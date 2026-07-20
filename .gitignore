@@ -18,6 +18,7 @@
 /psalm.xml.cache
 /.phpstan/
 /phpstan.neon                 # dist version is phpstan.neon.dist
+/.deptrac.cache
 /.rector/
 
 # ── Infection / mutation testing ─────────────────────────────────────────────
