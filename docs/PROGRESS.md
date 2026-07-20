@@ -31,4 +31,5 @@
 - [x] T21: import and export contracts — commit 69bb702 — green — 2026-07-20
 - [x] T22: export contract/support types — commit 1a254d7 — green — 2026-07-20
 - [x] T23: import contract/support types — commit 78aea39 — green — 2026-07-20
-- [ ] T24: remaining M1 contract graph — not started
+- [x] T24: metadata collection wrappers — commit 4edde13 — green — 2026-07-20
+- [ ] T25: metadata inspector ports — not started
