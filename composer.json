@@ -89,7 +89,7 @@
         "cs": "php-cs-fixer fix --dry-run --diff",
         "cs:fix": "php-cs-fixer fix",
         "deptrac": "deptrac analyse",
-        "infection": "infection --min-msi=80 --min-covered-msi=90",
+        "infection": "infection --min-msi=80 --min-covered-msi=90 --initial-tests-php-options='-d pcov.enabled=1'",
         "ci": [
             "@stan",
             "@psalm",

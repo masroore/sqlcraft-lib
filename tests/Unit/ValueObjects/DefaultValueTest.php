@@ -28,6 +28,13 @@ final class DefaultValueTest extends TestCase
         new DefaultValue(DefaultValueKind::NULL_VALUE, 'unexpected');
     }
 
+    public function testInvalidEmptyStringDefaultsAreRejected(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        new DefaultValue(DefaultValueKind::EMPTY_STRING, 'unexpected');
+    }
+
     public function testNonNullKindsRequireValues(): void
     {
         $this->expectException(InvalidArgumentException::class);

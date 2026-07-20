@@ -29,6 +29,17 @@ final class CapabilityTest extends TestCase
         self::assertFalse($parquet->equals(new ExtendedCapability('duckdb.json')));
     }
 
+    public function testCapabilityExceptionFormatsExtendedCapabilityNames(): void
+    {
+        $exception = new CapabilityNotSupportedException(
+            new ExtendedCapability('duckdb.parquet'),
+            'duckdb',
+            '1.2',
+        );
+
+        self::assertSame('Capability not supported: duckdb.parquet on duckdb 1.2.', $exception->getMessage());
+    }
+
     public function testCapabilitySetQueriesAndIteratesCoreAndExtendedCapabilities(): void
     {
         $parquet = new ExtendedCapability('duckdb.parquet');
