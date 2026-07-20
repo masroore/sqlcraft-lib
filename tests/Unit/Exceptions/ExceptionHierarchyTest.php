@@ -161,8 +161,6 @@ final class ExceptionHierarchyTest extends TestCase
         foreach ([
             SQLCraftException::class,
             ConnectionException::class,
-            QueryException::class,
-            ConstraintViolationException::class,
             MetadataException::class,
             CapabilityException::class,
             SecurityException::class,

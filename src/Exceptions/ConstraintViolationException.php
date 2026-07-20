@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SQLCraft\Exceptions;
 
-abstract class ConstraintViolationException extends QueryException
+class ConstraintViolationException extends QueryException
 {
     public function __construct(
         string $message,

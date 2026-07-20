@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SQLCraft\Exceptions;
 
-abstract class QueryException extends SQLCraftException
+class QueryException extends SQLCraftException
 {
     public function __construct(
         string $message,
