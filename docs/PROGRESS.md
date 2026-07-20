@@ -47,4 +47,6 @@
 - [x] T7: SQLite integration coverage — commit d30b3ab — green — 2026-07-20
 - [x] T8: SQLite driver and platform stub — commit 7379e9a — green — 2026-07-20
 - [x] T9: M2 acceptance gate — commit pending — green — 2026-07-20
-- [ ] M3: Platform and Driver Core — not started
+## M3 — Platform & Driver Core
+- [x] T1: abstract platform capability foundation — commit 9e88ca6 — green — 2026-07-20
+- [ ] T2: concrete platform core — not started

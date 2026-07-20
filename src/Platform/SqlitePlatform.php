@@ -18,7 +18,7 @@ use SQLCraft\ValueObjects\QualifiedName;
 use SQLCraft\ValueObjects\ServerVersion;
 
 /** @internal Minimal SQLite dialect used by M2 connection tests. */
-final class SqlitePlatform implements PlatformInterface
+final class SqlitePlatform extends AbstractPlatform
 {
     #[\Override]
     public function getName(): string
@@ -43,20 +43,26 @@ final class SqlitePlatform implements PlatformInterface
         return new ServerVersion('3.0.0');
     }
 
+    /**
+     * @return array{always: list<\SQLCraft\Capabilities\Capability>, versioned: list<array{0: \SQLCraft\Capabilities\Capability, 1: array{0: int, 1: int, 2: int}}>}
+     */
     #[\Override]
-    public function getCapabilitySet(ServerVersion $version): CapabilitySet
+    protected function buildCapabilityMatrix(): array
     {
-        return new CapabilitySet([
-            Capability::Table,
-            Capability::View,
-            Capability::Columns,
-            Capability::Indexes,
-            Capability::ForeignKeys,
-            Capability::CheckConstraints,
-            Capability::InsertUpdate,
-            Capability::DropColumn,
-            Capability::Sql,
-        ]);
+        return [
+            'always' => [
+                Capability::Table,
+                Capability::View,
+                Capability::Columns,
+                Capability::Indexes,
+                Capability::ForeignKeys,
+                Capability::CheckConstraints,
+                Capability::InsertUpdate,
+                Capability::DropColumn,
+                Capability::Sql,
+            ],
+            'versioned' => [],
+        ];
     }
 
     #[\Override]
