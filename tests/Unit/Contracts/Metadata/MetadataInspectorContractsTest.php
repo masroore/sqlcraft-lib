@@ -32,7 +32,7 @@ final class MetadataInspectorContractsTest extends TestCase
             TableInspectorInterface::class => [
                 'getTables', 'streamTables', 'getTableStatus', 'getParentTables', 'getPartitions',
             ],
-            ColumnInspectorInterface::class => ['getColumns', 'getColumn'],
+            ColumnInspectorInterface::class => ['getColumns', 'getAllColumns', 'getColumn'],
             IndexInspectorInterface::class => ['getIndexes'],
             ForeignKeyInspectorInterface::class => ['getForeignKeys', 'getReferencingKeys'],
             ViewInspectorInterface::class => ['getViews', 'getViewDefinition', 'getMaterializedViews'],

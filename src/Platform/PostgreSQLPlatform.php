@@ -398,6 +398,48 @@ final class PostgreSQLPlatform extends AbstractPlatform
     }
 
     #[\Override]
+    public function getAllColumnsSql(string $database, ?string $schema = null): string
+    {
+        return 'SELECT * FROM information_schema.columns WHERE table_catalog = '
+            . $this->quoteValue($database)
+            . ($schema === null ? '' : ' AND table_schema = ' . $this->quoteValue($schema))
+            . ' ORDER BY table_schema, table_name, ordinal_position';
+    }
+
+    #[\Override]
+    public function getAllIndexesSql(string $database, ?string $schema = null): string
+    {
+        return "SELECT namespace.nspname AS table_schema, table.relname AS table_name, index_rel.relname AS index_name, "
+            . "CASE WHEN index_data.indisprimary THEN 'PRIMARY' WHEN index_data.indisunique THEN 'UNIQUE' ELSE 'INDEX' END AS index_type, "
+            . 'index_data.indisunique AS is_unique, access_method.amname AS algorithm, attribute.attname AS column_name '
+            . 'FROM pg_index index_data JOIN pg_class table ON table.oid = index_data.indrelid '
+            . 'JOIN pg_class index_rel ON index_rel.oid = index_data.indexrelid '
+            . 'JOIN pg_namespace namespace ON namespace.oid = table.relnamespace '
+            . 'JOIN pg_am access_method ON access_method.oid = index_rel.relam '
+            . 'LEFT JOIN LATERAL unnest(index_data.indkey) WITH ORDINALITY key_columns(attnum, position) ON true '
+            . 'LEFT JOIN pg_attribute attribute ON attribute.attrelid = table.oid AND attribute.attnum = key_columns.attnum '
+            . "WHERE table.relnamespace NOT IN (SELECT oid FROM pg_namespace WHERE nspname LIKE 'pg_%' OR nspname = 'information_schema')"
+            . ($schema === null ? '' : ' AND namespace.nspname = ' . $this->quoteValue($schema))
+            . ' ORDER BY namespace.nspname, table.relname, index_rel.relname, key_columns.position';
+    }
+
+    #[\Override]
+    public function getAllForeignKeysSql(string $database, ?string $schema = null): string
+    {
+        return 'SELECT tc.constraint_name, tc.table_schema, tc.table_name, kcu.column_name AS source_column, '
+            . 'ccu.table_schema AS target_schema, ccu.table_name AS target_table, ccu.column_name AS target_column '
+            . 'FROM information_schema.table_constraints tc '
+            . 'JOIN information_schema.key_column_usage kcu ON kcu.constraint_catalog = tc.constraint_catalog '
+            . 'AND kcu.constraint_schema = tc.constraint_schema AND kcu.constraint_name = tc.constraint_name '
+            . 'JOIN information_schema.constraint_column_usage ccu ON ccu.constraint_catalog = tc.constraint_catalog '
+            . 'AND ccu.constraint_schema = tc.constraint_schema AND ccu.constraint_name = tc.constraint_name '
+            . 'WHERE tc.constraint_catalog = ' . $this->quoteValue($database)
+            . " AND tc.constraint_type = 'FOREIGN KEY'"
+            . ($schema === null ? '' : ' AND tc.table_schema = ' . $this->quoteValue($schema))
+            . ' ORDER BY tc.table_schema, tc.table_name, tc.constraint_name, kcu.ordinal_position';
+    }
+
+    #[\Override]
     public function getIndexesSql(QualifiedName $table): string
     {
         return 'SELECT * FROM pg_indexes WHERE tablename = ' . $this->quoteValue($table->object->name)

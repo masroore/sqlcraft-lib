@@ -389,6 +389,30 @@ class MySQLPlatform extends AbstractPlatform
     }
 
     #[\Override]
+    public function getAllColumnsSql(string $database, ?string $schema = null): string
+    {
+        return 'SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '
+            . $this->quoteValue($schema ?? $database)
+            . ' ORDER BY TABLE_NAME, ORDINAL_POSITION';
+    }
+
+    #[\Override]
+    public function getAllIndexesSql(string $database, ?string $schema = null): string
+    {
+        return 'SELECT * FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = '
+            . $this->quoteValue($schema ?? $database)
+            . ' ORDER BY TABLE_NAME, INDEX_NAME, SEQ_IN_INDEX';
+    }
+
+    #[\Override]
+    public function getAllForeignKeysSql(string $database, ?string $schema = null): string
+    {
+        return 'SELECT * FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA = '
+            . $this->quoteValue($schema ?? $database)
+            . ' AND REFERENCED_TABLE_NAME IS NOT NULL ORDER BY TABLE_NAME, CONSTRAINT_NAME, ORDINAL_POSITION';
+    }
+
+    #[\Override]
     public function getIndexesSql(QualifiedName $table): string
     {
         return 'SHOW INDEX FROM ' . $this->quoteQualifiedName($table);

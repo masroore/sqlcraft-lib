@@ -147,6 +147,12 @@ final class SchemaManager
         return $this->cached($conn, 'columns:' . $table->object->name, fn (): ColumnCollection => $this->columnInspector->getColumns($conn, $table));
     }
 
+    /** @return array<string, ColumnCollection> */
+    public function getAllColumns(ConnectionInterface $conn, string $database, ?string $schema = null): array
+    {
+        return $this->cached($conn, 'columns-all:' . ($schema ?? ''), fn (): array => $this->columnInspector->getAllColumns($conn, $database, $schema));
+    }
+
     public function getColumn(ConnectionInterface $conn, QualifiedName $table, Identifier $column): ColumnMeta
     {
         return $this->cached($conn, 'column:' . $table->object->name . ':' . $column->name, fn (): ColumnMeta => $this->columnInspector->getColumn($conn, $table, $column));

@@ -18,6 +18,12 @@ interface IntrospectionDialectInterface
 
     public function getColumnsSql(QualifiedName $table): string;
 
+    public function getAllColumnsSql(string $database, ?string $schema = null): string;
+
+    public function getAllIndexesSql(string $database, ?string $schema = null): string;
+
+    public function getAllForeignKeysSql(string $database, ?string $schema = null): string;
+
     public function getTableStatusSql(QualifiedName $table): string;
 
     public function getViewsSql(?string $schema = null): string;

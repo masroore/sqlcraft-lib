@@ -323,6 +323,48 @@ final class SqlitePlatform extends AbstractPlatform
     {
         return 'PRAGMA table_info(' . $this->quoteIdentifier($table->object) . ')';
     }
+
+    #[\Override]
+    public function getAllColumnsSql(string $database, ?string $schema = null): string
+    {
+        $catalog = $this->catalog($database);
+
+        return 'SELECT schema_object.name AS table_name, table_column.name AS column_name, '
+            . "table_column.type AS data_type, CASE WHEN table_column.notnull = 0 THEN 'YES' ELSE 'NO' END AS is_nullable, "
+            . 'table_column.dflt_value AS column_default, table_column.pk AS pk '
+            . 'FROM ' . $this->quoteIdentifier(new Identifier($catalog)) . '.sqlite_master schema_object '
+            . 'JOIN pragma_table_info(schema_object.name) table_column '
+            . "WHERE schema_object.type = 'table' AND schema_object.name NOT LIKE 'sqlite_%' "
+            . 'ORDER BY schema_object.name, table_column.cid';
+    }
+
+    #[\Override]
+    public function getAllIndexesSql(string $database, ?string $schema = null): string
+    {
+        $catalog = $this->catalog($database);
+
+        return 'SELECT schema_object.name AS table_name, table_index.name AS index_name, '
+            . 'table_index.[unique] AS is_unique, table_index.partial, index_column.name AS column_name '
+            . 'FROM ' . $this->quoteIdentifier(new Identifier($catalog)) . '.sqlite_master schema_object '
+            . 'JOIN pragma_index_list(schema_object.name) table_index '
+            . 'LEFT JOIN pragma_index_info(table_index.name) index_column '
+            . "WHERE schema_object.type = 'table' AND schema_object.name NOT LIKE 'sqlite_%' "
+            . 'ORDER BY schema_object.name, table_index.name, index_column.seqno';
+    }
+
+    #[\Override]
+    public function getAllForeignKeysSql(string $database, ?string $schema = null): string
+    {
+        $catalog = $this->catalog($database);
+
+        return "SELECT schema_object.name AS table_name, 'fk_' || schema_object.name || '_' || foreign_key.id AS constraint_name, "
+            . 'foreign_key."from" AS source_column, foreign_key."table" AS target_table, '
+            . 'foreign_key."to" AS target_column '
+            . 'FROM ' . $this->quoteIdentifier(new Identifier($catalog)) . '.sqlite_master schema_object '
+            . 'JOIN pragma_foreign_key_list(schema_object.name) foreign_key '
+            . "WHERE schema_object.type = 'table' AND schema_object.name NOT LIKE 'sqlite_%' "
+            . 'ORDER BY schema_object.name, foreign_key.id, foreign_key.seq';
+    }
     #[\Override]
     public function getIndexesSql(QualifiedName $table): string
     {

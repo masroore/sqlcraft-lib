@@ -166,6 +166,21 @@ final class AbstractPlatformTest extends TestCase
                 return '';
             }
             #[\Override]
+            public function getAllColumnsSql(string $database, ?string $schema = null): string
+            {
+                return '';
+            }
+            #[\Override]
+            public function getAllIndexesSql(string $database, ?string $schema = null): string
+            {
+                return '';
+            }
+            #[\Override]
+            public function getAllForeignKeysSql(string $database, ?string $schema = null): string
+            {
+                return '';
+            }
+            #[\Override]
             public function getTableStatusSql(\SQLCraft\ValueObjects\QualifiedName $table): string
             {
                 return '';
