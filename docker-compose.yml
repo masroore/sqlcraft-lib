@@ -85,8 +85,10 @@ services:
     command: ["tail", "-f", "/dev/null"]
 
   # ── MSSQL test-DB initialiser (runs once after mssql is healthy) ───────────
+  # Reuses the server image (already pulled) — no extra image download.
   mssql-init:
-    image: mcr.microsoft.com/mssql-tools:latest
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    platform: linux/amd64
     volumes:
       - ./docker/mssql/init-db.sh:/init-db.sh:ro
     environment:
