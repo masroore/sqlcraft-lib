@@ -30,4 +30,5 @@
 - [x] T20: execution contracts — commit 8597e85 — green — 2026-07-20
 - [x] T21: import and export contracts — commit 69bb702 — green — 2026-07-20
 - [x] T22: export contract/support types — commit 1a254d7 — green — 2026-07-20
-- [ ] T23: import contract/support types — not started
+- [x] T23: import contract/support types — commit 78aea39 — green — 2026-07-20
+- [ ] T24: remaining M1 contract graph — not started
