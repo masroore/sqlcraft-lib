@@ -42,4 +42,5 @@
 - [x] T2: PDO exception translation — commit dbf30ab — green — 2026-07-20
 - [x] T3: PDO connection factory seam — commit 06f741a — green — 2026-07-20
 - [x] T4: PDO connection adapter — commit 124afec — green — 2026-07-20
-- [ ] T5: connection factory integration — not started
+- [x] T5: connection factory integration — commit 6a5ea91 — green — 2026-07-20
+- [ ] T6: transaction manager — not started
