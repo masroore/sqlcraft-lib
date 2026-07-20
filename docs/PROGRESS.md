@@ -8,4 +8,5 @@
 
 ## M1 — Foundation
 - [x] T1: exceptions — commit 93561c7 — green — 2026-07-20
-- [ ] T2: Support utils — not started
+- [x] T2: Support utils — commit 6b889d9 — green — 2026-07-20
+- [ ] T3: ValueObjects — not started
