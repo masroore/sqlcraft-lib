@@ -38,4 +38,5 @@
 - [x] M1 gate: Foundation acceptance review — commit d97b152 — green — 2026-07-20
 
 ## M2 — Connection Layer
-- [ ] T1: PDO connection adapter — not started
+- [x] T1: result implementations — commit 7fabd36 — green — 2026-07-20
+- [ ] T2: PDO connection adapter — not started
