@@ -6,6 +6,8 @@ namespace SQLCraft\Metadata;
 
 use InvalidArgumentException;
 use SQLCraft\DTO\ColumnMeta;
+use SQLCraft\DTO\DatabaseMeta;
+use SQLCraft\DTO\ProcessMeta;
 use SQLCraft\DTO\ForeignKeyMeta;
 use SQLCraft\DTO\IndexColumnMeta;
 use SQLCraft\DTO\PartitionInfo;
@@ -55,6 +57,37 @@ abstract class AbstractMetadataFactory implements MetadataFactoryInterface
             privileges: $this->integerList($this->value($row, 'privileges')),
             origName: $this->stringValue($this->value($row, 'orig_name')),
             defaultConstraintName: $this->stringValue($this->value($row, 'default_constraint_name')),
+        );
+    }
+
+    /** @param array<string, bool|float|int|string|null> $row */
+    #[\Override]
+    public function createDatabaseMeta(array $row): DatabaseMeta
+    {
+        $row = $this->normalizeRow($row);
+
+        return new DatabaseMeta(
+            name: $this->requiredString($row, 'database_name', 'schema_name', 'name'),
+            charset: $this->stringValue($this->value($row, 'default_character_set_name', 'charset')),
+            collation: $this->stringValue($this->value($row, 'default_collation_name', 'collation')),
+        );
+    }
+
+    /** @param array<string, bool|float|int|string|null> $row */
+    #[\Override]
+    public function createProcessMeta(array $row): ProcessMeta
+    {
+        $row = $this->normalizeRow($row);
+
+        return new ProcessMeta(
+            id: (int) ($this->value($row, 'id', 'pid', 'process_id') ?? 0),
+            user: $this->stringValue($this->value($row, 'user', 'usename')) ?? '',
+            host: $this->stringValue($this->value($row, 'host', 'client_addr')),
+            database: $this->stringValue($this->value($row, 'db', 'datname', 'database')),
+            command: $this->stringValue($this->value($row, 'command', 'state')) ?? '',
+            time: (int) ($this->value($row, 'time', 'query_start') ?? 0),
+            state: $this->stringValue($this->value($row, 'state', 'wait_event')),
+            query: $this->stringValue($this->value($row, 'info', 'query')),
         );
     }
 

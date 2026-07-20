@@ -342,6 +342,24 @@ final class SqlitePlatform extends AbstractPlatform
         return 'PRAGMA compile_options';
     }
     #[\Override]
+    public function getStatusSql(): string
+    {
+        return '';
+    }
+
+    #[\Override]
+    public function getCharsetsSql(): string
+    {
+        throw CapabilityNotSupportedException::for(Capability::Charset, 'sqlite');
+    }
+
+    #[\Override]
+    public function getCollationsSql(?string $charset = null): string
+    {
+        throw CapabilityNotSupportedException::for(Capability::Collation, 'sqlite');
+    }
+
+    #[\Override]
     public function getProcesslistSql(): string
     {
         throw CapabilityNotSupportedException::for(Capability::Processlist, 'sqlite');

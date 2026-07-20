@@ -415,6 +415,24 @@ class MySQLPlatform extends AbstractPlatform
     }
 
     #[\Override]
+    public function getStatusSql(): string
+    {
+        return 'SHOW STATUS';
+    }
+
+    #[\Override]
+    public function getCharsetsSql(): string
+    {
+        return 'SHOW CHARACTER SET';
+    }
+
+    #[\Override]
+    public function getCollationsSql(?string $charset = null): string
+    {
+        return 'SHOW COLLATION' . ($charset === null ? '' : ' WHERE Charset = ' . $this->quoteValue($charset));
+    }
+
+    #[\Override]
     public function getProcesslistSql(): string
     {
         return 'SHOW PROCESSLIST';

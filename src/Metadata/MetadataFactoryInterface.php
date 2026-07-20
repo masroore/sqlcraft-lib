@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace SQLCraft\Metadata;
 
 use SQLCraft\DTO\ColumnMeta;
+use SQLCraft\DTO\DatabaseMeta;
 use SQLCraft\DTO\ForeignKeyMeta;
 use SQLCraft\DTO\IndexMeta;
 use SQLCraft\DTO\PartitionInfo;
+use SQLCraft\DTO\ProcessMeta;
 use SQLCraft\DTO\RoutineMeta;
 use SQLCraft\DTO\SchemaMeta;
 use SQLCraft\DTO\SequenceMeta;
@@ -24,6 +26,12 @@ interface MetadataFactoryInterface
 {
     /** @param array<string, bool|float|int|string|null> $row */
     public function createColumnMeta(array $row): ColumnMeta;
+
+    /** @param array<string, bool|float|int|string|null> $row */
+    public function createDatabaseMeta(array $row): DatabaseMeta;
+
+    /** @param array<string, bool|float|int|string|null> $row */
+    public function createProcessMeta(array $row): ProcessMeta;
 
     /** @param array<string, bool|float|int|string|null> $row */
     public function createTableStatus(array $row): TableStatus;

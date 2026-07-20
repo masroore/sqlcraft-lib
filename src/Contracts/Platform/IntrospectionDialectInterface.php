@@ -38,5 +38,11 @@ interface IntrospectionDialectInterface
 
     public function getVariablesSql(): string;
 
+    public function getStatusSql(): string;
+
+    public function getCharsetsSql(): string;
+
+    public function getCollationsSql(?string $charset = null): string;
+
     public function getProcesslistSql(): string;
 }

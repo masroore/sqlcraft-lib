@@ -421,6 +421,25 @@ final class PostgreSQLPlatform extends AbstractPlatform
     }
 
     #[\Override]
+    public function getStatusSql(): string
+    {
+        return 'SELECT name, setting AS value FROM pg_settings ORDER BY name';
+    }
+
+    #[\Override]
+    public function getCharsetsSql(): string
+    {
+        throw CapabilityNotSupportedException::for(Capability::Charset, 'pgsql');
+    }
+
+    #[\Override]
+    public function getCollationsSql(?string $charset = null): string
+    {
+        return 'SELECT collname AS name, pg_encoding_to_char(collencoding) AS charset '
+            . 'FROM pg_collation ORDER BY collname';
+    }
+
+    #[\Override]
     public function getProcesslistSql(): string
     {
         return 'SELECT pid, usename, datname, state, query FROM pg_stat_activity';
