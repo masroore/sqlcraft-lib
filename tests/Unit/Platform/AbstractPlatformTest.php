@@ -181,6 +181,21 @@ final class AbstractPlatformTest extends TestCase
                 return '';
             }
             #[\Override]
+            public function getViewsSql(?string $schema = null): string
+            {
+                return '';
+            }
+            #[\Override]
+            public function getViewDefinitionSql(\SQLCraft\ValueObjects\QualifiedName $view): string
+            {
+                return '';
+            }
+            #[\Override]
+            public function getMaterializedViewsSql(?string $schema = null): string
+            {
+                return '';
+            }
+            #[\Override]
             public function getIndexesSql(\SQLCraft\ValueObjects\QualifiedName $table): string
             {
                 return '';

@@ -20,6 +20,12 @@ interface IntrospectionDialectInterface
 
     public function getTableStatusSql(QualifiedName $table): string;
 
+    public function getViewsSql(?string $schema = null): string;
+
+    public function getViewDefinitionSql(QualifiedName $view): string;
+
+    public function getMaterializedViewsSql(?string $schema = null): string;
+
     public function getParentTablesSql(QualifiedName $table): string;
 
     public function getPartitionsSql(QualifiedName $table): string;

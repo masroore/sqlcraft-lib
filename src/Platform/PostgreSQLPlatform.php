@@ -364,6 +364,32 @@ final class PostgreSQLPlatform extends AbstractPlatform
     }
 
     #[\Override]
+    public function getViewsSql(?string $schema = null): string
+    {
+        return 'SELECT viewname AS view_name, schemaname AS table_schema, definition AS view_definition, '
+            . '0 AS materialized FROM pg_views'
+            . ($schema === null ? '' : ' WHERE schemaname = ' . $this->quoteValue($schema))
+            . ' ORDER BY schemaname, viewname';
+    }
+
+    #[\Override]
+    public function getViewDefinitionSql(QualifiedName $view): string
+    {
+        return 'SELECT definition FROM pg_views WHERE schemaname = '
+            . $this->quoteValue($view->schema instanceof Identifier ? $view->schema->name : 'public') . ' AND viewname = '
+            . $this->quoteValue($view->object->name);
+    }
+
+    #[\Override]
+    public function getMaterializedViewsSql(?string $schema = null): string
+    {
+        return 'SELECT matviewname AS view_name, schemaname AS table_schema, definition AS view_definition, '
+            . '1 AS materialized FROM pg_matviews'
+            . ($schema === null ? '' : ' WHERE schemaname = ' . $this->quoteValue($schema))
+            . ' ORDER BY schemaname, matviewname';
+    }
+
+    #[\Override]
     public function getColumnsSql(QualifiedName $table): string
     {
         return 'SELECT * FROM information_schema.columns WHERE table_name = ' . $this->quoteValue($table->object->name)

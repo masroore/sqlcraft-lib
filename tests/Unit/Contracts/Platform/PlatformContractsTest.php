@@ -19,7 +19,7 @@ final class PlatformContractsTest extends TestCase
         self::assertSame(['quoteIdentifier', 'quoteValue', 'quoteBinary', 'convertFieldIn', 'convertFieldOut'], $this->methods(QuotingInterface::class));
         self::assertSame(['applyPagination', 'applySingleRowLimit'], $this->methods(PaginationInterface::class));
         self::assertSame(['mapPhpTypeToDb', 'getSupportedTypes', 'getUnsignedTypes', 'getCollatableTypes'], $this->methods(TypeMapperInterface::class));
-        self::assertSame(['getDatabasesSql', 'getSchemasSql', 'getTypesSql', 'getTablesSql', 'getColumnsSql', 'getTableStatusSql', 'getParentTablesSql', 'getPartitionsSql', 'getIndexesSql', 'getForeignKeysSql', 'getReferencingForeignKeysSql', 'getTriggersSql', 'getRoutinesSql', 'getSequencesSql', 'getVariablesSql', 'getStatusSql', 'getCharsetsSql', 'getCollationsSql', 'getProcesslistSql'], $this->methods(IntrospectionDialectInterface::class));
+        self::assertSame(['getDatabasesSql', 'getSchemasSql', 'getTypesSql', 'getTablesSql', 'getColumnsSql', 'getTableStatusSql', 'getViewsSql', 'getViewDefinitionSql', 'getMaterializedViewsSql', 'getParentTablesSql', 'getPartitionsSql', 'getIndexesSql', 'getForeignKeysSql', 'getReferencingForeignKeysSql', 'getTriggersSql', 'getRoutinesSql', 'getSequencesSql', 'getVariablesSql', 'getStatusSql', 'getCharsetsSql', 'getCollationsSql', 'getProcesslistSql'], $this->methods(IntrospectionDialectInterface::class));
         self::assertSame(['renderColumnDefinition', 'renderPrimaryKeyClause', 'renderForeignKeyClause', 'renderCheckConstraintClause', 'renderCreateTableStatement', 'renderAlterTableAddColumn', 'renderAlterTableDropColumn', 'renderCreateIndexStatement', 'renderDropIndexStatement'], $this->methods(DdlDialectInterface::class));
     }
 
