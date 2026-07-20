@@ -285,6 +285,12 @@ final class SqlitePlatform extends AbstractPlatform
         return 'PRAGMA foreign_key_list(' . $this->quoteIdentifier($table->object) . ')';
     }
     #[\Override]
+    public function getReferencingForeignKeysSql(QualifiedName $table): string
+    {
+        throw CapabilityNotSupportedException::for(Capability::ForeignKeys, 'sqlite');
+    }
+
+    #[\Override]
     public function getTriggersSql(QualifiedName $table): string
     {
         return "SELECT name, sql FROM sqlite_master WHERE type = 'trigger' ORDER BY name";

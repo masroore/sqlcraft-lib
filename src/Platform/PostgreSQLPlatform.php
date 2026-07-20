@@ -325,6 +325,14 @@ final class PostgreSQLPlatform extends AbstractPlatform
     }
 
     #[\Override]
+    public function getReferencingForeignKeysSql(QualifiedName $table): string
+    {
+        return 'SELECT * FROM information_schema.key_column_usage WHERE referenced_table_name = '
+            . $this->quoteValue($table->object->name)
+            . ' AND referenced_column_name IS NOT NULL';
+    }
+
+    #[\Override]
     public function getTriggersSql(QualifiedName $table): string
     {
         return 'SELECT * FROM information_schema.triggers WHERE event_object_table = '
