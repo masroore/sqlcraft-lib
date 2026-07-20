@@ -39,6 +39,8 @@
 Thumbs.db
 /.idea/
 /.vscode/
+/.omc/
+/.claude/
 *.swp
 *.swo
 *~
