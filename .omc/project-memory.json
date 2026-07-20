@@ -1,0 +1,57 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1784524888367,
+  "projectRoot": "/Users/masroor/projects/adminer-ng/sqlcraft",
+  "techStack": {
+    "languages": [],
+    "frameworks": [],
+    "packageManager": null,
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "docs"
+    ],
+    "gitBranches": null
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "docs": {
+      "path": "docs",
+      "purpose": "Documentation",
+      "fileCount": 1,
+      "lastAccessed": 1784524888363,
+      "keyFiles": []
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "docs/plans/23-roadmap.md",
+      "accessCount": 1,
+      "lastAccessed": 1784524950287,
+      "type": "file"
+    },
+    {
+      "path": "docs/IMPLEMENTATION-PROMPT.md",
+      "accessCount": 1,
+      "lastAccessed": 1784524985459,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}
