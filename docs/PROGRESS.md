@@ -15,4 +15,5 @@
 - [x] T6: abstract immutable collection — commit 02f2453 — green — 2026-07-20
 - [x] T7: core metadata DTOs — commit 57116a7 — green — 2026-07-20
 - [x] T8: index and trigger DTOs — commit 9f15ed2 — green — 2026-07-20
-- [ ] T9: routine DTOs — not started
+- [x] T9: routine DTOs — commit e7da1de — green — 2026-07-20
+- [ ] T10: database and server DTOs — not started
