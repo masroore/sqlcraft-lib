@@ -14,6 +14,12 @@ interface IntrospectionDialectInterface
 
     public function getColumnsSql(QualifiedName $table): string;
 
+    public function getTableStatusSql(QualifiedName $table): string;
+
+    public function getParentTablesSql(QualifiedName $table): string;
+
+    public function getPartitionsSql(QualifiedName $table): string;
+
     public function getIndexesSql(QualifiedName $table): string;
 
     public function getForeignKeysSql(QualifiedName $table): string;

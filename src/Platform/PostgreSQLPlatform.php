@@ -297,9 +297,52 @@ final class PostgreSQLPlatform extends AbstractPlatform
     #[\Override]
     public function getTablesSql(string $database, ?string $schema = null): string
     {
-        $schemaFilter = $schema === null ? '' : ' AND table_schema = ' . $this->quoteValue($schema);
-        return 'SELECT table_name AS name FROM information_schema.tables WHERE table_catalog = '
-            . $this->quoteValue($database) . " AND table_type = 'BASE TABLE'" . $schemaFilter . ' ORDER BY table_name';
+        return $this->tableStatusSql($schema, null);
+    }
+
+    #[\Override]
+    public function getTableStatusSql(QualifiedName $table): string
+    {
+        return $this->tableStatusSql(
+            $table->schema?->name,
+            $table->object->name,
+        );
+    }
+
+    #[\Override]
+    public function getParentTablesSql(QualifiedName $table): string
+    {
+        $schema = $table->schema?->name;
+        return 'SELECT parent.relname AS table_name, parent_ns.nspname AS schema, '
+            . 'current_database() AS catalog FROM pg_inherits inheritance '
+            . 'JOIN pg_class child ON child.oid = inheritance.inhrelid '
+            . 'JOIN pg_class parent ON parent.oid = inheritance.inhparent '
+            . 'JOIN pg_namespace parent_ns ON parent_ns.oid = parent.relnamespace '
+            . 'JOIN pg_namespace child_ns ON child_ns.oid = child.relnamespace '
+            . 'WHERE child.relname = ' . $this->quoteValue($table->object->name)
+            . ($schema === null ? '' : ' AND child_ns.nspname = ' . $this->quoteValue($schema))
+            . ' ORDER BY parent.relname';
+    }
+
+    #[\Override]
+    public function getPartitionsSql(QualifiedName $table): string
+    {
+        $schema = $table->schema?->name;
+        $schemaFilter = $schema === null ? '' : ' AND parent_ns.nspname = ' . $this->quoteValue($schema);
+
+        return "SELECT child.relname AS name, child_ns.nspname AS schema,
+"
+            . "CASE parent_part.partstrat WHEN 'r' THEN 'RANGE' WHEN 'l' THEN 'LIST' WHEN 'h' THEN 'HASH' ELSE parent_part.partstrat END AS method,
+"
+            . 'pg_get_partkeydef(parent.oid) AS expression, parent.relname AS parent_table, '
+            . 'pg_get_expr(child.relpartbound, child.oid) AS bound FROM pg_inherits inheritance '
+            . 'JOIN pg_class child ON child.oid = inheritance.inhrelid '
+            . 'JOIN pg_class parent ON parent.oid = inheritance.inhparent '
+            . 'JOIN pg_namespace child_ns ON child_ns.oid = child.relnamespace '
+            . 'JOIN pg_namespace parent_ns ON parent_ns.oid = parent.relnamespace '
+            . 'JOIN pg_partitioned_table parent_part ON parent_part.partrelid = parent.oid '
+            . 'WHERE parent.relname = ' . $this->quoteValue($table->object->name) . $schemaFilter
+            . ' ORDER BY child.relname';
     }
 
     #[\Override]
@@ -363,6 +406,28 @@ final class PostgreSQLPlatform extends AbstractPlatform
     public function getProcesslistSql(): string
     {
         return 'SELECT pid, usename, datname, state, query FROM pg_stat_activity';
+    }
+
+    private function tableStatusSql(?string $schema, ?string $table): string
+    {
+        $sql = "SELECT c.relname AS table_name, CASE WHEN c.relkind IN ('v', 'm') THEN 'VIEW' ELSE 'BASE TABLE' END AS table_type,
+"
+            . 'n.nspname AS schema, c.oid, c.reltuples AS rows, '
+            . "CASE WHEN c.relkind IN ('v', 'm') THEN 1 ELSE 0 END AS is_view,
+"
+            . 'CASE WHEN p.partrelid IS NOT NULL THEN 1 ELSE 0 END AS partitioned '
+            . 'FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace '
+            . 'LEFT JOIN pg_partitioned_table p ON p.partrelid = c.oid '
+            . "WHERE c.relkind IN ('r', 'p', 'v', 'm') AND n.nspname NOT LIKE 'pg_%' AND n.nspname <> 'information_schema'";
+
+        if ($schema !== null) {
+            $sql .= ' AND n.nspname = ' . $this->quoteValue($schema);
+        }
+        if ($table !== null) {
+            $sql .= ' AND c.relname = ' . $this->quoteValue($table);
+        }
+
+        return $sql . ' ORDER BY n.nspname, c.relname';
     }
 
     private function renderDataType(DataType $dataType): string

@@ -267,8 +267,27 @@ final class SqlitePlatform extends AbstractPlatform
     #[\Override]
     public function getTablesSql(string $database, ?string $schema = null): string
     {
-        return "SELECT name FROM \"" . str_replace('"', '""', $database) . "\".sqlite_master WHERE type = 'table' ORDER BY name";
+        return $this->tableStatusSql($this->catalog($database), null);
     }
+
+    #[\Override]
+    public function getTableStatusSql(QualifiedName $table): string
+    {
+        return $this->tableStatusSql($this->catalog($table->catalog?->name), $table->object->name);
+    }
+
+    #[\Override]
+    public function getParentTablesSql(QualifiedName $table): string
+    {
+        return '';
+    }
+
+    #[\Override]
+    public function getPartitionsSql(QualifiedName $table): string
+    {
+        throw CapabilityNotSupportedException::for(Capability::Partitions, 'sqlite');
+    }
+
     #[\Override]
     public function getColumnsSql(QualifiedName $table): string
     {
@@ -314,6 +333,25 @@ final class SqlitePlatform extends AbstractPlatform
     public function getProcesslistSql(): string
     {
         throw CapabilityNotSupportedException::for(Capability::Processlist, 'sqlite');
+    }
+
+    private function tableStatusSql(string $database, ?string $table): string
+    {
+        $quotedDatabase = $this->quoteIdentifier(new Identifier($database));
+        $sql = "SELECT name AS table_name, type AS table_type, "
+            . "CASE WHEN type = 'view' THEN 1 ELSE 0 END AS is_view "
+            . "FROM {$quotedDatabase}.sqlite_master WHERE type IN ('table', 'view') AND name NOT LIKE 'sqlite_%'";
+
+        if ($table !== null) {
+            $sql .= ' AND name = ' . $this->quoteValue($table);
+        }
+
+        return $sql . ' ORDER BY name';
+    }
+
+    private function catalog(?string $database): string
+    {
+        return in_array($database, ['main', 'temp'], true) ? $database : 'main';
     }
 
     private function quoteQualifiedName(QualifiedName $name): string

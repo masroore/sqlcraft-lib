@@ -317,8 +317,31 @@ class MySQLPlatform extends AbstractPlatform
     #[\Override]
     public function getTablesSql(string $database, ?string $schema = null): string
     {
-        return 'SELECT TABLE_NAME AS name FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '
-            . $this->quoteValue($database) . " AND TABLE_TYPE = 'BASE TABLE' ORDER BY TABLE_NAME";
+        return $this->tableStatusSql($database, null);
+    }
+
+    #[\Override]
+    public function getTableStatusSql(QualifiedName $table): string
+    {
+        return $this->tableStatusSql($this->databaseName($table), $table->object->name);
+    }
+
+    #[\Override]
+    public function getParentTablesSql(QualifiedName $table): string
+    {
+        return '';
+    }
+
+    #[\Override]
+    public function getPartitionsSql(QualifiedName $table): string
+    {
+        $database = $this->databaseName($table);
+
+        return 'SELECT PARTITION_NAME AS name, TABLE_SCHEMA AS schema, PARTITION_METHOD AS method, '
+            . 'PARTITION_EXPRESSION AS expression, TABLE_NAME AS parent_table, '
+            . 'PARTITION_DESCRIPTION AS bound FROM INFORMATION_SCHEMA.PARTITIONS WHERE TABLE_SCHEMA = '
+            . $this->quoteValue($database) . ' AND TABLE_NAME = ' . $this->quoteValue($table->object->name)
+            . ' AND PARTITION_NAME IS NOT NULL ORDER BY PARTITION_ORDINAL_POSITION';
     }
 
     #[\Override]
@@ -383,6 +406,23 @@ class MySQLPlatform extends AbstractPlatform
     public function getProcesslistSql(): string
     {
         return 'SHOW PROCESSLIST';
+    }
+
+    private function tableStatusSql(string $database, ?string $table): string
+    {
+        $sql = 'SELECT TABLE_NAME AS table_name, TABLE_TYPE AS table_type, TABLE_SCHEMA AS table_schema, '
+            . 'ENGINE AS engine, TABLE_COMMENT AS table_comment, TABLE_ROWS AS table_rows, '
+            . 'TABLE_COLLATION AS table_collation, AUTO_INCREMENT AS auto_increment, '
+            . 'DATA_LENGTH AS data_length, INDEX_LENGTH AS index_length, DATA_FREE AS data_free, '
+            . 'CREATE_OPTIONS AS create_options, '
+            . "CASE WHEN CREATE_OPTIONS LIKE '%partitioned%' THEN 1 ELSE 0 END AS partitioned "
+            . 'FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ' . $this->quoteValue($database);
+
+        if ($table !== null) {
+            $sql .= ' AND TABLE_NAME = ' . $this->quoteValue($table);
+        }
+
+        return $sql . ' ORDER BY TABLE_NAME';
     }
 
     private function databaseName(QualifiedName $table): string
