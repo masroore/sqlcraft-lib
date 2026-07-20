@@ -30,7 +30,7 @@ final class MetadataInspectorContractsTest extends TestCase
                 'getProcessList', 'getCharsets', 'getCollations',
             ],
             TableInspectorInterface::class => [
-                'getTables', 'getTableStatus', 'getParentTables', 'getPartitions',
+                'getTables', 'streamTables', 'getTableStatus', 'getParentTables', 'getPartitions',
             ],
             ColumnInspectorInterface::class => ['getColumns', 'getColumn'],
             IndexInspectorInterface::class => ['getIndexes'],
