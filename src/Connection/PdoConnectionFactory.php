@@ -46,6 +46,6 @@ final class PdoConnectionFactory implements PdoConnectionFactoryInterface
             );
         }
 
-        return new PdoConnection($pdo, $platform, $this->translator, $name);
+        return new PdoConnection($pdo, $platform, $this->translator, $name, $parameters->database);
     }
 }

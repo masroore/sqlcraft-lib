@@ -31,6 +31,7 @@ final class PdoConnection implements ConnectionInterface
         private readonly PlatformInterface $platform,
         private readonly PdoExceptionTranslator $translator,
         private readonly ?string $name = null,
+        private readonly ?string $databaseName = null,
     ) {
     }
 
@@ -56,6 +57,12 @@ final class PdoConnection implements ConnectionInterface
     public function getName(): ?string
     {
         return $this->name;
+    }
+
+    #[\Override]
+    public function getDatabaseName(): ?string
+    {
+        return $this->databaseName;
     }
 
     /** @param array<string|int, mixed> $params */

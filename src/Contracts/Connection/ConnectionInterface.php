@@ -19,6 +19,8 @@ interface ConnectionInterface
 
     public function getName(): ?string;
 
+    public function getDatabaseName(): ?string;
+
     /** @param array<string|int, mixed> $params */
     public function execute(string $sql, array $params = []): ExecutionResult;
 
