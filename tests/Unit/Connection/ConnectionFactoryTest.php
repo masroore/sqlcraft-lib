@@ -7,25 +7,23 @@ namespace SQLCraft\Tests\Unit\Connection;
 use PHPUnit\Framework\TestCase;
 use SQLCraft\Connection\ConnectionFactory;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
-use SQLCraft\Contracts\Connection\PdoConnectionFactoryInterface;
 use SQLCraft\Contracts\Driver\DriverInterface;
 use SQLCraft\ValueObjects\ConnectionParameters;
 
 final class ConnectionFactoryTest extends TestCase
 {
-    public function testItCreatesAConnectionThroughTheInjectedPDOFactory(): void
+    public function testItCreatesAConnectionThroughTheInjectedDriver(): void
     {
         $connection = $this->createMock(ConnectionInterface::class);
-        $pdoFactory = $this->createMock(PdoConnectionFactoryInterface::class);
         $driver = $this->createMock(DriverInterface::class);
         $parameters = new ConnectionParameters(database: ':memory:');
 
-        $pdoFactory
+        $driver
             ->expects(self::once())
             ->method('connect')
-            ->with($driver, $parameters)
+            ->with($parameters)
             ->willReturn($connection);
 
-        self::assertSame($connection, (new ConnectionFactory($pdoFactory, $driver))->connect($parameters));
+        self::assertSame($connection, (new ConnectionFactory($driver))->connect($parameters));
     }
 }

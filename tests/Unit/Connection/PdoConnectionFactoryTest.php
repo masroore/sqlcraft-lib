@@ -4,26 +4,33 @@ declare(strict_types=1);
 
 namespace SQLCraft\Tests\Unit\Connection;
 
+use PDO;
 use PHPUnit\Framework\TestCase;
 use SQLCraft\Connection\PdoConnectionFactory;
-use SQLCraft\Contracts\Connection\ConnectionInterface;
-use SQLCraft\Contracts\Driver\DriverInterface;
+use SQLCraft\Connection\PdoExceptionTranslator;
+use SQLCraft\Contracts\Platform\PlatformInterface;
 use SQLCraft\ValueObjects\ConnectionParameters;
 
 final class PdoConnectionFactoryTest extends TestCase
 {
-    public function testItDelegatesConnectionCreationToTheDriver(): void
+    public function testItCreatesAPdoConnectionWithoutExposingPdoOutsideConnection(): void
     {
-        $connection = $this->createMock(ConnectionInterface::class);
-        $driver = $this->createMock(DriverInterface::class);
-        $parameters = new ConnectionParameters(database: ':memory:');
+        $platform = $this->createMock(PlatformInterface::class);
+        $platform->method('getName')->willReturn('sqlite');
+        $factory = new PdoConnectionFactory(new PdoExceptionTranslator());
+        $connection = $factory->connect('sqlite::memory:', new ConnectionParameters(), $platform, 'memory');
 
-        $driver
-            ->expects(self::once())
-            ->method('connect')
-            ->with($parameters)
-            ->willReturn($connection);
+        self::assertSame('memory', $connection->getName());
+        self::assertTrue($connection->isConnected());
+        self::assertSame([['value' => 1]], $connection->query('SELECT 1 AS value')->fetchAll());
+    }
 
-        self::assertSame($connection, (new PdoConnectionFactory())->connect($driver, $parameters));
+    public function testItTranslatesConnectionFailures(): void
+    {
+        $platform = $this->createMock(PlatformInterface::class);
+        $factory = new PdoConnectionFactory(new PdoExceptionTranslator());
+
+        $this->expectException(\SQLCraft\Exceptions\ConnectionFailedException::class);
+        $factory->connect('sqlite:/path/that/does/not/exist/db.sqlite', new ConnectionParameters(), $platform);
     }
 }
