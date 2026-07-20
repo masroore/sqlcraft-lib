@@ -11,6 +11,11 @@
 
 ## Environment
 
+**All paths in this document are relative to the `./sqlcraft/` directory.** The
+parent `adminer-ng/` repository contains a parallel `./adminer/` directory with
+the legacy Adminer source code (informational only; not required for SQLCraft
+development).
+
 All commands in this document run **inside the PHP container** unless stated
 otherwise. `docker-compose.yml` provides PHP 8.4 with every required PDO
 extension, Composer, and all static-analysis tools pre-installed. Each database
