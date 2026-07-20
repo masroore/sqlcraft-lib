@@ -81,6 +81,7 @@
         "test": "phpunit --testsuite=unit",
         "test:integration": "phpunit --testsuite=integration",
         "test:contract": "phpunit --testsuite=contract",
+        "test:golden": "phpunit --testsuite=golden",
         "test:all": "phpunit",
         "stan": "phpstan analyse --memory-limit=1G",
         "psalm": "psalm --show-info=false",
@@ -96,7 +97,8 @@
             "@cs",
             "@deptrac",
             "@rector",
-            "@test"
+            "@test",
+            "@test:golden"
         ]
     },
     "minimum-stability": "stable",
