@@ -24,5 +24,8 @@
         <testsuite name="contract">
             <directory>tests/Contract</directory>
         </testsuite>
+        <testsuite name="golden">
+            <directory>tests/Golden</directory>
+        </testsuite>
     </testsuites>
 </phpunit>
