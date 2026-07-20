@@ -26,4 +26,5 @@
 - [x] T16: contract dependency rules — commit 438471e — green — 2026-07-20
 - [x] T17: connection and platform contract graph — commit a3f4e87 — green — 2026-07-20
 - [x] T18: capability resolver contract — commit 2557c1f — green — 2026-07-20
-- [ ] T19: remaining M1 contracts — not started
+- [x] T19: DDL builder contract — commit a302fe3 — green — 2026-07-20
+- [ ] T20: execution and query contracts — not started
