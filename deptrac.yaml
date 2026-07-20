@@ -1,0 +1,178 @@
+deptrac:
+  paths:
+    - src
+  layers:
+    - name: Contracts
+      collectors:
+        - type: directory
+          value: src/Contracts/.*
+    - name: ValueObjects
+      collectors:
+        - type: directory
+          value: src/ValueObjects/.*
+    - name: DTO
+      collectors:
+        - type: directory
+          value: src/DTO/.*
+    - name: Collections
+      collectors:
+        - type: directory
+          value: src/Collections/.*
+    - name: Exceptions
+      collectors:
+        - type: directory
+          value: src/Exceptions/.*
+    - name: Support
+      collectors:
+        - type: directory
+          value: src/Support/.*
+    - name: Capabilities
+      collectors:
+        - type: directory
+          value: src/Capabilities/.*
+    - name: Connection
+      collectors:
+        - type: directory
+          value: src/Connection/.*
+    - name: Driver
+      collectors:
+        - type: directory
+          value: src/Driver/.*
+    - name: Platform
+      collectors:
+        - type: directory
+          value: src/Platform/.*
+    - name: Metadata
+      collectors:
+        - type: directory
+          value: src/Metadata/.*
+    - name: Schema
+      collectors:
+        - type: directory
+          value: src/Schema/.*
+    - name: DDL
+      collectors:
+        - type: directory
+          value: src/DDL/.*
+    - name: Query
+      collectors:
+        - type: directory
+          value: src/Query/.*
+    - name: Execution
+      collectors:
+        - type: directory
+          value: src/Execution/.*
+    - name: Import
+      collectors:
+        - type: directory
+          value: src/Import/.*
+    - name: Export
+      collectors:
+        - type: directory
+          value: src/Export/.*
+    - name: Security
+      collectors:
+        - type: directory
+          value: src/Security/.*
+    - name: Events
+      collectors:
+        - type: directory
+          value: src/Events/.*
+    - name: Utilities
+      collectors:
+        - type: directory
+          value: src/Utilities/.*
+  ruleset:
+    Contracts: ~
+    ValueObjects:
+      - Support
+    DTO:
+      - ValueObjects
+      - Support
+    Collections:
+      - ValueObjects
+      - DTO
+      - Support
+    Exceptions:
+      - Contracts
+      - ValueObjects
+    Support: ~
+    Capabilities:
+      - Contracts
+      - ValueObjects
+      - Exceptions
+    Connection:
+      - Contracts
+      - ValueObjects
+      - Exceptions
+      - Support
+    Driver:
+      - Contracts
+      - Connection
+      - Platform
+      - Capabilities
+      - ValueObjects
+      - Exceptions
+    Platform:
+      - Contracts
+      - ValueObjects
+      - DTO
+      - Collections
+      - Capabilities
+      - Exceptions
+      - Support
+    Metadata:
+      - Contracts
+      - DTO
+      - ValueObjects
+      - Collections
+      - Exceptions
+      - Support
+    Schema:
+      - Contracts
+      - Metadata
+      - DTO
+      - ValueObjects
+      - Collections
+      - Exceptions
+    DDL:
+      - Contracts
+      - ValueObjects
+      - Platform
+      - Capabilities
+      - Exceptions
+    Query:
+      - Contracts
+      - ValueObjects
+      - Platform
+      - Support
+      - Exceptions
+    Execution:
+      - Contracts
+      - DTO
+      - Collections
+      - Exceptions
+      - Events
+    Import:
+      - Contracts
+      - Execution
+      - DTO
+      - ValueObjects
+      - Exceptions
+    Export:
+      - Contracts
+      - Execution
+      - Metadata
+      - DTO
+      - Collections
+      - Exceptions
+    Security:
+      - Contracts
+      - ValueObjects
+      - Exceptions
+    Events:
+      - Contracts
+      - ValueObjects
+      - DTO
+    Utilities:
+      - Support

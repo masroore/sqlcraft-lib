@@ -68,17 +68,6 @@ services:
       SQLCRAFT_ORACLE_PASS: secret
 
       # SQLite uses :memory: — no host/port needed
-    depends_on:
-      mysql:
-        condition: service_healthy
-      mariadb:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-      mssql:
-        condition: service_healthy
-      mssql-init:
-        condition: service_completed_successfully
     working_dir: /app
     # Default command keeps the container alive for `docker compose run` workflows.
     # Override with: docker compose run --rm php <command>

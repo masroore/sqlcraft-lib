@@ -1,0 +1,104 @@
+{
+    "name": "vendor/sqlcraft",
+    "description": "Framework-independent, PDO-based, capability-driven database administration SDK for PHP 8.4+.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "database",
+        "dbal",
+        "sql",
+        "schema",
+        "introspection",
+        "ddl",
+        "pdo",
+        "mysql",
+        "postgresql",
+        "sqlite",
+        "mssql",
+        "oracle"
+    ],
+    "homepage": "https://github.com/vendor/sqlcraft",
+    "authors": [
+        {
+            "name": "SQLCraft Contributors",
+            "homepage": "https://github.com/vendor/sqlcraft/graphs/contributors"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/vendor/sqlcraft/issues",
+        "source": "https://github.com/vendor/sqlcraft"
+    },
+    "require": {
+        "php": "^8.4",
+        "ext-pdo": "*"
+    },
+    "suggest": {
+        "ext-pdo_mysql": "Required to connect to MySQL/MariaDB servers.",
+        "ext-pdo_pgsql": "Required to connect to PostgreSQL servers.",
+        "ext-pdo_sqlite": "Required to connect to SQLite databases.",
+        "ext-pdo_sqlsrv": "Required to connect to Microsoft SQL Server (Microsoft driver).",
+        "ext-pdo_dblib": "Alternative FreeTDS-based driver for Microsoft SQL Server on non-Windows.",
+        "ext-pdo_oci": "Required to connect to Oracle databases.",
+        "psr/simple-cache-implementation": "Enables metadata caching (21-performance.md \u00a74). Any PSR-16 implementation.",
+        "psr/event-dispatcher-implementation": "Enables domain event dispatch (QueryExecutedEvent, DdlExecutedEvent, etc; 05 \u00a79).",
+        "psr/log-implementation": "Enables query/deprecation logging. Any PSR-3 implementation."
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.68",
+        "infection/infection": "^0.29",
+        "phpstan/phpstan": "^2.1",
+        "phpstan/phpstan-strict-rules": "^2.0",
+        "phpunit/phpunit": "^11.5",
+        "psr/event-dispatcher": "^1.0",
+        "psr/log": "^3.0",
+        "psr/simple-cache": "^3.0",
+        "qossmic/deptrac": "^2.0",
+        "rector/rector": "^2.0",
+        "testcontainers/testcontainers": "^1.0",
+        "vimeo/psalm": "^6.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "SQLCraft\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "SQLCraft\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": false,
+        "preferred-install": "dist"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-main": "1.x-dev"
+        }
+    },
+    "scripts": {
+        "test": "phpunit --testsuite=unit",
+        "test:integration": "phpunit --testsuite=integration",
+        "test:contract": "phpunit --testsuite=contract",
+        "test:all": "phpunit",
+        "stan": "phpstan analyse --memory-limit=1G",
+        "psalm": "psalm --show-info=false",
+        "rector": "rector process --dry-run",
+        "rector:fix": "rector process",
+        "cs": "php-cs-fixer fix --dry-run --diff",
+        "cs:fix": "php-cs-fixer fix",
+        "deptrac": "deptrac analyse",
+        "infection": "infection --min-msi=80 --min-covered-msi=90",
+        "ci": [
+            "@stan",
+            "@psalm",
+            "@cs",
+            "@deptrac",
+            "@rector",
+            "@test"
+        ]
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
