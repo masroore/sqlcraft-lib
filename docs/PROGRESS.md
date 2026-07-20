@@ -52,4 +52,5 @@
 - [x] T2: MySQL and MariaDB platform dialects — commit a7c1930 — green — 2026-07-20
 - [x] T3: PostgreSQL platform dialect — commit c518e75 — green — 2026-07-20
 - [x] T4: driver registry and built-in drivers — commit 21d3dd3 — green — 2026-07-20
-- [ ] T5: platform conformance suite — not started
+- [x] T5: live platform conformance suite — commit d2ff6c8 — green — 2026-07-20
+- [ ] T6: M3 acceptance gate — not started
