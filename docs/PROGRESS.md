@@ -57,4 +57,5 @@
 - [x] Milestone gate: M3 — pending merge — green — 2026-07-20
 
 ## M4 — Schema Introspection
-- [ ] T1: inspector contracts and typed metadata adapters — not started
+- [x] T1: typed metadata factory contract — commit 95dd091 — green — 2026-07-20
+- [ ] T2: platform metadata factories — not started
