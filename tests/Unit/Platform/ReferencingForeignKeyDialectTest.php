@@ -20,7 +20,7 @@ final class ReferencingForeignKeyDialectTest extends TestCase
         $table = new QualifiedName(new Identifier('teams'));
 
         self::assertStringContainsString('REFERENCED_TABLE_NAME', (new MySQLPlatform())->getReferencingForeignKeysSql($table));
-        self::assertStringContainsString('referenced_table_name', (new PostgreSQLPlatform())->getReferencingForeignKeysSql($table));
+        self::assertStringContainsString('ccu.table_name', (new PostgreSQLPlatform())->getReferencingForeignKeysSql($table));
     }
 
     public function testSqliteRejectsReverseForeignKeyInspectionExplicitly(): void
