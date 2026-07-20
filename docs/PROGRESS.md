@@ -72,3 +72,4 @@
 - [x] T13: batched column introspection — commit 5e999d2 — green — 2026-07-20
 - [x] T14: introspection SQL golden snapshots — commit 06d5c0f — green — 2026-07-20
 - [x] T15: SQLite schema integration coverage — commit 33fada4 — green — 2026-07-20
+- [x] T16: MySQL MariaDB PostgreSQL schema integration coverage — commit 7fc688e — green — 2026-07-20
