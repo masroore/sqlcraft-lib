@@ -32,4 +32,5 @@
 - [x] T22: export contract/support types — commit 1a254d7 — green — 2026-07-20
 - [x] T23: import contract/support types — commit 78aea39 — green — 2026-07-20
 - [x] T24: metadata collection wrappers — commit 4edde13 — green — 2026-07-20
-- [ ] T25: metadata inspector ports — not started
+- [x] T25: metadata inspector ports (typed subset) — commit 5f0c610 — green — 2026-07-20
+- [ ] T26: resolve DatabaseInspectorInterface type inventory — not started
