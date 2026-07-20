@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use SQLCraft\DTO\ColumnMeta;
 use SQLCraft\DTO\ForeignKeyMeta;
 use SQLCraft\DTO\IndexMeta;
+use SQLCraft\DTO\PartitionInfo;
 use SQLCraft\DTO\RoutineMeta;
 use SQLCraft\DTO\TableStatus;
 use SQLCraft\DTO\TriggerMeta;
@@ -23,6 +24,7 @@ final class MetadataFactoryInterfaceTest extends TestCase
         self::assertSame([
             'createColumnMeta',
             'createTableStatus',
+            'createPartitionInfo',
             'createIndexMeta',
             'createForeignKeyMeta',
             'createTriggerMeta',
@@ -35,6 +37,7 @@ final class MetadataFactoryInterfaceTest extends TestCase
         $expectedReturnTypes = [
             'createColumnMeta' => ColumnMeta::class,
             'createTableStatus' => TableStatus::class,
+            'createPartitionInfo' => PartitionInfo::class,
             'createIndexMeta' => IndexMeta::class,
             'createForeignKeyMeta' => ForeignKeyMeta::class,
             'createTriggerMeta' => TriggerMeta::class,

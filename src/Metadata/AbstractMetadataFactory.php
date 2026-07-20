@@ -8,6 +8,7 @@ use InvalidArgumentException;
 use SQLCraft\DTO\ColumnMeta;
 use SQLCraft\DTO\ForeignKeyMeta;
 use SQLCraft\DTO\IndexColumnMeta;
+use SQLCraft\DTO\PartitionInfo;
 use SQLCraft\DTO\IndexMeta;
 use SQLCraft\DTO\RoutineMeta;
 use SQLCraft\DTO\RoutineParameter;
@@ -76,6 +77,22 @@ abstract class AbstractMetadataFactory implements MetadataFactoryInterface
             createOptions: $this->stringValue($this->value($row, 'create_options')),
             partitioned: $this->toBool($this->value($row, 'partitioned', 'is_partitioned')),
             schema: $this->stringValue($this->value($row, 'table_schema', 'schema')),
+        );
+    }
+
+    /** @param array<string, bool|float|int|string|null> $row */
+    #[\Override]
+    public function createPartitionInfo(array $row): PartitionInfo
+    {
+        $row = $this->normalizeRow($row);
+
+        return new PartitionInfo(
+            name: $this->requiredString($row, 'name', 'partition_name'),
+            schema: $this->stringValue($this->value($row, 'schema', 'table_schema', 'partition_schema')),
+            method: $this->requiredString($row, 'method', 'partition_method'),
+            expression: $this->stringValue($this->value($row, 'expression', 'partition_expression')),
+            parentTable: $this->stringValue($this->value($row, 'parent_table', 'table_name')),
+            bound: $this->stringValue($this->value($row, 'bound', 'partition_description')),
         );
     }
 

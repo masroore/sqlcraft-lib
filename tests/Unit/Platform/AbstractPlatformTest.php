@@ -156,6 +156,21 @@ final class AbstractPlatformTest extends TestCase
                 return '';
             }
             #[\Override]
+            public function getTableStatusSql(\SQLCraft\ValueObjects\QualifiedName $table): string
+            {
+                return '';
+            }
+            #[\Override]
+            public function getParentTablesSql(\SQLCraft\ValueObjects\QualifiedName $table): string
+            {
+                return '';
+            }
+            #[\Override]
+            public function getPartitionsSql(\SQLCraft\ValueObjects\QualifiedName $table): string
+            {
+                return '';
+            }
+            #[\Override]
             public function getIndexesSql(\SQLCraft\ValueObjects\QualifiedName $table): string
             {
                 return '';
