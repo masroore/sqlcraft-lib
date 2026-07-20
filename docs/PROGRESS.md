@@ -23,4 +23,5 @@
 - [x] T13: DTO collection wrappers — commit a7352c6 — green — 2026-07-20
 - [x] T14: capability data types — commit 497705e — green — 2026-07-20
 - [x] T15: event dispatcher contract — commit 0f1e37a — green — 2026-07-20
-- [ ] T16: remaining foundation contracts — not started
+- [x] T16: contract dependency rules — commit 438471e — green — 2026-07-20
+- [ ] T17: connection and platform contract graph — not started
