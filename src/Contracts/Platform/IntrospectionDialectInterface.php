@@ -40,6 +40,12 @@ interface IntrospectionDialectInterface
 
     public function getRoutinesSql(?string $schema = null): string;
 
+    public function getRoutineDetailSql(QualifiedName $routine): string;
+
+    public function getCheckConstraintsSql(QualifiedName $table): string;
+
+    public function getUsersSql(): string;
+
     public function getSequencesSql(?string $schema = null): string;
 
     public function getVariablesSql(): string;

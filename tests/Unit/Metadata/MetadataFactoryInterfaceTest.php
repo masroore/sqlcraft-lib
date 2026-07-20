@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SQLCraft\Tests\Unit\Metadata;
 
 use PHPUnit\Framework\TestCase;
+use SQLCraft\DTO\CheckConstraintMeta;
 use SQLCraft\DTO\ColumnMeta;
 use SQLCraft\DTO\DatabaseMeta;
 use SQLCraft\DTO\ForeignKeyMeta;
@@ -17,6 +18,7 @@ use SQLCraft\ValueObjects\DataType;
 use SQLCraft\DTO\RoutineMeta;
 use SQLCraft\DTO\TableStatus;
 use SQLCraft\DTO\TriggerMeta;
+use SQLCraft\DTO\UserMeta;
 use SQLCraft\DTO\ViewMeta;
 use SQLCraft\Metadata\MetadataFactoryInterface;
 
@@ -29,6 +31,7 @@ final class MetadataFactoryInterfaceTest extends TestCase
         self::assertTrue($reflection->isInterface());
         self::assertSame([
             'createColumnMeta',
+            'createCheckConstraintMeta',
             'createDatabaseMeta',
             'createProcessMeta',
             'createTableStatus',
@@ -41,6 +44,7 @@ final class MetadataFactoryInterfaceTest extends TestCase
             'createTriggerMeta',
             'createRoutineMeta',
             'createViewMeta',
+            'createUserMeta',
         ], array_map(
             static fn (\ReflectionMethod $method): string => $method->getName(),
             $reflection->getMethods(),
@@ -48,6 +52,7 @@ final class MetadataFactoryInterfaceTest extends TestCase
 
         $expectedReturnTypes = [
             'createColumnMeta' => ColumnMeta::class,
+            'createCheckConstraintMeta' => CheckConstraintMeta::class,
             'createDatabaseMeta' => DatabaseMeta::class,
             'createProcessMeta' => ProcessMeta::class,
             'createTableStatus' => TableStatus::class,
@@ -60,6 +65,7 @@ final class MetadataFactoryInterfaceTest extends TestCase
             'createTriggerMeta' => TriggerMeta::class,
             'createRoutineMeta' => RoutineMeta::class,
             'createViewMeta' => ViewMeta::class,
+            'createUserMeta' => UserMeta::class,
         ];
 
         foreach ($expectedReturnTypes as $methodName => $returnType) {

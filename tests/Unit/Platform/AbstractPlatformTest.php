@@ -221,6 +221,21 @@ final class AbstractPlatformTest extends TestCase
                 return '';
             }
             #[\Override]
+            public function getRoutineDetailSql(\SQLCraft\ValueObjects\QualifiedName $routine): string
+            {
+                return '';
+            }
+            #[\Override]
+            public function getCheckConstraintsSql(\SQLCraft\ValueObjects\QualifiedName $table): string
+            {
+                return '';
+            }
+            #[\Override]
+            public function getUsersSql(): string
+            {
+                return '';
+            }
+            #[\Override]
             public function getSequencesSql(?string $schema = null): string
             {
                 return '';

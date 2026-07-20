@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SQLCraft\Metadata;
 
+use SQLCraft\DTO\CheckConstraintMeta;
 use SQLCraft\DTO\ColumnMeta;
 use SQLCraft\DTO\DatabaseMeta;
 use SQLCraft\DTO\ForeignKeyMeta;
@@ -16,6 +17,7 @@ use SQLCraft\DTO\SequenceMeta;
 use SQLCraft\ValueObjects\DataType;
 use SQLCraft\DTO\TableStatus;
 use SQLCraft\DTO\TriggerMeta;
+use SQLCraft\DTO\UserMeta;
 use SQLCraft\DTO\ViewMeta;
 
 /**
@@ -27,6 +29,9 @@ interface MetadataFactoryInterface
 {
     /** @param array<string, bool|float|int|string|null> $row */
     public function createColumnMeta(array $row): ColumnMeta;
+
+    /** @param array<string, bool|float|int|string|null> $row */
+    public function createCheckConstraintMeta(array $row): CheckConstraintMeta;
 
     /** @param array<string, bool|float|int|string|null> $row */
     public function createDatabaseMeta(array $row): DatabaseMeta;
@@ -63,4 +68,7 @@ interface MetadataFactoryInterface
 
     /** @param array<string, bool|float|int|string|null> $row */
     public function createViewMeta(array $row): ViewMeta;
+
+    /** @param array<string, bool|float|int|string|null> $row */
+    public function createUserMeta(array $row): UserMeta;
 }
