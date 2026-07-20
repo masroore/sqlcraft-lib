@@ -63,4 +63,5 @@
 - [x] T4: core metadata inspectors — commit 6c1a7fb — green — 2026-07-20
 - [x] T5: foreign-key metadata inspector — commit 8381c87 — green — 2026-07-20
 - [x] T6: connection database-name seam — commit 7a907da — green — 2026-07-20
-- [ ] T7: table metadata inspector — not started
+- [x] T7: table metadata inspector — commit 4d5da39 — green — 2026-07-20
+- [ ] T8: database/schema inspector — not started
