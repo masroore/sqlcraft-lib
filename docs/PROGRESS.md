@@ -40,4 +40,5 @@
 ## M2 — Connection Layer
 - [x] T1: result implementations — commit 7fabd36 — green — 2026-07-20
 - [x] T2: PDO exception translation — commit dbf30ab — green — 2026-07-20
-- [ ] T3: PDO connection factory seam — not started
+- [x] T3: PDO connection factory seam — commit 06f741a — green — 2026-07-20
+- [ ] T4: PDO connection adapter — not started
