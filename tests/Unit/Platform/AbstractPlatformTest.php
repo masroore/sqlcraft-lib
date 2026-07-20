@@ -216,6 +216,21 @@ final class AbstractPlatformTest extends TestCase
                 return '';
             }
             #[\Override]
+            public function getStatusSql(): string
+            {
+                return '';
+            }
+            #[\Override]
+            public function getCharsetsSql(): string
+            {
+                return '';
+            }
+            #[\Override]
+            public function getCollationsSql(?string $charset = null): string
+            {
+                return '';
+            }
+            #[\Override]
             public function getProcesslistSql(): string
             {
                 return '';

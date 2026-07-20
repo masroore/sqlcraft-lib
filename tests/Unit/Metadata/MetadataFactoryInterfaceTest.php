@@ -6,9 +6,11 @@ namespace SQLCraft\Tests\Unit\Metadata;
 
 use PHPUnit\Framework\TestCase;
 use SQLCraft\DTO\ColumnMeta;
+use SQLCraft\DTO\DatabaseMeta;
 use SQLCraft\DTO\ForeignKeyMeta;
 use SQLCraft\DTO\IndexMeta;
 use SQLCraft\DTO\PartitionInfo;
+use SQLCraft\DTO\ProcessMeta;
 use SQLCraft\DTO\SchemaMeta;
 use SQLCraft\DTO\SequenceMeta;
 use SQLCraft\ValueObjects\DataType;
@@ -26,6 +28,8 @@ final class MetadataFactoryInterfaceTest extends TestCase
         self::assertTrue($reflection->isInterface());
         self::assertSame([
             'createColumnMeta',
+            'createDatabaseMeta',
+            'createProcessMeta',
             'createTableStatus',
             'createPartitionInfo',
             'createSchemaMeta',
@@ -42,6 +46,8 @@ final class MetadataFactoryInterfaceTest extends TestCase
 
         $expectedReturnTypes = [
             'createColumnMeta' => ColumnMeta::class,
+            'createDatabaseMeta' => DatabaseMeta::class,
+            'createProcessMeta' => ProcessMeta::class,
             'createTableStatus' => TableStatus::class,
             'createPartitionInfo' => PartitionInfo::class,
             'createSchemaMeta' => SchemaMeta::class,
