@@ -1,0 +1,216 @@
+# SQLCraft — local test environment
+#
+# Usage:
+#   docker compose up -d          # start all engines
+#   docker compose run --rm php bash           # interactive PHP shell
+#   docker compose run --rm php composer install
+#   docker compose run --rm php composer run ci
+#   docker compose run --rm php composer run test
+#   docker compose run --rm php composer run test:integration
+#
+# Engine ports (host → container):
+#   MySQL    → 13306:3306
+#   MariaDB  → 13307:3306
+#   Postgres → 15432:5432
+#   MSSQL    → 11433:1433
+#   Oracle   → 11521:1521  (profile: oracle — opt-in, see below)
+#
+# Bring up without Oracle (default):
+#   docker compose up -d
+#
+# Bring up with Oracle (slow first start, ~2–3 min):
+#   docker compose --profile oracle up -d
+
+services:
+
+  # ── PHP 8.4 dev/test container ─────────────────────────────────────────────
+  php:
+    build:
+      context: docker/php
+      dockerfile: Dockerfile
+      args:
+        UID: "${UID:-1000}"
+        GID: "${GID:-1000}"
+        ORACLE: "${ORACLE:-0}"   # set ORACLE=1 + place zips in docker/php/oracle/ to enable pdo_oci
+    volumes:
+      - .:/app
+      - composer_cache:/home/sqlcraft/.composer
+    environment:
+      # ── connection env vars consumed by phpunit bootstrap / integration tests
+      SQLCRAFT_MYSQL_HOST: mysql
+      SQLCRAFT_MYSQL_PORT: "3306"
+      SQLCRAFT_MYSQL_DB: sqlcraft_test
+      SQLCRAFT_MYSQL_USER: sqlcraft
+      SQLCRAFT_MYSQL_PASS: secret
+
+      SQLCRAFT_MARIADB_HOST: mariadb
+      SQLCRAFT_MARIADB_PORT: "3306"
+      SQLCRAFT_MARIADB_DB: sqlcraft_test
+      SQLCRAFT_MARIADB_USER: sqlcraft
+      SQLCRAFT_MARIADB_PASS: secret
+
+      SQLCRAFT_PGSQL_HOST: postgres
+      SQLCRAFT_PGSQL_PORT: "5432"
+      SQLCRAFT_PGSQL_DB: sqlcraft_test
+      SQLCRAFT_PGSQL_USER: sqlcraft
+      SQLCRAFT_PGSQL_PASS: secret
+
+      SQLCRAFT_MSSQL_HOST: mssql
+      SQLCRAFT_MSSQL_PORT: "1433"
+      SQLCRAFT_MSSQL_DB: sqlcraft_test
+      SQLCRAFT_MSSQL_USER: sa
+      SQLCRAFT_MSSQL_PASS: "SQLcraft_Test1!"
+
+      SQLCRAFT_ORACLE_HOST: oracle
+      SQLCRAFT_ORACLE_PORT: "1521"
+      SQLCRAFT_ORACLE_SERVICE: XEPDB1
+      SQLCRAFT_ORACLE_USER: sqlcraft
+      SQLCRAFT_ORACLE_PASS: secret
+
+      # SQLite uses :memory: — no host/port needed
+    depends_on:
+      mysql:
+        condition: service_healthy
+      mariadb:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      mssql:
+        condition: service_healthy
+      mssql-init:
+        condition: service_completed_successfully
+    working_dir: /app
+    # Default command keeps the container alive for `docker compose run` workflows.
+    # Override with: docker compose run --rm php <command>
+    command: ["tail", "-f", "/dev/null"]
+
+  # ── MSSQL test-DB initialiser (runs once after mssql is healthy) ───────────
+  mssql-init:
+    image: mcr.microsoft.com/mssql-tools:latest
+    volumes:
+      - ./docker/mssql/init-db.sh:/init-db.sh:ro
+    environment:
+      MSSQL_HOST: mssql
+      MSSQL_SA_PASSWORD: "SQLcraft_Test1!"
+      MSSQL_DB: sqlcraft_test
+    entrypoint: ["/bin/bash", "/init-db.sh"]
+    depends_on:
+      mssql:
+        condition: service_healthy
+    restart: "no"
+
+  # ── MySQL 8.4 ──────────────────────────────────────────────────────────────
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: rootsecret
+      MYSQL_DATABASE: sqlcraft_test
+      MYSQL_USER: sqlcraft
+      MYSQL_PASSWORD: secret
+    ports:
+      - "13306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "sqlcraft", "-psecret"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 25s
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+
+  # ── MariaDB 11.4 ───────────────────────────────────────────────────────────
+  mariadb:
+    image: mariadb:11.4
+    environment:
+      MARIADB_ROOT_PASSWORD: rootsecret
+      MARIADB_DATABASE: sqlcraft_test
+      MARIADB_USER: sqlcraft
+      MARIADB_PASSWORD: secret
+    ports:
+      - "13307:3306"
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    volumes:
+      - mariadb_data:/var/lib/mysql
+
+  # ── PostgreSQL 18 ──────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: sqlcraft_test
+      POSTGRES_USER: sqlcraft
+      POSTGRES_PASSWORD: secret
+    ports:
+      - "15432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sqlcraft -d sqlcraft_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # ── SQL Server 2022 ────────────────────────────────────────────────────────
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    platform: linux/amd64   # required on Apple Silicon
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "SQLcraft_Test1!"
+      MSSQL_PID: Developer
+    ports:
+      - "11433:1433"
+    healthcheck:
+      # -C trusts the self-signed TLS cert the container ships with
+      test:
+        - "CMD-SHELL"
+        - >
+          /opt/mssql-tools18/bin/sqlcmd
+          -S localhost -U sa -P 'SQLcraft_Test1!'
+          -Q 'SELECT 1' -C -b
+          > /dev/null 2>&1
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 40s
+    volumes:
+      - mssql_data:/var/opt/mssql
+
+  # ── Oracle XE 21c (opt-in, profile: oracle) ────────────────────────────────
+  # Enable with:  docker compose --profile oracle up -d
+  # First start downloads ~1.5 GB and takes 2–3 min to initialise.
+  # pdo_oci in the php service requires ORACLE=1 rebuild (see docker/php/oracle/README.txt).
+  oracle:
+    profiles: ["oracle"]
+    image: gvenzl/oracle-xe:21-slim-faststart
+    environment:
+      ORACLE_PASSWORD: oracleroot       # SYS / SYSTEM password
+      APP_USER: sqlcraft
+      APP_USER_PASSWORD: secret
+    ports:
+      - "11521:1521"
+    healthcheck:
+      test: ["CMD-SHELL", "healthcheck.sh"]
+      interval: 15s
+      timeout: 15s
+      retries: 20
+      start_period: 120s
+    volumes:
+      - oracle_data:/opt/oracle/oradata
+
+volumes:
+  mysql_data:
+  mariadb_data:
+  postgres_data:
+  mssql_data:
+  oracle_data:
+  composer_cache:
