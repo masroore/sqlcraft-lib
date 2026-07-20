@@ -60,4 +60,5 @@
 - [x] T1: typed metadata factory contract — commit 95dd091 — green — 2026-07-20
 - [x] T2: platform metadata factories — commit 6ef45f3 — green — 2026-07-20
 - [x] T3: streaming table inspection contract — commit 10f261f — green — 2026-07-20
-- [ ] T4: concrete metadata inspectors — not started
+- [x] T4: core metadata inspectors — commit 6c1a7fb — green — 2026-07-20
+- [ ] T5: foreign-key metadata inspector — not started
