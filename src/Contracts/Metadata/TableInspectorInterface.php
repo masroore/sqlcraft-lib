@@ -15,6 +15,9 @@ interface TableInspectorInterface
 {
     public function getTables(ConnectionInterface $conn, ?string $schema = null): TableCollection;
 
+    /** @return \Generator<string, TableStatus> */
+    public function streamTables(ConnectionInterface $conn, ?string $schema = null): \Generator;
+
     public function getTableStatus(ConnectionInterface $conn, QualifiedName $table): TableStatus;
 
     public function getParentTables(ConnectionInterface $conn, QualifiedName $table): QualifiedNameCollection;
