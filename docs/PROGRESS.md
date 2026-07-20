@@ -5,6 +5,7 @@
 - [x] T2: package metadata and distribution files — commit 37309ab — green — 2026-07-20
 - [x] T3: GitHub Actions workflows — commit 726c0b4 — green — 2026-07-20
 - [x] Milestone gate: M0 — commit e40233e — green — 2026-07-20
+- [x] Dependency maintenance: pin Testcontainers 1.0.10 — commits 4fcc1f5, bdb215c — green — 2026-07-20
 
 ## M1 — Foundation
 - [x] T1: exceptions — commit 93561c7 — green — 2026-07-20
@@ -16,4 +17,5 @@
 - [x] T7: core metadata DTOs — commit 57116a7 — green — 2026-07-20
 - [x] T8: index and trigger DTOs — commit 9f15ed2 — green — 2026-07-20
 - [x] T9: routine DTOs — commit e7da1de — green — 2026-07-20
-- [ ] T10: database and server DTOs — not started
+- [x] T10: server and sequence DTOs — commit 3fb0436 — green — 2026-07-20
+- [ ] T11: database and schema DTOs — not started
