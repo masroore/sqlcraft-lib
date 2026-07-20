@@ -1,0 +1,57 @@
+name: Integration Matrix
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  engine-matrix:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { engine: mysql, version: '5.7' }
+          - { engine: mysql, version: '8.0' }
+          - { engine: mysql, version: '8.4' }
+          - { engine: mariadb, version: '10.6' }
+          - { engine: mariadb, version: '11.4' }
+          - { engine: postgres, version: '13' }
+          - { engine: postgres, version: '14' }
+          - { engine: postgres, version: '15' }
+          - { engine: postgres, version: '16' }
+          - { engine: postgres, version: '17' }
+          - { engine: mssql, version: '2019' }
+          - { engine: mssql, version: '2022' }
+          - { engine: oracle-xe, version: '21' }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_mysql, pdo_pgsql, pdo_sqlsrv, pdo_oci
+      - run: composer install --prefer-dist --no-progress
+      - name: Run integration and contract suites against ${{ matrix.engine }}:${{ matrix.version }}
+        env:
+          SQLCRAFT_TEST_ENGINE: ${{ matrix.engine }}
+          SQLCRAFT_TEST_ENGINE_VERSION: ${{ matrix.version }}
+        run: |
+          vendor/bin/phpunit --testsuite=integration --group=${{ matrix.engine }}
+          vendor/bin/phpunit --testsuite=contract --group=${{ matrix.engine }}
+
+  os-smoke:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_sqlite
+      - run: composer install --prefer-dist --no-progress
+      - run: composer run test
