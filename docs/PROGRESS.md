@@ -53,4 +53,8 @@
 - [x] T3: PostgreSQL platform dialect — commit c518e75 — green — 2026-07-20
 - [x] T4: driver registry and built-in drivers — commit 21d3dd3 — green — 2026-07-20
 - [x] T5: live platform conformance suite — commit d2ff6c8 — green — 2026-07-20
-- [ ] T6: M3 acceptance gate — not started
+- [x] T6: M3 acceptance gate — commit d9566c8 — green — 2026-07-20
+- [x] Milestone gate: M3 — pending merge — green — 2026-07-20
+
+## M4 — Schema Introspection
+- [ ] T1: inspector contracts and typed metadata adapters — not started
