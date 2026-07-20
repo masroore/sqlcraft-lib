@@ -106,12 +106,12 @@ abstract class AbstractMetadataFactory implements MetadataFactoryInterface
         $row = $this->normalizeRow($row);
 
         return new ForeignKeyMeta(
-            constraintName: $this->requiredString($row, 'constraint_name', 'name'),
+            constraintName: $this->requiredString($row, 'constraint_name', 'name', 'id'),
             targetDatabase: $this->stringValue($this->value($row, 'target_database', 'referenced_table_catalog')),
             targetSchema: $this->stringValue($this->value($row, 'target_schema', 'referenced_table_schema')),
-            targetTable: $this->requiredString($row, 'target_table', 'referenced_table_name'),
-            sourceColumns: $this->stringList($this->value($row, 'source_columns', 'source_column', 'column_name')),
-            targetColumns: $this->stringList($this->value($row, 'target_columns', 'target_column', 'referenced_column_name')),
+            targetTable: $this->requiredString($row, 'target_table', 'referenced_table_name', 'table'),
+            sourceColumns: $this->stringList($this->value($row, 'source_columns', 'source_column', 'column_name', 'from')),
+            targetColumns: $this->stringList($this->value($row, 'target_columns', 'target_column', 'referenced_column_name', 'to')),
             onDelete: $this->foreignKeyAction($this->value($row, 'on_delete', 'delete_rule')),
             onUpdate: $this->foreignKeyAction($this->value($row, 'on_update', 'update_rule')),
             definition: $this->stringValue($this->value($row, 'definition', 'constraint_definition')),

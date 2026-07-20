@@ -346,6 +346,15 @@ class MySQLPlatform extends AbstractPlatform
     }
 
     #[\Override]
+    public function getReferencingForeignKeysSql(QualifiedName $table): string
+    {
+        return 'SELECT * FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE REFERENCED_TABLE_SCHEMA = '
+            . $this->quoteValue($this->databaseName($table))
+            . ' AND REFERENCED_TABLE_NAME = ' . $this->quoteValue($table->object->name)
+            . ' AND REFERENCED_COLUMN_NAME IS NOT NULL';
+    }
+
+    #[\Override]
     public function getTriggersSql(QualifiedName $table): string
     {
         return 'SHOW TRIGGERS FROM ' . $this->quoteIdentifier($table->catalog ?? $table->schema ?? $table->object);

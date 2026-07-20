@@ -18,6 +18,8 @@ interface IntrospectionDialectInterface
 
     public function getForeignKeysSql(QualifiedName $table): string;
 
+    public function getReferencingForeignKeysSql(QualifiedName $table): string;
+
     public function getTriggersSql(QualifiedName $table): string;
 
     public function getRoutinesSql(?string $schema = null): string;

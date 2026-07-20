@@ -166,6 +166,11 @@ final class AbstractPlatformTest extends TestCase
                 return '';
             }
             #[\Override]
+            public function getReferencingForeignKeysSql(\SQLCraft\ValueObjects\QualifiedName $table): string
+            {
+                return '';
+            }
+            #[\Override]
             public function getTriggersSql(\SQLCraft\ValueObjects\QualifiedName $table): string
             {
                 return '';
