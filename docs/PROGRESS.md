@@ -58,4 +58,5 @@
 
 ## M4 — Schema Introspection
 - [x] T1: typed metadata factory contract — commit 95dd091 — green — 2026-07-20
-- [ ] T2: platform metadata factories — not started
+- [x] T2: platform metadata factories — commit 6ef45f3 — green — 2026-07-20
+- [ ] T3: metadata inspector contract reconciliation — not started
