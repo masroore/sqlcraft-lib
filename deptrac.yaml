@@ -96,6 +96,7 @@ deptrac:
     Exceptions:
       - Contracts
       - ValueObjects
+      - Capabilities
     Support: ~
     Capabilities:
       - Contracts

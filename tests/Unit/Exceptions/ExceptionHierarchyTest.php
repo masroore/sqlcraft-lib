@@ -8,7 +8,8 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use SQLCraft\Exceptions\AuthenticationException;
 use SQLCraft\Exceptions\CapabilityException;
-use SQLCraft\Exceptions\CapabilityNotSupportedException;
+use SQLCraft\Capabilities\CapabilityNotSupportedException;
+use SQLCraft\Capabilities\Capability;
 use SQLCraft\Exceptions\ConnectionException;
 use SQLCraft\Exceptions\ConnectionFailedException;
 use SQLCraft\Exceptions\ConnectionLostException;
@@ -105,12 +106,12 @@ final class ExceptionHierarchyTest extends TestCase
 
     public function testCapabilityExceptionFactoryCarriesScalarContext(): void
     {
-        $exception = CapabilityNotSupportedException::for('triggers', 'sqlite', '3.45');
+        $exception = CapabilityNotSupportedException::for(Capability::Trigger, 'sqlite', '3.45');
 
-        self::assertSame('triggers', $exception->capability);
+        self::assertSame(Capability::Trigger, $exception->capability);
         self::assertSame('sqlite', $exception->platform);
         self::assertSame('3.45', $exception->version);
-        self::assertSame('Capability not supported: triggers on sqlite 3.45.', $exception->getMessage());
+        self::assertSame('Capability not supported: trigger on sqlite 3.45.', $exception->getMessage());
     }
 
     public function testOtherTypedPayloadsAreExposed(): void
