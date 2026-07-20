@@ -20,4 +20,5 @@
 - [x] T10: server and sequence DTOs — commit 3fb0436 — green — 2026-07-20
 - [x] T11: database and schema DTOs — commit 6c43106 — green — 2026-07-20
 - [x] T12: remaining DTOs — commit c43546a — green — 2026-07-20
-- [ ] T13: DTO collection wrappers — not started
+- [x] T13: DTO collection wrappers — commit a7352c6 — green — 2026-07-20
+- [ ] T14: capability data types — not started
