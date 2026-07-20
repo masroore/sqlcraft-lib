@@ -56,12 +56,21 @@ final class SqlitePlatform extends AbstractPlatform
                 Capability::Columns,
                 Capability::Indexes,
                 Capability::ForeignKeys,
-                Capability::CheckConstraints,
-                Capability::InsertUpdate,
-                Capability::DropColumn,
                 Capability::Sql,
+                Capability::Database,
+                Capability::DropColumn,
+                Capability::Dump,
+                Capability::Status,
+                Capability::Variables,
+                Capability::Trigger,
+                Capability::CheckConstraints,
+                Capability::DescendingIndexes,
+                Capability::PartialIndexes,
+                Capability::InsertUpdate,
             ],
-            'versioned' => [],
+            'versioned' => [
+                [Capability::GeneratedColumns, [3, 31, 0]],
+            ],
         ];
     }
 
