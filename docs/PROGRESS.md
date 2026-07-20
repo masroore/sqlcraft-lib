@@ -7,4 +7,5 @@
 - [x] Milestone gate: M0 — commit e40233e — green — 2026-07-20
 
 ## M1 — Foundation
-- [ ] T1: exceptions — not started
+- [x] T1: exceptions — commit 93561c7 — green — 2026-07-20
+- [ ] T2: Support utils — not started
