@@ -25,4 +25,5 @@
 - [x] T15: event dispatcher contract — commit 0f1e37a — green — 2026-07-20
 - [x] T16: contract dependency rules — commit 438471e — green — 2026-07-20
 - [x] T17: connection and platform contract graph — commit a3f4e87 — green — 2026-07-20
-- [ ] T18: capability and schema contract graph — not started
+- [x] T18: capability resolver contract — commit 2557c1f — green — 2026-07-20
+- [ ] T19: remaining M1 contracts — not started
