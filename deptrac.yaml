@@ -83,7 +83,15 @@ deptrac:
         - type: directory
           value: src/Utilities/.*
   ruleset:
-    Contracts: ~
+    Contracts:
+      - ValueObjects
+      - DTO
+      - Collections
+      - Exceptions
+      - Capabilities
+      - Support
+      - Connection
+      - Platform
     ValueObjects:
       - Support
     DTO:
