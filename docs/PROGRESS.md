@@ -49,4 +49,5 @@
 - [x] T9: M2 acceptance gate — commit pending — green — 2026-07-20
 ## M3 — Platform & Driver Core
 - [x] T1: abstract platform capability foundation — commit 9e88ca6 — green — 2026-07-20
-- [ ] T2: concrete platform core — not started
+- [x] T2: MySQL and MariaDB platform dialects — commit a7c1930 — green — 2026-07-20
+- [ ] T3: PostgreSQL platform dialect — not started
