@@ -9,6 +9,9 @@ use SQLCraft\DTO\ForeignKeyMeta;
 use SQLCraft\DTO\IndexMeta;
 use SQLCraft\DTO\PartitionInfo;
 use SQLCraft\DTO\RoutineMeta;
+use SQLCraft\DTO\SchemaMeta;
+use SQLCraft\DTO\SequenceMeta;
+use SQLCraft\ValueObjects\DataType;
 use SQLCraft\DTO\TableStatus;
 use SQLCraft\DTO\TriggerMeta;
 
@@ -27,6 +30,15 @@ interface MetadataFactoryInterface
 
     /** @param array<string, bool|float|int|string|null> $row */
     public function createPartitionInfo(array $row): PartitionInfo;
+
+    /** @param array<string, bool|float|int|string|null> $row */
+    public function createSchemaMeta(array $row): SchemaMeta;
+
+    /** @param array<string, bool|float|int|string|null> $row */
+    public function createSequenceMeta(array $row): SequenceMeta;
+
+    /** @param array<string, bool|float|int|string|null> $row */
+    public function createDataType(array $row): DataType;
 
     /** @param array<string, bool|float|int|string|null> $row */
     public function createIndexMeta(array $row): IndexMeta;

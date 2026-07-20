@@ -295,6 +295,24 @@ final class PostgreSQLPlatform extends AbstractPlatform
     }
 
     #[\Override]
+    public function getSchemasSql(): string
+    {
+        return 'SELECT schema_name AS name, catalog_name AS catalog, schema_owner AS owner '
+            . 'FROM information_schema.schemata ORDER BY schema_name';
+    }
+
+    #[\Override]
+    public function getTypesSql(?string $schema = null): string
+    {
+        $schemaFilter = $schema === null ? '' : ' AND namespace.nspname = ' . $this->quoteValue($schema);
+
+        return "SELECT type.typname AS data_type, namespace.nspname AS schema FROM pg_type type"
+            . ' JOIN pg_namespace namespace ON namespace.oid = type.typnamespace '
+            . "WHERE type.typtype IN ('b', 'c', 'd', 'e')" . $schemaFilter
+            . ' ORDER BY namespace.nspname, type.typname';
+    }
+
+    #[\Override]
     public function getTablesSql(string $database, ?string $schema = null): string
     {
         return $this->tableStatusSql($schema, null);

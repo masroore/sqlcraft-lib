@@ -9,6 +9,9 @@ use SQLCraft\DTO\ColumnMeta;
 use SQLCraft\DTO\ForeignKeyMeta;
 use SQLCraft\DTO\IndexMeta;
 use SQLCraft\DTO\PartitionInfo;
+use SQLCraft\DTO\SchemaMeta;
+use SQLCraft\DTO\SequenceMeta;
+use SQLCraft\ValueObjects\DataType;
 use SQLCraft\DTO\RoutineMeta;
 use SQLCraft\DTO\TableStatus;
 use SQLCraft\DTO\TriggerMeta;
@@ -25,6 +28,9 @@ final class MetadataFactoryInterfaceTest extends TestCase
             'createColumnMeta',
             'createTableStatus',
             'createPartitionInfo',
+            'createSchemaMeta',
+            'createSequenceMeta',
+            'createDataType',
             'createIndexMeta',
             'createForeignKeyMeta',
             'createTriggerMeta',
@@ -38,6 +44,9 @@ final class MetadataFactoryInterfaceTest extends TestCase
             'createColumnMeta' => ColumnMeta::class,
             'createTableStatus' => TableStatus::class,
             'createPartitionInfo' => PartitionInfo::class,
+            'createSchemaMeta' => SchemaMeta::class,
+            'createSequenceMeta' => SequenceMeta::class,
+            'createDataType' => DataType::class,
             'createIndexMeta' => IndexMeta::class,
             'createForeignKeyMeta' => ForeignKeyMeta::class,
             'createTriggerMeta' => TriggerMeta::class,

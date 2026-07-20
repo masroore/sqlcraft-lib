@@ -10,6 +10,10 @@ interface IntrospectionDialectInterface
 {
     public function getDatabasesSql(): string;
 
+    public function getSchemasSql(): string;
+
+    public function getTypesSql(?string $schema = null): string;
+
     public function getTablesSql(string $database, ?string $schema = null): string;
 
     public function getColumnsSql(QualifiedName $table): string;
