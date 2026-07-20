@@ -41,7 +41,10 @@ Thumbs.db
 /.idea/
 /.vscode/
 /.omc/
+/.agents/
 /.claude/
+/.serena/
+/graphify-out/
 *.swp
 *.swo
 *~
