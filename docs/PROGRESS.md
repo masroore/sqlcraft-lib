@@ -70,3 +70,4 @@
 - [x] T11: routine, constraint, and user inspectors — commit 5110390 — green — 2026-07-20
 - [x] T12: schema manager and metadata cache seam — commit 19cee9b — green — 2026-07-20
 - [x] T13: batched column introspection — commit 5e999d2 — green — 2026-07-20
+- [x] T14: introspection SQL golden snapshots — commit 06d5c0f — green — 2026-07-20
