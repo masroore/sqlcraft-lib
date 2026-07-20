@@ -41,15 +41,15 @@
   },
   "hotPaths": [
     {
-      "path": "docs/plans/23-roadmap.md",
-      "accessCount": 1,
-      "lastAccessed": 1784524950287,
+      "path": "docs/IMPLEMENTATION-PROMPT.md",
+      "accessCount": 7,
+      "lastAccessed": 1784525144254,
       "type": "file"
     },
     {
-      "path": "docs/IMPLEMENTATION-PROMPT.md",
+      "path": "docs/plans/23-roadmap.md",
       "accessCount": 1,
-      "lastAccessed": 1784524985459,
+      "lastAccessed": 1784524950287,
       "type": "file"
     }
   ],
