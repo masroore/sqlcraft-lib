@@ -46,4 +46,5 @@
 - [x] T6: transaction manager — commit 1df263d — green — 2026-07-20
 - [x] T7: SQLite integration coverage — commit d30b3ab — green — 2026-07-20
 - [x] T8: SQLite driver and platform stub — commit 7379e9a — green — 2026-07-20
-- [ ] T9: M2 acceptance gate — not started
+- [x] T9: M2 acceptance gate — commit pending — green — 2026-07-20
+- [ ] M3: Platform and Driver Core — not started
