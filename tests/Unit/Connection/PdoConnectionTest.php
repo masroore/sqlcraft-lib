@@ -36,6 +36,7 @@ final class PdoConnectionTest extends TestCase
             $platform,
             new PdoExceptionTranslator(),
             'test',
+            'app',
         );
     }
 
@@ -44,6 +45,7 @@ final class PdoConnectionTest extends TestCase
         $this->connection()->execute('CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT NOT NULL)');
         $result = $this->connection()->execute('INSERT INTO users (name) VALUES (?)', ['Ada']);
 
+        self::assertSame('app', $this->connection()->getDatabaseName());
         self::assertSame(1, $result->affectedRows);
         self::assertSame('1', (string) $result->lastInsertId);
         self::assertSame(1, $this->connection()->affectedRows());

@@ -19,6 +19,7 @@ final class ConnectionContractsTest extends TestCase
                 'getServerVersion',
                 'getPlatform',
                 'getName',
+                'getDatabaseName',
                 'execute',
                 'query',
                 'prepare',
