@@ -12,4 +12,5 @@
 - [x] T3: core ValueObjects — commit 80a9d3d — green — 2026-07-20
 - [x] T4: enum and default ValueObjects — commit f64129e — green — 2026-07-20
 - [x] T5: named and connection ValueObjects — commit f9bb0da — green — 2026-07-20
-- [ ] T6: collections — not started
+- [x] T6: abstract immutable collection — commit 02f2453 — green — 2026-07-20
+- [ ] T7: DTOs — not started
