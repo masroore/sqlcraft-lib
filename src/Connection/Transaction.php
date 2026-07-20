@@ -20,6 +20,8 @@ final class Transaction
 
     public function commit(): void
     {
+        $this->assertActive();
+
         if ($this->savepointName !== null) {
             $this->connection->execute("RELEASE SAVEPOINT {$this->savepointName}");
         } else {
@@ -31,6 +33,8 @@ final class Transaction
 
     public function rollback(): void
     {
+        $this->assertActive();
+
         if ($this->savepointName !== null) {
             $this->connection->execute("ROLLBACK TO SAVEPOINT {$this->savepointName}");
         } else {
@@ -43,5 +47,12 @@ final class Transaction
     public function isActive(): bool
     {
         return !$this->committed && !$this->rolledBack;
+    }
+
+    private function assertActive(): void
+    {
+        if (!$this->isActive()) {
+            throw new \LogicException('The transaction is no longer active.');
+        }
     }
 }
