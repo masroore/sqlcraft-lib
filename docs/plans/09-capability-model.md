@@ -435,30 +435,32 @@ The capability resolver encapsulates the version predicate once; every consumer 
 ## 10. `CapabilityNotSupportedException`
 
 ```php
-namespace SQLCraft\Exceptions;
+namespace SQLCraft\Capabilities;
+
+use SQLCraft\Exceptions\CapabilityException;
 
 final class CapabilityNotSupportedException extends CapabilityException
 {
     public function __construct(
         public readonly Capability|ExtendedCapability $capability,
-        public readonly string    $platformName,
-        public readonly ?ServerVersion $serverVersion = null,
+        public readonly string $platform,
+        public readonly string $version = '',
     ) {
-        $capName = $capability instanceof Capability
+        $capabilityName = $capability instanceof Capability
             ? $capability->value
             : $capability->name;
-        $version = $serverVersion ? " (version {$serverVersion})" : '';
-        parent::__construct(
-            "Capability '{$capName}' is not supported by platform '{$platformName}'{$version}."
-        );
+        $context = $platform === ''
+            ? $capabilityName
+            : sprintf('%s on %s%s', $capabilityName, $platform, $version === '' ? '' : ' ' . $version);
+        parent::__construct(sprintf('Capability not supported: %s.', $context));
     }
 
     public static function for(
-        Capability|ExtendedCapability $cap,
+        Capability|ExtendedCapability $capability,
         string $platform = '',
-        ?ServerVersion $version = null,
+        string $version = '',
     ): self {
-        return new self($cap, $platform, $version);
+        return new self($capability, $platform, $version);
     }
 }
 ```

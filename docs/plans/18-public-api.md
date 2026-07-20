@@ -346,9 +346,10 @@ A consumer who has never read these docs should be able to find everything throu
 All exceptions thrown by SQLCraft extend `SQLCraft\Exceptions\SQLCraftException` (05 §9). The public API commits to **never throwing a non-SQLCraft exception** for expected failure modes — a `\PDOException` never escapes past the `Connection` module boundary (07 §5); it is always caught and rethrown as one of the typed exceptions below.
 
 ```php
+use SQLCraft\Capabilities\CapabilityNotSupportedException;
 use SQLCraft\Exceptions\{
     QueryException, ConstraintViolationException, UniqueConstraintException,
-    CapabilityNotSupportedException, ConnectionException, ObjectNotFoundException,
+    ConnectionException, ObjectNotFoundException,
 };
 
 try {
