@@ -1,0 +1,64 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SQLCraft\Schema;
+
+use InvalidArgumentException;
+use SQLCraft\Contracts\Connection\ConnectionInterface;
+use SQLCraft\Contracts\Metadata\MetadataCacheInterface;
+use SQLCraft\Metadata\CheckConstraintInspector;
+use SQLCraft\Metadata\ColumnInspector;
+use SQLCraft\Metadata\DatabaseInspector;
+use SQLCraft\Metadata\ForeignKeyInspector;
+use SQLCraft\Metadata\IndexInspector;
+use SQLCraft\Metadata\MetadataFactoryInterface;
+use SQLCraft\Metadata\MySQLMetadataFactory;
+use SQLCraft\Metadata\PostgreSQLMetadataFactory;
+use SQLCraft\Metadata\RoutineInspector;
+use SQLCraft\Metadata\SequenceInspector;
+use SQLCraft\Metadata\ServerInspector;
+use SQLCraft\Metadata\SqliteMetadataFactory;
+use SQLCraft\Metadata\TableInspector;
+use SQLCraft\Metadata\TriggerInspector;
+use SQLCraft\Metadata\UserInspector;
+use SQLCraft\Metadata\ViewInspector;
+
+final class SchemaManagerFactory
+{
+    public static function forConnection(
+        ConnectionInterface $connection,
+        ?MetadataCacheInterface $cache = null,
+    ): SchemaManager {
+        $factory = self::metadataFactory($connection);
+
+        return new SchemaManager(
+            serverInspector: new ServerInspector($factory),
+            databaseInspector: new DatabaseInspector($factory),
+            tableInspector: new TableInspector($factory),
+            columnInspector: new ColumnInspector($factory),
+            indexInspector: new IndexInspector($factory),
+            foreignKeyInspector: new ForeignKeyInspector($factory),
+            viewInspector: new ViewInspector($factory),
+            routineInspector: new RoutineInspector($factory),
+            triggerInspector: new TriggerInspector($factory),
+            sequenceInspector: new SequenceInspector($factory),
+            checkConstraintInspector: new CheckConstraintInspector($factory),
+            userInspector: new UserInspector($factory),
+            cache: $cache,
+        );
+    }
+
+    private static function metadataFactory(ConnectionInterface $connection): MetadataFactoryInterface
+    {
+        return match ($connection->getPlatformName()) {
+            'mysql', 'mariadb' => new MySQLMetadataFactory(),
+            'pgsql' => new PostgreSQLMetadataFactory(),
+            'sqlite' => new SqliteMetadataFactory(),
+            default => throw new InvalidArgumentException(sprintf(
+                'No metadata factory is registered for platform %s.',
+                $connection->getPlatformName(),
+            )),
+        };
+    }
+}
