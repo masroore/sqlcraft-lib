@@ -427,6 +427,31 @@ final class PostgreSQLPlatform extends AbstractPlatform
     }
 
     #[\Override]
+    public function getRoutineDetailSql(QualifiedName $routine): string
+    {
+        return 'SELECT * FROM information_schema.routines WHERE routine_schema = '
+            . $this->quoteValue(($routine->schema instanceof Identifier ? $routine->schema->name : 'public')) . ' AND routine_name = '
+            . $this->quoteValue($routine->object->name);
+    }
+
+    #[\Override]
+    public function getCheckConstraintsSql(QualifiedName $table): string
+    {
+        return 'SELECT tc.constraint_name, cc.check_clause, 0 AS not_enforced '
+            . 'FROM information_schema.table_constraints tc JOIN information_schema.check_constraints cc '
+            . 'ON cc.constraint_name = tc.constraint_name AND cc.constraint_schema = tc.constraint_schema '
+            . 'WHERE tc.table_schema = ' . $this->quoteValue(($table->schema instanceof Identifier ? $table->schema->name : 'public'))
+            . ' AND tc.table_name = ' . $this->quoteValue($table->object->name)
+            . " AND tc.constraint_type = 'CHECK'";
+    }
+
+    #[\Override]
+    public function getUsersSql(): string
+    {
+        return 'SELECT rolname, rolsuper, rolcanlogin FROM pg_roles ORDER BY rolname';
+    }
+
+    #[\Override]
     public function getRoutinesSql(?string $schema = null): string
     {
         return 'SELECT * FROM information_schema.routines'

@@ -345,6 +345,24 @@ final class SqlitePlatform extends AbstractPlatform
         return "SELECT name, sql FROM sqlite_master WHERE type = 'trigger' ORDER BY name";
     }
     #[\Override]
+    public function getRoutineDetailSql(QualifiedName $routine): string
+    {
+        throw CapabilityNotSupportedException::for(Capability::Routine, 'sqlite');
+    }
+
+    #[\Override]
+    public function getCheckConstraintsSql(QualifiedName $table): string
+    {
+        throw CapabilityNotSupportedException::for(Capability::CheckConstraints, 'sqlite');
+    }
+
+    #[\Override]
+    public function getUsersSql(): string
+    {
+        throw CapabilityNotSupportedException::for(Capability::Privileges, 'sqlite');
+    }
+
+    #[\Override]
     public function getRoutinesSql(?string $schema = null): string
     {
         return "SELECT name, sql FROM sqlite_master WHERE type IN ('trigger', 'view') ORDER BY name";

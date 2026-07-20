@@ -419,6 +419,29 @@ class MySQLPlatform extends AbstractPlatform
     }
 
     #[\Override]
+    public function getRoutineDetailSql(QualifiedName $routine): string
+    {
+        return 'SELECT * FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_SCHEMA = '
+            . $this->quoteValue($this->databaseName($routine)) . ' AND ROUTINE_NAME = '
+            . $this->quoteValue($routine->object->name);
+    }
+
+    #[\Override]
+    public function getCheckConstraintsSql(QualifiedName $table): string
+    {
+        return 'SELECT CONSTRAINT_NAME AS constraint_name, CHECK_CLAUSE AS check_clause, 0 AS not_enforced '
+            . 'FROM INFORMATION_SCHEMA.CHECK_CONSTRAINTS WHERE CONSTRAINT_SCHEMA = '
+            . $this->quoteValue($this->databaseName($table)) . ' AND TABLE_NAME = '
+            . $this->quoteValue($table->object->name);
+    }
+
+    #[\Override]
+    public function getUsersSql(): string
+    {
+        return 'SELECT User AS user, Host AS host, plugin, Super_priv AS super_priv, account_locked FROM mysql.user';
+    }
+
+    #[\Override]
     public function getRoutinesSql(?string $schema = null): string
     {
         return 'SELECT * FROM INFORMATION_SCHEMA.ROUTINES'

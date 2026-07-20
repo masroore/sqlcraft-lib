@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SQLCraft\Metadata;
 
 use InvalidArgumentException;
+use SQLCraft\DTO\CheckConstraintMeta;
 use SQLCraft\DTO\ColumnMeta;
 use SQLCraft\DTO\DatabaseMeta;
 use SQLCraft\DTO\ProcessMeta;
@@ -18,6 +19,7 @@ use SQLCraft\DTO\SequenceMeta;
 use SQLCraft\DTO\RoutineParameter;
 use SQLCraft\DTO\TableStatus;
 use SQLCraft\DTO\TriggerMeta;
+use SQLCraft\DTO\UserMeta;
 use SQLCraft\DTO\ViewMeta;
 use SQLCraft\ValueObjects\Collation;
 use SQLCraft\ValueObjects\DataType;
@@ -58,6 +60,19 @@ abstract class AbstractMetadataFactory implements MetadataFactoryInterface
             privileges: $this->integerList($this->value($row, 'privileges')),
             origName: $this->stringValue($this->value($row, 'orig_name')),
             defaultConstraintName: $this->stringValue($this->value($row, 'default_constraint_name')),
+        );
+    }
+
+    /** @param array<string, bool|float|int|string|null> $row */
+    #[\Override]
+    public function createCheckConstraintMeta(array $row): CheckConstraintMeta
+    {
+        $row = $this->normalizeRow($row);
+
+        return new CheckConstraintMeta(
+            name: $this->requiredString($row, 'constraint_name', 'name'),
+            expression: $this->requiredString($row, 'check_clause', 'expression', 'definition'),
+            enforced: !$this->toBool($this->value($row, 'not_enforced', 'is_not_enforced')),
         );
     }
 
@@ -224,6 +239,23 @@ abstract class AbstractMetadataFactory implements MetadataFactoryInterface
             body: $this->requiredString($row, 'body', 'action_statement', 'sql'),
             definer: $this->stringValue($this->value($row, 'definer')),
             table: $this->stringValue($this->value($row, 'table_name', 'event_object_table')),
+        );
+    }
+
+    /** @param array<string, bool|float|int|string|null> $row */
+    #[\Override]
+    public function createUserMeta(array $row): UserMeta
+    {
+        $row = $this->normalizeRow($row);
+
+        return new UserMeta(
+            name: $this->requiredString($row, 'user', 'rolname', 'name'),
+            host: $this->stringValue($this->value($row, 'host', 'host_name')),
+            plugin: $this->stringValue($this->value($row, 'plugin', 'auth_method')),
+            superuser: $this->toBool($this->value($row, 'super_priv', 'rolsuper', 'superuser')),
+            canLogin: array_key_exists('rolcanlogin', $row)
+                ? $this->toBool($row['rolcanlogin'])
+                : !$this->toBool($this->value($row, 'account_locked')),
         );
     }
 
