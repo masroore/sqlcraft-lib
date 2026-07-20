@@ -63,7 +63,7 @@ final class PdoExceptionTranslator
             );
         }
 
-        if ($sqlState === '42601' || $nativeCode === 1064) {
+        if ($this->isSyntaxError($exception, $sqlState, $nativeCode)) {
             return new SyntaxErrorException($sql, 'SQL syntax error.', $nativeCode, $previous);
         }
 
@@ -79,6 +79,21 @@ final class PdoExceptionTranslator
         $code = $exception->getCode();
 
         return is_string($code) ? $code : '';
+    }
+
+    private function isSyntaxError(PDOException $exception, string $sqlState, int $nativeCode): bool
+    {
+        if ($sqlState === '42601' || $nativeCode === 1064) {
+            return true;
+        }
+
+        if ($nativeCode !== 1) {
+            return false;
+        }
+
+        $message = strtolower($exception->getMessage());
+
+        return str_contains($message, 'syntax error') || str_contains($message, 'near ');
     }
 
     private function nativeCode(PDOException $exception): int

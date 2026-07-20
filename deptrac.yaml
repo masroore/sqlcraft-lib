@@ -114,6 +114,7 @@ deptrac:
       - Exceptions
     Connection:
       - Contracts
+      - DTO
       - ValueObjects
       - Exceptions
       - Support
