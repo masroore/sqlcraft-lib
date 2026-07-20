@@ -1,0 +1,10 @@
+{
+    "name": "vendor/sqlcraft-tools",
+    "description": "Isolated development tooling for SQLCraft.",
+    "private": true,
+    "require": {
+        "rector/rector": "^2.0"
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
