@@ -93,6 +93,7 @@ deptrac:
       - Connection
       - Platform
       - Export
+      - Import
     ValueObjects:
       - Support
     DTO:
