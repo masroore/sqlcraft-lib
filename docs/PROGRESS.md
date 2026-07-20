@@ -43,4 +43,5 @@
 - [x] T3: PDO connection factory seam — commit 06f741a — green — 2026-07-20
 - [x] T4: PDO connection adapter — commit 124afec — green — 2026-07-20
 - [x] T5: connection factory integration — commit 6a5ea91 — green — 2026-07-20
-- [ ] T6: transaction manager — not started
+- [x] T6: transaction manager — commit 1df263d — green — 2026-07-20
+- [ ] T7: connection lifecycle and integration coverage — not started
