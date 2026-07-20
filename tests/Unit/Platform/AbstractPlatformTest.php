@@ -146,6 +146,16 @@ final class AbstractPlatformTest extends TestCase
                 return '';
             }
             #[\Override]
+            public function getSchemasSql(): string
+            {
+                return '';
+            }
+            #[\Override]
+            public function getTypesSql(?string $schema = null): string
+            {
+                return '';
+            }
+            #[\Override]
             public function getTablesSql(string $database, ?string $schema = null): string
             {
                 return '';

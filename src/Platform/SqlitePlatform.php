@@ -265,6 +265,18 @@ final class SqlitePlatform extends AbstractPlatform
         return "SELECT 'main' AS name UNION ALL SELECT 'temp' AS name";
     }
     #[\Override]
+    public function getSchemasSql(): string
+    {
+        return '';
+    }
+
+    #[\Override]
+    public function getTypesSql(?string $schema = null): string
+    {
+        throw CapabilityNotSupportedException::for(Capability::Type, 'sqlite');
+    }
+
+    #[\Override]
     public function getTablesSql(string $database, ?string $schema = null): string
     {
         return $this->tableStatusSql($this->catalog($database), null);

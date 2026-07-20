@@ -11,6 +11,8 @@ use SQLCraft\DTO\IndexColumnMeta;
 use SQLCraft\DTO\PartitionInfo;
 use SQLCraft\DTO\IndexMeta;
 use SQLCraft\DTO\RoutineMeta;
+use SQLCraft\DTO\SchemaMeta;
+use SQLCraft\DTO\SequenceMeta;
 use SQLCraft\DTO\RoutineParameter;
 use SQLCraft\DTO\TableStatus;
 use SQLCraft\DTO\TriggerMeta;
@@ -78,6 +80,45 @@ abstract class AbstractMetadataFactory implements MetadataFactoryInterface
             partitioned: $this->toBool($this->value($row, 'partitioned', 'is_partitioned')),
             schema: $this->stringValue($this->value($row, 'table_schema', 'schema')),
         );
+    }
+
+    /** @param array<string, bool|float|int|string|null> $row */
+    #[\Override]
+    public function createSchemaMeta(array $row): SchemaMeta
+    {
+        $row = $this->normalizeRow($row);
+
+        return new SchemaMeta(
+            name: $this->requiredString($row, 'schema_name', 'name'),
+            catalog: $this->stringValue($this->value($row, 'catalog_name', 'catalog', 'table_catalog')),
+            owner: $this->stringValue($this->value($row, 'schema_owner', 'owner')),
+        );
+    }
+
+    /** @param array<string, bool|float|int|string|null> $row */
+    #[\Override]
+    public function createSequenceMeta(array $row): SequenceMeta
+    {
+        $row = $this->normalizeRow($row);
+
+        return new SequenceMeta(
+            name: $this->requiredString($row, 'sequence_name', 'name'),
+            schema: $this->stringValue($this->value($row, 'sequence_schema', 'schema')),
+            startValue: $this->integerOrString($this->value($row, 'start_value', 'start')),
+            minValue: $this->integerOrString($this->value($row, 'minimum_value', 'min_value', 'min')),
+            maxValue: $this->integerOrString($this->value($row, 'maximum_value', 'max_value', 'max')),
+            increment: (int) ($this->value($row, 'increment', 'increment_by') ?? 1),
+            cycle: $this->toBool($this->value($row, 'cycle', 'is_cycled')),
+            ownedByTable: $this->stringValue($this->value($row, 'owned_by_table')),
+            ownedByColumn: $this->stringValue($this->value($row, 'owned_by_column')),
+        );
+    }
+
+    /** @param array<string, bool|float|int|string|null> $row */
+    #[\Override]
+    public function createDataType(array $row): DataType
+    {
+        return $this->dataType($this->normalizeRow($row));
     }
 
     /** @param array<string, bool|float|int|string|null> $row */
@@ -373,6 +414,24 @@ abstract class AbstractMetadataFactory implements MetadataFactoryInterface
     private function nullableInt(bool|float|int|string|null $value): ?int
     {
         return $value === null || $value === '' ? null : (int) $value;
+    }
+
+    private function integerOrString(bool|float|int|string|null $value): int|string
+    {
+        if ($value === null || $value === '') {
+            return 0;
+        }
+        if (is_int($value)) {
+            return $value;
+        }
+        if (is_float($value)) {
+            return (int) $value;
+        }
+        if (is_string($value) && preg_match('/^-?\d+$/', $value) === 1) {
+            return (int) $value;
+        }
+
+        return (string) $value;
     }
 
     private function toBool(bool|float|int|string|null $value): bool

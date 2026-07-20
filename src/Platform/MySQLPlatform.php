@@ -315,6 +315,18 @@ class MySQLPlatform extends AbstractPlatform
     }
 
     #[\Override]
+    public function getSchemasSql(): string
+    {
+        return '';
+    }
+
+    #[\Override]
+    public function getTypesSql(?string $schema = null): string
+    {
+        throw CapabilityNotSupportedException::for(Capability::Type, 'mysql');
+    }
+
+    #[\Override]
     public function getTablesSql(string $database, ?string $schema = null): string
     {
         return $this->tableStatusSql($database, null);
