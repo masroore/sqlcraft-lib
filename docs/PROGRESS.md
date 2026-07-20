@@ -66,4 +66,5 @@
 - [x] T7: table metadata inspector — commit 4d5da39 — green — 2026-07-20
 - [x] T8: database/schema inspector — commit 908b684 — green — 2026-07-20
 - [x] T9: server metadata inspector — commit 3cb5a95 — green — 2026-07-20
-- [ ] T10: remaining object inspectors — not started
+- [x] T10: view and sequence inspectors — commit 3241bdd — green — 2026-07-20
+- [ ] T11: routine, constraint, and user inspectors — not started
