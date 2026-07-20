@@ -442,23 +442,42 @@ final class PostgreSQLPlatform extends AbstractPlatform
     #[\Override]
     public function getIndexesSql(QualifiedName $table): string
     {
-        return 'SELECT * FROM pg_indexes WHERE tablename = ' . $this->quoteValue($table->object->name)
+        return 'SELECT *, indexname AS index_name FROM pg_indexes WHERE tablename = ' . $this->quoteValue($table->object->name)
             . ($table->schema instanceof Identifier ? ' AND schemaname = ' . $this->quoteValue($table->schema->name) : '');
     }
 
     #[\Override]
     public function getForeignKeysSql(QualifiedName $table): string
     {
-        return 'SELECT * FROM information_schema.table_constraints WHERE table_name = '
-            . $this->quoteValue($table->object->name) . " AND constraint_type = 'FOREIGN KEY'";
+        $schema = $table->schema instanceof Identifier ? $table->schema->name : 'public';
+
+        return 'SELECT tc.constraint_name, tc.table_schema, tc.table_name, kcu.column_name AS source_column, '
+            . 'ccu.table_schema AS target_schema, ccu.table_name AS target_table, ccu.column_name AS target_column '
+            . 'FROM information_schema.table_constraints tc '
+            . 'JOIN information_schema.key_column_usage kcu ON kcu.constraint_catalog = tc.constraint_catalog '
+            . 'AND kcu.constraint_schema = tc.constraint_schema AND kcu.constraint_name = tc.constraint_name '
+            . 'JOIN information_schema.constraint_column_usage ccu ON ccu.constraint_catalog = tc.constraint_catalog '
+            . 'AND ccu.constraint_schema = tc.constraint_schema AND ccu.constraint_name = tc.constraint_name '
+            . 'WHERE tc.table_schema = ' . $this->quoteValue($schema)
+            . ' AND tc.table_name = ' . $this->quoteValue($table->object->name)
+            . " AND tc.constraint_type = 'FOREIGN KEY' ORDER BY kcu.ordinal_position";
     }
 
     #[\Override]
     public function getReferencingForeignKeysSql(QualifiedName $table): string
     {
-        return 'SELECT * FROM information_schema.key_column_usage WHERE referenced_table_name = '
-            . $this->quoteValue($table->object->name)
-            . ' AND referenced_column_name IS NOT NULL';
+        $schema = $table->schema instanceof Identifier ? $table->schema->name : 'public';
+
+        return 'SELECT tc.constraint_name, tc.table_schema, tc.table_name, kcu.column_name AS source_column, '
+            . 'ccu.table_schema AS target_schema, ccu.table_name AS target_table, ccu.column_name AS target_column '
+            . 'FROM information_schema.table_constraints tc '
+            . 'JOIN information_schema.key_column_usage kcu ON kcu.constraint_catalog = tc.constraint_catalog '
+            . 'AND kcu.constraint_schema = tc.constraint_schema AND kcu.constraint_name = tc.constraint_name '
+            . 'JOIN information_schema.constraint_column_usage ccu ON ccu.constraint_catalog = tc.constraint_catalog '
+            . 'AND ccu.constraint_schema = tc.constraint_schema AND ccu.constraint_name = tc.constraint_name '
+            . 'WHERE ccu.table_schema = ' . $this->quoteValue($schema)
+            . ' AND ccu.table_name = ' . $this->quoteValue($table->object->name)
+            . " AND tc.constraint_type = 'FOREIGN KEY' ORDER BY kcu.ordinal_position";
     }
 
     #[\Override]
