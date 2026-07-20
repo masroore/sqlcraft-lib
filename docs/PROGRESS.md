@@ -35,4 +35,7 @@
 - [x] T25: metadata inspector ports (typed subset) — commit 5f0c610 — green — 2026-07-20
 - [x] T26: resolve DatabaseInspectorInterface type inventory — commit 6bc113f — green — 2026-07-20
 - [x] T27: mutation coverage baseline — commit 96b35dc — green — 2026-07-20
-- [x] M1 gate: Foundation acceptance review — verified green — 2026-07-20
+- [x] M1 gate: Foundation acceptance review — commit d97b152 — green — 2026-07-20
+
+## M2 — Connection Layer
+- [ ] T1: PDO connection adapter — not started
