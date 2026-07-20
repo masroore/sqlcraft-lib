@@ -65,4 +65,5 @@
 - [x] T6: connection database-name seam — commit 7a907da — green — 2026-07-20
 - [x] T7: table metadata inspector — commit 4d5da39 — green — 2026-07-20
 - [x] T8: database/schema inspector — commit 908b684 — green — 2026-07-20
-- [ ] T9: server metadata inspector — not started
+- [x] T9: server metadata inspector — commit 3cb5a95 — green — 2026-07-20
+- [ ] T10: remaining object inspectors — not started
