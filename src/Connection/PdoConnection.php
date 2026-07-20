@@ -69,7 +69,14 @@ final class PdoConnection implements ConnectionInterface
             $statement->execute($params);
             $this->affectedRows = $statement->rowCount();
 
-            $lastInsertId = $this->lastInsertId();
+            $lastInsertId = false;
+            if (preg_match('/^\s*(?:INSERT|REPLACE)\b/i', $sql) === 1) {
+                try {
+                    $lastInsertId = $this->lastInsertId();
+                } catch (QueryException) {
+                    // PostgreSQL raises when an INSERT did not advance a sequence.
+                }
+            }
 
             return new ExecutionResult(
                 affectedRows: $this->affectedRows,
@@ -257,13 +264,14 @@ final class PdoConnection implements ConnectionInterface
                 continue;
             }
 
-            /** @var array{name: string, table?: string, native_type?: string, len: int, flags: array<int, string>, precision: int, pdo_type: int} $meta */
+            /** @var array{name: string, table?: string, native_type?: string, len?: int, flags?: list<string>, precision?: int, pdo_type?: int} $meta */
+            $flags = $meta['flags'] ?? [];
             $columns[] = new ResultColumn(
                 name: $meta['name'],
                 nativeType: isset($meta['native_type']) ? $meta['native_type'] : null,
                 table: isset($meta['table']) ? $meta['table'] : null,
-                length: $meta['len'],
-                nullable: !in_array('not_null', $meta['flags'], true),
+                length: $meta['len'] ?? null,
+                nullable: !in_array('not_null', $flags, true),
             );
         }
 

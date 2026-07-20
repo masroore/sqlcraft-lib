@@ -109,7 +109,6 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     command: >
-      --default-authentication-plugin=mysql_native_password
       --character-set-server=utf8mb4
       --collation-server=utf8mb4_unicode_ci
 
@@ -148,7 +147,7 @@ services:
       retries: 10
       start_period: 10s
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
 
   # ── SQL Server 2022 ────────────────────────────────────────────────────────
   mssql:
