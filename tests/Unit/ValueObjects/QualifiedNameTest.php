@@ -43,10 +43,25 @@ final class QualifiedNameTest extends TestCase
         self::assertSame('app', $name->catalog?->name);
     }
 
+    public function testQualifyDefaultsToAndSupportsFullDepth(): void
+    {
+        $name = new QualifiedName(
+            new Identifier('users'),
+            new Identifier('public'),
+            new Identifier('app'),
+        );
+
+        $qualified = $name->qualify();
+
+        self::assertSame('users', $qualified->object->name);
+        self::assertSame('public', $qualified->schema?->name);
+        self::assertSame('app', $qualified->catalog?->name);
+    }
+
     public function testQualifyRejectsInvalidDepth(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
-        (new QualifiedName(new Identifier('users')))->qualify(4);
+        (new QualifiedName(new Identifier('users')))->qualify(0);
     }
 }

@@ -67,6 +67,28 @@ final class ExceptionHierarchyTest extends TestCase
         ];
     }
 
+    public function testTypedExceptionConstructorsPreserveCodesAndPreviousExceptions(): void
+    {
+        $previous = new RuntimeException('native failure');
+        $exceptions = [
+            new ConnectionFailedException('connection failed', code: 42, previous: $previous),
+            new UniqueConstraintException('duplicate value', code: 42, previous: $previous),
+            new DeadlockException('deadlock', code: 42, previous: $previous),
+            new DriverMisconfiguredException('driver misconfigured', code: 42, previous: $previous),
+            new DriverNotFoundException('driver missing', code: 42, previous: $previous),
+            new ExportFailedException('export failed', code: 42, previous: $previous),
+            new ImportFailedException('import failed', code: 42, previous: $previous),
+            new InsufficientPrivilegesException('denied', code: 42, previous: $previous),
+            new ObjectNotFoundException('table missing', code: 42, previous: $previous),
+            new SyntaxErrorException('SELECT * FRM users', 'syntax error', code: 42, previous: $previous),
+        ];
+
+        foreach ($exceptions as $exception) {
+            self::assertSame(42, $exception->getCode());
+            self::assertSame($previous, $exception->getPrevious());
+        }
+    }
+
     public function testSyntaxErrorPreservesSqlAndPreviousException(): void
     {
         $previous = new RuntimeException('native failure');

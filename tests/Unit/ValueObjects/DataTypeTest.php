@@ -9,6 +9,11 @@ use SQLCraft\ValueObjects\DataType;
 
 final class DataTypeTest extends TestCase
 {
+    public function testUnsignedDefaultsToFalse(): void
+    {
+        self::assertFalse((new DataType('INT'))->unsigned);
+    }
+
     public function testItStoresTypeShape(): void
     {
         $type = new DataType(

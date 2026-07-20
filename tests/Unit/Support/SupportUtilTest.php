@@ -44,7 +44,13 @@ final class SupportUtilTest extends TestCase
         self::assertFalse(TypeUtil::toBool(0));
         self::assertTrue(TypeUtil::toBool(1));
         self::assertTrue(TypeUtil::toBool(' YES '));
+        self::assertTrue(TypeUtil::toBool('1'));
+        self::assertTrue(TypeUtil::toBool('true'));
+        self::assertTrue(TypeUtil::toBool('on'));
         self::assertFalse(TypeUtil::toBool('off'));
+        self::assertFalse(TypeUtil::toBool('0'));
+        self::assertFalse(TypeUtil::toBool('false'));
+        self::assertFalse(TypeUtil::toBool('no'));
         self::assertNull(TypeUtil::toBool('unknown'));
     }
 

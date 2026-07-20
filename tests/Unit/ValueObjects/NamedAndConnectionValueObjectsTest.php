@@ -112,6 +112,28 @@ final class NamedAndConnectionValueObjectsTest extends TestCase
         new ServerVersion('not-a-version');
     }
 
+    public function testServerVersionComparesDefaultAndBoundaryComponents(): void
+    {
+        $version = new ServerVersion('8.0.36');
+        $zero = new ServerVersion('8.0.0');
+
+        self::assertTrue($version->isAtLeast(8, 0, 36));
+        self::assertFalse($version->isAtLeast(8, 0, 37));
+        self::assertSame(1, $version->compare(8, 0, 35));
+        self::assertSame(-1, $version->compare(8, 0, 37));
+        self::assertTrue($zero->isAtLeast(8));
+        self::assertSame(0, $zero->compare(8));
+        self::assertFalse($version->equals(new ServerVersion('8.1.36')));
+        self::assertFalse($version->equals(new ServerVersion('8.0.37')));
+    }
+
+    public function testServerVersionTrimsInputBeforeParsing(): void
+    {
+        $version = new ServerVersion('  v1.2.3  ');
+
+        self::assertSame('v1.2.3', $version->value);
+    }
+
     public function testConnectionParametersStoresConnectionOptions(): void
     {
         $parameters = new ConnectionParameters(
@@ -169,6 +191,12 @@ final class NamedAndConnectionValueObjectsTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
 
         new ConnectionParameters(socket: "/tmp/db\0.sock");
+    }
+
+    public function testConnectionParametersAcceptsPortBoundaries(): void
+    {
+        self::assertSame(1, (new ConnectionParameters(port: 1))->port);
+        self::assertSame(65535, (new ConnectionParameters(port: 65535))->port);
     }
 
     public function testConnectionParametersRejectsPortZero(): void

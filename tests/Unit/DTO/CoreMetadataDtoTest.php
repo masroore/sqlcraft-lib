@@ -88,6 +88,23 @@ final class CoreMetadataDtoTest extends TestCase
         self::assertSame('public', $table->schema);
     }
 
+    public function testForeignKeyMetaIsNotDeferrableByDefault(): void
+    {
+        $foreignKey = new ForeignKeyMeta(
+            constraintName: 'orders_user_id_foreign',
+            targetDatabase: null,
+            targetSchema: null,
+            targetTable: 'users',
+            sourceColumns: ['user_id'],
+            targetColumns: ['id'],
+            onDelete: ForeignKeyAction::NO_ACTION,
+            onUpdate: ForeignKeyAction::NO_ACTION,
+            definition: null,
+        );
+
+        self::assertFalse($foreignKey->deferrable);
+    }
+
     public function testForeignKeyMetaStoresOrderedColumnMappingsAndActions(): void
     {
         $foreignKey = new ForeignKeyMeta(
