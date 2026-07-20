@@ -19,4 +19,5 @@
 - [x] T9: routine DTOs — commit e7da1de — green — 2026-07-20
 - [x] T10: server and sequence DTOs — commit 3fb0436 — green — 2026-07-20
 - [x] T11: database and schema DTOs — commit 6c43106 — green — 2026-07-20
-- [ ] T12: remaining DTOs — not started
+- [x] T12: remaining DTOs — commit c43546a — green — 2026-07-20
+- [ ] T13: DTO collection wrappers — not started
