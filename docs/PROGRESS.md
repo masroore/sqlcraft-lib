@@ -13,4 +13,5 @@
 - [x] T4: enum and default ValueObjects — commit f64129e — green — 2026-07-20
 - [x] T5: named and connection ValueObjects — commit f9bb0da — green — 2026-07-20
 - [x] T6: abstract immutable collection — commit 02f2453 — green — 2026-07-20
-- [ ] T7: DTOs — not started
+- [x] T7: core metadata DTOs — commit 57116a7 — green — 2026-07-20
+- [ ] T8: remaining DTOs — not started
