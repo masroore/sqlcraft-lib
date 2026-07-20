@@ -330,7 +330,7 @@ final class SqlitePlatform extends AbstractPlatform
         $catalog = $this->catalog($database);
 
         return 'SELECT schema_object.name AS table_name, table_column.name AS column_name, '
-            . "table_column.type AS data_type, CASE WHEN table_column.notnull = 0 THEN 'YES' ELSE 'NO' END AS is_nullable, "
+            . "table_column.type AS data_type, CASE WHEN table_column.\"notnull\" = 0 THEN 'YES' ELSE 'NO' END AS is_nullable, "
             . 'table_column.dflt_value AS column_default, table_column.pk AS pk '
             . 'FROM ' . $this->quoteIdentifier(new Identifier($catalog)) . '.sqlite_master schema_object '
             . 'JOIN pragma_table_info(schema_object.name) table_column '
@@ -384,7 +384,7 @@ final class SqlitePlatform extends AbstractPlatform
     #[\Override]
     public function getTriggersSql(QualifiedName $table): string
     {
-        return "SELECT name, sql FROM sqlite_master WHERE type = 'trigger' ORDER BY name";
+        return "SELECT name, sql FROM sqlite_master WHERE type = 'trigger' AND tbl_name = " . $this->quoteValue($table->object->name) . ' ORDER BY name';
     }
     #[\Override]
     public function getRoutineDetailSql(QualifiedName $routine): string
