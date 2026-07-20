@@ -5,7 +5,7 @@
 - [x] T2: package metadata and distribution files — commit 37309ab — green — 2026-07-20
 - [x] T3: GitHub Actions workflows — commit 726c0b4 — green — 2026-07-20
 - [x] Milestone gate: M0 — commit e40233e — green — 2026-07-20
-- [x] Dependency maintenance: pin Testcontainers 1.0.10 — commits 4fcc1f5, bdb215c — green — 2026-07-20
+- [x] Dependency maintenance: verify Testcontainers 1.0.10 is current stable — commits 4fcc1f5, bdb215c — green — 2026-07-20
 
 ## M1 — Foundation
 - [x] T1: exceptions — commit 93561c7 — green — 2026-07-20
@@ -35,4 +35,4 @@
 - [x] T25: metadata inspector ports (typed subset) — commit 5f0c610 — green — 2026-07-20
 - [x] T26: resolve DatabaseInspectorInterface type inventory — commit 6bc113f — green — 2026-07-20
 - [x] T27: mutation coverage baseline — commit 96b35dc — green — 2026-07-20
-- [ ] M1 gate: Foundation acceptance review — ready
+- [x] M1 gate: Foundation acceptance review — verified green — 2026-07-20
