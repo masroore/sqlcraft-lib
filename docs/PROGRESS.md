@@ -62,4 +62,5 @@
 - [x] T3: streaming table inspection contract — commit 10f261f — green — 2026-07-20
 - [x] T4: core metadata inspectors — commit 6c1a7fb — green — 2026-07-20
 - [x] T5: foreign-key metadata inspector — commit 8381c87 — green — 2026-07-20
-- [ ] T6: table metadata inspector and database-name seam — not started
+- [x] T6: connection database-name seam — commit 7a907da — green — 2026-07-20
+- [ ] T7: table metadata inspector — not started
