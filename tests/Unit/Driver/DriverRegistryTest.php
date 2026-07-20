@@ -1,0 +1,100 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SQLCraft\Tests\Unit\Driver;
+
+use PHPUnit\Framework\TestCase;
+use SQLCraft\Contracts\Connection\ConnectionInterface;
+use SQLCraft\Contracts\Driver\DriverInterface;
+use SQLCraft\Contracts\Platform\PlatformInterface;
+use SQLCraft\Driver\DriverRegistry;
+use SQLCraft\Exceptions\DriverNotFoundException;
+use SQLCraft\ValueObjects\ConnectionParameters;
+
+final class DriverRegistryTest extends TestCase
+{
+    public function testItRegistersAndRetrievesDriversByName(): void
+    {
+        $driver = new class () implements DriverInterface {
+            #[\Override]
+            public function buildDsn(ConnectionParameters $params): string
+            {
+                return 'fake:';
+            }
+            #[\Override]
+            public function connect(ConnectionParameters $params): ConnectionInterface
+            {
+                throw new \LogicException();
+            }
+            #[\Override]
+            public function getPlatform(ConnectionInterface $connection): PlatformInterface
+            {
+                throw new \LogicException();
+            }
+            #[\Override]
+            public function getName(): string
+            {
+                return 'fake';
+            }
+            #[\Override]
+            public function getPdoDriverNames(): array
+            {
+                return ['fake'];
+            }
+        };
+        $registry = new DriverRegistry([$driver]);
+
+        self::assertSame($driver, $registry->get('fake'));
+        self::assertSame(['fake'], $registry->getRegisteredNames());
+    }
+
+    public function testItReplacesARegisteredDriverWithTheSameName(): void
+    {
+        $first = $this->fakeDriver();
+        $second = $this->fakeDriver();
+        $registry = new DriverRegistry([$first]);
+        $registry->register($second);
+
+        self::assertSame($second, $registry->get('fake'));
+        self::assertSame(['fake'], $registry->getRegisteredNames());
+    }
+
+    public function testItThrowsForAnUnknownDriver(): void
+    {
+        $this->expectException(DriverNotFoundException::class);
+        $this->expectExceptionMessage('Driver not found: missing.');
+        (new DriverRegistry())->get('missing');
+    }
+
+    private function fakeDriver(): DriverInterface
+    {
+        return new class () implements DriverInterface {
+            #[\Override]
+            public function buildDsn(ConnectionParameters $params): string
+            {
+                return 'fake:';
+            }
+            #[\Override]
+            public function connect(ConnectionParameters $params): ConnectionInterface
+            {
+                throw new \LogicException();
+            }
+            #[\Override]
+            public function getPlatform(ConnectionInterface $connection): PlatformInterface
+            {
+                throw new \LogicException();
+            }
+            #[\Override]
+            public function getName(): string
+            {
+                return 'fake';
+            }
+            #[\Override]
+            public function getPdoDriverNames(): array
+            {
+                return ['fake'];
+            }
+        };
+    }
+}
