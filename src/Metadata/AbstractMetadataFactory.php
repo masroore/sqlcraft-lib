@@ -18,6 +18,7 @@ use SQLCraft\DTO\SequenceMeta;
 use SQLCraft\DTO\RoutineParameter;
 use SQLCraft\DTO\TableStatus;
 use SQLCraft\DTO\TriggerMeta;
+use SQLCraft\DTO\ViewMeta;
 use SQLCraft\ValueObjects\Collation;
 use SQLCraft\ValueObjects\DataType;
 use SQLCraft\ValueObjects\DefaultValue;
@@ -223,6 +224,20 @@ abstract class AbstractMetadataFactory implements MetadataFactoryInterface
             body: $this->requiredString($row, 'body', 'action_statement', 'sql'),
             definer: $this->stringValue($this->value($row, 'definer')),
             table: $this->stringValue($this->value($row, 'table_name', 'event_object_table')),
+        );
+    }
+
+    /** @param array<string, bool|float|int|string|null> $row */
+    #[\Override]
+    public function createViewMeta(array $row): ViewMeta
+    {
+        $row = $this->normalizeRow($row);
+
+        return new ViewMeta(
+            name: $this->requiredString($row, 'table_name', 'view_name', 'name'),
+            schema: $this->stringValue($this->value($row, 'table_schema', 'schema')),
+            definition: $this->stringValue($this->value($row, 'view_definition', 'definition', 'sql')),
+            materialized: $this->toBool($this->value($row, 'materialized', 'is_materialized')),
         );
     }
 

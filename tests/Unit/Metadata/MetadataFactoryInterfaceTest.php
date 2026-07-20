@@ -17,6 +17,7 @@ use SQLCraft\ValueObjects\DataType;
 use SQLCraft\DTO\RoutineMeta;
 use SQLCraft\DTO\TableStatus;
 use SQLCraft\DTO\TriggerMeta;
+use SQLCraft\DTO\ViewMeta;
 use SQLCraft\Metadata\MetadataFactoryInterface;
 
 final class MetadataFactoryInterfaceTest extends TestCase
@@ -39,6 +40,7 @@ final class MetadataFactoryInterfaceTest extends TestCase
             'createForeignKeyMeta',
             'createTriggerMeta',
             'createRoutineMeta',
+            'createViewMeta',
         ], array_map(
             static fn (\ReflectionMethod $method): string => $method->getName(),
             $reflection->getMethods(),
@@ -57,6 +59,7 @@ final class MetadataFactoryInterfaceTest extends TestCase
             'createForeignKeyMeta' => ForeignKeyMeta::class,
             'createTriggerMeta' => TriggerMeta::class,
             'createRoutineMeta' => RoutineMeta::class,
+            'createViewMeta' => ViewMeta::class,
         ];
 
         foreach ($expectedReturnTypes as $methodName => $returnType) {

@@ -16,6 +16,7 @@ use SQLCraft\DTO\SequenceMeta;
 use SQLCraft\ValueObjects\DataType;
 use SQLCraft\DTO\TableStatus;
 use SQLCraft\DTO\TriggerMeta;
+use SQLCraft\DTO\ViewMeta;
 
 /**
  * Converts one platform-specific metadata row into a typed snapshot.
@@ -59,4 +60,7 @@ interface MetadataFactoryInterface
 
     /** @param array<string, bool|float|int|string|null> $row */
     public function createRoutineMeta(array $row): RoutineMeta;
+
+    /** @param array<string, bool|float|int|string|null> $row */
+    public function createViewMeta(array $row): ViewMeta;
 }

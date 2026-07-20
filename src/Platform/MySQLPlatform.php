@@ -357,6 +357,29 @@ class MySQLPlatform extends AbstractPlatform
     }
 
     #[\Override]
+    public function getViewsSql(?string $schema = null): string
+    {
+        return 'SELECT TABLE_NAME AS view_name, TABLE_SCHEMA AS table_schema, VIEW_DEFINITION AS view_definition, '
+            . '0 AS materialized FROM INFORMATION_SCHEMA.VIEWS'
+            . ($schema === null ? '' : ' WHERE TABLE_SCHEMA = ' . $this->quoteValue($schema))
+            . ' ORDER BY TABLE_SCHEMA, TABLE_NAME';
+    }
+
+    #[\Override]
+    public function getViewDefinitionSql(QualifiedName $view): string
+    {
+        return 'SELECT VIEW_DEFINITION AS definition FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_SCHEMA = '
+            . $this->quoteValue($this->databaseName($view)) . ' AND TABLE_NAME = '
+            . $this->quoteValue($view->object->name);
+    }
+
+    #[\Override]
+    public function getMaterializedViewsSql(?string $schema = null): string
+    {
+        throw CapabilityNotSupportedException::for(Capability::MaterializedView, 'mysql');
+    }
+
+    #[\Override]
     public function getColumnsSql(QualifiedName $table): string
     {
         return 'SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '

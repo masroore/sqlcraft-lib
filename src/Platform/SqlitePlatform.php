@@ -301,6 +301,24 @@ final class SqlitePlatform extends AbstractPlatform
     }
 
     #[\Override]
+    public function getViewsSql(?string $schema = null): string
+    {
+        return "SELECT name AS view_name, NULL AS table_schema, sql AS view_definition, 0 AS materialized FROM main.sqlite_master WHERE type = 'view' ORDER BY name";
+    }
+
+    #[\Override]
+    public function getViewDefinitionSql(QualifiedName $view): string
+    {
+        return "SELECT sql AS definition FROM main.sqlite_master WHERE type = 'view' AND name = " . $this->quoteValue($view->object->name);
+    }
+
+    #[\Override]
+    public function getMaterializedViewsSql(?string $schema = null): string
+    {
+        throw CapabilityNotSupportedException::for(Capability::MaterializedView, 'sqlite');
+    }
+
+    #[\Override]
     public function getColumnsSql(QualifiedName $table): string
     {
         return 'PRAGMA table_info(' . $this->quoteIdentifier($table->object) . ')';
