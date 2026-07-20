@@ -10,4 +10,5 @@
 - [x] T1: exceptions — commit 93561c7 — green — 2026-07-20
 - [x] T2: Support utils — commit 6b889d9 — green — 2026-07-20
 - [x] T3: core ValueObjects — commit 80a9d3d — green — 2026-07-20
-- [ ] T4: enum and default ValueObjects — not started
+- [x] T4: enum and default ValueObjects — commit f64129e — green — 2026-07-20
+- [ ] T5: named and connection ValueObjects — not started
