@@ -3,6 +3,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="https://getpsalm.org/schema/config https://getpsalm.org/schema/config.xsd"
     errorLevel="1"
+    findUnusedCode="false"
     resolveFromConfigFile="true"
 >
     <projectFiles>
