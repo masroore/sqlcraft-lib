@@ -42,8 +42,8 @@
   "hotPaths": [
     {
       "path": "docs/IMPLEMENTATION-PROMPT.md",
-      "accessCount": 8,
-      "lastAccessed": 1784525404997,
+      "accessCount": 17,
+      "lastAccessed": 1784526639508,
       "type": "file"
     },
     {
@@ -98,6 +98,12 @@
       "path": "docker/php/oracle/README.txt",
       "accessCount": 1,
       "lastAccessed": 1784526009433,
+      "type": "file"
+    },
+    {
+      "path": ".env.example",
+      "accessCount": 1,
+      "lastAccessed": 1784526314786,
       "type": "file"
     }
   ],

@@ -9,6 +9,56 @@
 
 ---
 
+## Environment
+
+All commands in this document run **inside the PHP container** unless stated
+otherwise. `docker-compose.yml` provides PHP 8.4 with every required PDO
+extension, Composer, and all static-analysis tools pre-installed. Each database
+engine runs as a named service.
+
+### One-time setup
+
+```bash
+# 1. Copy the env file (values match docker-compose defaults — edit only if you change ports)
+cp .env.example .env
+
+# 2. Build the PHP image (first time, or after Dockerfile changes)
+docker compose build php
+
+# 3. Install Composer dependencies
+docker compose run --rm php composer install
+```
+
+### Start / stop the engine services
+
+```bash
+# Start MySQL, MariaDB, PostgreSQL, SQL Server — required from M2 onward
+docker compose up -d
+
+# Stop (data volumes are preserved)
+docker compose down
+
+# With Oracle too (M8 only, opt-in — first start takes ~3 min):
+docker compose --profile oracle up -d
+```
+
+Unit tests, static analysis, and all M0–M1 work only need the `php` container;
+the database services are not required until M2.
+
+### Shorthand
+
+Every `composer` command below means:
+
+```bash
+docker compose run --rm php composer <...>
+```
+
+For interactive work: `docker compose run --rm php bash`.
+
+Git commands run on the **host**, not inside the container.
+
+---
+
 ## 0. What you are building
 
 SQLCraft is a modern, framework-independent PHP 8.4 library (an SDK) for database
@@ -100,7 +150,7 @@ before you consider the step done. The canonical command (defined in
 `composer.json` per `docs/plans/19-package-structure.md`) is:
 
 ```bash
-composer run ci
+docker compose run --rm php composer run ci
 ```
 
 `composer run ci` runs, in order: PHPStan (max), Psalm (max), PHP-CS-Fixer
@@ -110,25 +160,27 @@ the suite is red and your step is not done.
 While iterating on a single Task you may run the stages individually for speed:
 
 ```bash
-composer run stan        # PHPStan at max level
-composer run psalm       # Psalm at max level
-composer run cs          # PHP-CS-Fixer check (add :fix to auto-format)
-composer run deptrac     # architecture/dependency-boundary rules
-composer run rector      # Rector dry-run (must report no changes)
-composer run test        # PHPUnit
+docker compose run --rm php composer run stan        # PHPStan at max level
+docker compose run --rm php composer run psalm       # Psalm at max level
+docker compose run --rm php composer run cs          # PHP-CS-Fixer check (add :fix to auto-format)
+docker compose run --rm php composer run deptrac     # architecture/dependency-boundary rules
+docker compose run --rm php composer run rector      # Rector dry-run (must report no changes)
+docker compose run --rm php composer run test        # PHPUnit
 ```
 
-But you must run the **full** `composer run ci` and see it green before you
-commit. No exceptions.
+But you must run the **full** `docker compose run --rm php composer run ci` and
+see it green before you commit. No exceptions.
 
-**Integration tests** (against real databases via Testcontainers) start at M2.
-When a milestone requires them, run:
+**Integration tests** (against real databases) start at M2. Ensure the engine
+services are running (`docker compose up -d`) before executing:
 
 ```bash
-composer run test:integration
+docker compose run --rm php composer run test:integration
 ```
 
-If a required database engine is not available in your environment, say so
+The `SQLCRAFT_*` environment variables in `.env` are automatically passed into
+the container — no extra flags needed. If a required database engine is not
+available (e.g. Oracle before `docker compose --profile oracle up -d`), say so
 explicitly in your report — do not pretend a test passed that you did not run,
 and do not silently skip it. Report exactly which tests ran and which did not.
 
@@ -168,8 +220,8 @@ Within a Task, work in **Steps**: (1) read the plan section, (2) write the class
 ### The exact loop you repeat for every Task
 
 1. **Confirm position.** State which milestone and Task you are on. Check that all
-   prior Tasks in this milestone are committed and green (`git status` clean,
-   `composer run ci` green).
+   prior Tasks in this milestone are committed and green (`git status` clean on
+   the host; `docker compose run --rm php composer run ci` green).
 2. **Read the plan.** Open the specific plan document(s) and section(s) for this
    Task. Extract the exact class names, interface methods, property names, types,
    and any invariants or edge cases described. Quote the relevant shapes to
@@ -181,7 +233,7 @@ Within a Task, work in **Steps**: (1) read the plan section, (2) write the class
    (e.g. "`Identifier` rejects empty string and null byte"), and the edge cases
    the plan calls out. Use the test types the plan defines (Unit / Integration /
    Contract / Golden / property-based) as appropriate for the layer.
-6. **Run the full suite.** `composer run ci`. Read every error. Fix the code.
+6. **Run the full suite.** `docker compose run --rm php composer run ci`. Read every error. Fix the code.
 7. **Repeat 6 until green.** If it fails the same way twice after genuine fixes,
    stop and report (Golden Rule 5).
 8. **Commit.** See §5.
@@ -201,8 +253,8 @@ next milestone.
 ## 5. Git commit protocol
 
 You commit **after every completed Task** and again at every **milestone gate**.
-A commit is only allowed when `composer run ci` is green and `git status` shows
-only the files you intended to change.
+A commit is only allowed when `docker compose run --rm php composer run ci` is
+green and `git status` (on the host) shows only the files you intended to change.
 
 ### Rules
 
@@ -288,9 +340,9 @@ Format:
 ```
 
 At the start of every session: read `docs/PROGRESS.md`, run `git log --oneline -10`
-and `git status`, run `composer run ci`, and confirm the last logged state matches
-reality before continuing. If they disagree, trust the code and the checks over
-the log, and correct the log.
+and `git status` (on the host), run `docker compose run --rm php composer run ci`,
+and confirm the last logged state matches reality before continuing. If they
+disagree, trust the code and the checks over the log, and correct the log.
 
 ---
 
@@ -336,9 +388,10 @@ the PSR-4 skeleton, `phpstan.neon.dist` (max), `psalm.xml` (max),
 `.php-cs-fixer.dist.php`, `rector.php`, `deptrac.yaml` (encode the §4 dependency
 rules now), `infection.json.dist`, the two GitHub Actions workflows, the isolated
 `tools/` composer setup, `LICENSE` (MIT), a `README.md` stub, `.gitignore`, and
-`.gitattributes`. Acceptance: `composer install` clean, `composer run ci` exits 0
-against the empty skeleton, deptrac runs with zero classes. This is your first
-commit(s); the toolchain being green from empty is the whole point.
+`.gitattributes`. Acceptance: `docker compose run --rm php composer install` clean,
+`docker compose run --rm php composer run ci` exits 0 against the empty skeleton,
+deptrac runs with zero classes. This is your first commit(s); the toolchain being
+green from empty is the whole point.
 
 ### M1 — Foundation
 Pure data and contracts, zero I/O. Suggested Task ordering: Exceptions →
@@ -451,10 +504,17 @@ what is green, what is red, what you need decided.
 1. Read this whole document.
 2. Read `docs/plans/00-overview.md`, `01-vision.md`, `02-guiding-principles.md`,
    `19-package-structure.md`, and `23-roadmap.md` (M0 section).
-3. Confirm the repo state: `git status`, `git log --oneline -5`.
-4. Create `docs/PROGRESS.md` with the milestone checklist skeleton.
-5. Begin **M0, Task 1**. Follow the loop in §4. Commit per §5. Log per §6.
-6. Proceed through the milestones in order, never skipping the verification gate.
+3. Start the environment (see **Environment** section above):
+   ```bash
+   cp .env.example .env
+   docker compose build php
+   docker compose run --rm php composer install
+   # engine services not needed until M2 — skip `docker compose up -d` for now
+   ```
+4. Confirm the repo state: `git status`, `git log --oneline -5` (host).
+5. Create `docs/PROGRESS.md` with the milestone checklist skeleton.
+6. Begin **M0, Task 1**. Follow the loop in §4. Commit per §5. Log per §6.
+7. Proceed through the milestones in order, never skipping the verification gate.
 
 Work patiently and mechanically. Small steps, always green, always committed.
 The design thinking is already done — your excellence shows in disciplined,

@@ -1,0 +1,52 @@
+# SQLCraft — .gitignore
+
+# ── Environment / secrets ─────────────────────────────────────────────────────
+.env
+*.local
+
+# ── Composer ──────────────────────────────────────────────────────────────────
+/vendor/
+# composer.lock is committed for libraries (CI reproducibility — see 19-package-structure.md §2)
+# Do NOT add composer.lock here.
+
+# ── PHP tooling output ────────────────────────────────────────────────────────
+/.php-cs-fixer.cache
+/.phpunit.result.cache
+/.phpunit.cache/
+/phpunit.xml                  # dist version is phpunit.xml.dist; local overrides are ignored
+/.psalm/
+/psalm.xml.cache
+/.phpstan/
+/phpstan.neon                 # dist version is phpstan.neon.dist
+/.rector/
+
+# ── Infection / mutation testing ─────────────────────────────────────────────
+/infection.log
+/infection-summary.log
+/.infection/
+
+# ── Coverage reports ──────────────────────────────────────────────────────────
+/coverage/
+/coverage.xml
+/.coverage/
+
+# ── Tools directory vendor (isolated Composer install — see 19-package-structure.md §6) ──
+/tools/vendor/
+/tools/composer.lock
+
+# ── OS / editor artifacts ─────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+/.idea/
+/.vscode/
+*.swp
+*.swo
+*~
+
+# ── Docker / local runtime ────────────────────────────────────────────────────
+/docker/php/oracle/*.zip      # Oracle Instant Client zips — too large, never committed
+
+# ── SQLite test databases ─────────────────────────────────────────────────────
+*.db
+*.sqlite
+*.sqlite3
