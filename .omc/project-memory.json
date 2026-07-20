@@ -105,6 +105,12 @@
       "accessCount": 1,
       "lastAccessed": 1784526314786,
       "type": "file"
+    },
+    {
+      "path": "Makefile",
+      "accessCount": 1,
+      "lastAccessed": 1784526750801,
+      "type": "file"
     }
   ],
   "userDirectives": []
