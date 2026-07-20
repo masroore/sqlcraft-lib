@@ -54,7 +54,7 @@
         "psr/simple-cache": "^3.0",
         "qossmic/deptrac": "^2.0",
         "rector/rector": "^2.0",
-        "testcontainers/testcontainers": "^1.0",
+        "testcontainers/testcontainers": "^1.0.10",
         "vimeo/psalm": "^6.5"
     },
     "autoload": {
