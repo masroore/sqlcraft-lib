@@ -33,4 +33,5 @@
 - [x] T23: import contract/support types — commit 78aea39 — green — 2026-07-20
 - [x] T24: metadata collection wrappers — commit 4edde13 — green — 2026-07-20
 - [x] T25: metadata inspector ports (typed subset) — commit 5f0c610 — green — 2026-07-20
-- [ ] T26: resolve DatabaseInspectorInterface type inventory — not started
+- [x] T26: resolve DatabaseInspectorInterface type inventory — commit 6bc113f — green — 2026-07-20
+- [ ] M1 gate: Foundation acceptance review — not started
