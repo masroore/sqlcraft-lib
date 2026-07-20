@@ -46,7 +46,7 @@
 - [x] T6: transaction manager — commit 1df263d — green — 2026-07-20
 - [x] T7: SQLite integration coverage — commit d30b3ab — green — 2026-07-20
 - [x] T8: SQLite driver and platform stub — commit 7379e9a — green — 2026-07-20
-- [x] T9: M2 acceptance gate — commit pending — green — 2026-07-20
+- [x] T9: M2 acceptance gate — commit 156546f — green — 2026-07-20
 ## M3 — Platform & Driver Core
 - [x] T1: abstract platform capability foundation — commit 9e88ca6 — green — 2026-07-20
 - [x] T2: MySQL and MariaDB platform dialects — commit a7c1930 — green — 2026-07-20
@@ -54,7 +54,7 @@
 - [x] T4: driver registry and built-in drivers — commit 21d3dd3 — green — 2026-07-20
 - [x] T5: live platform conformance suite — commit d2ff6c8 — green — 2026-07-20
 - [x] T6: M3 acceptance gate — commit d9566c8 — green — 2026-07-20
-- [x] Milestone gate: M3 — pending merge — green — 2026-07-20
+- [x] Milestone gate: M3 — commit 21170e5 — green — 2026-07-20
 
 ## M4 — Schema Introspection
 - [x] T1: typed metadata factory contract — commit 95dd091 — green — 2026-07-20
