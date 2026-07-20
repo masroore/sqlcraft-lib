@@ -261,6 +261,36 @@ You commit **after every completed Task** and again at every **milestone gate**.
 A commit is only allowed when `docker compose run --rm php composer run ci` is
 green and `git status` (on the host) shows only the files you intended to change.
 
+### Worktree workflow
+
+For each Task or Milestone, create an isolated git worktree:
+
+```bash
+# Create a worktree with a brief, descriptive name (lowercase, hyphens)
+git worktree add ../sqlcraft-work/<task-name> master
+
+# Work inside the worktree
+cd ../sqlcraft-work/<task-name>
+# ... complete the Task or Milestone ...
+docker compose run --rm php composer run ci
+
+# Commit (see Rules below)
+git add <specific paths>
+git commit -m "..."
+
+# Return to main checkout and merge
+cd ../sqlcraft
+git merge sqlcraft-work/<task-name>
+
+# Clean up the worktree
+git worktree remove ../sqlcraft-work/<task-name>
+```
+
+**Worktree naming:** Use the format `m<n>-t<k>-<brief-description>` (e.g.,
+`m1-t1-exceptions`, `m2-t3-transaction-manager`) or `m<n>-gate` for milestone
+completion commits. This isolates work, prevents accidental changes to master,
+and lets you run parallel checks on multiple branches if needed.
+
 ### Rules
 
 - **Never commit red code.** If the suite is not green, you have nothing to commit.
