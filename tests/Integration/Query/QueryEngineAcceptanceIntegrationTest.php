@@ -116,8 +116,8 @@ final class QueryEngineAcceptanceIntegrationTest extends TestCase
                 DELIMITER $$
                 CREATE PROCEDURE sqlcraft_acceptance_routine()
                 BEGIN
-                    SELECT 1 AS first_value;
-                    SELECT 2 AS second_value;
+                    SELECT 1 AS first_result;
+                    SELECT 2 AS second_result;
                 END$$
                 DELIMITER ;
                 SQL);
