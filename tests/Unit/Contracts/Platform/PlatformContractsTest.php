@@ -29,7 +29,7 @@ final class PlatformContractsTest extends TestCase
         $methods = array_map(static fn (\ReflectionMethod $method): string => $method->getName(), $reflection->getMethods());
 
         self::assertTrue($reflection->isInterface());
-        foreach (['getName', 'getFlavor', 'getServerVersion', 'getCapabilitySet', 'getDefaultCharset', 'getDefaultCollation', 'supportsSchemas', 'getKeywordList'] as $method) {
+        foreach (['getName', 'getFlavor', 'getServerVersion', 'getCapabilitySet', 'getDefaultCharset', 'getDefaultCollation', 'supportsSchemas', 'getKeywordList', 'getOperators'] as $method) {
             self::assertContains($method, $methods);
         }
     }

@@ -422,6 +422,18 @@ abstract class AbstractPlatform implements PlatformInterface
         return $sql . ' LIMIT 1';
     }
 
+    /** @return list<string> */
+    #[\Override]
+    public function getOperators(): array
+    {
+        return [
+            '=', '!=', '<>', '<', '<=', '>', '>=',
+            'LIKE', 'NOT LIKE', 'IN', 'NOT IN',
+            'IS NULL', 'IS NOT NULL', 'BETWEEN', 'NOT BETWEEN',
+            'REGEXP', 'NOT REGEXP',
+        ];
+    }
+
     #[\Override]
     public function wrapWithTimeout(string $sql, int $milliseconds): ?string
     {
