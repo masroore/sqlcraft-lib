@@ -56,3 +56,4 @@ Thumbs.db
 *.db
 *.sqlite
 *.sqlite3
+.qwen/
