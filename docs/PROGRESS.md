@@ -127,7 +127,12 @@
 ## M9 — Security & Events
 - [x] T1: event dispatcher and catalog audit — commit 34d4383 — green — 2026-07-21
 - [x] T2: security validation and redaction audit — commit 9e5578d — green — 2026-07-21
-- [ ] T3: resource limits and M9 acceptance gate — not started
+- [x] T3: event taxonomy, query interception, and observability — commit 30056ea — green — 2026-07-21
+- [ ] T4: connection and transaction lifecycle events — not started
+- [ ] T5: DDL, schema, metadata, and capability events — not started
+- [ ] T6: typed structural-SQL validation audit — not started
+- [ ] T7: credentials, redaction, and resource limits — not started
+- [ ] T8: M9 acceptance gate — not started
 
 ## M10 — Documentation & v1.0
 - [ ] T1: examples and README — not started
