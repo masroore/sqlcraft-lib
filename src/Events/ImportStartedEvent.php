@@ -6,7 +6,7 @@ namespace SQLCraft\Events;
 
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 
-final readonly class ImportStartedEvent
+final readonly class ImportStartedEvent extends ObservabilityEvent
 {
     public function __construct(
         public ConnectionInterface $connection,

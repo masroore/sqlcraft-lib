@@ -6,7 +6,7 @@ namespace SQLCraft\Events;
 
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 
-final readonly class ImportProgressEvent
+final readonly class ImportProgressEvent extends ObservabilityEvent
 {
     public function __construct(
         public ConnectionInterface $connection,

@@ -6,14 +6,15 @@ namespace SQLCraft\Events;
 
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 
-final readonly class ImportFinishedEvent extends ObservabilityEvent
+final readonly class SlowQueryDetectedEvent extends ObservabilityEvent
 {
-    /** @param list<object> $errors */
+    /** @param array<string|int, mixed> $params */
     public function __construct(
         public ConnectionInterface $connection,
-        public int $statementsExecuted,
-        public array $errors,
+        public string $sql,
+        public array $params,
         public float $elapsedMs,
+        public int $thresholdMs,
     ) {
     }
 }
