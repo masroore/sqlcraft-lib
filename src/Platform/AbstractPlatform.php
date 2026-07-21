@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace SQLCraft\Platform;
 
 use SQLCraft\Capabilities\Capability;
+use SQLCraft\Capabilities\CapabilityNotSupportedException;
+use SQLCraft\Contracts\DDL\AlterTableDefinitionInterface;
 use SQLCraft\Contracts\DDL\CheckConstraintDefinitionInterface;
 use SQLCraft\Contracts\DDL\ColumnDefinitionInterface;
 use SQLCraft\Contracts\DDL\ForeignKeyDefinitionInterface;
@@ -37,6 +39,63 @@ abstract class AbstractPlatform implements PlatformInterface
         $sql = 'DROP TABLE' . ($ifExists ? ' IF EXISTS' : '') . ' ' . $qualified;
 
         return $cascade ? $sql . ' CASCADE' : $sql;
+    }
+
+    /** @return list<string> */
+    #[\Override]
+    public function renderDdlAlterTable(AlterTableDefinitionInterface $alterTable): array
+    {
+        $table = $alterTable->getTable();
+        $statements = [];
+
+        foreach ($alterTable->getAddColumns() as [$column, $after]) {
+            if ($after instanceof Identifier) {
+                throw CapabilityNotSupportedException::for(Capability::MoveColumn, $this->getName());
+            }
+            $statements[] = $this->renderAlterTableAddColumn($table, $this->toColumnMeta($column));
+        }
+        foreach ($alterTable->getModifyColumns() as [$new, $original]) {
+            $definition = $this->renderDdlColumnDefinition($new);
+            $columnPrefix = $this->quoteIdentifier(new Identifier($new->getName())) . ' ';
+            $typeAndAttributes = str_starts_with($definition, $columnPrefix)
+                ? substr($definition, strlen($columnPrefix))
+                : $definition;
+            $statements[] = 'ALTER TABLE ' . $this->quoteQualifiedName($table)
+                . ' ALTER COLUMN ' . $this->quoteIdentifier(new Identifier($original->getName()))
+                . ' ' . $typeAndAttributes;
+        }
+        foreach ($alterTable->getDropColumns() as $column) {
+            $statements[] = $this->renderAlterTableDropColumn($table, $column);
+        }
+        foreach ($alterTable->getAddIndexes() as $index) {
+            $statements[] = $this->renderDdlCreateIndexStatement($table, $index);
+        }
+        foreach ($alterTable->getDropIndexes() as $index) {
+            $statements[] = $this->renderDropIndexStatement($table, $index);
+        }
+        foreach ($alterTable->getAddForeignKeys() as $foreignKey) {
+            $statements[] = 'ALTER TABLE ' . $this->quoteQualifiedName($table)
+                . ' ADD ' . $this->renderDdlForeignKeyClause($foreignKey);
+        }
+        foreach ($alterTable->getDropForeignKeys() as $constraint) {
+            $statements[] = 'ALTER TABLE ' . $this->quoteQualifiedName($table)
+                . ' DROP CONSTRAINT ' . $this->quoteIdentifier($constraint);
+        }
+        foreach ($alterTable->getAddCheckConstraints() as $check) {
+            $statements[] = 'ALTER TABLE ' . $this->quoteQualifiedName($table)
+                . ' ADD ' . $this->renderDdlCheckConstraintClause($check);
+        }
+        foreach ($alterTable->getDropCheckConstraints() as $constraint) {
+            $statements[] = 'ALTER TABLE ' . $this->quoteQualifiedName($table)
+                . ' DROP CONSTRAINT ' . $this->quoteIdentifier($constraint);
+        }
+        $rename = $alterTable->getRename();
+        if ($rename instanceof Identifier) {
+            $statements[] = 'ALTER TABLE ' . $this->quoteQualifiedName($table)
+                . ' RENAME TO ' . $this->quoteIdentifier($rename);
+        }
+
+        return $statements;
     }
 
     #[\Override]
