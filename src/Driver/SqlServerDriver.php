@@ -30,8 +30,7 @@ final class SqlServerDriver implements DriverInterface
         if ($params->database !== null) {
             $dsn .= ';Database=' . $params->database;
         }
-
-        return $dsn;
+        return $dsn . ';TrustServerCertificate=Yes';
     }
 
     #[\Override]

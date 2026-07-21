@@ -272,7 +272,8 @@ final class PdoConnection implements ConnectionInterface
             }
 
             /** @var array{name: string, table?: string, native_type?: string, len?: int, flags?: list<string>, precision?: int, pdo_type?: int} $meta */
-            $flags = $meta['flags'] ?? [];
+            $rawFlags = $meta['flags'] ?? null;
+            $flags = is_array($rawFlags) ? $rawFlags : [];
             $columns[] = new ResultColumn(
                 name: $meta['name'],
                 nativeType: isset($meta['native_type']) ? $meta['native_type'] : null,
