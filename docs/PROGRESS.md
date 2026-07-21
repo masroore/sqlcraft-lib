@@ -96,7 +96,7 @@ Historical milestone tasks above remain recorded for traceability. Their origina
 - [x] Gap-analysis phase 6 — import/export completeness — commit `a0d99be`
 - [x] Gap-analysis phase 7 — DDL scope reconciliation — commit `62f0b8a`
 - [x] Gap-analysis phase 8 — docs/config hygiene — commit `e9358ae`
-- [x] Gap-analysis phase 9 seam-liveness guard — architectural regression test and deferred-export warnings implemented
+- [x] Gap-analysis phase 9 seam-liveness guard — commit `87bb34c`
 
 ## M10 — Documentation & v1.0
 
