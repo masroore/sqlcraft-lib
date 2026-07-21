@@ -77,7 +77,7 @@
 
 ## M5 — DDL Services
 - [x] T1: table and index builders — commit a035ffe — green — 2026-07-21
-- [ ] T2: alter table builder and dialect support — not started
+- [x] T2: alter table builder and dialect support — commit 4e33923 — green — 2026-07-21
 - [ ] T3: remaining DDL builders — not started
 - [ ] T4: SQLite table recreation strategy — not started
 - [ ] T5: DdlManager and execution wiring — not started
