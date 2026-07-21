@@ -126,7 +126,7 @@
 
 ## M9 — Security & Events
 - [x] T1: event dispatcher and catalog audit — commit 34d4383 — green — 2026-07-21
-- [ ] T2: security validation and redaction audit — not started
+- [x] T2: security validation and redaction audit — commit 9e5578d — green — 2026-07-21
 - [ ] T3: resource limits and M9 acceptance gate — not started
 
 ## M10 — Documentation & v1.0
