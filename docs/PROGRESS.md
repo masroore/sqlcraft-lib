@@ -98,3 +98,6 @@
 - [x] T6: EXPLAIN and warnings services — commit a7c816f — green — 2026-07-21
 - [x] T7: M6 acceptance coverage — commit e0c5ff8 — green — 2026-07-21
 - [ ] T8: M6 acceptance gate — not started
+- [x] T8: M6 acceptance gate — commit pending — green — 2026-07-21
+## M7 — Import/Export
+- [ ] T1: sinks and format writer contracts — not started
