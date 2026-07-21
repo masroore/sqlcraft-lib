@@ -41,6 +41,11 @@ final class StatementSplitterTest extends TestCase
         );
     }
 
+    public function testIgnoresCommentOnlyTrailingInput(): void
+    {
+        self::assertSame([], (new StatementSplitter())->split("-- trailing comment\n/* another comment */")->statements);
+    }
+
     public function testRejectsEmptyDelimiter(): void
     {
         $this->expectException(\InvalidArgumentException::class);

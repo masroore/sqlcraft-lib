@@ -100,10 +100,7 @@ final readonly class StatementSplitter implements StatementSplitterInterface
             }
 
             if (substr($normalized, $index, strlen($activeDelimiter)) === $activeDelimiter) {
-                $statement = trim($buffer);
-                if ($statement !== '') {
-                    $statements[] = $statement;
-                }
+                $this->appendStatement($statements, $buffer);
                 $buffer = '';
                 $index += strlen($activeDelimiter) - 1;
                 continue;
@@ -112,12 +109,25 @@ final readonly class StatementSplitter implements StatementSplitterInterface
             $buffer .= $character;
         }
 
-        $statement = trim($buffer);
-        if ($statement !== '') {
-            $statements[] = $statement;
-        }
+        $this->appendStatement($statements, $buffer);
 
         return new StatementBatch($statements);
+    }
+
+    /** @param list<string> $statements */
+    private function appendStatement(array &$statements, string $buffer): void
+    {
+        $statement = trim($buffer);
+        if ($statement === '' || $this->isCommentOnly($statement)) {
+            return;
+        }
+
+        $statements[] = $statement;
+    }
+
+    private function isCommentOnly(string $statement): bool
+    {
+        return preg_match('/^(?:\s*(?:--[^\r\n]*|#[^\r\n]*|\/\*.*?\*\/)\s*)+$/s', $statement) === 1;
     }
 
     private function removeDelimiterDirectives(string $sql): string
