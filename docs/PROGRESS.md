@@ -125,7 +125,7 @@
 - [x] T4: M8 MSSQL acceptance gate; Oracle deferred — commit e72b3ee — green — 2026-07-21
 
 ## M9 — Security & Events
-- [ ] T1: event dispatcher and catalog audit — not started
+- [x] T1: event dispatcher and catalog audit — commit 34d4383 — green — 2026-07-21
 - [ ] T2: security validation and redaction audit — not started
 - [ ] T3: resource limits and M9 acceptance gate — not started
 
