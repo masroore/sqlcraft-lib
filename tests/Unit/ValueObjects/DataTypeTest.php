@@ -30,4 +30,16 @@ final class DataTypeTest extends TestCase
         self::assertSame('utf8mb4_unicode_ci', $type->collation);
         self::assertSame('utf8mb4', $type->charset);
     }
+    public function testItRejectsUnsafeTypeSyntax(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        new DataType('TEXT); DROP TABLE audit_log; --');
+    }
+
+    public function testItAllowsCommonParameterizedTypes(): void
+    {
+        self::assertSame("ENUM('open','closed')", (new DataType("ENUM('open','closed')"))->name);
+    }
+
 }

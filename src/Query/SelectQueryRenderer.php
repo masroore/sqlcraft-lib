@@ -54,7 +54,7 @@ final readonly class SelectQueryRenderer
         if ($columns === []) {
             return '*';
         }
-        $allowedAggregates = ['COUNT', 'SUM', 'AVG', 'MIN', 'MAX'];
+        $allowedAggregates = $this->platform->getSupportedAggregateFunctions();
 
         return implode(', ', array_map(function (ColumnSelection $selection) use ($allowedAggregates): string {
             $column = $this->platform->quoteIdentifier($selection->column);

@@ -34,4 +34,7 @@ interface PlatformInterface extends
 
     /** @return list<string> */
     public function getOperators(): array;
+
+    /** @return list<string> */
+    public function getSupportedAggregateFunctions(): array;
 }

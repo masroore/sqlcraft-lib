@@ -71,4 +71,23 @@ final class SelectQueryTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         new PaginationParams(0, 10);
     }
+    public function testAggregateFunctionsComeFromThePlatformAllowlist(): void
+    {
+        $platform = self::createMock(\SQLCraft\Contracts\Platform\PlatformInterface::class);
+        $platform->method('getSupportedAggregateFunctions')->willReturn(['COUNT']);
+        $platform->method('quoteIdentifier')->willReturnCallback(static fn (Identifier $identifier): string => '"' . $identifier->name . '"');
+        $platform->method('getOperators')->willReturn(['=']);
+        $platform->method('getName')->willReturn('test');
+        $query = new SelectQuery(new QualifiedName(new Identifier('users')), [new ColumnSelection(new Identifier('id'), 'SUM')]);
+
+        $this->expectException(\InvalidArgumentException::class);
+        (new SelectQueryRenderer($platform))->render($query);
+    }
+
+    public function testAggregateInjectionIsRejectedByConstructor(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        new ColumnSelection(new Identifier('id'), 'COUNT/**/');
+    }
+
 }

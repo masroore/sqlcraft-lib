@@ -423,6 +423,13 @@ abstract class AbstractPlatform implements PlatformInterface
     }
 
     /** @return list<string> */
+    /** @return list<string> */
+    #[\Override]
+    public function getSupportedAggregateFunctions(): array
+    {
+        return ['COUNT', 'SUM', 'AVG', 'MIN', 'MAX'];
+    }
+
     #[\Override]
     public function getOperators(): array
     {
