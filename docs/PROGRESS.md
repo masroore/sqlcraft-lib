@@ -95,3 +95,6 @@
 - [ ] T5: query history and QueryManager — not started
 - [x] T5: query history and QueryManager — commit 6079776 — green — 2026-07-21
 - [ ] T6: EXPLAIN and warnings services — not started
+- [x] T6: EXPLAIN and warnings services — commit a7c816f — green — 2026-07-21
+- [x] T7: M6 acceptance coverage — commit e0c5ff8 — green — 2026-07-21
+- [ ] T8: M6 acceptance gate — not started
