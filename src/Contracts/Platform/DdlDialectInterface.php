@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SQLCraft\Contracts\Platform;
 
+use SQLCraft\Contracts\DDL\AlterTableDefinitionInterface;
 use SQLCraft\Contracts\DDL\CheckConstraintDefinitionInterface;
 use SQLCraft\Contracts\DDL\ColumnDefinitionInterface;
 use SQLCraft\Contracts\DDL\ForeignKeyDefinitionInterface;
@@ -17,6 +18,9 @@ use SQLCraft\ValueObjects\QualifiedName;
 
 interface DdlDialectInterface
 {
+    /** @return list<string> */
+    public function renderDdlAlterTable(AlterTableDefinitionInterface $alterTable): array;
+
     public function renderDdlColumnDefinition(ColumnDefinitionInterface $column): string;
 
     public function renderDdlPrimaryKeyClause(IndexDefinitionInterface $index): string;
