@@ -36,6 +36,7 @@ use SQLCraft\Contracts\Metadata\TableInspectorInterface;
 use SQLCraft\Contracts\Metadata\TriggerInspectorInterface;
 use SQLCraft\Contracts\Metadata\UserInspectorInterface;
 use SQLCraft\Contracts\Metadata\ViewInspectorInterface;
+use SQLCraft\Contracts\Events\SchemaEventDispatcherInterface;
 use SQLCraft\DTO\ColumnMeta;
 use SQLCraft\DTO\RoutineMeta;
 use SQLCraft\DTO\ServerInfo;
@@ -61,6 +62,7 @@ final class SchemaManager
         private readonly CheckConstraintInspectorInterface $checkConstraintInspector,
         private readonly UserInspectorInterface $userInspector,
         private readonly ?MetadataCacheInterface $cache = null,
+        private readonly ?SchemaEventDispatcherInterface $events = null,
     ) {
     }
 
@@ -236,14 +238,13 @@ final class SchemaManager
      */
     private function cached(ConnectionInterface $conn, string $method, callable $loader): mixed
     {
-        if (!$this->cache instanceof MetadataCacheInterface) {
-            return $loader();
-        }
+        $startedAt = hrtime(true);
+        $result = $this->cache instanceof MetadataCacheInterface
+            ? $this->cache->remember($this->cacheKey($conn, $method), $loader)
+            : $loader();
+        $this->events?->metadataFetched($conn, $method, $method, (hrtime(true) - $startedAt) / 1_000_000);
 
-        return $this->cache->remember(
-            $this->cacheKey($conn, $method),
-            $loader,
-        );
+        return $result;
     }
 
     private function cacheKey(ConnectionInterface $conn, string $method): string
