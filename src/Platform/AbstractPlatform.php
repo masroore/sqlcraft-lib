@@ -77,6 +77,82 @@ abstract class AbstractPlatform implements PlatformInterface
     }
 
     #[\Override]
+    public function renderCreateSequenceStatement(
+        Identifier $name,
+        int $start,
+        int $increment,
+        ?int $min,
+        ?int $max,
+        bool $cycle,
+        ?int $cache,
+    ): string {
+        $sql = 'CREATE SEQUENCE ' . $this->quoteIdentifier($name)
+            . ' START WITH ' . $start . ' INCREMENT BY ' . $increment;
+        if ($min !== null) {
+            $sql .= ' MINVALUE ' . $min;
+        }
+        if ($max !== null) {
+            $sql .= ' MAXVALUE ' . $max;
+        }
+        if ($cycle) {
+            $sql .= ' CYCLE';
+        }
+        if ($cache !== null) {
+            $sql .= ' CACHE ' . $cache;
+        }
+
+        return $sql;
+    }
+
+    #[\Override]
+    public function renderDropSequenceStatement(Identifier $name, bool $ifExists): string
+    {
+        return 'DROP SEQUENCE' . ($ifExists ? ' IF EXISTS' : '') . ' ' . $this->quoteIdentifier($name);
+    }
+
+    #[\Override]
+    public function renderCreateDatabaseStatement(Identifier $name, ?string $charset, ?string $collation, bool $ifNotExists): string
+    {
+        $sql = 'CREATE DATABASE' . ($ifNotExists ? ' IF NOT EXISTS' : '') . ' ' . $this->quoteIdentifier($name);
+        if ($charset !== null) {
+            $sql .= ' CHARACTER SET ' . $charset;
+        }
+        if ($collation !== null) {
+            $sql .= ' COLLATE ' . $collation;
+        }
+
+        return $sql;
+    }
+
+    #[\Override]
+    public function renderDropDatabaseStatement(Identifier $name, bool $ifExists): string
+    {
+        return 'DROP DATABASE' . ($ifExists ? ' IF EXISTS' : '') . ' ' . $this->quoteIdentifier($name);
+    }
+
+    #[\Override]
+    public function renderCreateSchemaStatement(Identifier $name, ?string $authorization, bool $ifNotExists): string
+    {
+        $sql = 'CREATE SCHEMA' . ($ifNotExists ? ' IF NOT EXISTS' : '') . ' ' . $this->quoteIdentifier($name);
+
+        return $authorization === null ? $sql : $sql . ' AUTHORIZATION ' . $authorization;
+    }
+
+    #[\Override]
+    public function renderDropSchemaStatement(Identifier $name, bool $ifExists, bool $cascade): string
+    {
+        $sql = 'DROP SCHEMA' . ($ifExists ? ' IF EXISTS' : '') . ' ' . $this->quoteIdentifier($name);
+
+        return $cascade ? $sql . ' CASCADE' : $sql;
+    }
+
+    #[\Override]
+    public function renderUseDatabaseStatement(Identifier $database): string
+    {
+        return 'USE ' . $this->quoteIdentifier($database);
+    }
+
+    #[\Override]
     public function renderCreateTriggerStatement(
         QualifiedName $name,
         QualifiedName $table,

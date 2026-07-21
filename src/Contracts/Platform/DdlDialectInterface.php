@@ -58,6 +58,28 @@ interface DdlDialectInterface
 
     public function renderDropRoutineStatement(QualifiedName $name, string $type, bool $ifExists): string;
 
+    public function renderCreateSequenceStatement(
+        Identifier $name,
+        int $start,
+        int $increment,
+        ?int $min,
+        ?int $max,
+        bool $cycle,
+        ?int $cache,
+    ): string;
+
+    public function renderDropSequenceStatement(Identifier $name, bool $ifExists): string;
+
+    public function renderCreateDatabaseStatement(Identifier $name, ?string $charset, ?string $collation, bool $ifNotExists): string;
+
+    public function renderDropDatabaseStatement(Identifier $name, bool $ifExists): string;
+
+    public function renderCreateSchemaStatement(Identifier $name, ?string $authorization, bool $ifNotExists): string;
+
+    public function renderDropSchemaStatement(Identifier $name, bool $ifExists, bool $cascade): string;
+
+    public function renderUseDatabaseStatement(Identifier $database): string;
+
 
     public function renderDdlColumnDefinition(ColumnDefinitionInterface $column): string;
 
