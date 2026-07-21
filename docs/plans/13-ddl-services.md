@@ -44,6 +44,8 @@ CreateTableBuilder (immutable VO)
     → platform->renderCreateTable(builder) → SQL string
 ```
 
+This implementation uses DDL-facing metadata projection contracts (`Contracts\DDL\*DefinitionInterface`) rather than importing `DTO` classes into `SQLCraft\DDL`. The dependency graph deliberately keeps DDL independent from DTO; immutable projection implementations live under `SQLCraft\DDL\Definition`, and `AbstractPlatform` adapts projections to the existing platform DTO renderers. This preserves the typed metadata semantics without weakening the architectural boundary.
+
 This gives:
 - **Separation of intent from rendering.** The builder describes *what* you want; the platform decides *how* to express it in that engine's dialect.
 - **Testability without a live DB.** Unit tests can assert on builder state and mock the platform renderer.
