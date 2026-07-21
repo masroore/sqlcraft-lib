@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace SQLCraft\Query;
 
 use InvalidArgumentException;
-use SQLCraft\Contracts\Execution\StatementSplitterInterface;
 use SQLCraft\Contracts\Execution\StatementBatch;
+use SQLCraft\Contracts\Execution\StatementSplitterInterface;
+use SQLCraft\Contracts\Execution\StreamingStatementSplitterInterface;
 
-final readonly class StatementSplitter implements StatementSplitterInterface
+final readonly class StatementSplitter implements StatementSplitterInterface, StreamingStatementSplitterInterface
 {
     #[\Override]
     public function split(string $sql, string $delimiter = ';'): StatementBatch
@@ -17,134 +18,141 @@ final readonly class StatementSplitter implements StatementSplitterInterface
             throw new InvalidArgumentException('Statement delimiter cannot be empty.');
         }
 
-        $activeDelimiter = $delimiter;
-        $normalized = $this->removeDelimiterDirectives($sql);
-        $statements = [];
+        $stream = fopen('php://temp', 'w+b');
+        if ($stream === false) {
+            throw new InvalidArgumentException('Unable to create a temporary statement stream.');
+        }
+        fwrite($stream, $sql);
+        rewind($stream);
+        $statements = iterator_to_array($this->stream($stream, $delimiter), false);
+        fclose($stream);
+
+        /** @var list<string> $statements */
+        return new StatementBatch($statements);
+    }
+
+    /**
+     * @param resource $stream
+     * @return \Generator<int, string, void, void>
+     */
+    #[\Override]
+    public function splitStream($stream, string $delimiter = ';'): \Generator
+    {
+        if ($delimiter === '') {
+            throw new InvalidArgumentException('Statement delimiter cannot be empty.');
+        }
+
+        yield from $this->stream($stream, $delimiter);
+    }
+
+    /**
+     * @param resource $stream
+     * @return \Generator<int, string, void, void>
+     */
+    private function stream($stream, string $initialDelimiter): \Generator
+    {
+        $delimiter = $initialDelimiter;
         $buffer = '';
         $quote = null;
         $lineComment = false;
         $blockComment = false;
-        $length = strlen($normalized);
 
-        for ($index = 0; $index < $length; $index++) {
-            $character = $normalized[$index];
-            $next = $index + 1 < $length ? $normalized[$index + 1] : null;
-
-            if ($character === "\x1D") {
-                $end = strpos($normalized, "\x1E", $index + 1);
-                if ($end === false) {
-                    throw new InvalidArgumentException('Malformed DELIMITER directive.');
-                }
-                $activeDelimiter = substr($normalized, $index + 1, $end - $index - 1);
-                $index = $end;
+        while (($line = fgets($stream)) !== false) {
+            if (!$lineComment && !$blockComment && $quote === null
+                && preg_match('/^\s*DELIMITER\s+(\S+)\s*(?:\r?\n)?$/i', $line, $matches) === 1
+            ) {
+                yield from $this->flush($buffer);
+                $buffer = '';
+                $delimiter = $matches[1];
                 continue;
             }
 
-            if ($lineComment) {
-                $buffer .= $character;
-                if ($character === "\n") {
-                    $lineComment = false;
-                }
-                continue;
-            }
+            $length = strlen($line);
+            for ($index = 0; $index < $length; $index++) {
+                $character = $line[$index];
+                $next = $index + 1 < $length ? $line[$index + 1] : null;
 
-            if ($blockComment) {
-                $buffer .= $character;
-                if ($character === '*' && $next === '/') {
-                    $buffer .= '/';
-                    $index++;
-                    $blockComment = false;
-                }
-                continue;
-            }
-
-            if ($quote !== null) {
-                $buffer .= $character;
-                if ($character === '\\' && $next !== null) {
-                    $buffer .= $next;
-                    $index++;
+                if ($lineComment) {
+                    $buffer .= $character;
+                    if ($character === "\n") {
+                        $lineComment = false;
+                    }
                     continue;
                 }
-                if ($character === $quote) {
-                    if ($next === $quote) {
+
+                if ($blockComment) {
+                    $buffer .= $character;
+                    if ($character === '*' && $next === '/') {
+                        $buffer .= '/';
+                        $index++;
+                        $blockComment = false;
+                    }
+                    continue;
+                }
+
+                if ($quote !== null) {
+                    $buffer .= $character;
+                    if ($character === '\\' && $next !== null) {
                         $buffer .= $next;
                         $index++;
                         continue;
                     }
-                    $quote = null;
+                    if ($character === $quote) {
+                        if ($next === $quote) {
+                            $buffer .= $next;
+                            $index++;
+                            continue;
+                        }
+                        $quote = null;
+                    }
+                    continue;
                 }
-                continue;
-            }
 
-            if (($character === '-' && $next === '-' && ($index + 2 >= $length || ctype_space($normalized[$index + 2]))) || $character === '#') {
-                $buffer .= $character;
-                if ($character === '-') {
-                    $buffer .= '-';
+                if (($character === '-' && $next === '-' && ($index + 2 >= $length || ctype_space($line[$index + 2]))) || $character === '#') {
+                    $buffer .= $character;
+                    if ($character === '-') {
+                        $buffer .= '-';
+                        $index++;
+                    }
+                    $lineComment = true;
+                    continue;
+                }
+
+                if ($character === '/' && $next === '*') {
+                    $buffer .= '/*';
                     $index++;
+                    $blockComment = true;
+                    continue;
                 }
-                $lineComment = true;
-                continue;
-            }
 
-            if ($character === '/' && $next === '*') {
-                $buffer .= '/*';
-                $index++;
-                $blockComment = true;
-                continue;
-            }
+                if (in_array($character, ["'", '"', '`'], true)) {
+                    $quote = $character;
+                    $buffer .= $character;
+                    continue;
+                }
 
-            if (in_array($character, ["'", '"', '`'], true)) {
-                $quote = $character;
+                if ($delimiter !== '' && substr($line, $index, strlen($delimiter)) === $delimiter) {
+                    yield from $this->flush($buffer);
+                    $buffer = '';
+                    $index += strlen($delimiter) - 1;
+                    continue;
+                }
+
                 $buffer .= $character;
-                continue;
             }
-
-            if (substr($normalized, $index, strlen($activeDelimiter)) === $activeDelimiter) {
-                $this->appendStatement($statements, $buffer);
-                $buffer = '';
-                $index += strlen($activeDelimiter) - 1;
-                continue;
-            }
-
-            $buffer .= $character;
         }
 
-        $this->appendStatement($statements, $buffer);
-
-        return new StatementBatch($statements);
+        yield from $this->flush($buffer);
     }
 
-    /** @param list<string> $statements */
-    private function appendStatement(array &$statements, string $buffer): void
+    /** @return \Generator<int, string, void, void> */
+    private function flush(string $buffer): \Generator
     {
         $statement = trim($buffer);
-        if ($statement === '' || $this->isCommentOnly($statement)) {
+        if ($statement === '' || preg_match('/^(?:\s*(?:--[^\r\n]*|#[^\r\n]*|\/\*.*?\*\/)(?:\s*))*$/s', $statement) === 1) {
             return;
         }
 
-        $statements[] = $statement;
-    }
-
-    private function isCommentOnly(string $statement): bool
-    {
-        return preg_match('/^(?:\s*(?:--[^\r\n]*|#[^\r\n]*|\/\*.*?\*\/)\s*)+$/s', $statement) === 1;
-    }
-
-    private function removeDelimiterDirectives(string $sql): string
-    {
-        $lines = preg_split('/(?<=\n)/', $sql);
-        if ($lines === false) {
-            return '';
-        }
-        $body = '';
-        foreach ($lines as $line) {
-            if (preg_match('/^\s*DELIMITER\s+(\S+)\s*(?:\r?\n)?$/i', $line, $matches) === 1) {
-                $body .= "\x1D" . $matches[1] . "\x1E";
-                continue;
-            }
-            $body .= $line;
-        }
-
-        return $body;
+        yield $statement;
     }
 }

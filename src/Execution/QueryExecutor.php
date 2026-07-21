@@ -88,9 +88,9 @@ final readonly class QueryExecutor implements QueryExecutorInterface
 
     /** @param array<string|int, mixed> $params */
     #[\Override]
-    public function executeDdl(ConnectionInterface $connection, string $sql, array $params = []): void
+    public function executeDdl(ConnectionInterface $connection, string $sql, array $params = [], string $objectName = ''): void
     {
-        $before = new BeforeDdlExecuted($connection, $sql, '');
+        $before = new BeforeDdlExecuted($connection, $sql, $objectName);
         $this->events?->dispatch($before);
         $this->assertNotCancelled($before->isCancelled(), $before->cancelReason);
         $startedAt = hrtime(true);
@@ -99,7 +99,7 @@ final readonly class QueryExecutor implements QueryExecutorInterface
             $connection->execute($sql, $params);
             $this->record($connection, $sql, $startedAt, true);
             $elapsedMs = $this->elapsedMs($startedAt);
-            $this->events?->dispatch(new AfterDdlExecuted($connection, $sql, '', $elapsedMs));
+            $this->events?->dispatch(new AfterDdlExecuted($connection, $sql, $objectName, $elapsedMs));
             $this->events?->dispatch(new AfterQueryExecuted(
                 $connection,
                 $sql,

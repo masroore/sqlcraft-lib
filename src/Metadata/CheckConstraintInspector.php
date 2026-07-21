@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SQLCraft\Metadata;
 
+use SQLCraft\Capabilities\Capability;
 use SQLCraft\Collections\CheckConstraintCollection;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Metadata\CheckConstraintInspectorInterface;
@@ -19,6 +20,7 @@ final class CheckConstraintInspector implements CheckConstraintInspectorInterfac
     #[\Override]
     public function getCheckConstraints(ConnectionInterface $conn, QualifiedName $table): CheckConstraintCollection
     {
+        $this->requireCapability($conn, Capability::CheckConstraints);
         /** @var list<array<string, bool|float|int|string|null>> $rows */
         $rows = $conn->query($conn->getPlatform()->getCheckConstraintsSql($table))->fetchAll();
         $constraints = [];
@@ -30,4 +32,16 @@ final class CheckConstraintInspector implements CheckConstraintInspectorInterfac
 
         return new CheckConstraintCollection($constraints);
     }
+
+    private function requireCapability(ConnectionInterface $connection, Capability $capability): void
+    {
+        try {
+            $version = $connection->getServerVersion();
+        } catch (\Throwable) {
+            return;
+        }
+
+        $connection->getPlatform()->getCapabilitySet($version)->require($capability);
+    }
+
 }

@@ -6,6 +6,7 @@ namespace SQLCraft\DDL;
 
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\DDL\DdlBuilderInterface;
+use SQLCraft\Contracts\DDL\ObjectNameAwareDdlBuilderInterface;
 use SQLCraft\Contracts\Execution\QueryExecutorInterface;
 use SQLCraft\Contracts\Events\SchemaEventDispatcherInterface;
 use SQLCraft\Exceptions\OperationCancelledException;
@@ -45,15 +46,20 @@ final readonly class DdlManager
             }
 
             $startedAt = hrtime(true);
-            $this->executor->executeDdl($connection, $sql);
-            $elapsedMs = (hrtime(true) - $startedAt) / 1_000_000;
-            $this->events?->afterDdlExecuted($connection, $sql, $objectName, $elapsedMs);
+            $this->executor->executeDdl($connection, $sql, objectName: $objectName);
+            $this->events?->afterDdlExecuted($connection, $sql, $objectName, (hrtime(true) - $startedAt) / 1_000_000);
             $this->events?->schemaChanged($connection, 'DDL', $objectName, 'ALTER');
         }
     }
 
+
     private function objectName(DdlBuilderInterface $builder): string
     {
+        if ($builder instanceof ObjectNameAwareDdlBuilderInterface) {
+            return $builder->getObjectName();
+        }
+
         return (new \ReflectionClass($builder))->getShortName();
     }
+
 }

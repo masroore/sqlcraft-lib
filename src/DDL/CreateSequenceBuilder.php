@@ -9,8 +9,9 @@ use SQLCraft\Contracts\DDL\DdlBuilderInterface;
 use SQLCraft\Contracts\Platform\DdlDialectInterface;
 use SQLCraft\ValueObjects\Identifier;
 
-final readonly class CreateSequenceBuilder implements DdlBuilderInterface
+final readonly class CreateSequenceBuilder implements DdlBuilderInterface, \SQLCraft\Contracts\DDL\ObjectNameAwareDdlBuilderInterface
 {
+    use LegacyDdlExecution;
     public function __construct(
         public Identifier $name,
         public int $start = 1,
@@ -29,11 +30,11 @@ final readonly class CreateSequenceBuilder implements DdlBuilderInterface
         return [$dialect->renderCreateSequenceStatement($this->name, $this->start, $this->increment, $this->min, $this->max, $this->cycle, $this->cache)];
     }
 
+
     #[\Override]
-    public function execute(ConnectionInterface $connection): void
+    public function getObjectName(): string
     {
-        foreach ($this->toSql($connection->getPlatform()) as $sql) {
-            $connection->execute($sql);
-        }
+        return $this->name->name;
     }
+
 }

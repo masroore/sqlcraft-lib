@@ -30,6 +30,7 @@ interface QueryExecutorInterface
         ConnectionInterface $connection,
         string $sql,
         array $params = [],
+        string $objectName = '',
     ): void;
 
     /** @param array<string|int, mixed> $params */

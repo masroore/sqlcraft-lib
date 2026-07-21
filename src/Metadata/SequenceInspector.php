@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SQLCraft\Metadata;
 
+use SQLCraft\Capabilities\Capability;
 use SQLCraft\Collections\SequenceCollection;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Metadata\SequenceInspectorInterface;
@@ -18,6 +19,7 @@ final class SequenceInspector implements SequenceInspectorInterface
     #[\Override]
     public function getSequences(ConnectionInterface $conn, ?string $schema = null): SequenceCollection
     {
+        $this->requireCapability($conn, Capability::Sequence);
         /** @var list<array<string, bool|float|int|string|null>> $rows */
         $rows = $conn->query($conn->getPlatform()->getSequencesSql($schema))->fetchAll();
         $sequences = [];
@@ -29,4 +31,16 @@ final class SequenceInspector implements SequenceInspectorInterface
 
         return new SequenceCollection($sequences);
     }
+
+    private function requireCapability(ConnectionInterface $connection, Capability $capability): void
+    {
+        try {
+            $version = $connection->getServerVersion();
+        } catch (\Throwable) {
+            return;
+        }
+
+        $connection->getPlatform()->getCapabilitySet($version)->require($capability);
+    }
+
 }

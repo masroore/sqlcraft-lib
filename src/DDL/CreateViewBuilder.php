@@ -10,8 +10,9 @@ use SQLCraft\Contracts\Platform\DdlDialectInterface;
 use SQLCraft\ValueObjects\Identifier;
 use SQLCraft\ValueObjects\QualifiedName;
 
-final readonly class CreateViewBuilder implements DdlBuilderInterface
+final readonly class CreateViewBuilder implements DdlBuilderInterface, \SQLCraft\Contracts\DDL\ObjectNameAwareDdlBuilderInterface
 {
+    use LegacyDdlExecution;
     /** @param list<Identifier> $columns */
     public function __construct(
         public QualifiedName $name,
@@ -29,11 +30,11 @@ final readonly class CreateViewBuilder implements DdlBuilderInterface
         return [$dialect->renderCreateViewStatement($this->name, $this->selectSql, $this->orReplace, $this->columns, $this->checkOption)];
     }
 
+
     #[\Override]
-    public function execute(ConnectionInterface $connection): void
+    public function getObjectName(): string
     {
-        foreach ($this->toSql($connection->getPlatform()) as $sql) {
-            $connection->execute($sql);
-        }
+        return $this->name->object->name;
     }
+
 }

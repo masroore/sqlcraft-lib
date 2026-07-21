@@ -14,8 +14,9 @@ use SQLCraft\Contracts\DDL\IndexDefinitionInterface;
 use SQLCraft\ValueObjects\IndexType;
 use SQLCraft\ValueObjects\QualifiedName;
 
-final readonly class CreateTableBuilder implements DdlBuilderInterface
+final readonly class CreateTableBuilder implements DdlBuilderInterface, \SQLCraft\Contracts\DDL\ObjectNameAwareDdlBuilderInterface
 {
+    use LegacyDdlExecution;
     /**
      * @param list<ColumnDefinitionInterface> $columns
      * @param list<IndexDefinitionInterface> $indexes
@@ -83,13 +84,6 @@ final readonly class CreateTableBuilder implements DdlBuilderInterface
         )];
     }
 
-    #[\Override]
-    public function execute(ConnectionInterface $connection): void
-    {
-        foreach ($this->toSql($connection->getPlatform()) as $sql) {
-            $connection->execute($sql);
-        }
-    }
 
     /** @return array<string, scalar|null> */
     private function options(): array
@@ -105,4 +99,11 @@ final readonly class CreateTableBuilder implements DdlBuilderInterface
             'auto_increment_value' => $this->autoIncrementValue,
         ];
     }
+
+    #[\Override]
+    public function getObjectName(): string
+    {
+        return $this->table->object->name;
+    }
+
 }

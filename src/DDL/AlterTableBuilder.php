@@ -15,8 +15,10 @@ use SQLCraft\Contracts\Platform\DdlDialectInterface;
 use SQLCraft\ValueObjects\Identifier;
 use SQLCraft\ValueObjects\QualifiedName;
 
-final readonly class AlterTableBuilder implements AlterTableDefinitionInterface, DdlBuilderInterface
+final readonly class AlterTableBuilder implements AlterTableDefinitionInterface, DdlBuilderInterface, \SQLCraft\Contracts\DDL\ObjectNameAwareDdlBuilderInterface
 {
+    use LegacyDdlExecution;
+
     /**
      * @param list<array{0: ColumnDefinitionInterface, 1: ?Identifier}> $addColumns
      * @param list<array{0: ColumnDefinitionInterface, 1: ColumnDefinitionInterface}> $modifyColumns
@@ -100,13 +102,6 @@ final readonly class AlterTableBuilder implements AlterTableDefinitionInterface,
         return $dialect->renderDdlAlterTable($this);
     }
 
-    #[\Override]
-    public function execute(ConnectionInterface $connection): void
-    {
-        foreach ($this->toSql($connection->getPlatform()) as $sql) {
-            $connection->execute($sql);
-        }
-    }
 
     #[\Override]
     public function getTable(): QualifiedName
@@ -221,4 +216,11 @@ final readonly class AlterTableBuilder implements AlterTableDefinitionInterface,
             rename: $replaceRename ? $rename : $this->rename,
         );
     }
+
+    #[\Override]
+    public function getObjectName(): string
+    {
+        return $this->table->object->name;
+    }
+
 }

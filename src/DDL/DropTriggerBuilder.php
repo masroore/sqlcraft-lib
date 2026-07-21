@@ -9,8 +9,9 @@ use SQLCraft\Contracts\DDL\DdlBuilderInterface;
 use SQLCraft\Contracts\Platform\DdlDialectInterface;
 use SQLCraft\ValueObjects\QualifiedName;
 
-final readonly class DropTriggerBuilder implements DdlBuilderInterface
+final readonly class DropTriggerBuilder implements DdlBuilderInterface, \SQLCraft\Contracts\DDL\ObjectNameAwareDdlBuilderInterface
 {
+    use LegacyDdlExecution;
     public function __construct(
         public QualifiedName $name,
         public ?QualifiedName $table = null,
@@ -25,11 +26,11 @@ final readonly class DropTriggerBuilder implements DdlBuilderInterface
         return [$dialect->renderDropTriggerStatement($this->name, $this->table, $this->ifExists)];
     }
 
+
     #[\Override]
-    public function execute(ConnectionInterface $connection): void
+    public function getObjectName(): string
     {
-        foreach ($this->toSql($connection->getPlatform()) as $sql) {
-            $connection->execute($sql);
-        }
+        return $this->name->object->name;
     }
+
 }

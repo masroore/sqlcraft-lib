@@ -10,7 +10,7 @@ use SQLCraft\Contracts\DDL\DdlBuilderInterface;
 use SQLCraft\Contracts\Platform\DdlDialectInterface;
 use SQLCraft\ValueObjects\Identifier;
 
-final readonly class DropSchemaBuilder implements DdlBuilderInterface
+final readonly class DropSchemaBuilder implements DdlBuilderInterface, \SQLCraft\Contracts\DDL\ObjectNameAwareDdlBuilderInterface
 {
     public function __construct(public Identifier $name, public bool $ifExists = false, public bool $cascade = false)
     {
@@ -23,13 +23,21 @@ final readonly class DropSchemaBuilder implements DdlBuilderInterface
         return [$dialect->renderDropSchemaStatement($this->name, $this->ifExists, $this->cascade)];
     }
 
-    #[\Override]
-    public function execute(ConnectionInterface $connection): void
-    {
-        $connection->getPlatform()->getCapabilitySet($connection->getServerVersion())->require(Capability::Scheme);
 
-        foreach ($this->toSql($connection->getPlatform()) as $sql) {
-            $connection->execute($sql);
-        }
+    #[\Override]
+    public function getObjectName(): string
+    {
+        return $this->name->name;
     }
+
+
+
+
+    #[\Override]
+    public function execute(\SQLCraft\Contracts\Connection\ConnectionInterface $connection): void
+    {
+        $connection->getPlatform()->getCapabilitySet($connection->getServerVersion())->require(\SQLCraft\Capabilities\Capability::Scheme);
+        (new DdlManager(new \SQLCraft\Execution\QueryExecutor()))->execute($connection, $this);
+    }
+
 }

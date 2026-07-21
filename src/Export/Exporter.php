@@ -52,7 +52,8 @@ final class Exporter implements ExporterInterface
         [$tablesExported, $rowsExported] = match ($options->scope->kind) {
             ScopeKind::FilteredResult => $this->exportFiltered($conn, $sink, $writer, $options, $startedAt),
             ScopeKind::Tables => $this->exportSelectedTables($conn, $sink, $writer, $options, $startedAt),
-            ScopeKind::Database, ScopeKind::AllDatabases => $this->exportDatabase($conn, $sink, $writer, $options, $startedAt),
+            ScopeKind::Database => $this->exportDatabase($conn, $sink, $writer, $options, $startedAt),
+            ScopeKind::AllDatabases => $this->exportAllDatabases($conn, $sink, $writer, $options, $startedAt),
         };
 
         $writer->writeFooter($sink, $options);
@@ -77,6 +78,41 @@ final class Exporter implements ExporterInterface
         }
 
         return [$tablesExported, $rowsExported];
+    }
+
+    /** @return array{0: int, 1: int} */
+    private function exportAllDatabases(
+        ConnectionInterface $conn,
+        SinkInterface $sink,
+        FormatWriterInterface $writer,
+        DumpOptions $options,
+        int $startedAt,
+    ): array {
+        $tables = 0;
+        $rows = 0;
+        foreach ($this->source->getDatabases($conn) as $database) {
+            $scope = DumpScope::database($database->name);
+            $databaseOptions = new DumpOptions(
+                format: $options->format,
+                scope: $scope,
+                databaseStyle: $options->databaseStyle,
+                tableStyle: $options->tableStyle,
+                dataStyle: $options->dataStyle,
+                includeAutoIncrement: $options->includeAutoIncrement,
+                includeTriggers: $options->includeTriggers,
+                includeRoutines: $options->includeRoutines,
+                includeEvents: $options->includeEvents,
+                includeUserTypes: $options->includeUserTypes,
+                batchSize: $options->batchSize,
+                csvSeparator: $options->csvSeparator,
+                nullRepresentation: $options->nullRepresentation,
+            );
+            [$databaseTables, $databaseRows] = $this->exportDatabase($conn, $sink, $writer, $databaseOptions, $startedAt);
+            $tables += $databaseTables;
+            $rows += $databaseRows;
+        }
+
+        return [$tables, $rows];
     }
 
     /** @return array{0: int, 1: int} */

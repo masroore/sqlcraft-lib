@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SQLCraft\Platform;
 
 use SQLCraft\Capabilities\Capability;
+use SQLCraft\ValueObjects\Identifier;
 
 final class MariaDbPlatform extends MySQLPlatform
 {
@@ -43,4 +44,39 @@ final class MariaDbPlatform extends MySQLPlatform
 
         return $matrix;
     }
+
+    #[\Override]
+    public function renderCreateSequenceStatement(
+        Identifier $name,
+        int $start,
+        int $increment,
+        ?int $min,
+        ?int $max,
+        bool $cycle,
+        ?int $cache,
+    ): string {
+        $sql = 'CREATE SEQUENCE ' . $this->quoteIdentifier($name)
+            . ' START WITH ' . $start . ' INCREMENT BY ' . $increment;
+        if ($min !== null) {
+            $sql .= ' MINVALUE ' . $min;
+        }
+        if ($max !== null) {
+            $sql .= ' MAXVALUE ' . $max;
+        }
+        if ($cycle) {
+            $sql .= ' CYCLE';
+        }
+        if ($cache !== null) {
+            $sql .= ' CACHE ' . $cache;
+        }
+
+        return $sql;
+    }
+
+    #[\Override]
+    public function renderDropSequenceStatement(Identifier $name, bool $ifExists): string
+    {
+        return 'DROP SEQUENCE' . ($ifExists ? ' IF EXISTS' : '') . ' ' . $this->quoteIdentifier($name);
+    }
+
 }

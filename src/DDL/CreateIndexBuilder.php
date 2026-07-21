@@ -10,8 +10,9 @@ use SQLCraft\Contracts\Platform\DdlDialectInterface;
 use SQLCraft\Contracts\DDL\IndexDefinitionInterface;
 use SQLCraft\ValueObjects\QualifiedName;
 
-final readonly class CreateIndexBuilder implements DdlBuilderInterface
+final readonly class CreateIndexBuilder implements DdlBuilderInterface, \SQLCraft\Contracts\DDL\ObjectNameAwareDdlBuilderInterface
 {
+    use LegacyDdlExecution;
     public function __construct(
         public QualifiedName $table,
         public IndexDefinitionInterface $index,
@@ -25,11 +26,11 @@ final readonly class CreateIndexBuilder implements DdlBuilderInterface
         return [$dialect->renderDdlCreateIndexStatement($this->table, $this->index)];
     }
 
+
     #[\Override]
-    public function execute(ConnectionInterface $connection): void
+    public function getObjectName(): string
     {
-        foreach ($this->toSql($connection->getPlatform()) as $sql) {
-            $connection->execute($sql);
-        }
+        return $this->index->getName();
     }
+
 }

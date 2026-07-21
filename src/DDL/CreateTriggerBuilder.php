@@ -11,8 +11,9 @@ use SQLCraft\ValueObjects\QualifiedName;
 use SQLCraft\ValueObjects\TriggerEvent;
 use SQLCraft\ValueObjects\TriggerTiming;
 
-final readonly class CreateTriggerBuilder implements DdlBuilderInterface
+final readonly class CreateTriggerBuilder implements DdlBuilderInterface, \SQLCraft\Contracts\DDL\ObjectNameAwareDdlBuilderInterface
 {
+    use LegacyDdlExecution;
     public function __construct(
         public QualifiedName $name,
         public QualifiedName $table,
@@ -31,11 +32,11 @@ final readonly class CreateTriggerBuilder implements DdlBuilderInterface
         return [$dialect->renderCreateTriggerStatement($this->name, $this->table, $this->timing, $this->event, $this->body, $this->definer, $this->forEach)];
     }
 
+
     #[\Override]
-    public function execute(ConnectionInterface $connection): void
+    public function getObjectName(): string
     {
-        foreach ($this->toSql($connection->getPlatform()) as $sql) {
-            $connection->execute($sql);
-        }
+        return $this->name->object->name;
     }
+
 }

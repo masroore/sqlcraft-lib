@@ -5,18 +5,17 @@ declare(strict_types=1);
 namespace SQLCraft\Import;
 
 use InvalidArgumentException;
-use RuntimeException;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Execution\BatchExecutorInterface;
 use SQLCraft\Contracts\Execution\StatementBatch;
 use SQLCraft\Contracts\Execution\StatementSplitterInterface;
+use SQLCraft\Contracts\Execution\StreamingStatementSplitterInterface;
 use SQLCraft\Contracts\Events\ImportExportEventDispatcherInterface;
 use SQLCraft\Contracts\Import\ImportSourceInterface;
 use SQLCraft\Contracts\Import\ImporterInterface;
 
 final readonly class Importer implements ImporterInterface
 {
-    private const int CHUNK_SIZE = 8192;
     private const int MAX_BATCH_SIZE = 1000;
 
     public function __construct(
@@ -51,41 +50,23 @@ final readonly class Importer implements ImporterInterface
                 $transaction = $conn->beginTransaction();
             }
 
-            $buffer = '';
-            while (!feof($stream)) {
-                $chunk = fread($stream, self::CHUNK_SIZE);
-                if ($chunk === false) {
-                    throw new RuntimeException('Unable to read import source stream.');
+            /** @var list<string> $batch */
+            $batch = [];
+            foreach ($this->statements($stream) as $statement) {
+                if ($this->reachedMaximum($executed, $skipped, $options)) {
+                    break;
                 }
-                if ($chunk === '') {
+
+                $batch[] = $statement;
+                if (count($batch) < self::MAX_BATCH_SIZE) {
                     continue;
                 }
 
-                $bytesProcessed += strlen($chunk);
-                $buffer .= $chunk;
-                if ($this->endsWithStatementDelimiter($buffer)) {
-                    $lastSql = $buffer;
-                    [$executed, $skipped, $errors] = $this->executeSql(
-                        $conn,
-                        $buffer,
-                        $options,
-                        $executed,
-                        $skipped,
-                        $errors,
-                        $startedAt,
-                        $bytesProcessed,
-                    );
-                    $buffer = '';
-                    if ($this->reachedMaximum($executed, $skipped, $options)) {
-                        break;
-                    }
-                }
-            }
-
-            if (trim($buffer) !== '' && !$this->reachedMaximum($executed, $skipped, $options)) {
-                [$executed, $skipped, $errors] = $this->executeSql(
+                /** @var list<string> $batchForExecution */
+                $batchForExecution = $batch;
+                [$executed, $skipped, $errors] = $this->executeBatch(
                     $conn,
-                    $buffer,
+                    $batchForExecution,
                     $options,
                     $executed,
                     $skipped,
@@ -93,6 +74,24 @@ final readonly class Importer implements ImporterInterface
                     $startedAt,
                     $bytesProcessed,
                 );
+                $lastSql = $statement;
+                $batch = [];
+            }
+
+            if ($batch !== [] && !$this->reachedMaximum($executed, $skipped, $options)) {
+                /** @var list<string> $batchForExecution */
+                $batchForExecution = $batch;
+                [$executed, $skipped, $errors] = $this->executeBatch(
+                    $conn,
+                    $batch,
+                    $options,
+                    $executed,
+                    $skipped,
+                    $errors,
+                    $startedAt,
+                    $bytesProcessed,
+                );
+                $lastSql = $batch[array_key_last($batch)];
             }
 
             $transaction?->commit();
@@ -115,12 +114,13 @@ final readonly class Importer implements ImporterInterface
     }
 
     /**
+     * @param list<string> $statements
      * @param list<ImportError> $errors
      * @return array{0: int, 1: int, 2: list<ImportError>}
      */
-    private function executeSql(
+    private function executeBatch(
         ConnectionInterface $connection,
-        string $sql,
+        array $statements,
         ImportOptions $options,
         int $executed,
         int $skipped,
@@ -128,48 +128,56 @@ final readonly class Importer implements ImporterInterface
         int $startedAt,
         int $bytesProcessed,
     ): array {
-        $batch = $this->splitter->split($sql);
-        $remaining = $this->remainingStatements($batch, $executed, $options);
-        $skipped += count($batch->statements) - count($remaining->statements);
+        $remaining = $options->maxStatements === null
+            ? $statements
+            : array_slice($statements, 0, max(0, $options->maxStatements - $executed - $skipped));
+        $skipped += count($statements) - count($remaining);
+        if ($remaining === []) {
+            return [$executed, $skipped, $errors];
+        }
 
-        $batchOffset = 0;
-        foreach (array_chunk($remaining->statements, self::MAX_BATCH_SIZE) as $statements) {
-            foreach ($this->batchExecutor->executeBatch(
-                $connection,
-                new StatementBatch($statements),
-                $options->stopOnError,
-            ) as $result) {
-                if ($result->error !== null) {
-                    $errors[] = new ImportError(
-                        statementIndex: $executed + $batchOffset + $result->index,
-                        sql: $result->sql,
-                        errorMessage: $result->error->getMessage(),
-                        errorCode: (int) $result->error->getCode(),
-                    );
-                    $skipped++;
-                    continue;
-                }
-
-                $executed++;
-                if (($executed + $skipped) % $options->progressInterval === 0) {
-                    $this->events?->importProgress($connection, $bytesProcessed, $executed, (hrtime(true) - $startedAt) / 1_000_000);
-                }
+        foreach ($this->batchExecutor->executeBatch(
+            $connection,
+            new StatementBatch($remaining),
+            $options->stopOnError,
+        ) as $result) {
+            if ($result->error !== null) {
+                $errors[] = new ImportError(
+                    statementIndex: $executed + $result->index,
+                    sql: $result->sql,
+                    errorMessage: $result->error->getMessage(),
+                    errorCode: (int) $result->error->getCode(),
+                );
+                $skipped++;
+                continue;
             }
-            $batchOffset += count($statements);
+
+            $executed++;
+            if (($executed + $skipped) % $options->progressInterval === 0) {
+                $this->events?->importProgress($connection, $bytesProcessed, $executed, (hrtime(true) - $startedAt) / 1_000_000);
+            }
         }
 
         return [$executed, $skipped, $errors];
     }
 
-    private function remainingStatements(StatementBatch $batch, int $executed, ImportOptions $options): StatementBatch
+    /**
+     * @param resource $stream
+     * @return iterable<string>
+     */
+    private function statements($stream): iterable
     {
-        if ($options->maxStatements === null) {
-            return $batch;
+        if ($this->splitter instanceof StreamingStatementSplitterInterface) {
+            $statements = $this->splitter->splitStream($stream);
+            /** @var \Generator<int, string> $statements */
+            yield from $statements;
+            return;
         }
 
-        $remaining = max(0, $options->maxStatements - $executed);
-
-        return new StatementBatch(array_slice($batch->statements, 0, $remaining));
+        $batch = $this->splitter->split((string) stream_get_contents($stream));
+        /** @var list<string> $statements */
+        $statements = $batch->statements;
+        yield from $statements;
     }
 
     private function reachedMaximum(int $executed, int $skipped, ImportOptions $options): bool
@@ -177,8 +185,4 @@ final readonly class Importer implements ImporterInterface
         return $options->maxStatements !== null && $executed + $skipped >= $options->maxStatements;
     }
 
-    private function endsWithStatementDelimiter(string $sql): bool
-    {
-        return str_ends_with(rtrim($sql), ';');
-    }
 }

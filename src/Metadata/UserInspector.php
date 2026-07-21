@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SQLCraft\Metadata;
 
+use SQLCraft\Capabilities\Capability;
 use SQLCraft\Collections\UserCollection;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Metadata\UserInspectorInterface;
@@ -18,6 +19,7 @@ final class UserInspector implements UserInspectorInterface
     #[\Override]
     public function getUsers(ConnectionInterface $conn): UserCollection
     {
+        $this->requireCapability($conn, Capability::Privileges);
         /** @var list<array<string, bool|float|int|string|null>> $rows */
         $rows = $conn->query($conn->getPlatform()->getUsersSql())->fetchAll();
         $users = [];
@@ -29,4 +31,16 @@ final class UserInspector implements UserInspectorInterface
 
         return new UserCollection($users);
     }
+
+    private function requireCapability(ConnectionInterface $connection, Capability $capability): void
+    {
+        try {
+            $version = $connection->getServerVersion();
+        } catch (\Throwable) {
+            return;
+        }
+
+        $connection->getPlatform()->getCapabilitySet($version)->require($capability);
+    }
+
 }

@@ -9,8 +9,9 @@ use SQLCraft\Contracts\DDL\DdlBuilderInterface;
 use SQLCraft\Contracts\Platform\DdlDialectInterface;
 use SQLCraft\ValueObjects\QualifiedName;
 
-final readonly class TruncateBuilder implements DdlBuilderInterface
+final readonly class TruncateBuilder implements DdlBuilderInterface, \SQLCraft\Contracts\DDL\ObjectNameAwareDdlBuilderInterface
 {
+    use LegacyDdlExecution;
     public function __construct(
         public QualifiedName $table,
         public bool $cascade = false,
@@ -25,11 +26,11 @@ final readonly class TruncateBuilder implements DdlBuilderInterface
         return [$dialect->renderTruncateStatement($this->table, $this->cascade, $this->restartIdentity)];
     }
 
+
     #[\Override]
-    public function execute(ConnectionInterface $connection): void
+    public function getObjectName(): string
     {
-        foreach ($this->toSql($connection->getPlatform()) as $sql) {
-            $connection->execute($sql);
-        }
+        return $this->table->object->name;
     }
+
 }

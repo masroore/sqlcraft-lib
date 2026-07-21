@@ -9,8 +9,9 @@ use SQLCraft\Contracts\DDL\DdlBuilderInterface;
 use SQLCraft\Contracts\Platform\DdlDialectInterface;
 use SQLCraft\ValueObjects\Identifier;
 
-final readonly class CreateDatabaseBuilder implements DdlBuilderInterface
+final readonly class CreateDatabaseBuilder implements DdlBuilderInterface, \SQLCraft\Contracts\DDL\ObjectNameAwareDdlBuilderInterface
 {
+    use LegacyDdlExecution;
     public function __construct(public Identifier $name, public ?string $charset = null, public ?string $collation = null, public bool $ifNotExists = false)
     {
     }
@@ -22,11 +23,11 @@ final readonly class CreateDatabaseBuilder implements DdlBuilderInterface
         return [$dialect->renderCreateDatabaseStatement($this->name, $this->charset, $this->collation, $this->ifNotExists)];
     }
 
+
     #[\Override]
-    public function execute(ConnectionInterface $connection): void
+    public function getObjectName(): string
     {
-        foreach ($this->toSql($connection->getPlatform()) as $sql) {
-            $connection->execute($sql);
-        }
+        return $this->name->name;
     }
+
 }

@@ -11,6 +11,7 @@ use SQLCraft\Platform\MariaDbPlatform;
 use SQLCraft\Platform\MySQLPlatform;
 use SQLCraft\Platform\PostgreSQLPlatform;
 use SQLCraft\Platform\SqlitePlatform;
+use SQLCraft\Platform\SqlServerPlatform;
 use SQLCraft\ValueObjects\Identifier;
 use SQLCraft\ValueObjects\QualifiedName;
 
@@ -23,6 +24,7 @@ final class IntrospectionSqlGoldenTest extends TestCase
         yield 'mariadb' => [new MariaDbPlatform(), 'app', 'public', 'mariadb'];
         yield 'pgsql' => [new PostgreSQLPlatform(), 'app', 'public', 'pgsql'];
         yield 'sqlite' => [new SqlitePlatform(), 'main', 'main', 'sqlite'];
+        yield 'sqlserver' => [new SqlServerPlatform(), 'app', 'public', 'sqlserver'];
     }
 
     #[\PHPUnit\Framework\Attributes\DataProvider('platformProvider')]

@@ -30,7 +30,15 @@ final readonly class TableDumper
         $writer->writeTableHeader($sink, $table, $options);
 
         if ($options->tableStyle !== TableSectionStyle::None) {
-            $writer->writeTableDdl($sink, $table, $this->source->getTableDdl($connection, $table->name, $table->schema));
+            $ddl = $this->source->getTableDdl($connection, $table->name, $table->schema);
+            if ($options->includeTriggers && $this->supports($connection, \SQLCraft\Capabilities\Capability::Trigger)) {
+                $ddl = [...$ddl, ...$this->source->getTriggerDdl($connection, $table->name, $table->schema)];
+            }
+            if ($options->includeRoutines && $this->supports($connection, \SQLCraft\Capabilities\Capability::Routine)) {
+                $ddl = [...$ddl, ...$this->source->getRoutineDdl($connection, $table->schema)];
+            }
+            /** @var list<string> $ddl */
+            $writer->writeTableDdl($sink, $table, $ddl);
         }
 
         $rows = 0;
@@ -85,6 +93,16 @@ final readonly class TableDumper
         }
 
         return $rowCount;
+    }
+
+
+    private function supports(ConnectionInterface $connection, \SQLCraft\Capabilities\Capability $capability): bool
+    {
+        try {
+            return $connection->getPlatform()->getCapabilitySet($connection->getServerVersion())->has($capability);
+        } catch (\Throwable) {
+            return false;
+        }
     }
 
     private function selectAllSql(ConnectionInterface $connection, TableStatus $table): string

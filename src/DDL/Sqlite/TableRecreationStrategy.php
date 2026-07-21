@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace SQLCraft\DDL\Sqlite;
 
 use SQLCraft\Contracts\Connection\ConnectionInterface;
+use SQLCraft\Contracts\DDL\DdlBuilderInterface;
+use SQLCraft\Contracts\DDL\ObjectNameAwareDdlBuilderInterface;
 use SQLCraft\Contracts\DDL\TableRecreationDefinitionInterface;
 use SQLCraft\Contracts\DDL\TableRecreationMetadataProviderInterface;
 use SQLCraft\Contracts\Execution\TransactionManagerInterface;
+use SQLCraft\Contracts\Execution\QueryExecutorInterface;
 use SQLCraft\DDL\AlterTableBuilder;
 use SQLCraft\DDL\CreateIndexBuilder;
 use SQLCraft\DDL\CreateTableBuilder;
@@ -25,6 +28,7 @@ final readonly class TableRecreationStrategy
     public function __construct(
         private TransactionManagerInterface $transactions,
         private TableRecreationMetadataProviderInterface $metadata,
+        private ?QueryExecutorInterface $executor = null,
     ) {
     }
 
@@ -36,38 +40,42 @@ final readonly class TableRecreationStrategy
             $temporary = new QualifiedName($this->temporaryName($original));
             $final = $this->finalDefinition($definition, $builder);
 
-            $connection->execute('PRAGMA foreign_keys = OFF');
-            (new CreateTableBuilder(
+            $this->executeSql($connection, 'PRAGMA foreign_keys = OFF', $original->object->name);
+            $this->executeBuilder($connection, new CreateTableBuilder(
                 table: $temporary,
                 columns: $final->getColumns(),
                 foreignKeys: $final->getForeignKeys(),
                 checkConstraints: $final->getCheckConstraints(),
-            ))->execute($connection);
+            ));
 
             $columns = array_map(
                 static fn (\SQLCraft\Contracts\DDL\ColumnDefinitionInterface $column): string => $connection->quoteIdentifier($column->getName()),
                 $final->getColumns(),
             );
             $columnList = implode(', ', $columns);
-            $connection->execute(
+            $this->executeSql(
+                $connection,
                 'INSERT INTO ' . $connection->quoteIdentifier($temporary->object->name)
                 . ' (' . $columnList . ') SELECT ' . $columnList
                 . ' FROM ' . $connection->quoteIdentifier($original->object->name),
+                $original->object->name,
             );
 
-            (new DropTableBuilder($original))->execute($connection);
-            $connection->execute(
+            $this->executeBuilder($connection, new DropTableBuilder($original));
+            $this->executeSql(
+                $connection,
                 'ALTER TABLE ' . $connection->quoteIdentifier($temporary->object->name)
                 . ' RENAME TO ' . $connection->quoteIdentifier($original->object->name),
+                $original->object->name,
             );
 
             foreach ($final->getIndexes() as $index) {
                 if ($index->getType() !== IndexType::PRIMARY) {
-                    (new CreateIndexBuilder($original, $index))->execute($connection);
+                    $this->executeBuilder($connection, new CreateIndexBuilder($original, $index));
                 }
             }
             foreach ($final->getTriggers() as $trigger) {
-                (new CreateTriggerBuilder(
+                $this->executeBuilder($connection, new CreateTriggerBuilder(
                     $trigger->getName(),
                     $original,
                     $trigger->getTiming(),
@@ -75,14 +83,32 @@ final readonly class TableRecreationStrategy
                     $trigger->getBody(),
                     $trigger->getDefiner(),
                     $trigger->getForEach(),
-                ))->execute($connection);
+                ));
             }
 
-            $connection->execute('PRAGMA foreign_keys = ON');
+            $this->executeSql($connection, 'PRAGMA foreign_keys = ON', $original->object->name);
             if ($connection->query('PRAGMA foreign_key_check')->fetchAll() !== []) {
                 throw new ForeignKeyConstraintException('Table recreation produced foreign-key violations.');
             }
         });
+    }
+
+    private function executeBuilder(ConnectionInterface $connection, DdlBuilderInterface $builder): void
+    {
+        foreach ($builder->toSql($connection->getPlatform()) as $sql) {
+            $this->executeSql($connection, $sql, $this->objectName($builder));
+        }
+    }
+
+    private function executeSql(ConnectionInterface $connection, string $sql, string $objectName): void
+    {
+        if ($this->executor instanceof QueryExecutorInterface) {
+            $this->executor->executeDdl($connection, $sql, objectName: $objectName);
+
+            return;
+        }
+
+        $connection->execute($sql);
     }
 
     private function temporaryName(QualifiedName $original): Identifier
@@ -142,4 +168,14 @@ final readonly class TableRecreationStrategy
 
         return new TableRecreationDefinition($columns, $indexes, $foreignKeys, $checks, $definition->getTriggers());
     }
+
+    private function objectName(DdlBuilderInterface $builder): string
+    {
+        if ($builder instanceof ObjectNameAwareDdlBuilderInterface) {
+            return $builder->getObjectName();
+        }
+
+        return $builder::class;
+    }
+
 }

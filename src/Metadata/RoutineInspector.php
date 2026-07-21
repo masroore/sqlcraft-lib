@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SQLCraft\Metadata;
 
+use SQLCraft\Capabilities\Capability;
 use SQLCraft\Collections\RoutineCollection;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Metadata\RoutineInspectorInterface;
@@ -33,6 +34,7 @@ final class RoutineInspector implements RoutineInspectorInterface
     #[\Override]
     public function getRoutineDetail(ConnectionInterface $conn, QualifiedName $routine): RoutineMeta
     {
+        $this->requireCapability($conn, Capability::Routine);
         $row = $conn->query($conn->getPlatform()->getRoutineDetailSql($routine))->fetchAssoc();
         if ($row === null) {
             throw new ObjectNotFoundException(
@@ -47,6 +49,7 @@ final class RoutineInspector implements RoutineInspectorInterface
 
     private function collect(ConnectionInterface $conn, ?string $schema, string $type): RoutineCollection
     {
+        $this->requireCapability($conn, Capability::Routine);
         /** @var list<array<string, bool|float|int|string|null>> $rows */
         $rows = $conn->query($conn->getPlatform()->getRoutinesSql($schema))->fetchAll();
         $routines = [];
@@ -61,4 +64,16 @@ final class RoutineInspector implements RoutineInspectorInterface
 
         return new RoutineCollection($routines);
     }
+
+    private function requireCapability(ConnectionInterface $connection, Capability $capability): void
+    {
+        try {
+            $version = $connection->getServerVersion();
+        } catch (\Throwable) {
+            return;
+        }
+
+        $connection->getPlatform()->getCapabilitySet($version)->require($capability);
+    }
+
 }

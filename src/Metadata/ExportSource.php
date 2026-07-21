@@ -5,6 +5,11 @@ declare(strict_types=1);
 namespace SQLCraft\Metadata;
 
 use SQLCraft\Collections\ColumnCollection;
+use SQLCraft\Collections\DatabaseCollection;
+use SQLCraft\Contracts\Metadata\RoutineInspectorInterface;
+use SQLCraft\Contracts\Metadata\ServerInspectorInterface;
+use SQLCraft\Contracts\Metadata\TriggerInspectorInterface;
+use SQLCraft\ValueObjects\TriggerTiming;
 use SQLCraft\Collections\TableCollection;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Export\ExportSourceInterface;
@@ -20,6 +25,9 @@ final readonly class ExportSource implements ExportSourceInterface
     public function __construct(
         private TableInspectorInterface $tables,
         private ColumnInspectorInterface $columns,
+        private ?TriggerInspectorInterface $triggers = null,
+        private ?RoutineInspectorInterface $routines = null,
+        private ?ServerInspectorInterface $server = null,
     ) {
     }
 
@@ -62,6 +70,55 @@ final readonly class ExportSource implements ExportSourceInterface
             : $connection->quoteIdentifier($schema) . '.' . $connection->quoteIdentifier($table);
 
         return ['CREATE TABLE ' . $qualified . ' (' . implode(', ', $definitions) . ')'];
+    }
+
+
+    #[\Override]
+    public function getDatabases(ConnectionInterface $connection): DatabaseCollection
+    {
+        if (!$this->server instanceof ServerInspectorInterface) {
+            throw new \LogicException('Database introspection is not configured for this export source.');
+        }
+
+        return $this->server->getDatabases($connection);
+    }
+
+    /** @return list<string> */
+    #[\Override]
+    public function getTriggerDdl(ConnectionInterface $connection, string $table, ?string $schema = null): array
+    {
+        if (!$this->triggers instanceof TriggerInspectorInterface) {
+            return [];
+        }
+
+        $definitions = [];
+        foreach ($this->triggers->getTriggers($connection, $this->qualifiedName($connection, $table, $schema)) as $trigger) {
+            $sql = 'CREATE TRIGGER ' . $connection->quoteIdentifier($trigger->name)
+                . ' ' . $trigger->timing->value . ' ' . $trigger->event->value
+                . ' ON ' . $connection->quoteIdentifier($table)
+                . ' FOR EACH ROW ' . $trigger->body;
+            $definitions[] = $sql;
+        }
+
+        return $definitions;
+    }
+
+    /** @return list<string> */
+    #[\Override]
+    public function getRoutineDdl(ConnectionInterface $connection, ?string $schema = null): array
+    {
+        if (!$this->routines instanceof RoutineInspectorInterface) {
+            return [];
+        }
+
+        $definitions = [];
+        foreach ([$this->routines->getFunctions($connection, $schema), $this->routines->getProcedures($connection, $schema)] as $routines) {
+            foreach ($routines as $routine) {
+                $definitions[] = 'CREATE ' . $routine->type . ' ' . $connection->quoteIdentifier($routine->name) . ' ' . $routine->body;
+            }
+        }
+
+        return $definitions;
     }
 
     private function qualifiedName(ConnectionInterface $connection, string $table, ?string $schema): QualifiedName

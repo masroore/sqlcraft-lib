@@ -11,8 +11,9 @@ use SQLCraft\Contracts\Platform\DdlDialectInterface;
 use SQLCraft\ValueObjects\DataType;
 use SQLCraft\ValueObjects\QualifiedName;
 
-final readonly class CreateRoutineBuilder implements DdlBuilderInterface
+final readonly class CreateRoutineBuilder implements DdlBuilderInterface, \SQLCraft\Contracts\DDL\ObjectNameAwareDdlBuilderInterface
 {
+    use LegacyDdlExecution;
     /** @param list<RoutineParameterDefinitionInterface> $parameters */
     public function __construct(
         public QualifiedName $name,
@@ -33,11 +34,11 @@ final readonly class CreateRoutineBuilder implements DdlBuilderInterface
         return [$dialect->renderCreateRoutineStatement($this->name, $this->type, $this->parameters, $this->returnType, $this->body, $this->language, $this->deterministic, $this->orReplace)];
     }
 
+
     #[\Override]
-    public function execute(ConnectionInterface $connection): void
+    public function getObjectName(): string
     {
-        foreach ($this->toSql($connection->getPlatform()) as $sql) {
-            $connection->execute($sql);
-        }
+        return $this->name->object->name;
     }
+
 }

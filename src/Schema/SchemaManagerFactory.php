@@ -19,6 +19,7 @@ use SQLCraft\Metadata\RoutineInspector;
 use SQLCraft\Metadata\SequenceInspector;
 use SQLCraft\Metadata\ServerInspector;
 use SQLCraft\Metadata\SqliteMetadataFactory;
+use SQLCraft\Metadata\SqlServerMetadataFactory;
 use SQLCraft\Metadata\TableInspector;
 use SQLCraft\Metadata\TriggerInspector;
 use SQLCraft\Metadata\UserInspector;
@@ -55,6 +56,7 @@ final class SchemaManagerFactory
             'mysql', 'mariadb' => new MySQLMetadataFactory(),
             'pgsql' => new PostgreSQLMetadataFactory(),
             'sqlite' => new SqliteMetadataFactory(),
+            'sqlserver' => new SqlServerMetadataFactory(),
             default => throw new InvalidArgumentException(sprintf(
                 'No metadata factory is registered for platform %s.',
                 $connection->getPlatformName(),
