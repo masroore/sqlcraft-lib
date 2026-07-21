@@ -116,3 +116,4 @@
 - [x] T7: round-trip and large-file coverage — commit 42e6a05 — green — 2026-07-21
 - [ ] M7 gate: Import/Export acceptance review — not started
 - [x] T8: CSV import pipeline — commit 6590608 — green — 2026-07-21
+- [x] M7 gate: Import/Export acceptance review — commit bbdffda — green — 2026-07-21
