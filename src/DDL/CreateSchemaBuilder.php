@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SQLCraft\DDL;
 
 use SQLCraft\Contracts\Connection\ConnectionInterface;
+use SQLCraft\Capabilities\Capability;
 use SQLCraft\Contracts\DDL\DdlBuilderInterface;
 use SQLCraft\Contracts\Platform\DdlDialectInterface;
 use SQLCraft\ValueObjects\Identifier;
@@ -25,6 +26,8 @@ final readonly class CreateSchemaBuilder implements DdlBuilderInterface
     #[\Override]
     public function execute(ConnectionInterface $connection): void
     {
+        $connection->getPlatform()->getCapabilitySet($connection->getServerVersion())->require(Capability::Scheme);
+
         foreach ($this->toSql($connection->getPlatform()) as $sql) {
             $connection->execute($sql);
         }

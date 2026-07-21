@@ -6,6 +6,7 @@ namespace SQLCraft\Tests\Unit\DDL;
 
 use PHPUnit\Framework\TestCase;
 use SQLCraft\Capabilities\CapabilityNotSupportedException;
+use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Platform\DdlDialectInterface;
 use SQLCraft\DDL\CreateDatabaseBuilder;
 use SQLCraft\DDL\CreateSchemaBuilder;
@@ -17,6 +18,7 @@ use SQLCraft\DDL\UseDatabaseBuilder;
 use SQLCraft\Platform\MySQLPlatform;
 use SQLCraft\Platform\SqlitePlatform;
 use SQLCraft\ValueObjects\Identifier;
+use SQLCraft\ValueObjects\ServerVersion;
 
 final class SequenceSchemaBuilderTest extends TestCase
 {
@@ -53,6 +55,28 @@ final class SequenceSchemaBuilderTest extends TestCase
         self::assertSame(['CREATE SCHEMA "reporting"'], (new CreateSchemaBuilder(new Identifier('reporting')))->toSql($sqlite));
         self::assertSame(['DROP SCHEMA "reporting"'], (new DropSchemaBuilder(new Identifier('reporting')))->toSql($sqlite));
         self::assertSame(['USE "analytics"'], (new UseDatabaseBuilder(new Identifier('analytics')))->toSql($sqlite));
+    }
+
+    public function testSqliteRejectsSchemaCreationAtExecutionTime(): void
+    {
+        $connection = self::createMock(ConnectionInterface::class);
+        $connection->expects(self::once())->method('getPlatform')->willReturn(new SqlitePlatform());
+        $connection->expects(self::once())->method('getServerVersion')->willReturn(new ServerVersion('3.45.0'));
+
+        $this->expectException(CapabilityNotSupportedException::class);
+
+        (new CreateSchemaBuilder(new Identifier('reporting')))->execute($connection);
+    }
+
+    public function testSqliteRejectsSchemaDropAtExecutionTime(): void
+    {
+        $connection = self::createMock(ConnectionInterface::class);
+        $connection->expects(self::once())->method('getPlatform')->willReturn(new SqlitePlatform());
+        $connection->expects(self::once())->method('getServerVersion')->willReturn(new ServerVersion('3.45.0'));
+
+        $this->expectException(CapabilityNotSupportedException::class);
+
+        (new DropSchemaBuilder(new Identifier('reporting')))->execute($connection);
     }
 
     public function testMysqlRejectsNativeSequences(): void
