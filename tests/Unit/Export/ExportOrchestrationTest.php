@@ -120,7 +120,7 @@ final class ExportOrchestrationTest extends TestCase
         $executor = self::createMock(QueryExecutorInterface::class);
 
         $sink = new StringBufferSink();
-        (new TableDumper($source, $executor))->dump(
+        $rows = (new TableDumper($source, $executor))->dump(
             $connection,
             $table,
             new SqlFormatWriter($connection),
@@ -128,7 +128,9 @@ final class ExportOrchestrationTest extends TestCase
             new DumpOptions('sql', DumpScope::table('shop', 'orders'), dataStyle: DataStyle::None),
         );
 
+        self::assertSame(0, $rows);
         self::assertStringContainsString('ALTER TABLE "orders" AUTO_INCREMENT = 42;', $sink->contents());
+        self::assertStringEndsWith("\n\n", $sink->contents());
     }
 
     public function testTableDumperEmitsRequestedTriggerAndRoutineDdl(): void
@@ -137,8 +139,8 @@ final class ExportOrchestrationTest extends TestCase
         $table = new TableStatus('orders');
         $source = self::createMock(ExportSourceInterface::class);
         $source->expects(self::once())->method('getTableDdl')->willReturn(['CREATE TABLE "orders" ("id" INT)']);
-        $source->expects(self::once())->method('getTriggerDdl')->with($connection, 'orders', null)->willReturn(['CREATE TRIGGER audit']);
-        $source->expects(self::once())->method('getRoutineDdl')->with($connection, null)->willReturn(['CREATE FUNCTION total']);
+        $source->expects(self::once())->method('getTriggerDdl')->with($connection, 'orders', null)->willReturn(['CREATE TRIGGER audit', 'CREATE TRIGGER audit_2']);
+        $source->expects(self::once())->method('getRoutineDdl')->with($connection, null)->willReturn(['CREATE FUNCTION total', 'CREATE FUNCTION count']);
 
         $sink = new StringBufferSink();
         (new TableDumper($source, self::createMock(QueryExecutorInterface::class)))->dump(
@@ -156,7 +158,9 @@ final class ExportOrchestrationTest extends TestCase
         );
 
         self::assertStringContainsString('CREATE TRIGGER audit;', $sink->contents());
+        self::assertStringContainsString('CREATE TRIGGER audit_2;', $sink->contents());
         self::assertStringContainsString('CREATE FUNCTION total;', $sink->contents());
+        self::assertStringContainsString('CREATE FUNCTION count;', $sink->contents());
     }
 
     public function testTableDumperDoesNotEmitOptionalDdlWhenFlagsAreFalse(): void
