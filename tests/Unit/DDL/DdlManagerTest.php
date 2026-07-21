@@ -6,8 +6,12 @@ namespace SQLCraft\Tests\Unit\DDL;
 
 use PHPUnit\Framework\TestCase;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
+use SQLCraft\Contracts\DDL\TableRecreationMetadataProviderInterface;
 use SQLCraft\Contracts\Execution\QueryExecutorInterface;
+use SQLCraft\Contracts\Execution\TransactionManagerInterface;
+use SQLCraft\DDL\AlterTableBuilder;
 use SQLCraft\DDL\CreateViewBuilder;
+use SQLCraft\DDL\Sqlite\TableRecreationStrategy;
 use SQLCraft\DDL\DdlManager;
 use SQLCraft\Platform\SqlitePlatform;
 use SQLCraft\ValueObjects\Identifier;
@@ -24,6 +28,25 @@ final class DdlManagerTest extends TestCase
         $builder = new CreateViewBuilder(new QualifiedName(new Identifier('active_users')), 'SELECT 1');
 
         self::assertSame(['CREATE VIEW "active_users" AS SELECT 1'], (new DdlManager($executor))->preview($connection, $builder));
+    }
+
+    public function testSqliteAlterUsesConfiguredRecreationStrategy(): void
+    {
+        $connection = self::createMock(ConnectionInterface::class);
+        $connection->expects(self::once())->method('getPlatformName')->willReturn('sqlite');
+        $transactions = self::createMock(TransactionManagerInterface::class);
+        $transactions->expects(self::once())->method('transactional')->with(
+            $connection,
+            self::isInstanceOf(\Closure::class),
+        );
+        $metadata = self::createMock(TableRecreationMetadataProviderInterface::class);
+        $executor = self::createMock(QueryExecutorInterface::class);
+        $executor->expects(self::never())->method('executeDdl');
+        $builder = (new AlterTableBuilder(new QualifiedName(new Identifier('users'))))
+            ->dropColumn(new Identifier('obsolete'));
+
+        (new DdlManager($executor, new TableRecreationStrategy($transactions, $metadata)))
+            ->execute($connection, $builder);
     }
 
     public function testExecuteRoutesEveryStatementThroughQueryExecutor(): void

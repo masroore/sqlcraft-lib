@@ -9,9 +9,11 @@ use PHPUnit\Framework\TestCase;
 use SQLCraft\Connection\PdoConnection;
 use SQLCraft\Connection\PdoExceptionTranslator;
 use SQLCraft\Connection\TransactionManager;
+use SQLCraft\Contracts\Execution\QueryExecutorInterface;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\DDL\TableRecreationMetadataProviderInterface;
 use SQLCraft\DDL\AlterTableBuilder;
+use SQLCraft\DDL\DdlManager;
 use SQLCraft\DDL\Definition\ColumnDefinition;
 use SQLCraft\DDL\Definition\TableRecreationDefinition;
 use SQLCraft\DDL\Sqlite\TableRecreationStrategy;
@@ -49,12 +51,36 @@ final class SqliteTableRecreationIntegrationTest extends TestCase
             }
         };
 
-        (new TableRecreationStrategy(new TransactionManager(), $provider))->execute(
+        $executor = self::createMock(QueryExecutorInterface::class);
+        $executor->expects(self::never())->method('executeDdl');
+        (new DdlManager($executor, new TableRecreationStrategy(new TransactionManager(), $provider)))->execute(
             $connection,
             (new AlterTableBuilder(new QualifiedName(new Identifier('users'))))->dropColumn(new Identifier('obsolete')),
         );
 
         self::assertSame(['id', 'name'], array_column($connection->query('PRAGMA table_info(users)')->fetchAll(), 'name'));
         self::assertSame([['id' => 1, 'name' => 'Ada']], $connection->query('SELECT id, name FROM users')->fetchAll());
+    }
+
+    public function testAddAndRenameColumnOperationsWorkAgainstSqliteFile(): void
+    {
+        $path = tempnam(sys_get_temp_dir(), 'sqlcraft-');
+        self::assertNotFalse($path);
+
+        try {
+            $pdo = new PDO('sqlite:' . $path);
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $connection = new PdoConnection($pdo, new SqlitePlatform(), new PdoExceptionTranslator(), databaseName: 'main');
+            $connection->execute('CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT NOT NULL)');
+
+            (new AlterTableBuilder(new QualifiedName(new Identifier('users'))))->withColumn(
+                new ColumnDefinition('email', new DataType('TEXT'), true, false, false, false, DefaultValue::nullValue(), null, null, null, [], null, null),
+            )->execute($connection);
+            (new AlterTableBuilder(new QualifiedName(new Identifier('users'))))->renameTo(new Identifier('people'))->execute($connection);
+
+            self::assertSame(['id', 'name', 'email'], array_column($connection->query('PRAGMA table_info(people)')->fetchAll(), 'name'));
+        } finally {
+            unlink($path);
+        }
     }
 }
