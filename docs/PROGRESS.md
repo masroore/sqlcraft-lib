@@ -101,3 +101,5 @@
 - [x] T8: M6 acceptance gate — commit pending — green — 2026-07-21
 ## M7 — Import/Export
 - [ ] T1: sinks and format writer contracts — not started
+- [x] T1: export sinks — commit f2439ec — green — 2026-07-21
+- [ ] T2: format writer contracts and dump options hardening — not started
