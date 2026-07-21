@@ -135,7 +135,7 @@
 - [x] T5c: platform capability event emission — commit d60a0df — green — 2026-07-21
 - [x] T6: typed structural-SQL validation audit — commit 2df4ef4 — green — 2026-07-21
 - [x] T7: credentials, redaction, and resource limits — commit 4e1685c — green — 2026-07-21
-- [ ] T8: M9 acceptance gate — not started
+- [x] T8: M9 acceptance gate — commit HEAD — green — 2026-07-21
 
 ## M10 — Documentation & v1.0
 - [ ] T1: examples and README — not started
