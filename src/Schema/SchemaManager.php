@@ -31,6 +31,8 @@ use SQLCraft\Contracts\Metadata\DatabaseInspectorInterface;
 use SQLCraft\Contracts\Metadata\ForeignKeyInspectorInterface;
 use SQLCraft\Contracts\Metadata\IndexInspectorInterface;
 use SQLCraft\Contracts\Metadata\MetadataCacheInterface;
+use SQLCraft\Contracts\Metadata\PrivilegeInspectorInterface;
+use SQLCraft\Collections\PrivilegeCollection;
 use SQLCraft\Contracts\Metadata\RoutineInspectorInterface;
 use SQLCraft\Contracts\Metadata\SequenceInspectorInterface;
 use SQLCraft\Contracts\Metadata\ServerInspectorInterface;
@@ -65,6 +67,7 @@ final class SchemaManager implements SchemaManagerInterface
         private readonly UserInspectorInterface $userInspector,
         private readonly ?MetadataCacheInterface $cache = null,
         private readonly ?SchemaEventDispatcherInterface $events = null,
+        private readonly ?PrivilegeInspectorInterface $privilegeInspector = null,
     ) {
     }
 
@@ -86,6 +89,15 @@ final class SchemaManager implements SchemaManagerInterface
     public function lazyTables(ConnectionInterface $conn, ?string $schema = null): LazyCollection
     {
         return new LazyCollection(fn (): iterable => $this->getTables($conn, $schema));
+    }
+
+    public function getPrivileges(ConnectionInterface $conn, ?string $user = null, ?QualifiedName $object = null): PrivilegeCollection
+    {
+        if (!$this->privilegeInspector instanceof PrivilegeInspectorInterface) {
+            return new PrivilegeCollection([]);
+        }
+
+        return $this->privilegeInspector->getPrivileges($conn, $user, $object);
     }
 
     public function getServerInfo(ConnectionInterface $conn): ServerInfo

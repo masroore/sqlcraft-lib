@@ -17,6 +17,7 @@ use SQLCraft\Metadata\IndexInspector;
 use SQLCraft\Metadata\MetadataFactoryInterface;
 use SQLCraft\Metadata\MySQLMetadataFactory;
 use SQLCraft\Metadata\PostgreSQLMetadataFactory;
+use SQLCraft\Metadata\PrivilegeInspector;
 use SQLCraft\Metadata\RoutineInspector;
 use SQLCraft\Metadata\SequenceInspector;
 use SQLCraft\Metadata\ServerInspector;
@@ -51,6 +52,7 @@ final class SchemaManagerFactory
             userInspector: new UserInspector($factory),
             cache: $cache,
             events: $events,
+            privilegeInspector: new PrivilegeInspector(),
         );
     }
 

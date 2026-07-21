@@ -40,6 +40,8 @@ enum Capability: string
     case Privileges = 'privileges';
     case Sql = 'sql';
     case QueryTimeout = 'query_timeout';
+    case UserManagement = 'user_management';
+    case PrivilegeManagement = 'privilege_management';
     case Dump = 'dump';
     case Partitions = 'partitions';
 }

@@ -9,6 +9,8 @@ use SQLCraft\Contracts\Execution\QueryExecutorInterface;
 use SQLCraft\Contracts\Query\PaginatorInterface;
 use SQLCraft\Contracts\Schema\SchemaManagerInterface;
 use SQLCraft\Contracts\Security\SecurityGuardInterface;
+use SQLCraft\Contracts\Security\UserManagerInterface;
+use SQLCraft\Contracts\Security\PrivilegeManagerInterface;
 use SQLCraft\DDL\DdlManager;
 use SQLCraft\Export\Exporter;
 use SQLCraft\Import\Importer;
@@ -26,6 +28,8 @@ final readonly class DatabaseSession
         private Exporter $exporter,
         private Importer $importer,
         private SecurityGuardInterface $security,
+        private UserManagerInterface $users,
+        private PrivilegeManagerInterface $privileges,
     ) {
     }
 
@@ -53,6 +57,16 @@ final readonly class DatabaseSession
     public function security(): SecurityGuardInterface
     {
         return $this->security;
+    }
+
+    public function users(): UserManagerInterface
+    {
+        return $this->users;
+    }
+
+    public function privileges(): PrivilegeManagerInterface
+    {
+        return $this->privileges;
     }
 
     public function export(): Exporter

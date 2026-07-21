@@ -44,7 +44,10 @@ use SQLCraft\Query\StatementSplitter;
 use SQLCraft\Schema\CacheInvalidationListener;
 use SQLCraft\Schema\NullMetadataCache;
 use SQLCraft\Schema\SchemaManagerFactory;
-use SQLCraft\Security\DenySecurityGuard;
+use SQLCraft\Security\PrivilegeGuard;
+use SQLCraft\Security\PrivilegeManager;
+use SQLCraft\Security\UserManager;
+use SQLCraft\Metadata\PrivilegeInspector;
 use SQLCraft\ValueObjects\ConnectionParameters;
 
 final class SQLCraftFactory
@@ -130,7 +133,9 @@ final class SQLCraftFactory
             $queryExecutor,
             $exporter,
             $importer,
-            new DenySecurityGuard(),
+            new PrivilegeGuard($connection, new PrivilegeInspector()),
+            new UserManager($connection, $queryExecutor),
+            new PrivilegeManager($connection, $queryExecutor),
         );
     }
 
