@@ -2,9 +2,9 @@
 
 > Status: **Planning phase. No code exists yet.**
 > Last updated: 2026-07-20
-> Exhaustive inventory of every Adminer capability, mapped to the SQLCraft module that owns it, the `Capability` enum value that gates it, and per-engine variance notes. Nothing from the operation surface in the master brief is omitted.
+> Inventory of the v1 operation surface, mapped to the SQLCraft module that owns each capability and the per-engine variance notes. The v1 engine set is SQLite, MySQL, MariaDB, PostgreSQL, and Microsoft SQL Server. **Oracle is deferred; Oracle comparison notes below describe future scope only.**
 
-Legend for the coverage matrix at the end: **F** = Full support, **P** = Partial support (engine-specific caveat noted), **A** = Absent (engine has no equivalent concept).
+Legend for the coverage matrix at the end: **F** = Full support, **P** = Partial support (engine-specific caveat noted), **A** = Absent (engine has no equivalent concept). The matrix has five v1 engine columns; Oracle is not a v1 coverage column.
 
 ---
 
@@ -96,7 +96,7 @@ Legend for the coverage matrix at the end: **F** = Full support, **P** = Partial
 |---|---|---|---|
 | List foreign keys | Metadata | *(none — baseline)* | `ForeignKey` → `ForeignKeyDefinition` VO |
 | Create/drop foreign key | DDL | `Capability::ForeignKeys` | SQLite requires `PRAGMA foreign_keys` enabled at runtime; enforcement is opt-in per-connection |
-| Composite foreign keys (multi-column) | DDL | `Capability::ForeignKeys` | All 6 engines support multi-column FKs |
+| Composite foreign keys (multi-column) | DDL | `Capability::ForeignKeys` | All five v1 engines support multi-column FKs; Oracle is deferred |
 | Cross-database/cross-schema foreign keys | DDL | `Capability::CrossSchemaForeignKeys` | MSSQL/PG support cross-schema within same DB; cross-database FKs largely unsupported everywhere except MySQL/MariaDB (same server) |
 | ON DELETE / ON UPDATE actions | DDL | *(none — baseline)* | Action set (`RESTRICT|NO ACTION|CASCADE|SET NULL|SET DEFAULT`) varies slightly; SQLite lacks `SET DEFAULT` reliability pre-3.x |
 | Deferrable constraints | DDL | `Capability::DeferrableForeignKeys` | PostgreSQL/Oracle native `DEFERRABLE INITIALLY {DEFERRED|IMMEDIATE}`; MySQL/MariaDB/SQLite/MSSQL absent |
@@ -132,7 +132,7 @@ Legend for the coverage matrix at the end: **F** = Full support, **P** = Partial
 
 | Feature | SQLCraft Module | Capability | Notes |
 |---|---|---|---|
-| List triggers | Metadata | `Capability::Triggers` | SQLite supports triggers; all 6 engines support table triggers |
+| List triggers | Metadata | `Capability::Triggers` | SQLite supports triggers; all five v1 engines support table triggers |
 | Create/alter/drop trigger | DDL | `Capability::Triggers` | — |
 | Timing (BEFORE/AFTER/INSTEAD OF) | DDL | `Capability::Triggers` / `Capability::ViewTriggers` | `INSTEAD OF` only on views, see §8 |
 | Event granularity (INSERT/UPDATE/DELETE, per-column) | DDL | `Capability::Triggers` | PG supports column-specific `UPDATE OF col` triggers; others are table-wide per-event |
@@ -186,7 +186,7 @@ Legend for the coverage matrix at the end: **F** = Full support, **P** = Partial
 | Execute raw SQL command | Execution | *(none — baseline)* | `ExecutionService::execute()` |
 | Multi-statement execution | Execution | `Capability::MultiStatement` | PDO driver-dependent; some drivers (e.g. `pdo_pgsql`) do not support multiple statements in one prepared call reliably — gated explicitly rather than assumed |
 | Custom statement delimiter | Execution | `Capability::CustomDelimiter` | Relevant mainly for routine/trigger bodies containing `;` — a parsing concern in the Execution/Import layer, not a server capability per se |
-| EXPLAIN plan | Execution | `Capability::ExplainPlan` | All 6 engines support some form (`EXPLAIN`, `EXPLAIN ANALYZE`, MSSQL `SET SHOWPLAN_ALL`) |
+| EXPLAIN plan | Execution | `Capability::ExplainPlan` | All five v1 engines support some form (`EXPLAIN`, `EXPLAIN ANALYZE`, MSSQL `SET SHOWPLAN_ALL`) |
 | Query warnings | Execution | `Capability::QueryWarnings` | MySQL/MariaDB `SHOW WARNINGS`; others surface via SQLSTATE/notices differently |
 | Query history | *(explicitly out of scope for persistence)* | — | SQLCraft may emit a `QueryExecuted` event (see `16-events.md`) that a consumer can persist; SQLCraft itself does not store history |
 
@@ -248,48 +248,50 @@ Covered inline in §3 (Analyze/Optimize/Check/Repair/Vacuum) to keep table-lifec
 
 ---
 
-## Coverage Matrix — Feature × Initial Six Engines
+## Coverage Matrix — Feature × Five v1 Engines
 
-| Feature Category | MySQL | MariaDB | PostgreSQL | SQLite | MSSQL | Oracle |
-|---|---|---|---|---|---|---|
-| Schemas/Namespaces | A | A | F | A | F | P (schemas ≈ users) |
-| Table engines (storage engine choice) | F | F | A | A | A | A |
-| Table comment | F | F | F | A | P (ext. properties) | F |
-| Materialized views | A | A | F | A | P (indexed views, partial analogue) | F |
-| View triggers (INSTEAD OF) | A | A | F | F | F | F |
-| Stored procedures | F | F | F | A | F | F |
-| Stored functions | F | F | F | A | F | F |
-| Multiple routine languages | A | A | F | A | A | F (PL/SQL + Java) |
-| Events/Scheduler | F | F | A | A | A | A |
-| Sequences | A | P (10.3+) | F | A | F (2012+) | F |
-| User-defined types | A | A | F | A | F | F |
-| Check constraints | F (8.0.16+) | F (10.2+) | F | F | F | F |
-| Deferrable foreign keys | A | A | F | A | A | F |
-| Fulltext index | F | F | P (via tsvector/GIN, different mechanism) | P (via FTS3/4/5 virtual tables) | F | P (Oracle Text, separate feature set) |
-| Spatial index | F | F | P (via PostGIS extension) | P (via SpatiaLite extension) | F | P (Oracle Spatial) |
-| Vector index | P (9.x+) | A | P (via pgvector extension) | A | A | A |
-| Descending index columns | P (8.0+) | P (varies) | F | P (3.30+) | F | F |
-| Partial indexes | A | A | F | F | A (filtered indexes are a distinct near-equivalent) | A |
-| Index prefix length | F | F | A | A | A | A |
-| Generated/computed columns | F | F | F (12+) | F (3.31+) | F | F |
-| Auto-increment / identity | F | F | F (SERIAL/IDENTITY) | F | F | F (12c+ IDENTITY, or sequence+trigger) |
-| Column comments | F | F | F | A | P (ext. properties) | F |
-| ENUM/SET native types | F | F | P (via CREATE TYPE) | A | A | A |
-| Partitioning | F | F | F | A | P (Enterprise-oriented features) | F |
-| Table inheritance | A | A | F | A | A | A |
-| Roles distinct from users | P (8.0+) | P (10.0.5+) | F (unified) | A | F | F |
-| Column-level privileges | F | F | F | A | F | P (limited) |
-| Cross-schema foreign keys | A (no schema concept) | A | F | A | F | P (via synonyms) |
-| Process list / kill | F | F | F | A | F | P (via v$session) |
-| Analyze / Optimize / Check / Repair | F (legacy MyISAM-era ops partly deprecated on InnoDB) | F | P (ANALYZE/VACUUM, different semantics) | P (ANALYZE/integrity_check, different semantics) | P (stats update, different semantics) | P (DBMS_STATS, different semantics) |
-| Multi-statement execution | P (driver-dependent) | P | P | F | F | P |
-| CSV/TSV import & export | F | F | F | F | F | F |
-| User/privilege management | F | F | F | A (no user model) | F | F |
+| Feature Category | MySQL | MariaDB | PostgreSQL | SQLite | MSSQL |
+|---|---|---|---|---|---|
+| Schemas/Namespaces | A | A | F | A | F |
+| Table engines (storage engine choice) | F | F | A | A | A |
+| Table comment | F | F | F | A | P (ext. properties) |
+| Materialized views | A | A | F | A | P (indexed views, partial analogue) |
+| View triggers (INSTEAD OF) | A | A | F | F | F |
+| Stored procedures | F | F | F | A | F |
+| Stored functions | F | F | F | A | F |
+| Multiple routine languages | A | A | F | A | A |
+| Events/Scheduler | F | F | A | A | A |
+| Sequences | A | P (10.3+) | F | A | F (2012+) |
+| User-defined types | A | A | F | A | F |
+| Check constraints | F (8.0.16+) | F (10.2+) | F | F | F |
+| Deferrable foreign keys | A | A | F | A | A |
+| Fulltext index | F | F | P (via tsvector/GIN, different mechanism) | P (via FTS3/4/5 virtual tables) | F |
+| Spatial index | F | F | P (via PostGIS extension) | P (via SpatiaLite extension) | F |
+| Vector index | P (9.x+) | A | P (via pgvector extension) | A | A |
+| Descending index columns | P (8.0+) | P (varies) | F | P (3.30+) | F |
+| Partial indexes | A | A | F | F | A (filtered indexes are a distinct near-equivalent) |
+| Index prefix length | F | F | A | A | A |
+| Generated/computed columns | F | F | F (12+) | F (3.31+) | F |
+| Auto-increment / identity | F | F | F (SERIAL/IDENTITY) | F | F |
+| Column comments | F | F | F | A | P (ext. properties) |
+| ENUM/SET native types | F | F | P (via CREATE TYPE) | A | A |
+| Partitioning | F | F | F | A | P (Enterprise-oriented features) |
+| Table inheritance | A | A | F | A | A |
+| Roles distinct from users | P (8.0+) | P (10.0.5+) | F (unified) | A | F |
+| Column-level privileges | F | F | F | A | F |
+| Cross-schema foreign keys | A (no schema concept) | A | F | A | F |
+| Process list / kill | F | F | F | A | F |
+| Analyze / Optimize / Check / Repair | F (legacy MyISAM-era ops partly deprecated on InnoDB) | F | P (ANALYZE/VACUUM, different semantics) | P (ANALYZE/integrity_check, different semantics) | P (stats update, different semantics) |
+| Multi-statement execution | P (driver-dependent) | P | P | F | F |
+| CSV/TSV import & export | F | F | F | F | F |
+| User/privilege management | F | F | F | A (no user model) | F |
 
 This matrix is the authoritative source for `Capability` map defaults in `08-capability-model.md` — any platform implementation that diverges from a `Full` or `Absent` marker here without a documented reason should be treated as a bug in the capability map, not in this inventory.
 
 
 ## Explicit DDL scope decisions
+
+- **Oracle driver/platform:** deferred from v1.0; no Oracle capability, metadata, or DDL implementation ships in this release.
 
 The following feature groups are intentionally deferred from v1.0 because engine semantics are uneven or the implementation cost is disproportionate to the baseline admin workflow:
 

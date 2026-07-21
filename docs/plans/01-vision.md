@@ -104,7 +104,7 @@ A v1.0 release is successful when:
 
 5. **Memory-safe export:** Exporting a database larger than `memory_limit` completes without a fatal error. The export API uses generators throughout.
 
-6. **Feature parity with Adminer on all 6 initial engines:** Every operation listed in `04-feature-inventory.md` for MySQL, MariaDB, PostgreSQL, SQLite, MSSQL, and Oracle is either implemented, or has a `Capability` entry explicitly marking it absent for that engine.
+6. **Feature parity with Adminer on the five v1 engines:** Every operation listed in `04-feature-inventory.md` for MySQL, MariaDB, PostgreSQL, SQLite, and MSSQL is either implemented, or has a `Capability` entry explicitly marking it absent for that engine. Oracle is deferred.
 
 ---
 
@@ -140,7 +140,7 @@ if (!$platform->supports(Capability::MaterializedViews)) {
 ```
 
 v1.0 ships with:
-- All 6 initial drivers (MySQL, MariaDB, PostgreSQL, SQLite, MSSQL, Oracle)
+- All five v1 drivers (MySQL, MariaDB, PostgreSQL, SQLite, MSSQL)
 - Full metadata introspection
 - Full DDL for tables, columns, indexes, foreign keys, views
 - Data CRUD + browse with pagination
@@ -150,4 +150,4 @@ v1.0 ships with:
 - User/privilege management
 - PSR-14 event bus integration
 - PHPStan max + Psalm max clean
-- Integration test suite covering all 6 engines via Docker
+- Integration test suite covering all five v1 engines via Docker

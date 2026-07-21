@@ -221,7 +221,7 @@ abstract class AbstractImmutableCollection implements \IteratorAggregate, \Count
 | `ConnectionPool` | Final class | Simple pool for applications needing concurrent connections |
 | `TransactionManager` | Final class | Savepoint-aware transaction nesting |
 | `StatementResult` | Readonly DTO | Raw result rows + affected count + last-insert-id |
-| `QueryLogger` | Interface | Optional PSR-3-compatible query log hook |
+| `QueryLogger` | Interface | Deferred optional PSR-3-compatible query log hook; not part of the v1 public contract |
 
 **Key interface sketch:**
 
@@ -268,17 +268,16 @@ interface ConnectionInterface
 
 | Name | Type | Purpose |
 |------|------|---------|
-| `DriverRegistry` | Final class | Static factory registry; third parties register drivers here |
+| `DriverRegistry` | Final class | Instance-backed registry; third parties register drivers at bootstrap |
 | `MySQLDriver` | Final class | MySQL/MariaDB connection factory |
 | `PostgreSQLDriver` | Final class | PostgreSQL connection factory |
 | `SqliteDriver` | Final class | SQLite connection factory |
 | `SqlServerDriver` | Final class | MS SQL Server connection factory |
-| `OracleDriver` | Final class | Oracle connection factory |
-| `AbstractDriver` | Abstract class | Optional helper base; implements `getName()` boilerplate |
+| `AbstractDriver` | Abstract class | Deferred optional helper; built-in drivers implement the interface directly |
 | `ConnectionParameters` | Readonly VO | Structured DSN fields (host, port, db, user, pass, ssl, extras) |
 | `DriverNotFoundException` | Exception | Unknown driver name requested |
 
-**Public API:** `DriverRegistry`, `ConnectionParameters`.
+**Public API:** `DriverRegistry`, `ConnectionParameters`. `DriverRegistry` is instance-based; construct it with built-in or consumer-provided drivers.
 
 **Internal:** Concrete driver classes (callers work via `DriverInterface`).
 
@@ -288,7 +287,7 @@ interface ConnectionInterface
 
 **Absorbs from Adminer:** Global `$driver`, `$_GET['driver']` selection, `PdoDb` connect logic.
 
-**Extension points:** Third-party packages implement `DriverInterface` and call `DriverRegistry::register()`.
+**Extension points:** Third-party packages implement `DriverInterface` and call `$registry->register($driver)` on their injected `DriverRegistry` instance.
 
 **Testing seam:** Implement a `FakeDriver` returning a `MockConnection` for unit tests.
 
@@ -310,7 +309,6 @@ interface ConnectionInterface
 | `PostgreSQLPlatform` | Final class | PgSQL dialect ($n params, schemas, bytea, sequences) |
 | `SqlitePlatform` | Final class | SQLite dialect (limited DDL, rowid, no procedures) |
 | `SqlServerPlatform` | Final class | MSSQL dialect ([bracket] quoting, TOP pagination, schemas) |
-| `OraclePlatform` | Final class | Oracle dialect (rownum subquery, CONNECT BY, dual) |
 | `PlatformCapabilityResolver` | Final class | Evaluates version predicates; produces `CapabilitySet` |
 
 **Public API:** All platform classes (via `PlatformInterface`); `PlatformCapabilityResolver`.
@@ -382,7 +380,7 @@ interface ConnectionInterface
 
 **Exceptions:** Exception class hierarchy only. `final` classes; typed properties. Depends on Contracts, ValueObjects.
 
-**Support:** Pure utility functions: `StringUtil`, `TypeUtil`, `ArrayUtil`. No domain logic, no DB. Depends on nothing.
+**Support:** Pure utility functions: `StringUtil`, `TypeUtil`, `ArrayUtil`, and `SecretRedactor` for credential-safe diagnostic text. No domain logic, no DB. Depends on nothing.
 
 **Utilities:** Higher-level helpers: `PaginationCalculator` (page/total → offset/limit), `IdentifierSanitizer` (strips dangerous characters from user input before it reaches an `Identifier` VO). Depends on Support only.
 

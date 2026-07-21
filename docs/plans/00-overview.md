@@ -1,6 +1,6 @@
 # SQLCraft Planning — 00: Overview
 
-> Status: **Planning phase. No code exists yet.**
+> Status: **Implemented release-candidate reference.** Gap-analysis phases 1–7 are complete; phase 8 documentation/config cleanup and phase 9 release verification remain.
 > Last updated: 2026-07-20
 
 ---
@@ -43,8 +43,7 @@ Every framework application that needs a DB-admin panel today must either embed 
   └────────────────────────┬─────────────────────────────────────┘
                            │ calls
   ┌────────────────────────▼─────────────────────────────────────┐
-  │                    SQLCraft Facade                           │
-  │         SQLCraft\Facade  /  ServiceContainer (opt.)          │
+  │                    SQLCraftFactory / DatabaseSession          │
   └──┬──────┬──────┬──────┬───────┬───────────┬─────────────────┘
      │      │      │      │       │           │
   ┌──▼──┐ ┌─▼──┐ ┌─▼──┐ ┌▼────┐ ┌▼────────┐ ┌▼──────────────┐
@@ -54,15 +53,14 @@ Every framework application that needs a DB-admin panel today must either embed 
      │      │      │      │       │                  │
   ┌──▼──────▼──────▼──────▼───────▼──────────────────▼────────┐
   │                Platform / Driver Layer                      │
-  │   PlatformInterface → MySQLPlatform / PgSQLPlatform /      │
-  │   SQLitePlatform / MSSQLPlatform / OraclePlatform /        │
-  │   MariaDBPlatform   (implements DriverInterface)            │
+  │   PlatformInterface → MySQL / MariaDB / PostgreSQL /       │
+  │   SQLite / SQL Server platforms (implements DriverInterface)│
   └────────────────────────┬────────────────────────────────────┘
                            │ wraps
   ┌────────────────────────▼────────────────────────────────────┐
   │                 Connection Layer                             │
   │    ConnectionInterface → PdoConnection → \PDO               │
-  │    ConnectionPool / LazyConnection / ReadReplicaConnection   │
+  │    ConnectionManager / TransactionManager                  │
   └─────────────────────────────────────────────────────────────┘
 
   Cross-cutting concerns (span every layer):
@@ -80,33 +78,20 @@ Adminer (at `adminer/`) is used exclusively as a **behavioral specification** �
 
 ---
 
-## Reading Guide — All 26 Planning Documents
+## Reading Guide
 
-| # | File | One-Line Summary |
-|---|---|---|
-| 00 | `00-overview.md` | Executive summary, ASCII architecture, reading guide (this file) |
-| 01 | `01-vision.md` | Long-term vision, design goals, personas, success metrics, v1.0 definition |
-| 02 | `02-guiding-principles.md` | Engineering principles: SOLID, immutability, DI, capability-driven, PHP 8.4 idioms |
-| 03 | `03-adminer-analysis.md` | Deep Adminer reverse-engineering: 4-class model, request lifecycle, debts, lessons |
-| 04 | `04-feature-inventory.md` | Exhaustive feature-to-module mapping with per-engine coverage matrix |
-| 05 | `05-namespace-structure.md` | Full PSR-4 namespace tree, bounded contexts, file layout conventions |
-| 06 | `06-connection-layer.md` | ConnectionInterface, PdoConnection, pool, lazy/read-replica, DSN builders |
-| 07 | `07-driver-platform.md` | DriverInterface, PlatformInterface, per-engine implementations, flavor/sub-vendor gating |
-| 08 | `08-capability-model.md` | Capability enum, per-platform capability maps, CapabilityAware trait, guard helpers |
-| 09 | `09-metadata-schema.md` | All introspection VOs (TableStatus, Field, Index, ForeignKey, Trigger, Routine …) |
-| 10 | `10-ddl-service.md` | DDL generation API: CREATE/ALTER/DROP for tables, columns, indexes, constraints |
-| 11 | `11-query-service.md` | Type-safe SELECT/INSERT/UPDATE/DELETE builders, pagination, FK navigation |
-| 12 | `12-execution-service.md` | Raw SQL execution, multi-statement, explain, warnings, query history |
-| 13 | `13-import-service.md` | Chunked SQL/CSV/TSV import, progress callbacks, transaction strategies |
-| 14 | `14-export-service.md` | Streaming dump: SQL/CSV/TSV, gzip/bzip2/tar, scope (db/table/all), options |
-| 15 | `15-security-service.md` | User/role management, GRANT/REVOKE matrix, privilege VOs, password hashing |
-| 16 | `16-events.md` | PSR-14 event bus integration, event catalog, before/after hooks |
-| 17 | `17-exceptions.md` | Exception hierarchy: ConnectionException, QueryException, CapabilityException … |
-| 18 | `18-value-objects.md` | Immutable VOs: Identifier, QualifiedName, Collation, Charset, Limit, Page … |
-| 19 | `19-collections.md` | Typed collection classes (TableCollection, FieldCollection, IndexCollection …) |
-| 20 | `20-dto-patterns.md` | DTO design for insert/update/schema-change commands; readonly class conventions |
-| 21 | `21-testing-strategy.md` | Unit, integration, contract tests; driver test matrix; fake/stub connection |
-| 22 | `22-extension-points.md` | How to add a new driver, new capability, new export format; plugin contract |
-| 23 | `23-streaming-memory.md` | Memory-efficient patterns: generators, chunked reads, resource handles for BLOBs |
-| 24 | `24-security-model.md` | Input validation, SQL injection prevention, identifier quoting, privilege escalation guard |
-| 25 | `25-versioning-stability.md` | SemVer policy, stability annotations, deprecation, BC break protocol |
+| Topic | Authoritative document |
+|---|---|
+| Vision and principles | `01-vision.md`, `02-guiding-principles.md` |
+| Domain model | `05-domain-model.md` |
+| Architecture and modules | `06-package-architecture.md`, `07-module-breakdown.md` |
+| Drivers and capabilities | `08-driver-architecture.md`, `09-capability-model.md` |
+| Connections | `10-connection-layer.md` |
+| Schema and DDL | `11-schema-services.md`, `13-ddl-services.md` |
+| Query engine | `12-query-engine.md` |
+| Import/export | `14-import-export.md` |
+| Security and events | `15-security.md`, `16-events.md` |
+| Public API and packaging | `18-public-api.md`, `19-package-structure.md` |
+| Testing and performance | `20-testing.md`, `21-performance.md` |
+| Roadmap and decisions | `23-roadmap.md`, `24-open-questions.md`, `25-final-review.md` |
+| Gap closure | `plans/gap-analysis/` |

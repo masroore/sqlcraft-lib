@@ -1,6 +1,7 @@
 # 12 — Query Engine
 
 > **Status:** Design draft
+> **Scope note:** Oracle-specific details in this document are future-version design notes; Oracle is deferred and not supported by v1.
 > **Scope:** `SQLCraft\Query` and `SQLCraft\Execution` namespaces — `QueryExecutor`, streaming vs buffered results, multi-statement/multi-resultset execution, `TransactionManager`, savepoints, `Paginator`, `SelectQuery` builder, `ExplainService`, warnings, query timeout, `QueryHistory`
 > **Depends on:** 05-domain-model.md (DTOs, exception hierarchy), 08-driver-architecture.md (PlatformInterface, PaginationInterface), 09-capability-model.md (Capability), 10-connection-layer.md (ConnectionInterface, ResultInterface, Transaction)
 > **Namespace root:** `SQLCraft\Query`, `SQLCraft\Execution`

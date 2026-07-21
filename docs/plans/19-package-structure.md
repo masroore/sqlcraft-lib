@@ -17,12 +17,12 @@
 | **Split by layer** (`sqlcraft/contracts`, `sqlcraft/metadata`, `sqlcraft/ddl`, ...) | One package per module in 07 | Rejected outright |
 
 **Rationale for a single package now:**
-1. **Version-lockstep risk.** The six built-in drivers and the core are developed together during v1; forcing consumers to pin compatible versions of 7 packages (`core` + 6 drivers) before the API has stabilized adds friction for no present benefit. Doctrine DBAL itself does **not** split drivers into packages (each driver lives in `Doctrine\DBAL\Driver\*` inside the single `doctrine/dbal` package) — the prompt's own framing that "doctrine/dbal does NOT [split drivers]" is accurate and is the precedent SQLCraft follows.
-2. **Capability matrix coherence.** The capability model (09) is validated as a whole matrix across all 6 engines in one CI run (20 §8's contract-test suite). Splitting drivers into separate repos/packages would fragment that guarantee and require a separate compatibility-matrix package just to re-glue it.
+1. **Version-lockstep risk.** The five built-in v1 drivers and the core are developed together during v1; forcing consumers to pin compatible versions of 7 packages (`core` + 6 drivers) before the API has stabilized adds friction for no present benefit. Doctrine DBAL itself does **not** split drivers into packages (each driver lives in `Doctrine\DBAL\Driver\*` inside the single `doctrine/dbal` package) — the prompt's own framing that "doctrine/dbal does NOT [split drivers]" is accurate and is the precedent SQLCraft follows.
+2. **Capability matrix coherence.** The capability model (09) is validated as a whole matrix across all five v1 engines in one CI run (20 §8's contract-test suite). Splitting drivers into separate repos/packages would fragment that guarantee and require a separate compatibility-matrix package just to re-glue it.
 3. **ext-pdo_* extensions are already the real per-engine dependency boundary.** A consumer who never uses PostgreSQL never loads `PostgreSQLDriver`/`PostgreSQLPlatform` classes into their working set in any meaningful resource sense (PHP autoloading is lazy per-class); there is no filesystem/network download cost being saved by a package split, unlike, say, npm packages with large `node_modules` footprints.
 4. **Low package-count is itself a usability feature** for a library whose whole pitch (01) is "just `composer require` one thing and it works everywhere."
 
-**When a future split would make sense:** if a specific driver (e.g., Oracle, which requires the relatively rare `pdo_oci` extension and has the smallest install base of the six) develops independent release cadence needs, or if a third-party wants to contribute a driver without going through the core repo's release process, a `sqlcraft/sqlcraft-oracle`-style *satellite* package can be split out later — this is exactly the `DriverRegistry::register()` extension point (08 §8, 18 §9) already designed to support out-of-tree drivers with zero core changes. No architectural rework is needed to do this later; it is purely a repository/release-process decision deferred until there's real demand.
+**When a future split would make sense:** if a future driver (for example, Oracle, which is deferred from v1 and requires the relatively rare `pdo_oci` extension) develops independent release cadence needs, or if a third-party wants to contribute a driver without going through the core repo's release process, a `sqlcraft/sqlcraft-oracle`-style *satellite* package can be split out later — this is exactly the `$registry->register()` extension point (08 §8, 18 §9) already designed to support out-of-tree drivers with zero core changes. No architectural rework is needed to do this later; it is purely a repository/release-process decision deferred until there's real demand.
 
 ---
 
@@ -57,13 +57,11 @@ sqlcraft/
 │   │   ├── PostgreSQL/
 │   │   ├── SQLite/
 │   │   ├── SqlServer/
-│   │   └── Oracle/
 │   ├── Platform/                      # 07 §7
 │   │   ├── MySQL/
 │   │   ├── PostgreSQL/
 │   │   ├── SQLite/
 │   │   ├── SqlServer/
-│   │   └── Oracle/
 │   ├── Metadata/                      # 07 §8
 │   ├── Schema/                        # 07 §9
 │   ├── DDL/                           # 07 §9
@@ -153,7 +151,6 @@ sqlcraft/
         "ext-pdo_sqlite": "Required to connect to SQLite databases.",
         "ext-pdo_sqlsrv": "Required to connect to Microsoft SQL Server (Microsoft driver).",
         "ext-pdo_dblib": "Alternative FreeTDS-based driver for Microsoft SQL Server on non-Windows.",
-        "ext-pdo_oci": "Required to connect to Oracle databases.",
         "psr/simple-cache-implementation": "Enables metadata caching (21-performance.md §4). Any PSR-16 implementation.",
         "psr/event-dispatcher-implementation": "Enables domain event dispatch (QueryExecutedEvent, DdlExecutedEvent, etc; 05 §9).",
         "psr/log-implementation": "Enables query/deprecation logging. Any PSR-3 implementation."

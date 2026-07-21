@@ -43,65 +43,50 @@ SQLCraft replaces this with a **type-safe, version-aware, discoverable capabilit
 ```php
 namespace SQLCraft\Capabilities;
 
-/**
- * Every named feature that a platform may or may not support.
- * Backed by string for serialisation and logging readability.
- * Names match Adminer's support() strings where equivalent, extended where needed.
- */
 enum Capability: string
 {
-    // Schema objects
-    case Table             = 'table';
-    case View              = 'view';
-    case MaterializedView  = 'materializedview';
-    case Sequence          = 'sequence';
-    case Type              = 'type';         // CREATE TYPE (PgSQL)
-    case Scheme            = 'scheme';       // named schemas/namespaces
-
-    // Column / table features
-    case Columns           = 'columns';
-    case Comment           = 'comment';      // object comments
-    case Charset           = 'charset';
-    case Collation         = 'collation';
-    case Compression       = 'compression';
-    case GeneratedColumns  = 'generated';
-
-    // Constraint features
-    case Indexes           = 'indexes';
-    case ForeignKeys       = 'fkeys';
-    case CheckConstraints  = 'check';
-    case PartialIndexes    = 'partial_indexes';
+    case Table = 'table';
+    case View = 'view';
+    case MaterializedView = 'materializedview';
+    case Sequence = 'sequence';
+    case Type = 'type';
+    case Scheme = 'scheme';
+    case Columns = 'columns';
+    case Comment = 'comment';
+    case Charset = 'charset';
+    case Collation = 'collation';
+    case Compression = 'compression';
+    case GeneratedColumns = 'generated';
+    case Indexes = 'indexes';
+    case ForeignKeys = 'fkeys';
+    case CheckConstraints = 'check';
+    case PartialIndexes = 'partial_indexes';
     case DescendingIndexes = 'descidx';
-
-    // DML features
-    case Copy              = 'copy';         // CREATE TABLE ... SELECT
-    case InsertUpdate      = 'insert_update'; // ON DUPLICATE KEY / UPSERT
-
-    // DDL structural
-    case DropColumn        = 'drop_col';
-    case MoveColumn        = 'move_col';     // FIRST / AFTER
-    case Database          = 'database';     // CREATE/DROP DATABASE
-
-    // Routines / programmability
-    case Routine           = 'routine';      // functions
-    case Procedure         = 'procedure';
-    case Trigger           = 'trigger';
-    case ViewTrigger       = 'view_trigger'; // triggers on views (MSSQL)
-    case Event             = 'event';        // MySQL/MariaDB scheduler events
-
-    // Introspection / admin
-    case Status            = 'status';       // SHOW TABLE STATUS equivalent
-    case Variables         = 'variables';    // SHOW VARIABLES equivalent
-    case Processlist       = 'processlist';
-    case Kill              = 'kill';         // kill a connection/query
-    case Privileges        = 'privileges';   // GRANT/REVOKE
-    case Sql               = 'sql';          // arbitrary SQL execution
-    case Dump              = 'dump';         // export
-    case Partitions        = 'partitions';
-
-    // Unsupported marker (used internally, not in CapabilitySet)
-    // Extended capabilities added by third-party drivers use their own enum
-    // via the CapabilitySet::withExtended() API (see §7).
+    case Copy = 'copy';
+    case DatabaseManagement = 'database_management';
+    case TableCopy = 'table_copy';
+    case InsertUpdate = 'insert_update';
+    case DropColumn = 'drop_col';
+    case MoveColumn = 'move_col';
+    case Database = 'database';
+    case Routine = 'routine';
+    case Procedure = 'procedure';
+    case Trigger = 'trigger';
+    case ViewTrigger = 'view_trigger';
+    case Event = 'event';
+    case Status = 'status';
+    case Variables = 'variables';
+    case Processlist = 'processlist';
+    case Kill = 'kill';
+    case Privileges = 'privileges';
+    case Sql = 'sql';
+    case QueryTimeout = 'query_timeout';
+    case UserManagement = 'user_management';
+    case PrivilegeManagement = 'privilege_management';
+    case CrossTableSearch = 'cross_table_search';
+    case BlobStreaming = 'blob_streaming';
+    case Dump = 'dump';
+    case Partitions = 'partitions';
 }
 ```
 
@@ -242,7 +227,7 @@ public function listTriggers(ConnectionInterface $conn, QualifiedName $table): T
 }
 ```
 
-`CapabilityNotSupportedException` carries the `Capability` value, the platform name, and the version — so a caller can log "Oracle does not support triggers" rather than a generic error.
+`CapabilityNotSupportedException` carries the `Capability` value, the platform name, and the version — so a caller can log a platform-specific reason rather than a generic error.
 
 ### 5.2 Boolean Check (for conditional UI/logic)
 
@@ -265,50 +250,49 @@ A functional-style `Result` monad was considered but rejected:
 
 ## 6. Capability Matrix
 
-Full matrix for the initial 6 engines. "Yes" = always supported. "No" = never supported. Version strings indicate minimum version requirement.
+Full matrix for the five v1 engines. "Yes" = always supported. "No" = never supported. Version strings indicate minimum version requirement. Oracle is deferred and intentionally absent from this matrix.
 
-| Capability | MySQL | MariaDB | PostgreSQL | SQLite | MS SQL Server | Oracle |
-|------------|-------|---------|------------|--------|---------------|--------|
-| `table` | Yes | Yes | Yes | Yes | Yes | Yes |
-| `view` | Yes | Yes | Yes | Yes | Yes | Yes |
-| `columns` | Yes | Yes | Yes | Yes | Yes | Yes |
-| `indexes` | Yes | Yes | Yes | Yes | Yes | Yes |
-| `fkeys` | Yes | Yes | Yes | Yes | Yes | Yes |
-| `sql` | Yes | Yes | Yes | Yes | Yes | Yes |
-| `database` | Yes | Yes | Yes | Yes | Yes | Yes |
-| `drop_col` | Yes | Yes | Yes | Yes | Yes | Yes |
-| `dump` | Yes | Yes | Yes | Yes | Yes | Yes |
-| `comment` | Yes | Yes | Yes | No | Yes | No |
-| `status` | Yes | Yes | No | Yes | Yes | Yes |
-| `variables` | Yes | Yes | No | Yes | Yes | Yes |
-| `processlist` | Yes | Yes | Yes | No | No | Yes |
-| `kill` | Yes | Yes | Yes | No | No | No |
-| `privileges` | Yes | Yes | No | No | No | No |
-| `trigger` | Yes | Yes | Yes | Yes | Yes | No |
-| `view_trigger` | No | No | No | No | Yes | No |
-| `routine` | Yes | Yes | Yes | No | No | No |
-| `procedure` | Yes | Yes | 11.0+ | No | No | No |
-| `event` | Yes | Yes | No | No | No | No |
-| `sequence` | No | 10.3+ | Yes | No | No | Yes |
-| `scheme` | No | No | Yes | No | Yes | Yes |
-| `type` | No | No | Yes | No | No | No |
-| `materializedview` | No | No | 9.3+ | No | No | No |
-| `check` | 8.0.16+ | 10.2.1+ | Yes | Yes | Yes | No |
-| `descidx` | 8.0+ | Yes | Yes | Yes | Yes | Yes |
-| `partial_indexes` | No | No | Yes | Yes | No | No |
-| `copy` | Yes | Yes | No | No | No | No |
-| `move_col` | Yes | Yes | No | No | No | No |
-| `insert_update` | Yes | Yes | No | Yes | No | No |
-| `compression` | Yes | Yes | No | No | No | No |
-| `generated` | 5.7+ | 5.2+ | 12.0+ | 3.31+ | Yes | Yes |
-| `partitions` | Yes | Yes | Yes (native) | No | Yes | Yes |
+| Capability | MySQL | MariaDB | PostgreSQL | SQLite | MS SQL Server |
+|------------|-------|---------|------------|--------|---------------|
+| `table` | Yes | Yes | Yes | Yes | Yes |
+| `view` | Yes | Yes | Yes | Yes | Yes |
+| `columns` | Yes | Yes | Yes | Yes | Yes |
+| `indexes` | Yes | Yes | Yes | Yes | Yes |
+| `fkeys` | Yes | Yes | Yes | Yes | Yes |
+| `sql` | Yes | Yes | Yes | Yes | Yes |
+| `database` | Yes | Yes | Yes | Yes | Yes |
+| `drop_col` | Yes | Yes | Yes | Yes | Yes |
+| `dump` | Yes | Yes | Yes | Yes | Yes |
+| `comment` | Yes | Yes | Yes | No | Yes |
+| `status` | Yes | Yes | No | Yes | Yes |
+| `variables` | Yes | Yes | No | Yes | Yes |
+| `processlist` | Yes | Yes | Yes | No | No |
+| `kill` | Yes | Yes | Yes | No | No |
+| `privileges` | Yes | Yes | No | No | No |
+| `trigger` | Yes | Yes | Yes | Yes | Yes |
+| `view_trigger` | No | No | No | No | Yes |
+| `routine` | Yes | Yes | Yes | No | No |
+| `procedure` | Yes | Yes | 11.0+ | No | No |
+| `event` | Yes | Yes | No | No | No |
+| `sequence` | No | 10.3+ | Yes | No | No |
+| `scheme` | No | No | Yes | No | Yes |
+| `type` | No | No | Yes | No | No |
+| `materializedview` | No | No | 9.3+ | No | No |
+| `check` | 8.0.16+ | 10.2.1+ | Yes | Yes | Yes |
+| `descidx` | 8.0+ | Yes | Yes | Yes | Yes |
+| `partial_indexes` | No | No | Yes | Yes | No |
+| `copy` | Yes | Yes | No | No | No |
+| `move_col` | Yes | Yes | No | No | No |
+| `insert_update` | Yes | Yes | No | Yes | No |
+| `compression` | Yes | Yes | No | No | No |
+| `generated` | 5.7+ | 5.2+ | 12.0+ | 3.31+ | Yes |
+| `partitions` | Yes | Yes | Yes (native) | No | Yes |
 
 **Notes:**
 - PostgreSQL `procedure` requires server ≥11 (before 11, only functions exist).
 - PostgreSQL `processlist` works via `pg_stat_activity`; CockroachDB flavor overrides this to No.
 - MariaDB `sequence` requires ≥10.3.0.
 - SQLite has no server version concept; `generated` support via `sqlite3_libversion()` check ≥3.31.0.
-- Oracle `sequence` support is always-on (Oracle has had sequences since very early versions).
 
 ---
 

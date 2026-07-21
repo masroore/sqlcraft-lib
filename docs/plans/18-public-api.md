@@ -509,7 +509,7 @@ None of the four integrations above contain business logic, error translation, o
 
 ## 9. `DriverRegistry` and Third-Party Drivers From the Consumer's Side
 
-Most consumers never call `DriverRegistry` directly — the six built-in engines are pre-registered by `SQLCraftFactory`'s default constructor path. A consumer only touches it to add a third-party driver (08 §9):
+Most consumers never call `DriverRegistry` directly — the five built-in v1 engines are pre-registered by `SQLCraftFactory`'s default constructor path. A consumer only touches it to add a third-party driver (08 §9):
 
 ```php
 $registry = new DriverRegistry(); // built-ins pre-registered

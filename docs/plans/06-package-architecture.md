@@ -165,7 +165,7 @@ New bounded contexts slot in by:
 2. Implementing in a new namespace (`SQLCraft\Replication\`).
 3. Following the dependency rules in §4 — the new context depends on Contracts; nothing existing needs to change.
 
-Third-party packages can publish their own driver by implementing `DriverInterface` + `PlatformInterface` and registering with `DriverRegistry::register()`. No SQLCraft core changes required.
+Third-party packages can publish their own driver by implementing `DriverInterface` + `PlatformInterface` and registering with `$registry->register()`. No SQLCraft core changes required.
 
 A future `Backup` context would depend on `Contracts`, `Execution`, `Export`, and `Metadata` — all legal per the dependency rules. No circular dependency introduced.
 

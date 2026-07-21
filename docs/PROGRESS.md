@@ -87,57 +87,17 @@
 - [x] T9: SQLite ALTER acceptance coverage — commit c85a5ab — green — 2026-07-21
 - [x] M5 gate: DDL acceptance review — commit e704a0b — green — 2026-07-21
 
-## M6 — Query Engine
-- [x] T1: Query executor — commit be5deb8 — green — 2026-07-21
-- [x] T2: statement splitter and batch execution — commit e6beff2 — green — 2026-07-21
-- [x] T3: SelectQuery builder and renderer — commit 4e3fdb9 — green — 2026-07-21
-- [x] T4: paginator and Page DTO — commit dbdd4e7 — green — 2026-07-21
-- [ ] T5: query history and QueryManager — not started
-- [x] T5: query history and QueryManager — commit 6079776 — green — 2026-07-21
-- [ ] T6: EXPLAIN and warnings services — not started
-- [x] T6: EXPLAIN and warnings services — commit a7c816f — green — 2026-07-21
-- [x] T7: M6 acceptance coverage — commit e0c5ff8 — green — 2026-07-21
-- [ ] T8: M6 acceptance gate — not started
-- [x] T8: M6 acceptance gate — commit pending — green — 2026-07-21
-## M7 — Import/Export
-- [ ] T1: sinks and format writer contracts — not started
-- [x] T1: export sinks — commit f2439ec — green — 2026-07-21
-- [ ] T2: format writer contracts and dump options hardening — not started
-- [x] T2: format writer contracts and dump options hardening — commit 1774562 — green — 2026-07-21
-- [ ] T3: SQL/CSV/TSV format writers — not started
-- [x] T3: SQL/CSV/TSV format writers — commit 32e0ac5 — green — 2026-07-21
-- [ ] T4: export orchestration — not started
-- [x] T4: export orchestration — commit b873d10 — green — 2026-07-21
-- [ ] T5: statement import pipeline — not started
-- [x] T5: statement import pipeline — commit f25da34 — green — 2026-07-21
-- [ ] T6: progress events and emission seam — not started
-- [x] T6: progress events and emission seam — commit cfac6fd — green — 2026-07-21
-- [ ] T7: round-trip and large-file coverage — not started
-- [x] T7: round-trip and large-file coverage — commit 42e6a05 — green — 2026-07-21
-- [ ] M7 gate: Import/Export acceptance review — not started
-- [x] T8: CSV import pipeline — commit 6590608 — green — 2026-07-21
-- [x] M7 gate: Import/Export acceptance review — commit bbdffda — green — 2026-07-21
+## M6–M9 — Gap closure
 
-## M8 — Remaining Platforms
-- [x] T1: SQL Server platform — commit 36ee826 — green — 2026-07-21
-- [x] T2: SQL Server driver — commit 0efc334 — green — 2026-07-21
-- [x] T3: SQL Server connection and integration coverage — commits abd89b8, 7d3496e — green — 2026-07-21
-- [x] T4: M8 MSSQL acceptance gate; Oracle deferred — commit e72b3ee — green — 2026-07-21
+Historical milestone tasks above remain recorded for traceability. Their original green labels are superseded by the gap-analysis work below; release readiness is judged against the current implementation and verification, not the historical checklist.
 
-## M9 — Security & Events
-- [x] T1: event dispatcher and catalog audit — commit 34d4383 — green — 2026-07-21
-- [x] T2: security validation and redaction audit — commit 9e5578d — green — 2026-07-21
-- [x] T2b: import/export event semantics — commit 4198c7b — green — 2026-07-21
-- [x] T3: event taxonomy, query interception, and observability — commit 30056ea — green — 2026-07-21
-- [x] T4: connection and transaction lifecycle events — commit dcdf417 — green — 2026-07-21
-- [x] T5: DDL and metadata events — commit 7d29379 — green — 2026-07-21
-- [x] T5b: capability event context — commit 8f62017 — green — 2026-07-21
-- [x] T5c: platform capability event emission — commit d60a0df — green — 2026-07-21
-- [x] T6: typed structural-SQL validation audit — commit 2df4ef4 — green — 2026-07-21
-- [x] T7: credentials, redaction, and resource limits — commit 4e1685c — green — 2026-07-21
-- [x] T8: M9 acceptance gate — commit 055d8df — green — 2026-07-21
+- [x] Gap-analysis phases 1–4 — commits `ec2d6b0`, `b39919f`, `7de9837`, `85c082c`
+- [x] Gap-analysis phase 5 — query completeness — commit `8501ef7`
+- [x] Gap-analysis phase 6 — import/export completeness — commit `a0d99be`
+- [x] Gap-analysis phase 7 — DDL scope reconciliation — commit `62f0b8a`
+- [x] Gap-analysis phase 8 — docs/config hygiene — in progress
 
 ## M10 — Documentation & v1.0
-- [x] T1: examples and README — commit 9da4fc1 — green — 2026-07-21
-- [x] T2: API audit and changelog — commit 89d5fca — green — 2026-07-21
-- [ ] T3: release verification and v1.0.0 tag — blocked by Infection MSI 57% / covered MSI 75% (thresholds 80% / 90%)
+
+- [ ] Phase 9 release verification — blocked until mutation testing meets MSI ≥ 80% and covered MSI ≥ 90%.
+- [ ] v1.0.0 tag — only after phase 9 passes.

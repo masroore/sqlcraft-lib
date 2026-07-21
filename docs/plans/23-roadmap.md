@@ -8,7 +8,7 @@
 
 ## Sizing Legend
 
-S = a few days of focused work. M = one to two weeks. L = two to four weeks. XL = a month or more, typically because it spans multiple engines or has irreducible edge-case surface (ALTER TABLE, Oracle). Sizes are relative to each other, not calendar commitments — no team size or velocity is assumed.
+S = a few days of focused work. M = one to two weeks. L = two to four weeks. XL = a month or more, typically because it spans multiple engines or has irreducible edge-case surface (ALTER TABLE). Sizes are relative to each other, not calendar commitments — no team size or velocity is assumed.
 
 ---
 
@@ -90,7 +90,7 @@ S = a few days of focused work. M = one to two weeks. L = two to four weeks. XL 
 - `TransactionManager::transactional()` correctly nests via savepoints; a test proves a nested `transactional()` call inside another does not attempt a real nested `BEGIN`
 - Every raw `\PDOException` thrown by the SQLite driver in a deliberately-triggered failure (bad SQL, unique violation, missing table) surfaces as the correct typed SQLCraft exception, never as `\PDOException` itself, at the public boundary
 
-**Risks & mitigations:** *Risk:* designing the exception-translation map against SQLite only may miss SQLSTATE/error-code shapes that MySQL/PostgreSQL/MSSQL/Oracle use differently, requiring rework in M3/M8. *Mitigation:* explicitly scope this milestone's exception map to "the classification logic is per-platform and pluggable" (each `Platform` supplies its own SQLSTATE→exception map, per `18-public-api.md` §6) rather than hardcoding a SQLite-shaped map into the shared `Connection` layer — SQLite validates the *mechanism*, not the final per-engine mapping table.
+**Risks & mitigations:** *Risk:* designing the exception-translation map against SQLite only may miss SQLSTATE/error-code shapes that MySQL/PostgreSQL/MSSQL use differently, requiring rework in M3/M8. *Mitigation:* explicitly scope this milestone's exception map to "the classification logic is per-platform and pluggable" (each `Platform` supplies its own SQLSTATE→exception map, per `18-public-api.md` §6) rather than hardcoding a SQLite-shaped map into the shared `Connection` layer — SQLite validates the *mechanism*, not the final per-engine mapping table.
 
 **Ships independently usable functionality:** Yes, narrowly — a consumer could use SQLCraft against SQLite alone for basic connect/execute/transact workflows after this milestone, though without schema introspection or DDL.
 
@@ -115,7 +115,7 @@ S = a few days of focused work. M = one to two weeks. L = two to four weeks. XL 
 - All four platforms pass the full conformance suite against live Testcontainers instances (MySQL 8.x, MariaDB 10.x/11.x, PostgreSQL 16.x, SQLite in-process)
 - `MariaDbPlatform`'s flavor-flag branching is isolated to `buildCapabilityMatrix()`/version-gate predicates only — a conformance test specifically asserts no `getFlavor() ===` branch exists in any method other than capability resolution (grep-based or a custom PHPStan rule per `08-driver-architecture.md` §6)
 - A capability-matrix regression test compares each platform's `buildCapabilityMatrix()` output against the `09-capability-model.md` §6 table verbatim, failing CI if they drift silently
-- `DriverRegistry::register()` + `get()` demonstrated with a throwaway fifth "fake" driver in a test, proving third-party extensibility without core changes (`08-driver-architecture.md` §9's DuckDB walkthrough, exercised as a test double rather than a real DuckDB dependency)
+- `$registry->register()` + `get()` demonstrated with a throwaway fifth "fake" driver in a test, proving third-party extensibility without core changes (`08-driver-architecture.md` §9's DuckDB walkthrough, exercised as a test double rather than a real DuckDB dependency)
 
 **Risks & mitigations:** *Risk:* the conformance suite is under-specified at design time and turns out to be either too strict (fails valid platform-specific behavior) or too loose (passes broken platforms). *Mitigation:* build the conformance suite incrementally alongside the first platform (`SqlitePlatform`, already partially proven in M2) and treat MySQL/PostgreSQL as the suite's real stress test — if the suite needs escape hatches for legitimate per-engine variance, add them as explicit `@requires-capability` skip annotations rather than weakening assertions globally.
 
@@ -233,29 +233,28 @@ S = a few days of focused work. M = one to two weeks. L = two to four weeks. XL 
 
 ---
 
-## M8 — Remaining Platforms
+## M8 — Remaining Platform: MSSQL (Oracle deferred)
 
-**Objective:** Extend the M3 platform work to the two remaining initial engines — MS SQL Server and Oracle — bringing the conformance suite, introspection, and DDL builders to full six-engine coverage.
+**Objective:** Extend the M3 platform work to Microsoft SQL Server. Oracle is explicitly deferred from v1.0 because its driver/platform and CI support were never implemented.
 
 **Key deliverables:**
 - `SqlServerPlatform` (full: `[bracket]` quoting, `TOP`/`OFFSET FETCH` pagination, schemas, view triggers, sequences since 2012) + `SqlServerDriver`
-- `OraclePlatform` (full: double-quote identifiers, rownum/`FETCH FIRST` pagination depending on version, `CONNECT BY`, `DUAL`, PL/SQL routine bodies) + `OracleDriver`
-- Both platforms pass the full M3 conformance suite
-- Both platforms' inspectors (M4) and DDL builders (M5) implemented and fixture-tested
-- Coverage-matrix cross-check against `04-feature-inventory.md` §"Coverage Matrix" — every `F`/`P`/`A` cell for MSSQL and Oracle validated against real behavior, not just transcribed from the planning doc
+- The SQL Server platform passes the full M3 conformance suite
+- SQL Server inspectors (M4) and DDL builders (M5) are implemented and fixture-tested
+- Coverage-matrix cross-check against `04-feature-inventory.md` §"Coverage Matrix" — every SQL Server `F`/`P`/`A` cell is validated against real behavior
 
-**Hard dependencies:** M3 partial (the `PlatformInterface` contract and conformance suite must exist), but this milestone is not "complete" in the M3 sense until M8 finishes — M3's XL size explicitly covered only 4 of 6 engines; M8 is where the remaining 2 land. M5 and M4's builder/inspector *patterns* must be stable (i.e., M4/M5 substantially done for the first four engines) so MSSQL/Oracle implementations aren't chasing a moving target.
+**Hard dependencies:** M3 partial (the `PlatformInterface` contract and conformance suite must exist). M5 and M4 builder/inspector patterns must be stable before extending SQL Server. Oracle is not part of the v1 dependency graph.
 
 **Acceptance criteria:**
-- Testcontainers-based integration tests for MSSQL (Linux container) and Oracle (XE or Free edition container — see `24-open-questions.md` §2 for the licensing/availability caveat that may affect CI feasibility) pass in CI, or a documented, explicit fallback (e.g., Oracle tested only via a local/manual matrix job, not blocking merge-to-main CI) is in place and agreed upon
-- `pdo_sqlsrv`/`pdo_dblib` and `pdo_oci` extension availability is documented per supported OS/PHP-build combination, since these are historically the two hardest PDO extensions to install (`24-open-questions.md` §2)
-- All 6 engines now pass identical consumer-facing workflow tests from `18-public-api.md` §3 (the "engine-swap guarantee" demonstrated concretely, §3.11) — this is the milestone where that guarantee becomes true for the full initial engine set, not just four of six
+- Testcontainers-based integration tests for MSSQL pass in CI; Oracle remains outside the v1 CI matrix
+- `pdo_sqlsrv`/`pdo_dblib` extension availability is documented per supported OS/PHP-build combination
+- All five v1 engines pass identical consumer-facing workflow tests from `18-public-api.md` §3 (the "engine-swap guarantee" demonstrated concretely, §3.11)
 
-**Risks & mitigations:** *Risk:* Oracle's `pdo_oci` extension is notoriously difficult to install/build in CI environments and Oracle's licensing terms for even the Free/XE edition may complicate automated container-based testing (flagged as an open per-engine unknown in `24-open-questions.md` §2). *Mitigation:* budget explicit spike time at the start of this milestone specifically to validate Oracle CI feasibility before committing to the rest of M8's Oracle scope; if CI-based Oracle testing proves infeasible within a reasonable time-box, fall back to a documented manual test protocol and mark Oracle support "best-effort, community-verified" in that release rather than blocking the milestone indefinitely.
+**Risks & mitigations:** SQL Server CI remains the main infrastructure risk because the required PDO extension and container image are platform-specific. Oracle is deferred to a future milestone with its own driver and CI feasibility decision.
 
-**Ships independently usable functionality:** Yes — this milestone completes the full six-engine v1 promise.
+**Ships independently usable functionality:** Yes — this milestone completes the v1 SQL Server extension. It does not include Oracle.
 
-**Size:** XL (two engines with genuinely divergent SQL dialects and, per the risk above, real infrastructure/tooling uncertainty around Oracle specifically)
+**Size:** L (SQL Server dialect and infrastructure work; Oracle deferred)
 
 ---
 
@@ -346,7 +345,7 @@ S = a few days of focused work. M = one to two weeks. L = two to four weeks. XL 
           M9 (security & events)
                  │
                  ▼
-          M8 (remaining platforms: MSSQL/Oracle)
+          M8 (remaining platform: MSSQL; Oracle deferred)
           [can start once M3 contract is stable —
            drawn after M9 here only for layout; in
            practice M8 may run concurrently with M6/M7/M9

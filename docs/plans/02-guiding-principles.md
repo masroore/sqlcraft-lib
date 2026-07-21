@@ -154,6 +154,8 @@ SQLCraftException (base)
 
 ## 9. Capability-Driven Design — Never Fake, Never Lowest-Common-Denominator
 
+> **Source of truth:** `09-capability-model.md` defines the complete `Capability` enum and platform matrix. This section describes the design principle only; its abbreviated historical example is not normative.
+
 **Decision:** The `Capability` enum contains one entry per named feature. Each `Platform` implementation declares a `CapabilityMap` at construction time. Any code that uses a capability calls `$platform->requires(Capability::X)` (throws if absent) or `$platform->supports(Capability::X)` (returns bool) before proceeding.
 
 ```php

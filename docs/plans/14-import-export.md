@@ -11,7 +11,7 @@
 
 1. **No output target assumption.** Adminer writes directly to `php://output` via `echo`/headers because it is a web application. SQLCraft is consumed as a library; it never assumes an HTTP response exists. Every export writes to an injectable sink.
 2. **Streaming by default, memory-bounded always.** A dump of a multi-gigabyte table must not buffer the whole result set or the whole output in memory. Rows are read from the connection and written to the sink incrementally.
-3. **Format independence.** SQL, CSV, TSV, JSON, and XML are treated as interchangeable output formats behind a single `FormatWriterInterface`. Adding Parquet or XLSX support should not require touching the exporter's orchestration logic.
+3. **Format independence.** SQL, CSV, and TSV are interchangeable implemented output formats behind a single `FormatWriterInterface`. JSON and XML remain deferred until their writer contracts and tests are implemented; adding Parquet or XLSX support should not require touching the exporter's orchestration logic.
 4. **Proper statement splitting on import.** Adminer's 100KB-chunk-plus-delimiter-scan approach is replaced with a real state machine that correctly handles quoted strings, comments, and `DELIMITER` changes without the chunk-boundary edge cases inherent in fixed-size reads.
 5. **Composable with the rest of SQLCraft.** Export DDL generation reuses `DdlBuilder` (13-ddl-services.md); import execution reuses `BatchExecutor` (12-query-engine.md §4.2); progress reporting reuses the PSR-14 event system (16-events.md §5.5).
 
@@ -364,7 +364,9 @@ CSV and TSV formats have no concept of DDL. `writeTableDdl()` is a no-op for CSV
 
 ---
 
-## 5. JSON / XML Format Writers
+## 5. JSON / XML Format Writers (Deferred)
+
+JSON and XML writer designs below are retained as future-version specifications. No v1 implementation or capability claim should be inferred from this section.
 
 ### 5.1 JSON
 

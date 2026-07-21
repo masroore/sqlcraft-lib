@@ -1,6 +1,7 @@
 # 13 — DDL Services
 
 > **Status:** Design draft
+> **Scope note:** Oracle-specific details in this document are future-version design notes; Oracle is deferred and not supported by v1.
 > **Scope:** `SQLCraft\DDL` namespace — DDL generation architecture, `DdlBuilder` family, `DdlDialectInterface` (extended from 08-driver-architecture.md), SQLite table recreation, schema diff, auto-increment/sequence handling, identifier keyword collision, DDL execution
 > **Depends on:** 05-domain-model.md (ColumnMeta, IndexMeta, ForeignKeyMeta, VOs), 08-driver-architecture.md (DdlDialectInterface, PlatformInterface), 09-capability-model.md (Capability enum), 10-connection-layer.md (ConnectionInterface), 12-query-engine.md (QueryExecutor)
 > **Namespace root:** `SQLCraft\DDL`

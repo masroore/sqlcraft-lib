@@ -190,7 +190,7 @@ final class DecoratingMysqlDriver implements DriverInterface
     // delegate buildDsn(), connect(), getName(), getPdoDriverNames() to $this->inner
 }
 
-DriverRegistry::register(new DecoratingMysqlDriver(new MySQLDriver()));
+$registry->register(new DecoratingMysqlDriver(new MySQLDriver()));
 ```
 
 **When to use decoration vs a full custom `DriverInterface`:** decoration is appropriate for small, targeted behavior tweaks (a different default charset, a different quoting edge case, an added capability). A genuinely new engine (§7) always warrants a full `DriverInterface` + `PlatformInterface` implementation, not decoration of an existing one.
@@ -206,7 +206,7 @@ Adminer's `adminer-plugins/` directory is scanned automatically at bootstrap: an
 - **All registration is explicit DI wiring**, performed by the consumer application, not by SQLCraft. This applies uniformly to all three mechanisms from §2:
   - PSR-14 listeners: registered with the dispatcher via the framework's normal listener registration (Symfony service tags, Laravel `EventServiceProvider`, or direct `SimpleListenerProvider::listen()` calls — 16-events.md §6).
   - Service swaps: registered as DI container bindings (`$container->set(Interface::class, Implementation::class)`).
-  - Format/source/driver registries: explicit `FormatRegistry::registerWriter(...)`, `DriverRegistry::register(...)` calls at bootstrap, typically inside the consumer's own service provider / container configuration class.
+  - Format/source/driver registries: explicit `FormatRegistry::registerWriter(...)`, `$registry->register(...)` calls at bootstrap, typically inside the consumer's own service provider / container configuration class.
 
 **Rationale:** an autoloading, auto-scanning plugin directory is a security and predictability liability for a library (arbitrary code execution merely by placing a file in a directory; no visibility into what actually loaded without reading the filesystem). It is also fundamentally incompatible with dependency injection, since scanned plugins receive no constructor-injected dependencies. Explicit registration means: (1) every active extension is visible by reading the consumer's own bootstrap/container configuration code, (2) extensions can receive their own dependencies through the same DI container as everything else, (3) there is no ambient "plugins directory" convention that behaves differently across deployment environments.
 
@@ -234,7 +234,7 @@ final class SqlCraftServiceProvider
         );
 
         // Third-party driver registration
-        DriverRegistry::register($container->get(DuckDbDriver::class));
+        $container->get(DriverRegistry::class)->register($container->get(DuckDbDriver::class));
     }
 }
 ```
@@ -333,7 +333,7 @@ A third-party driver package (e.g., `acme/sqlcraft-duckdb`) ships:
 5. **Optionally, extended capabilities** via `ExtendedCapability` for engine-specific features that don't fit the core `Capability` enum (09-capability-model.md §8) — e.g., DuckDB's Parquet import support.
 6. **A `composer.json` requiring `vendor/sqlcraft`** with a compatible version constraint, and depending on the specific PDO extension the driver needs (e.g., `ext-pdo_duckdb` in this example, though PHP's PDO driver ecosystem for exotic engines varies — some third-party engines require a custom PDO userspace driver or a non-PDO connection wrapped to satisfy `ConnectionInterface` directly, per 10-connection-layer.md §12's allowance for non-`PdoConnection`-based implementations).
 
-**Registration remains explicit** per §5 — the consumer's application calls `DriverRegistry::register(new DuckDbDriver())` at bootstrap. SQLCraft's core package has zero awareness of third-party driver packages; there is no driver marketplace, no auto-discovery tag scanning (e.g., no reliance on Composer's `type` field to auto-register).
+**Registration remains explicit** per §5 — the consumer's application calls `$registry->register(new DuckDbDriver())` at bootstrap. SQLCraft's core package has zero awareness of third-party driver packages; there is no driver marketplace, no auto-discovery tag scanning (e.g., no reliance on Composer's `type` field to auto-register).
 
 **What driver packages should NOT ship:** UI components, HTML templates, or anything resembling Adminer's per-driver `.inc.php` files that mixed dialect logic with page rendering. A SQLCraft driver package is pure logic — `Contracts\Driver`, `Contracts\Platform` implementations and nothing else. Any UI layer built on top of SQLCraft (out of SQLCraft's own scope entirely) is a separate concern for a separate package.
 

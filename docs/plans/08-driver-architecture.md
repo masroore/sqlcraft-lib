@@ -8,7 +8,7 @@
 
 ## 1. Overview
 
-The driver subsystem is SQLCraft's seam between the abstract domain model and the concrete reality of six (initially) incompatible database engines. Its design goals are:
+The driver subsystem is SQLCraft's seam between the abstract domain model and five supported database engines. **Oracle is deferred and has no v1 driver or platform.** Its design goals are:
 
 1. **No engine assumption in application services.** A `SchemaInspector` using a MySQL connection and one using a PostgreSQL connection call the same interfaces.
 2. **Segregated interfaces.** No driver is forced to implement dialect features it does not have. A hypothetical read-only analytics driver does not implement `DdlDialectInterface`.
@@ -200,7 +200,6 @@ abstract class AbstractPlatform implements PlatformInterface
 | `PostgreSQLPlatform` | `pgsql` | Double-quote identifiers; `$n` positional params; `OFFSET/FETCH`; schemas; sequences; materialized views |
 | `SqlitePlatform` | `sqlite` | Double-quote identifiers; no server version concept; LIMIT/OFFSET; no stored procedures |
 | `SqlServerPlatform` | `sqlserver` | `[bracket]` identifier quoting; `TOP n` pagination; schemas; view triggers |
-| `OraclePlatform` | `oracle` | Double-quote identifiers; rownum subquery; CONNECT BY; no triggers on VOs |
 
 ---
 
@@ -260,31 +259,33 @@ namespace SQLCraft\Driver;
 
 final class DriverRegistry
 {
-    private static array $drivers = [];
+    /** @var array<string, DriverInterface> */
+    private array $drivers = [];
 
-    /** Called at bootstrap (e.g., in a ServiceProvider or factory). */
-    public static function register(DriverInterface $driver): void
+    /** @param iterable<DriverInterface> $drivers */
+    public function __construct(iterable $drivers = [])
     {
-        self::$drivers[$driver->getName()] = $driver;
+        foreach ($drivers as $driver) {
+            $this->register($driver);
+        }
     }
 
-    public static function get(string $name): DriverInterface
+    public function register(DriverInterface $driver): void
     {
-        return self::$drivers[$name]
-            ?? throw DriverNotFoundException::forName($name);
+        $this->drivers[$driver->getName()] = $driver;
     }
 
-    /** @return list<string> */
-    public static function getRegisteredNames(): array
+    public function get(string $name): DriverInterface
     {
-        return array_keys(self::$drivers);
+        return $this->drivers[$name]
+            ?? throw new DriverNotFoundException(sprintf('Driver not found: %s.', $name), $name);
     }
 }
 ```
 
-**Multi-connection support:** Unlike Adminer's global `$driver`, the registry is a static factory only. Each `connect()` call returns a fresh `ConnectionInterface`; applications hold references to multiple connections simultaneously. No global mutable state.
+**Multi-connection support:** Unlike Adminer's global `$driver`, each registry is an ordinary instance owned by the composition root. Each `connect()` call returns a fresh `ConnectionInterface`; applications can hold references to multiple connections simultaneously without global mutable state.
 
-**Built-in auto-registration:** The `SQLCraftFactory` (or a DI container binding) pre-registers the 6 built-in drivers. Third parties call `DriverRegistry::register(new DuckDbDriver())` in their own ServiceProvider.
+**Built-in registration:** `SQLCraftFactory` (or a DI container binding) constructs a registry with the five built-in drivers. Third parties call `$registry->register(new DuckDbDriver())` in their own bootstrap code.
 
 **Adminer comparison:** Adminer selects a driver via `$_GET['server']` and a global. SQLCraft allows N connections from N drivers to be active simultaneously — required for cross-database operations, migration tools, and AI agents comparing two DB instances.
 
@@ -337,7 +338,7 @@ DuckDB exposes `INFORMATION_SCHEMA`. Implement `fetchColumns()`, `fetchIndexes()
 
 **Step 5: Register**
 ```php
-DriverRegistry::register(new DuckDbDriver());
+$registry->register(new DuckDbDriver());
 $conn = SQLCraftFactory::connect('duckdb', new ConnectionParameters(database: ':memory:'));
 ```
 
