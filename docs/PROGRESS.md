@@ -117,3 +117,19 @@
 - [ ] M7 gate: Import/Export acceptance review — not started
 - [x] T8: CSV import pipeline — commit 6590608 — green — 2026-07-21
 - [x] M7 gate: Import/Export acceptance review — commit bbdffda — green — 2026-07-21
+
+## M8 — Remaining Platforms
+- [x] T1: SQL Server platform — commit 36ee826 — green — 2026-07-21
+- [ ] T2: SQL Server driver — not started
+- [ ] T3: SQL Server connection and integration coverage — not started
+- [ ] T4: M8 MSSQL acceptance gate; Oracle deferred — not started
+
+## M9 — Security & Events
+- [ ] T1: event dispatcher and catalog audit — not started
+- [ ] T2: security validation and redaction audit — not started
+- [ ] T3: resource limits and M9 acceptance gate — not started
+
+## M10 — Documentation & v1.0
+- [ ] T1: examples and README — not started
+- [ ] T2: API audit and changelog — not started
+- [ ] T3: release verification and v1.0.0 tag — not started
