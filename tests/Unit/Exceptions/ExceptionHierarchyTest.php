@@ -170,4 +170,14 @@ final class ExceptionHierarchyTest extends TestCase
             self::assertTrue((new ReflectionClass($class))->isAbstract());
         }
     }
+    public function testStringifiedSqlCraftExceptionsDoNotIncludeNativeCauseText(): void
+    {
+        $exception = new \SQLCraft\Exceptions\QueryException(
+            'SQL execution failed.',
+            previous: new \RuntimeException('password=secret'),
+        );
+
+        self::assertStringNotContainsString('password=secret', (string) $exception);
+    }
+
 }

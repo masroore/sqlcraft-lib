@@ -13,6 +13,7 @@ use SQLCraft\Exceptions\ConnectionFailedException;
 use SQLCraft\Contracts\Events\ConnectionEventDispatcherInterface;
 use SQLCraft\Exceptions\OperationCancelledException;
 use SQLCraft\ValueObjects\ConnectionParameters;
+use SQLCraft\Support\SecretRedactor;
 
 /** @internal */
 final class PdoConnectionFactory implements PdoConnectionFactoryInterface
@@ -60,7 +61,7 @@ final class PdoConnectionFactory implements PdoConnectionFactoryInterface
             throw new ConnectionFailedException(
                 'Database connection failed.',
                 host: $parameters->host ?? '',
-                driver: $dsn,
+                driver: SecretRedactor::dsn($dsn),
                 previous: $exception,
             );
         }

@@ -60,4 +60,16 @@ final class BatchExecutorTest extends TestCase
         $this->expectException(\RuntimeException::class);
         iterator_to_array((new BatchExecutor($executor))->executeBatch($connection, new StatementBatch(['bad', 'never'])));
     }
+    public function testRejectsBatchesAboveConfiguredMaximum(): void
+    {
+        $executor = self::createMock(QueryExecutorInterface::class);
+        $batchExecutor = new BatchExecutor($executor, maximumStatements: 1);
+
+        $this->expectException(\InvalidArgumentException::class);
+        iterator_to_array($batchExecutor->executeBatch(
+            self::createMock(ConnectionInterface::class),
+            new StatementBatch(['one', 'two']),
+        ));
+    }
+
 }
