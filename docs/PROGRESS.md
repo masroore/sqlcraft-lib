@@ -93,3 +93,5 @@
 - [x] T3: SelectQuery builder and renderer — commit 4e3fdb9 — green — 2026-07-21
 - [x] T4: paginator and Page DTO — commit dbdd4e7 — green — 2026-07-21
 - [ ] T5: query history and QueryManager — not started
+- [x] T5: query history and QueryManager — commit 6079776 — green — 2026-07-21
+- [ ] T6: EXPLAIN and warnings services — not started
