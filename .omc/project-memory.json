@@ -161,6 +161,30 @@
       "type": "file"
     },
     {
+      "path": "docs/plans/07-module-breakdown.md",
+      "accessCount": 7,
+      "lastAccessed": 1784655679274,
+      "type": "file"
+    },
+    {
+      "path": "docs/plans/04-feature-inventory.md",
+      "accessCount": 4,
+      "lastAccessed": 1784655679331,
+      "type": "file"
+    },
+    {
+      "path": "docs/plans/00-overview.md",
+      "accessCount": 4,
+      "lastAccessed": 1784655679428,
+      "type": "file"
+    },
+    {
+      "path": "docs/plans/18-public-api.md",
+      "accessCount": 4,
+      "lastAccessed": 1784655861855,
+      "type": "file"
+    },
+    {
       "path": "docker-compose.yml",
       "accessCount": 2,
       "lastAccessed": 1784526183661,
@@ -173,15 +197,21 @@
       "type": "file"
     },
     {
-      "path": "docs/plans/00-overview.md",
-      "accessCount": 2,
-      "lastAccessed": 1784655473867,
-      "type": "file"
-    },
-    {
       "path": "docs/plans/23-roadmap.md",
       "accessCount": 2,
       "lastAccessed": 1784655474714,
+      "type": "file"
+    },
+    {
+      "path": "docs/plans/09-capability-model.md",
+      "accessCount": 2,
+      "lastAccessed": 1784655619799,
+      "type": "file"
+    },
+    {
+      "path": "docs/plans/16-events.md",
+      "accessCount": 2,
+      "lastAccessed": 1784655665034,
       "type": "file"
     },
     {
@@ -227,15 +257,201 @@
       "type": "file"
     },
     {
-      "path": "docs/plans/07-module-breakdown.md",
+      "path": "docs/plans/02-guiding-principles.md",
       "accessCount": 1,
-      "lastAccessed": 1784655474955,
+      "lastAccessed": 1784655565341,
       "type": "file"
     },
     {
-      "path": "docs/plans/04-feature-inventory.md",
+      "path": "docs/plans/05-domain-model.md",
       "accessCount": 1,
-      "lastAccessed": 1784655496216,
+      "lastAccessed": 1784655565916,
+      "type": "file"
+    },
+    {
+      "path": "docs/plans/06-package-architecture.md",
+      "accessCount": 1,
+      "lastAccessed": 1784655589617,
+      "type": "file"
+    },
+    {
+      "path": "docs/plans/08-driver-architecture.md",
+      "accessCount": 1,
+      "lastAccessed": 1784655590146,
+      "type": "file"
+    },
+    {
+      "path": "docs/plans/10-connection-layer.md",
+      "accessCount": 1,
+      "lastAccessed": 1784655590613,
+      "type": "file"
+    },
+    {
+      "path": "src/Schema/SchemaManager.php",
+      "accessCount": 1,
+      "lastAccessed": 1784655615274,
+      "type": "file"
+    },
+    {
+      "path": "src/Schema/NullMetadataCache.php",
+      "accessCount": 1,
+      "lastAccessed": 1784655615766,
+      "type": "file"
+    },
+    {
+      "path": "src/Contracts/Metadata/MetadataCacheInterface.php",
+      "accessCount": 1,
+      "lastAccessed": 1784655616202,
+      "type": "file"
+    },
+    {
+      "path": "src/Metadata/ColumnInspector.php",
+      "accessCount": 1,
+      "lastAccessed": 1784655616776,
+      "type": "file"
+    },
+    {
+      "path": "src/Metadata/SequenceInspector.php",
+      "accessCount": 1,
+      "lastAccessed": 1784655617209,
+      "type": "file"
+    },
+    {
+      "path": "docs/plans/13-ddl-services.md",
+      "accessCount": 1,
+      "lastAccessed": 1784655617650,
+      "type": "file"
+    },
+    {
+      "path": "src/Metadata/MySQLMetadataFactory.php",
+      "accessCount": 1,
+      "lastAccessed": 1784655617707,
+      "type": "file"
+    },
+    {
+      "path": "src/Metadata/PostgreSQLMetadataFactory.php",
+      "accessCount": 1,
+      "lastAccessed": 1784655618039,
+      "type": "file"
+    },
+    {
+      "path": "src/Metadata/SqliteMetadataFactory.php",
+      "accessCount": 1,
+      "lastAccessed": 1784655618469,
+      "type": "file"
+    },
+    {
+      "path": "src/Contracts/Platform/DdlDialectInterface.php",
+      "accessCount": 1,
+      "lastAccessed": 1784655618804,
+      "type": "file"
+    },
+    {
+      "path": "src/Metadata/AbstractMetadataFactory.php",
+      "accessCount": 1,
+      "lastAccessed": 1784655619073,
+      "type": "file"
+    },
+    {
+      "path": "src/DDL/DdlManager.php",
+      "accessCount": 1,
+      "lastAccessed": 1784655619150,
+      "type": "file"
+    },
+    {
+      "path": "docs/plans/11-schema-services.md",
+      "accessCount": 1,
+      "lastAccessed": 1784655619409,
+      "type": "file"
+    },
+    {
+      "path": "docs/plans/14-import-export.md",
+      "accessCount": 1,
+      "lastAccessed": 1784655621349,
+      "type": "file"
+    },
+    {
+      "path": "tests/Golden/IntrospectionSqlGoldenTest.php",
+      "accessCount": 1,
+      "lastAccessed": 1784655621787,
+      "type": "file"
+    },
+    {
+      "path": "src/Platform/MariaDbPlatform.php",
+      "accessCount": 1,
+      "lastAccessed": 1784655630940,
+      "type": "file"
+    },
+    {
+      "path": "src/Driver/DriverRegistry.php",
+      "accessCount": 1,
+      "lastAccessed": 1784655631248,
+      "type": "file"
+    },
+    {
+      "path": "src/Schema/SchemaManagerFactory.php",
+      "accessCount": 1,
+      "lastAccessed": 1784655637783,
+      "type": "file"
+    },
+    {
+      "path": "src/Metadata/MetadataFactoryInterface.php",
+      "accessCount": 1,
+      "lastAccessed": 1784655638230,
+      "type": "file"
+    },
+    {
+      "path": "src/Metadata/ServerInspector.php",
+      "accessCount": 1,
+      "lastAccessed": 1784655638845,
+      "type": "file"
+    },
+    {
+      "path": "src/Metadata/TableInspector.php",
+      "accessCount": 1,
+      "lastAccessed": 1784655639460,
+      "type": "file"
+    },
+    {
+      "path": "src/Export/DumpOptions.php",
+      "accessCount": 1,
+      "lastAccessed": 1784655640372,
+      "type": "file"
+    },
+    {
+      "path": "src/Export/Exporter.php",
+      "accessCount": 1,
+      "lastAccessed": 1784655640525,
+      "type": "file"
+    },
+    {
+      "path": "src/Import/Importer.php",
+      "accessCount": 1,
+      "lastAccessed": 1784655640867,
+      "type": "file"
+    },
+    {
+      "path": "src/Metadata/CheckConstraintInspector.php",
+      "accessCount": 1,
+      "lastAccessed": 1784655641807,
+      "type": "file"
+    },
+    {
+      "path": "docs/plans/21-performance.md",
+      "accessCount": 1,
+      "lastAccessed": 1784655642334,
+      "type": "file"
+    },
+    {
+      "path": "src/Metadata/UserInspector.php",
+      "accessCount": 1,
+      "lastAccessed": 1784655642459,
+      "type": "file"
+    },
+    {
+      "path": "src/Export/ScopeKind.php",
+      "accessCount": 1,
+      "lastAccessed": 1784655642601,
       "type": "file"
     }
   ],
