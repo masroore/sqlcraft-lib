@@ -139,5 +139,5 @@
 
 ## M10 — Documentation & v1.0
 - [x] T1: examples and README — commit 9da4fc1 — green — 2026-07-21
-- [ ] T2: API audit and changelog — not started
+- [x] T2: API audit and changelog — commit 89d5fca — green — 2026-07-21
 - [ ] T3: release verification and v1.0.0 tag — not started
