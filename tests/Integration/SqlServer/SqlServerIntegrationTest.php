@@ -50,7 +50,7 @@ final class SqlServerIntegrationTest extends TestCase
 
         self::assertSame('sqlserver', $connection->getPlatformName());
         self::assertGreaterThanOrEqual(11, $connection->getServerVersion()->major);
-        self::assertSame([['value' => '1']], $connection->query('SELECT 1 AS value')->fetchAll());
+        self::assertSame([['value' => 1]], $connection->query('SELECT 1 AS value')->fetchAll());
     }
 
     public function testSqlServerDdlAndPaginationUseThePlatformDialect(): void
@@ -67,7 +67,7 @@ final class SqlServerIntegrationTest extends TestCase
 
             $sql = $connection->getPlatform()->applyPagination('SELECT [id], [value] FROM ' . $quoted . ' ORDER BY [id]', 2, 2);
             self::assertSame(
-                [['id' => '3', 'value' => 'row-3'], ['id' => '4', 'value' => 'row-4']],
+                [['id' => 3, 'value' => 'row-3'], ['id' => 4, 'value' => 'row-4']],
                 $connection->query($sql)->fetchAll(),
             );
         } finally {

@@ -27,15 +27,22 @@ final class PdoConnectionFactory implements PdoConnectionFactoryInterface
         ?string $name = null,
     ): ConnectionInterface {
         try {
+            $options = [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_EMULATE_PREPARES => false,
+                PDO::ATTR_STRINGIFY_FETCHES => false,
+            ];
+            if ($platform->getName() === 'sqlserver' && defined('PDO::SQLSRV_ATTR_FETCHES_NUMERIC_TYPE')) {
+                /** @var int $attribute */
+                $attribute = constant('PDO::SQLSRV_ATTR_FETCHES_NUMERIC_TYPE');
+                $options[$attribute] = true;
+            }
+
             $pdo = new PDO(
                 $dsn,
                 $parameters->username,
                 $parameters->password,
-                [
-                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                    PDO::ATTR_EMULATE_PREPARES => false,
-                    PDO::ATTR_STRINGIFY_FETCHES => false,
-                ],
+                $options,
             );
         } catch (PDOException $exception) {
             throw new ConnectionFailedException(
