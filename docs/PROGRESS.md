@@ -129,7 +129,7 @@
 - [x] T2: security validation and redaction audit — commit 9e5578d — green — 2026-07-21
 - [x] T3: event taxonomy, query interception, and observability — commit 30056ea — green — 2026-07-21
 - [x] T4: connection and transaction lifecycle events — commit dcdf417 — green — 2026-07-21
-- [ ] T5: DDL, schema, metadata, and capability events — not started
+- [x] T5: DDL, schema, metadata, and capability events — commit 7d29379 — green — 2026-07-21
 - [ ] T6: typed structural-SQL validation audit — not started
 - [ ] T7: credentials, redaction, and resource limits — not started
 - [ ] T8: M9 acceptance gate — not started
