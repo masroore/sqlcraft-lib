@@ -1,6 +1,6 @@
 # SQLCraft Planning — 00: Overview
 
-> Status: **Implemented release-candidate reference.** Gap-analysis phases 1–7 are complete; phase 8 documentation/config cleanup and phase 9 release verification remain.
+> Status: **Implemented release-candidate reference.** Gap-analysis phases 1–8 and the phase 9 seam-liveness guard are complete; release verification remains blocked on mutation coverage.
 > Last updated: 2026-07-20
 
 ---

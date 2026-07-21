@@ -2,7 +2,7 @@
 
 SQLCraft is a framework-independent, PDO-based PHP 8.4+ database administration SDK. It exposes typed, capability-aware connection, metadata, DDL, query, import/export, and security services. It is not an ORM, migration framework, web UI, or application container.
 
-**Status:** v1.0 release-candidate hardening. Gap-analysis phases 1–7 are implemented and committed; phase 8 documentation/config cleanup is in progress. Release remains blocked on the phase 9 mutation-testing gate.
+**Status:** v1.0 release-candidate hardening. Gap-analysis phases 1–8 and the phase 9 seam-liveness guard are implemented and committed. Release remains blocked on the phase 9 mutation-testing gate.
 
 **Supported engines:** SQLite, MySQL, MariaDB, PostgreSQL, Microsoft SQL Server. Oracle is deferred and not supported in v1. Empty Oracle placeholder directories may remain for future work.
 
