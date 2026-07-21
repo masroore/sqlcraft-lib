@@ -21,6 +21,7 @@ use SQLCraft\Capabilities\CapabilitySet;
 use SQLCraft\Capabilities\ExtendedCapability;
 use SQLCraft\Capabilities\PlatformCapabilityResolver;
 use SQLCraft\Contracts\Platform\PlatformInterface;
+use SQLCraft\Contracts\Events\SchemaEventDispatcherInterface;
 use SQLCraft\ValueObjects\Identifier;
 use SQLCraft\ValueObjects\QualifiedName;
 use SQLCraft\ValueObjects\ServerVersion;
@@ -30,6 +31,10 @@ use SQLCraft\ValueObjects\TriggerTiming;
 
 abstract class AbstractPlatform implements PlatformInterface
 {
+    public function __construct(private readonly ?SchemaEventDispatcherInterface $events = null)
+    {
+    }
+
     #[\Override]
     public function quoteIdentifier(Identifier $identifier): string
     {
@@ -456,7 +461,7 @@ abstract class AbstractPlatform implements PlatformInterface
     #[\Override]
     public function getCapabilitySet(ServerVersion $version): CapabilitySet
     {
-        return (new PlatformCapabilityResolver($this->buildCapabilityMatrix()))
+        return (new PlatformCapabilityResolver($this->buildCapabilityMatrix(), $this->events))
             ->resolve($this->getName(), $version);
     }
 

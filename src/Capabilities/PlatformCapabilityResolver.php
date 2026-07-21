@@ -6,6 +6,7 @@ namespace SQLCraft\Capabilities;
 
 use SQLCraft\Contracts\Capabilities\CapabilityResolverInterface;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
+use SQLCraft\Contracts\Events\SchemaEventDispatcherInterface;
 use SQLCraft\ValueObjects\ServerVersion;
 
 final class PlatformCapabilityResolver implements CapabilityResolverInterface
@@ -16,8 +17,10 @@ final class PlatformCapabilityResolver implements CapabilityResolverInterface
      *     versioned?: list<array{0: Capability|ExtendedCapability, 1: array{0: int, 1: int, 2: int}}>
      * } $matrix
      */
-    public function __construct(private readonly array $matrix)
-    {
+    public function __construct(
+        private readonly array $matrix,
+        private readonly ?SchemaEventDispatcherInterface $events = null,
+    ) {
     }
 
     #[\Override]
@@ -34,6 +37,6 @@ final class PlatformCapabilityResolver implements CapabilityResolverInterface
             }
         }
 
-        return new CapabilitySet(array_values(array_unique($capabilities, SORT_REGULAR)));
+        return new CapabilitySet(array_values(array_unique($capabilities, SORT_REGULAR)), $this->events, $platformName, (string) $version);
     }
 }

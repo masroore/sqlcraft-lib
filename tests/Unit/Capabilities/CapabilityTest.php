@@ -9,6 +9,7 @@ use SQLCraft\Capabilities\Capability;
 use SQLCraft\Capabilities\CapabilityNotSupportedException;
 use SQLCraft\Capabilities\CapabilitySet;
 use SQLCraft\Capabilities\ExtendedCapability;
+use SQLCraft\Contracts\Events\SchemaEventDispatcherInterface;
 
 final class CapabilityTest extends TestCase
 {
@@ -85,4 +86,14 @@ final class CapabilityTest extends TestCase
         self::assertSame(3, $capabilities->count());
         self::assertSame(3, $other->count());
     }
+    public function testMissingCapabilityEmitsScalarContextBeforeThrowing(): void
+    {
+        $events = self::createMock(SchemaEventDispatcherInterface::class);
+        $events->expects(self::once())->method('capabilityNotSupported')->with('sequence', 'sqlite', '3.0.0');
+        $capabilities = new CapabilitySet([], $events, 'sqlite', '3.0.0');
+
+        $this->expectException(CapabilityNotSupportedException::class);
+        $capabilities->require(Capability::Sequence);
+    }
+
 }
