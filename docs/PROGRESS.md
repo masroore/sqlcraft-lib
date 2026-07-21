@@ -74,3 +74,11 @@
 - [x] T15: SQLite schema integration coverage — commit 33fada4 — green — 2026-07-20
 - [x] T16: MySQL MariaDB PostgreSQL schema integration coverage — commit 7fc688e — green — 2026-07-20
 - [x] M4 gate: Schema Introspection acceptance review — commit 043ac43 — green — 2026-07-20
+
+## M5 — DDL Services
+- [x] T1: table and index builders — commit a035ffe — green — 2026-07-21
+- [ ] T2: alter table builder and dialect support — not started
+- [ ] T3: remaining DDL builders — not started
+- [ ] T4: SQLite table recreation strategy — not started
+- [ ] T5: DdlManager and execution wiring — not started
+- [ ] M5 gate: DDL acceptance review — not started
