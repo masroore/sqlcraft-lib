@@ -11,6 +11,7 @@ use SQLCraft\Contracts\DDL\CheckConstraintDefinitionInterface;
 use SQLCraft\Contracts\DDL\ColumnDefinitionInterface;
 use SQLCraft\Contracts\DDL\ForeignKeyDefinitionInterface;
 use SQLCraft\Contracts\DDL\IndexDefinitionInterface;
+use SQLCraft\Contracts\DDL\RoutineParameterDefinitionInterface;
 use SQLCraft\DTO\CheckConstraintMeta;
 use SQLCraft\DTO\ColumnMeta;
 use SQLCraft\DTO\ForeignKeyMeta;
@@ -23,6 +24,9 @@ use SQLCraft\Contracts\Platform\PlatformInterface;
 use SQLCraft\ValueObjects\Identifier;
 use SQLCraft\ValueObjects\QualifiedName;
 use SQLCraft\ValueObjects\ServerVersion;
+use SQLCraft\ValueObjects\DataType;
+use SQLCraft\ValueObjects\TriggerEvent;
+use SQLCraft\ValueObjects\TriggerTiming;
 
 abstract class AbstractPlatform implements PlatformInterface
 {
@@ -70,6 +74,67 @@ abstract class AbstractPlatform implements PlatformInterface
         }
 
         return $cascade ? $sql . ' CASCADE' : $sql;
+    }
+
+    #[\Override]
+    public function renderCreateTriggerStatement(
+        QualifiedName $name,
+        QualifiedName $table,
+        TriggerTiming $timing,
+        TriggerEvent $event,
+        string $body,
+        ?string $definer,
+        string $forEach,
+    ): string {
+        $definerSql = $definer === null ? '' : ' DEFINER = ' . $definer;
+
+        return 'CREATE' . $definerSql . ' TRIGGER ' . $this->quoteQualifiedName($name)
+            . ' ' . $timing->value . ' ' . $event->value . ' ON ' . $this->quoteQualifiedName($table)
+            . ' FOR EACH ' . $forEach . ' ' . $body;
+    }
+
+    #[\Override]
+    public function renderDropTriggerStatement(QualifiedName $name, ?QualifiedName $table, bool $ifExists): string
+    {
+        return 'DROP TRIGGER' . ($ifExists ? ' IF EXISTS' : '') . ' ' . $this->quoteQualifiedName($name);
+    }
+
+    /** @param list<RoutineParameterDefinitionInterface> $parameters */
+    #[\Override]
+    public function renderCreateRoutineStatement(
+        QualifiedName $name,
+        string $type,
+        array $parameters,
+        ?DataType $returnType,
+        string $body,
+        ?string $language,
+        bool $deterministic,
+        bool $orReplace,
+    ): string {
+        $params = implode(', ', array_map(
+            fn (RoutineParameterDefinitionInterface $parameter): string => $parameter->getDirection()->value . ' '
+                . $this->quoteIdentifier(new Identifier($parameter->getName())) . ' ' . $parameter->getDataType()->name,
+            $parameters,
+        ));
+        $sql = 'CREATE ' . ($orReplace ? 'OR REPLACE ' : '') . $type . ' ' . $this->quoteQualifiedName($name)
+            . '(' . $params . ')';
+        if ($returnType instanceof DataType) {
+            $sql .= ' RETURNS ' . $returnType->name;
+        }
+        if ($language !== null) {
+            $sql .= ' LANGUAGE ' . $language;
+        }
+        if ($deterministic) {
+            $sql .= ' DETERMINISTIC';
+        }
+
+        return $sql . ' AS ' . $body;
+    }
+
+    #[\Override]
+    public function renderDropRoutineStatement(QualifiedName $name, string $type, bool $ifExists): string
+    {
+        return 'DROP ' . $type . ($ifExists ? ' IF EXISTS' : '') . ' ' . $this->quoteQualifiedName($name);
     }
 
     /** @return list<string> */

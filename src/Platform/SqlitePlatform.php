@@ -225,6 +225,26 @@ final class SqlitePlatform extends AbstractPlatform
     }
 
     #[\Override]
+    public function renderCreateRoutineStatement(
+        QualifiedName $name,
+        string $type,
+        array $parameters,
+        ?\SQLCraft\ValueObjects\DataType $returnType,
+        string $body,
+        ?string $language,
+        bool $deterministic,
+        bool $orReplace,
+    ): string {
+        throw CapabilityNotSupportedException::for(Capability::Routine, 'sqlite');
+    }
+
+    #[\Override]
+    public function renderDropRoutineStatement(QualifiedName $name, string $type, bool $ifExists): string
+    {
+        throw CapabilityNotSupportedException::for(Capability::Routine, 'sqlite');
+    }
+
+    #[\Override]
     public function renderTruncateStatement(QualifiedName $table, bool $cascade, bool $restartIdentity): string
     {
         return 'DELETE FROM ' . $this->quoteQualifiedName($table);
