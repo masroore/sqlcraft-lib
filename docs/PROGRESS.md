@@ -91,4 +91,5 @@
 - [x] T1: Query executor — commit be5deb8 — green — 2026-07-21
 - [x] T2: statement splitter and batch execution — commit e6beff2 — green — 2026-07-21
 - [x] T3: SelectQuery builder and renderer — commit 4e3fdb9 — green — 2026-07-21
-- [ ] T4: paginator and Page DTO — not started
+- [x] T4: paginator and Page DTO — commit dbdd4e7 — green — 2026-07-21
+- [ ] T5: query history and QueryManager — not started
