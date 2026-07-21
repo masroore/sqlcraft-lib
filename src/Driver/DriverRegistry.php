@@ -25,6 +25,11 @@ final class DriverRegistry
         $this->drivers[$driver->getName()] = $driver;
     }
 
+    public function registerAlias(string $name, DriverInterface $driver): void
+    {
+        $this->drivers[$name] = $driver;
+    }
+
     public function get(string $name): DriverInterface
     {
         return $this->drivers[$name]

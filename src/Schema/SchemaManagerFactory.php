@@ -7,6 +7,8 @@ namespace SQLCraft\Schema;
 use InvalidArgumentException;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Metadata\MetadataCacheInterface;
+use SQLCraft\Contracts\Events\SchemaEventDispatcherInterface;
+use SQLCraft\Metadata\ExportSource;
 use SQLCraft\Metadata\CheckConstraintInspector;
 use SQLCraft\Metadata\ColumnInspector;
 use SQLCraft\Metadata\DatabaseInspector;
@@ -30,6 +32,7 @@ final class SchemaManagerFactory
     public static function forConnection(
         ConnectionInterface $connection,
         ?MetadataCacheInterface $cache = null,
+        ?SchemaEventDispatcherInterface $events = null,
     ): SchemaManager {
         $factory = self::metadataFactory($connection);
 
@@ -47,10 +50,24 @@ final class SchemaManagerFactory
             checkConstraintInspector: new CheckConstraintInspector($factory),
             userInspector: new UserInspector($factory),
             cache: $cache,
+            events: $events,
         );
     }
 
-    private static function metadataFactory(ConnectionInterface $connection): MetadataFactoryInterface
+    public static function exportSourceForConnection(ConnectionInterface $connection): ExportSource
+    {
+        $factory = self::metadataFactory($connection);
+
+        return new ExportSource(
+            new TableInspector($factory),
+            new ColumnInspector($factory),
+            new TriggerInspector($factory),
+            new RoutineInspector($factory),
+            new ServerInspector($factory),
+        );
+    }
+
+    public static function metadataFactory(ConnectionInterface $connection): MetadataFactoryInterface
     {
         return match ($connection->getPlatformName()) {
             'mysql', 'mariadb' => new MySQLMetadataFactory(),

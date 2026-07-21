@@ -1,0 +1,141 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SQLCraft;
+
+use Psr\EventDispatcher\EventDispatcherInterface;
+use SQLCraft\Capabilities\CapabilityNotSupportedException;
+use SQLCraft\Connection\ConnectionManager;
+use SQLCraft\Connection\EnvCredentialProvider;
+use SQLCraft\Connection\PdoConnectionFactory;
+use SQLCraft\Connection\PdoExceptionTranslator;
+use SQLCraft\Contracts\Connection\CredentialProviderInterface;
+use SQLCraft\Contracts\Execution\QueryExecutorInterface;
+use SQLCraft\Contracts\Metadata\MetadataCacheInterface;
+use SQLCraft\DDL\DdlManager;
+use SQLCraft\Driver\DriverRegistry;
+use SQLCraft\Driver\MySQLDriver;
+use SQLCraft\Driver\PostgreSQLDriver;
+use SQLCraft\Driver\SqlServerDriver;
+use SQLCraft\Driver\SqliteDriver;
+use SQLCraft\Events\AfterDdlExecuted;
+use SQLCraft\Events\ConnectionEventDispatcher;
+use SQLCraft\Events\ImportExportEventDispatcher;
+use SQLCraft\Events\SchemaChangedEvent;
+use SQLCraft\Events\SchemaEventDispatcher;
+use SQLCraft\Events\SimpleEventDispatcher;
+use SQLCraft\Events\SimpleListenerProvider;
+use SQLCraft\Execution\BatchExecutor;
+use SQLCraft\Execution\QueryExecutor;
+use SQLCraft\Export\CsvFormatWriter;
+use SQLCraft\Export\CsvSemicolonFormatWriter;
+use SQLCraft\Export\Exporter;
+use SQLCraft\Export\FormatRegistry;
+use SQLCraft\Export\SqlFormatWriter;
+use SQLCraft\Export\TsvFormatWriter;
+use SQLCraft\Import\Importer;
+use SQLCraft\Metadata\ExportSource;
+use SQLCraft\Platform\MySQLPlatform;
+use SQLCraft\Platform\PostgreSQLPlatform;
+use SQLCraft\Platform\SqlServerPlatform;
+use SQLCraft\Platform\SqlitePlatform;
+use SQLCraft\Query\StatementSplitter;
+use SQLCraft\Schema\CacheInvalidationListener;
+use SQLCraft\Schema\NullMetadataCache;
+use SQLCraft\Schema\SchemaManagerFactory;
+use SQLCraft\Security\DenySecurityGuard;
+use SQLCraft\ValueObjects\ConnectionParameters;
+
+final class SQLCraftFactory
+{
+    private readonly DriverRegistry $drivers;
+    private readonly CredentialProviderInterface $credentials;
+    private readonly EventDispatcherInterface $events;
+    private readonly ConnectionManager $connections;
+    private readonly ?MetadataCacheInterface $cache;
+
+    public function __construct(
+        ?DriverRegistry $drivers = null,
+        ?CredentialProviderInterface $credentials = null,
+        ?EventDispatcherInterface $events = null,
+        ?MetadataCacheInterface $cache = null,
+    ) {
+        $pdo = new PdoConnectionFactory(new PdoExceptionTranslator(), $events === null ? null : new ConnectionEventDispatcher($events));
+        $this->drivers = $drivers ?? new DriverRegistry([
+            new MySQLDriver($pdo, new MySQLPlatform()),
+            new PostgreSQLDriver($pdo, new PostgreSQLPlatform()),
+            new SqliteDriver($pdo, new SqlitePlatform()),
+            new SqlServerDriver($pdo, new SqlServerPlatform()),
+        ]);
+        if ($drivers === null) {
+            $this->drivers->registerAlias('mariadb', $this->drivers->get('mysql'));
+        }
+        $this->credentials = $credentials ?? new EnvCredentialProvider();
+        $this->connections = new ConnectionManager();
+        $this->cache = $cache;
+
+        if ($events === null) {
+            $provider = new SimpleListenerProvider();
+            $this->events = new SimpleEventDispatcher($provider);
+            if ($cache !== null) {
+                $listener = new CacheInvalidationListener($cache);
+                $provider->listen(AfterDdlExecuted::class, $listener);
+                $provider->listen(SchemaChangedEvent::class, $listener);
+            }
+        } else {
+            $this->events = $events;
+        }
+    }
+
+    public function session(ConnectionParameters $parameters, ?string $name = null, ?string $credentialKey = null): DatabaseSession
+    {
+        if ($credentialKey !== null) {
+            $credential = $this->credentials->resolve($credentialKey);
+            $parameters = new ConnectionParameters(
+                host: $parameters->host,
+                port: $parameters->port,
+                socket: $parameters->socket,
+                database: $parameters->database,
+                username: $credential->username,
+                password: $credential->password,
+                charset: $parameters->charset,
+                ssl: $parameters->ssl,
+                extras: $parameters->extras,
+            );
+        }
+
+        $driverName = (string) ($parameters->extras['driver'] ?? 'sqlite');
+        $connection = $this->drivers->get($driverName)->connect($parameters);
+        $connectionName = $name ?? $connection->getName() ?? $driverName;
+        $this->connections->add($connectionName, $connection);
+
+        $queryExecutor = new QueryExecutor(events: $this->events);
+        $schemaEvents = new SchemaEventDispatcher($this->events);
+        $schema = SchemaManagerFactory::forConnection($connection, $this->cache ?? new NullMetadataCache(), $schemaEvents);
+        $source = SchemaManagerFactory::exportSourceForConnection($connection);
+        $registry = new FormatRegistry([
+            new SqlFormatWriter($connection),
+            new CsvFormatWriter(),
+            new TsvFormatWriter(),
+            new CsvSemicolonFormatWriter(),
+        ]);
+        $exporter = new Exporter($source, $queryExecutor, $registry);
+        $importer = new Importer(new StatementSplitter(), new BatchExecutor($queryExecutor));
+
+        return new DatabaseSession(
+            $connection,
+            $schema,
+            new DdlManager($queryExecutor, events: $schemaEvents),
+            $queryExecutor,
+            $exporter,
+            $importer,
+            new DenySecurityGuard(),
+        );
+    }
+
+    public function connections(): ConnectionManager
+    {
+        return $this->connections;
+    }
+}

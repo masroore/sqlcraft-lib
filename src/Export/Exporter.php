@@ -21,18 +21,26 @@ final class Exporter implements ExporterInterface
     public function __construct(
         private readonly ExportSourceInterface $source,
         QueryExecutorInterface $executor,
-        FormatWriterInterface|ImportExportEventDispatcherInterface|null $eventOrWriter = null,
+        FormatWriterInterface|FormatRegistry|ImportExportEventDispatcherInterface|null $eventOrWriter = null,
         FormatWriterInterface ...$writers,
     ) {
         $events = $eventOrWriter instanceof ImportExportEventDispatcherInterface ? $eventOrWriter : null;
-        if ($eventOrWriter instanceof FormatWriterInterface) {
-            $writers = [$eventOrWriter, ...$writers];
+        if ($eventOrWriter instanceof FormatRegistry) {
+            $writerMap = [];
+            foreach ($eventOrWriter->getSupportedWriteFormats() as $format) {
+                $writerMap[$format] = $eventOrWriter->getWriter($format);
+            }
+            $this->writers = $writerMap;
+        } else {
+            if ($eventOrWriter instanceof FormatWriterInterface) {
+                $writers = [$eventOrWriter, ...$writers];
+            }
+            $writerMap = [];
+            foreach ($writers as $writer) {
+                $writerMap[$writer->getFormatName()] = $writer;
+            }
+            $this->writers = $writerMap;
         }
-        $writerMap = [];
-        foreach ($writers as $writer) {
-            $writerMap[$writer->getFormatName()] = $writer;
-        }
-        $this->writers = $writerMap;
         $this->events = $events;
         $this->dumper = new TableDumper($source, $executor);
     }
