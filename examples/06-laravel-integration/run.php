@@ -1,0 +1,23 @@
+<?php
+
+declare(strict_types=1);
+
+require dirname(__DIR__, 2) . '/vendor/autoload.php';
+
+use SQLCraft\Connection\PdoConnectionFactory;
+use SQLCraft\Connection\PdoExceptionTranslator;
+use SQLCraft\Driver\SqliteDriver;
+use SQLCraft\Platform\SqlitePlatform;
+use SQLCraft\ValueObjects\ConnectionParameters;
+
+$bindings = [];
+$bindings['sqlcraft.connection'] = static function (): SQLCraft\Contracts\Connection\ConnectionInterface {
+    $factory = new PdoConnectionFactory(new PdoExceptionTranslator());
+    $driver = new SqliteDriver($factory, new SqlitePlatform());
+
+    return $driver->connect(new ConnectionParameters(database: ':memory:'));
+};
+
+$connection = $bindings['sqlcraft.connection']();
+$connection->execute('SELECT 1');
+echo "Laravel provider binding resolved\n";
