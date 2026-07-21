@@ -85,4 +85,4 @@
 - [x] T7: DdlManager and execution wiring — commit f5bb18a — green — 2026-07-21
 - [x] T8: SQLite recreation wiring and integration — commit 156537b — green — 2026-07-21
 - [x] T9: SQLite ALTER acceptance coverage — commit c85a5ab — green — 2026-07-21
-- [ ] M5 gate: DDL acceptance review — not started
+- [x] M5 gate: DDL acceptance review — commit pending — green — 2026-07-21
