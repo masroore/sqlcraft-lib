@@ -18,11 +18,11 @@ final class SqlServerDriverTest extends TestCase
         $driver = new SqlServerDriver(self::createMock(PdoConnectionFactoryInterface::class), new SqlServerPlatform());
 
         self::assertSame(
-            'sqlsrv:Server=db.example,11433;Database=shop',
+            'sqlsrv:Server=db.example,11433;Database=shop;TrustServerCertificate=Yes',
             $driver->buildDsn(new ConnectionParameters(host: 'db.example', port: 11433, database: 'shop')),
         );
         self::assertSame(
-            'sqlsrv:Server=/var/run/sqlserver;Database=shop',
+            'sqlsrv:Server=/var/run/sqlserver;Database=shop;TrustServerCertificate=Yes',
             $driver->buildDsn(new ConnectionParameters(socket: '/var/run/sqlserver', database: 'shop')),
         );
         self::assertSame('sqlserver', $driver->getName());
@@ -37,7 +37,7 @@ final class SqlServerDriverTest extends TestCase
         $parameters = new ConnectionParameters(database: 'shop');
         $factory->expects(self::once())
             ->method('connect')
-            ->with('sqlsrv:Server=127.0.0.1;Database=shop', $parameters, $platform)
+            ->with('sqlsrv:Server=127.0.0.1;Database=shop;TrustServerCertificate=Yes', $parameters, $platform)
             ->willReturn($connection);
         $driver = new SqlServerDriver($factory, $platform);
 
