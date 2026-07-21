@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace SQLCraft\Platform;
 
 use SQLCraft\Capabilities\Capability;
-use SQLCraft\Capabilities\CapabilitySet;
 use SQLCraft\Capabilities\CapabilityNotSupportedException;
+use SQLCraft\Capabilities\CapabilitySet;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Platform\PlatformInterface;
 use SQLCraft\DTO\CheckConstraintMeta;
