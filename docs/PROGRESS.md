@@ -132,6 +132,7 @@
 - [x] T4: connection and transaction lifecycle events — commit dcdf417 — green — 2026-07-21
 - [x] T5: DDL and metadata events — commit 7d29379 — green — 2026-07-21
 - [x] T5b: capability event context — commit 8f62017 — green — 2026-07-21
+- [x] T5c: platform capability event emission — commit d60a0df — green — 2026-07-21
 - [x] T6: typed structural-SQL validation audit — commit 2df4ef4 — green — 2026-07-21
 - [x] T7: credentials, redaction, and resource limits — commit 4e1685c — green — 2026-07-21
 - [ ] T8: M9 acceptance gate — not started
