@@ -39,6 +39,7 @@ enum Capability: string
     case Kill = 'kill';
     case Privileges = 'privileges';
     case Sql = 'sql';
+    case QueryTimeout = 'query_timeout';
     case Dump = 'dump';
     case Partitions = 'partitions';
 }

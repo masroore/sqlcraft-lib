@@ -22,6 +22,8 @@ use SQLCraft\Collections\TriggerCollection;
 use SQLCraft\Collections\TypeCollection;
 use SQLCraft\Collections\UserCollection;
 use SQLCraft\Collections\ViewCollection;
+use SQLCraft\Collections\LazyCollection;
+use SQLCraft\Contracts\Schema\SchemaManagerInterface;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Metadata\CheckConstraintInspectorInterface;
 use SQLCraft\Contracts\Metadata\ColumnInspectorInterface;
@@ -46,7 +48,7 @@ use SQLCraft\Schema\TableStructure;
 use SQLCraft\ValueObjects\Identifier;
 use SQLCraft\ValueObjects\QualifiedName;
 
-final class SchemaManager
+final class SchemaManager implements SchemaManagerInterface
 {
     public function __construct(
         private readonly ServerInspectorInterface $serverInspector,
@@ -64,6 +66,26 @@ final class SchemaManager
         private readonly ?MetadataCacheInterface $cache = null,
         private readonly ?SchemaEventDispatcherInterface $events = null,
     ) {
+    }
+
+    /** @return array<string, mixed> */
+    #[\Override]
+    public function compare(mixed $expected, mixed $actual): array
+    {
+        return $expected === $actual ? [] : ['expected' => $expected, 'actual' => $actual];
+    }
+
+    /** @param array<string, mixed> $diff */
+    #[\Override]
+    public function describeDiff(array $diff): string
+    {
+        return $diff === [] ? '' : json_encode($diff, JSON_THROW_ON_ERROR);
+    }
+
+    /** @return LazyCollection */
+    public function lazyTables(ConnectionInterface $conn, ?string $schema = null): LazyCollection
+    {
+        return new LazyCollection(fn (): iterable => $this->getTables($conn, $schema));
     }
 
     public function getServerInfo(ConnectionInterface $conn): ServerInfo

@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace SQLCraft\Query;
 
-use SQLCraft\Contracts\Connection\ConnectionInterface;
-
-interface PaginatorInterface
+/** @deprecated Use SQLCraft\Contracts\Query\PaginatorInterface. */
+interface PaginatorInterface extends \SQLCraft\Contracts\Query\PaginatorInterface
 {
-    public function paginate(ConnectionInterface $connection, SelectQuery $query, PaginationParams $params): Page;
 }

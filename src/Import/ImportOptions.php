@@ -13,7 +13,7 @@ final readonly class ImportOptions
         public bool $wrapInTransaction = false,
         public int $progressInterval = 50,
         public int $statementTimeoutMs = 0,
-        public ?int $maxStatements = null,
+        public ?int $maxStatements = 10000,
     ) {
         if ($progressInterval < 1) {
             throw new InvalidArgumentException('Progress interval must be >= 1.');
