@@ -109,3 +109,5 @@
 - [ ] T4: export orchestration — not started
 - [x] T4: export orchestration — commit b873d10 — green — 2026-07-21
 - [ ] T5: statement import pipeline — not started
+- [x] T5: statement import pipeline — commit f25da34 — green — 2026-07-21
+- [ ] T6: progress events and emission seam — not started
