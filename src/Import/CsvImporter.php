@@ -9,6 +9,7 @@ use RuntimeException;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Connection\PreparedStatementInterface;
 use SQLCraft\Contracts\Import\CsvImporterInterface;
+use SQLCraft\Contracts\Events\ImportExportEventDispatcherInterface;
 use SQLCraft\Contracts\Import\ImportSourceInterface;
 use SQLCraft\Contracts\Metadata\ColumnInspectorInterface;
 use SQLCraft\DTO\ColumnMeta;
@@ -17,8 +18,10 @@ use SQLCraft\ValueObjects\QualifiedName;
 
 final readonly class CsvImporter implements CsvImporterInterface
 {
-    public function __construct(private ColumnInspectorInterface $columns)
-    {
+    public function __construct(
+        private ColumnInspectorInterface $columns,
+        private ?ImportExportEventDispatcherInterface $events = null,
+    ) {
     }
 
     #[\Override]
@@ -34,6 +37,7 @@ final readonly class CsvImporter implements CsvImporterInterface
         }
 
         $startedAt = hrtime(true);
+        $this->events?->importStarted($conn, $source, $source->getEstimatedSize(), 'csv');
         $header = fgetcsv($stream, 0, $options->separator, '"', '');
         if (!is_array($header)) {
             return new ImportResult(0, 0, [], $this->elapsedMs($startedAt));
@@ -75,10 +79,14 @@ final readonly class CsvImporter implements CsvImporterInterface
             if ($transaction?->isActive() === true) {
                 $transaction->rollback();
             }
+            $this->events?->importFailed($conn, $error, null, $this->elapsedMs($startedAt));
             throw $error;
         }
 
-        return new ImportResult($statements, 0, [], $this->elapsedMs($startedAt));
+        $elapsedMs = $this->elapsedMs($startedAt);
+        $this->events?->importFinished($conn, $statements, [], $elapsedMs);
+
+        return new ImportResult($statements, 0, [], $elapsedMs);
     }
 
     /**

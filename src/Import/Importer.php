@@ -37,11 +37,13 @@ final readonly class Importer implements ImporterInterface
         }
 
         $startedAt = hrtime(true);
-        $this->events?->importStarted($conn, $source, $source->getEstimatedSize());
+        $this->events?->importStarted($conn, $source, $source->getEstimatedSize(), 'sql');
         $executed = 0;
         $skipped = 0;
         $errors = [];
         $transaction = null;
+        $bytesProcessed = 0;
+        $lastSql = null;
 
         try {
             if ($options->wrapInTransaction) {
@@ -58,8 +60,10 @@ final readonly class Importer implements ImporterInterface
                     continue;
                 }
 
+                $bytesProcessed += strlen($chunk);
                 $buffer .= $chunk;
                 if ($this->endsWithStatementDelimiter($buffer)) {
+                    $lastSql = $buffer;
                     [$executed, $skipped, $errors] = $this->executeSql(
                         $conn,
                         $buffer,
@@ -93,7 +97,7 @@ final readonly class Importer implements ImporterInterface
             if ($transaction?->isActive() === true) {
                 $transaction->rollback();
             }
-            $this->events?->importFailed($conn, $error, null, (hrtime(true) - $startedAt) / 1_000_000);
+            $this->events?->importFailed($conn, $error, $lastSql, (hrtime(true) - $startedAt) / 1_000_000);
             throw $error;
         }
 

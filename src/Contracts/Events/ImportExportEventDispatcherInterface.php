@@ -8,7 +8,7 @@ use SQLCraft\Contracts\Connection\ConnectionInterface;
 
 interface ImportExportEventDispatcherInterface
 {
-    public function importStarted(ConnectionInterface $connection, object $source, ?int $estimatedBytes): void;
+    public function importStarted(ConnectionInterface $connection, object $source, ?int $estimatedBytes, string $format = 'sql'): void;
 
     public function importProgress(ConnectionInterface $connection, int $bytesProcessed, int $statementsExecuted, float $elapsedMs): void;
 

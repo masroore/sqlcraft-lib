@@ -26,18 +26,21 @@ final readonly class TableDumper
         FormatWriterInterface $writer,
         SinkInterface $sink,
         DumpOptions $options,
-    ): void {
+    ): int {
         $writer->writeTableHeader($sink, $table, $options);
 
         if ($options->tableStyle !== TableSectionStyle::None) {
             $writer->writeTableDdl($sink, $table, $this->source->getTableDdl($connection, $table->name, $table->schema));
         }
 
+        $rows = 0;
         if ($options->dataStyle !== DataStyle::None && !$table->isView) {
-            $this->dumpRows($connection, $table, $writer, $sink, $options, $this->selectAllSql($connection, $table));
+            $rows = $this->dumpRows($connection, $table, $writer, $sink, $options, $this->selectAllSql($connection, $table));
         }
 
         $writer->writeTableFooter($sink, $table);
+
+        return $rows;
     }
 
     public function dumpFiltered(
@@ -47,10 +50,12 @@ final readonly class TableDumper
         FormatWriterInterface $writer,
         SinkInterface $sink,
         DumpOptions $options,
-    ): void {
+    ): int {
         $writer->writeTableHeader($sink, $table, $options);
-        $this->dumpRows($connection, $table, $writer, $sink, $options, $sql);
+        $rows = $this->dumpRows($connection, $table, $writer, $sink, $options, $sql);
         $writer->writeTableFooter($sink, $table);
+
+        return $rows;
     }
 
     private function dumpRows(
@@ -60,12 +65,14 @@ final readonly class TableDumper
         SinkInterface $sink,
         DumpOptions $options,
         string $sql,
-    ): void {
+    ): int {
         $columns = $this->source->getColumns($connection, $table->name, $table->schema);
         $result = $this->executor->query($connection, $sql);
         $batch = [];
+        $rowCount = 0;
 
         foreach ($result as $row) {
+            ++$rowCount;
             $batch[] = $row;
             if (count($batch) >= $options->batchSize) {
                 $writer->writeRows($sink, $table, $batch, $columns->map(static fn (ColumnMeta $column): ColumnMeta => $column), $options);
@@ -76,6 +83,8 @@ final readonly class TableDumper
         if ($batch !== []) {
             $writer->writeRows($sink, $table, $batch, $columns->map(static fn (ColumnMeta $column): ColumnMeta => $column), $options);
         }
+
+        return $rowCount;
     }
 
     private function selectAllSql(ConnectionInterface $connection, TableStatus $table): string

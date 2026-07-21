@@ -15,9 +15,9 @@ final readonly class ImportExportEventDispatcher implements ImportExportEventDis
     }
 
     #[\Override]
-    public function importStarted(ConnectionInterface $connection, object $source, ?int $estimatedBytes): void
+    public function importStarted(ConnectionInterface $connection, object $source, ?int $estimatedBytes, string $format = 'sql'): void
     {
-        $this->dispatcher->dispatch(new ImportStartedEvent($connection, $source, $estimatedBytes));
+        $this->dispatcher->dispatch(new ImportStartedEvent($connection, $source, $estimatedBytes, $format));
     }
 
     #[\Override]
