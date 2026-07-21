@@ -220,13 +220,13 @@ class MySQLPlatform extends AbstractPlatform
         bool $cycle,
         ?int $cache,
     ): string {
-        throw CapabilityNotSupportedException::for(Capability::Sequence, 'mysql');
+        throw $this->unsupported(Capability::Sequence);
     }
 
     #[\Override]
     public function renderDropSequenceStatement(\SQLCraft\ValueObjects\Identifier $name, bool $ifExists): string
     {
-        throw CapabilityNotSupportedException::for(Capability::Sequence, 'mysql');
+        throw $this->unsupported(Capability::Sequence);
     }
 
     #[\Override]
@@ -348,7 +348,7 @@ class MySQLPlatform extends AbstractPlatform
     #[\Override]
     public function getTypesSql(?string $schema = null): string
     {
-        throw CapabilityNotSupportedException::for(Capability::Type, 'mysql');
+        throw $this->unsupported(Capability::Type);
     }
 
     #[\Override]
@@ -401,7 +401,7 @@ class MySQLPlatform extends AbstractPlatform
     #[\Override]
     public function getMaterializedViewsSql(?string $schema = null): string
     {
-        throw CapabilityNotSupportedException::for(Capability::MaterializedView, 'mysql');
+        throw $this->unsupported(Capability::MaterializedView);
     }
 
     #[\Override]
@@ -500,7 +500,7 @@ class MySQLPlatform extends AbstractPlatform
     #[\Override]
     public function getSequencesSql(?string $schema = null): string
     {
-        throw CapabilityNotSupportedException::for(Capability::Sequence, 'mysql');
+        throw $this->unsupported(Capability::Sequence);
     }
 
     #[\Override]

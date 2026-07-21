@@ -227,7 +227,7 @@ abstract class AbstractPlatform implements PlatformInterface
 
         foreach ($alterTable->getAddColumns() as [$column, $after]) {
             if ($after instanceof Identifier) {
-                throw CapabilityNotSupportedException::for(Capability::MoveColumn, $this->getName());
+                throw $this->unsupported(Capability::MoveColumn);
             }
             $statements[] = $this->renderAlterTableAddColumn($table, $this->toColumnMeta($column));
         }
@@ -463,6 +463,14 @@ abstract class AbstractPlatform implements PlatformInterface
     {
         return (new PlatformCapabilityResolver($this->buildCapabilityMatrix(), $this->events))
             ->resolve($this->getName(), $version);
+    }
+
+    protected function unsupported(Capability|ExtendedCapability $capability): never
+    {
+        $capabilityName = $capability instanceof Capability ? $capability->value : $capability->name;
+        $this->events?->capabilityNotSupported($capabilityName, $this->getName(), '');
+
+        throw CapabilityNotSupportedException::for($capability, $this->getName());
     }
 
     /**

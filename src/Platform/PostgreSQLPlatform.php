@@ -535,7 +535,7 @@ final class PostgreSQLPlatform extends AbstractPlatform
     #[\Override]
     public function getVariablesSql(): string
     {
-        throw CapabilityNotSupportedException::for(Capability::Variables, 'pgsql');
+        throw $this->unsupported(Capability::Variables);
     }
 
     #[\Override]
@@ -547,7 +547,7 @@ final class PostgreSQLPlatform extends AbstractPlatform
     #[\Override]
     public function getCharsetsSql(): string
     {
-        throw CapabilityNotSupportedException::for(Capability::Charset, 'pgsql');
+        throw $this->unsupported(Capability::Charset);
     }
 
     #[\Override]

@@ -1,6 +1,6 @@
 getDatabasesSql: SHOW DATABASES
 getSchemasSql: 
-getTypesSql: UNSUPPORTED: Capability not supported: type on mysql.
+getTypesSql: UNSUPPORTED: Capability not supported: type on mariadb.
 getTablesSql: SELECT TABLE_NAME AS table_name, TABLE_TYPE AS table_type, TABLE_SCHEMA AS table_schema, ENGINE AS engine, TABLE_COMMENT AS table_comment, TABLE_ROWS AS table_rows, TABLE_COLLATION AS table_collation, AUTO_INCREMENT AS auto_increment, DATA_LENGTH AS data_length, INDEX_LENGTH AS index_length, DATA_FREE AS data_free, CREATE_OPTIONS AS create_options, CASE WHEN CREATE_OPTIONS LIKE '%partitioned%' THEN 1 ELSE 0 END AS partitioned FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'app' ORDER BY TABLE_NAME
 getColumnsSql: SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'app' AND TABLE_NAME = 'users' ORDER BY ORDINAL_POSITION
 getAllColumnsSql: SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'public' ORDER BY TABLE_NAME, ORDINAL_POSITION

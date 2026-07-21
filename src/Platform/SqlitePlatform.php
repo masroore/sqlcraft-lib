@@ -241,13 +241,13 @@ final class SqlitePlatform extends AbstractPlatform
         bool $deterministic,
         bool $orReplace,
     ): string {
-        throw CapabilityNotSupportedException::for(Capability::Routine, 'sqlite');
+        throw $this->unsupported(Capability::Routine);
     }
 
     #[\Override]
     public function renderDropRoutineStatement(QualifiedName $name, string $type, bool $ifExists): string
     {
-        throw CapabilityNotSupportedException::for(Capability::Routine, 'sqlite');
+        throw $this->unsupported(Capability::Routine);
     }
 
     #[\Override]
@@ -309,7 +309,7 @@ final class SqlitePlatform extends AbstractPlatform
     #[\Override]
     public function getTypesSql(?string $schema = null): string
     {
-        throw CapabilityNotSupportedException::for(Capability::Type, 'sqlite');
+        throw $this->unsupported(Capability::Type);
     }
 
     #[\Override]
@@ -333,7 +333,7 @@ final class SqlitePlatform extends AbstractPlatform
     #[\Override]
     public function getPartitionsSql(QualifiedName $table): string
     {
-        throw CapabilityNotSupportedException::for(Capability::Partitions, 'sqlite');
+        throw $this->unsupported(Capability::Partitions);
     }
 
     #[\Override]
@@ -351,7 +351,7 @@ final class SqlitePlatform extends AbstractPlatform
     #[\Override]
     public function getMaterializedViewsSql(?string $schema = null): string
     {
-        throw CapabilityNotSupportedException::for(Capability::MaterializedView, 'sqlite');
+        throw $this->unsupported(Capability::MaterializedView);
     }
 
     #[\Override]
@@ -414,7 +414,7 @@ final class SqlitePlatform extends AbstractPlatform
     #[\Override]
     public function getReferencingForeignKeysSql(QualifiedName $table): string
     {
-        throw CapabilityNotSupportedException::for(Capability::ForeignKeys, 'sqlite');
+        throw $this->unsupported(Capability::ForeignKeys);
     }
 
     #[\Override]
@@ -425,19 +425,19 @@ final class SqlitePlatform extends AbstractPlatform
     #[\Override]
     public function getRoutineDetailSql(QualifiedName $routine): string
     {
-        throw CapabilityNotSupportedException::for(Capability::Routine, 'sqlite');
+        throw $this->unsupported(Capability::Routine);
     }
 
     #[\Override]
     public function getCheckConstraintsSql(QualifiedName $table): string
     {
-        throw CapabilityNotSupportedException::for(Capability::CheckConstraints, 'sqlite');
+        throw $this->unsupported(Capability::CheckConstraints);
     }
 
     #[\Override]
     public function getUsersSql(): string
     {
-        throw CapabilityNotSupportedException::for(Capability::Privileges, 'sqlite');
+        throw $this->unsupported(Capability::Privileges);
     }
 
     #[\Override]
@@ -448,7 +448,7 @@ final class SqlitePlatform extends AbstractPlatform
     #[\Override]
     public function getSequencesSql(?string $schema = null): string
     {
-        throw CapabilityNotSupportedException::for(Capability::Sequence, 'sqlite');
+        throw $this->unsupported(Capability::Sequence);
     }
     #[\Override]
     public function getVariablesSql(): string
@@ -464,19 +464,19 @@ final class SqlitePlatform extends AbstractPlatform
     #[\Override]
     public function getCharsetsSql(): string
     {
-        throw CapabilityNotSupportedException::for(Capability::Charset, 'sqlite');
+        throw $this->unsupported(Capability::Charset);
     }
 
     #[\Override]
     public function getCollationsSql(?string $charset = null): string
     {
-        throw CapabilityNotSupportedException::for(Capability::Collation, 'sqlite');
+        throw $this->unsupported(Capability::Collation);
     }
 
     #[\Override]
     public function getProcesslistSql(): string
     {
-        throw CapabilityNotSupportedException::for(Capability::Processlist, 'sqlite');
+        throw $this->unsupported(Capability::Processlist);
     }
 
     private function tableStatusSql(string $database, ?string $table): string

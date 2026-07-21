@@ -389,7 +389,7 @@ final class SqlServerPlatform extends AbstractPlatform
     #[\Override]
     public function getMaterializedViewsSql(?string $schema = null): string
     {
-        throw CapabilityNotSupportedException::for(Capability::MaterializedView, 'sqlserver');
+        throw $this->unsupported(Capability::MaterializedView);
     }
 
     #[\Override]
