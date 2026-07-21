@@ -83,7 +83,5 @@
 - [x] T5: sequence, database, schema, and database-selection builders — commit c8d2f01 — green — 2026-07-21
 - [x] T6: SQLite table recreation strategy — commit f018706 — green — 2026-07-21
 - [x] T7: DdlManager and execution wiring — commit f5bb18a — green — 2026-07-21
-- [ ] M5 gate: DDL acceptance review — not started
-- [ ] T4: SQLite table recreation strategy — not started
-- [ ] T5: DdlManager and execution wiring — not started
+- [x] T8: SQLite recreation wiring and integration — commit 156537b — green — 2026-07-21
 - [ ] M5 gate: DDL acceptance review — not started
