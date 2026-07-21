@@ -33,6 +33,18 @@ final class DumpOptionsTest extends TestCase
         self::assertSame('\N', $options->nullRepresentation);
     }
 
+    public function testRejectsInvalidBatchAndFormatOptions(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        new DumpOptions('', DumpScope::database('shop'));
+    }
+
+    public function testRejectsNonPositiveBatchSize(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        new DumpOptions('sql', DumpScope::database('shop'), batchSize: 0);
+    }
+
     public function testAllOptionsCanBeConfigured(): void
     {
         $scope = DumpScope::table('shop', 'orders');

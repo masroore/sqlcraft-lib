@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SQLCraft\Export;
 
+use InvalidArgumentException;
+
 final readonly class DumpOptions
 {
     public function __construct(
@@ -21,5 +23,17 @@ final readonly class DumpOptions
         public ?string $csvSeparator = null,
         public string $nullRepresentation = '\\N',
     ) {
+        if (trim($format) === '') {
+            throw new InvalidArgumentException('Export format cannot be empty.');
+        }
+        if ($batchSize < 1) {
+            throw new InvalidArgumentException('Export batch size must be >= 1.');
+        }
+        if ($csvSeparator === '') {
+            throw new InvalidArgumentException('CSV separator cannot be empty.');
+        }
+        if ($nullRepresentation === '') {
+            throw new InvalidArgumentException('NULL representation cannot be empty.');
+        }
     }
 }

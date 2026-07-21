@@ -41,6 +41,12 @@ final class DumpScopeTest extends TestCase
         self::assertSame(['orders'], $table->tables);
     }
 
+    public function testRejectsEmptyScopeValues(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        DumpScope::tables('shop', []);
+    }
+
     public function testFilteredResultScope(): void
     {
         $scope = DumpScope::filteredResult('shop', 'orders', 'SELECT * FROM orders WHERE id > 10');

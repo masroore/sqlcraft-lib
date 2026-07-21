@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SQLCraft\Export;
 
+use InvalidArgumentException;
+
 final readonly class DumpScope
 {
     /**
@@ -15,6 +17,20 @@ final readonly class DumpScope
         public ?array $tables = null,
         public ?string $resultSql = null,
     ) {
+        if ($database !== null && trim($database) === '') {
+            throw new InvalidArgumentException('Export database cannot be empty.');
+        }
+        if ($tables !== null && $tables === []) {
+            throw new InvalidArgumentException('Export table list cannot be empty.');
+        }
+        foreach ($tables ?? [] as $table) {
+            if (trim($table) === '') {
+                throw new InvalidArgumentException('Export table name cannot be empty.');
+            }
+        }
+        if ($resultSql !== null && trim($resultSql) === '') {
+            throw new InvalidArgumentException('Filtered export SQL cannot be empty.');
+        }
     }
 
     public static function allDatabases(): self
