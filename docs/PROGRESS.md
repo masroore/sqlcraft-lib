@@ -107,3 +107,5 @@
 - [ ] T3: SQL/CSV/TSV format writers — not started
 - [x] T3: SQL/CSV/TSV format writers — commit 32e0ac5 — green — 2026-07-21
 - [ ] T4: export orchestration — not started
+- [x] T4: export orchestration — commit b873d10 — green — 2026-07-21
+- [ ] T5: statement import pipeline — not started
