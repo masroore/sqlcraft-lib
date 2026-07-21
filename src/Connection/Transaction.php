@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SQLCraft\Connection;
 
 use SQLCraft\Contracts\Connection\ConnectionInterface;
+use SQLCraft\Contracts\Events\ConnectionEventDispatcherInterface;
 
 final class Transaction
 {
@@ -15,6 +16,7 @@ final class Transaction
         private readonly ConnectionInterface $connection,
         public readonly string $isolationLevel = '',
         public readonly ?string $savepointName = null,
+        private readonly ?ConnectionEventDispatcherInterface $events = null,
     ) {
     }
 
@@ -22,6 +24,7 @@ final class Transaction
     {
         $this->assertActive();
 
+        $startedAt = hrtime(true);
         if ($this->savepointName !== null) {
             $this->connection->execute("RELEASE SAVEPOINT {$this->savepointName}");
         } else {
@@ -29,6 +32,11 @@ final class Transaction
         }
 
         $this->committed = true;
+        $this->events?->transactionCommitted(
+            $this->connection,
+            $this->savepointName,
+            (hrtime(true) - $startedAt) / 1_000_000,
+        );
     }
 
     public function rollback(): void
@@ -42,6 +50,7 @@ final class Transaction
         }
 
         $this->rolledBack = true;
+        $this->events?->transactionRolledBack($this->connection, $this->savepointName, 'rollback');
     }
 
     public function isActive(): bool

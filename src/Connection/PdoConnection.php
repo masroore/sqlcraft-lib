@@ -13,6 +13,7 @@ use SQLCraft\Contracts\Connection\ResultInterface;
 use SQLCraft\Contracts\Platform\PlatformInterface;
 use SQLCraft\DTO\ExecutionResult;
 use SQLCraft\Exceptions\ConnectionClosedException;
+use SQLCraft\Contracts\Events\ConnectionEventDispatcherInterface;
 use SQLCraft\Exceptions\QueryException;
 use SQLCraft\ValueObjects\Identifier;
 use SQLCraft\ValueObjects\ServerVersion;
@@ -32,6 +33,7 @@ final class PdoConnection implements ConnectionInterface
         private readonly PdoExceptionTranslator $translator,
         private readonly ?string $name = null,
         private readonly ?string $databaseName = null,
+        private readonly ?ConnectionEventDispatcherInterface $events = null,
     ) {
     }
 
@@ -180,6 +182,10 @@ final class PdoConnection implements ConnectionInterface
     public function beginTransaction(string $isolationLevel = ''): Transaction
     {
         $pdo = $this->assertOpen();
+        $cancelReason = $this->events?->beforeTransactionBegan($this, $isolationLevel);
+        if ($cancelReason !== null) {
+            throw new \SQLCraft\Exceptions\OperationCancelledException($cancelReason);
+        }
 
         if (!$pdo->inTransaction()) {
             try {
@@ -188,13 +194,16 @@ final class PdoConnection implements ConnectionInterface
                 throw $this->translator->translate($exception);
             }
 
-            return new Transaction($this);
+            $transaction = new Transaction($this, $isolationLevel, events: $this->events);
+        } else {
+            $savepoint = 'sqlcraft_sp_' . ++$this->savepointSequence;
+            $this->execute('SAVEPOINT ' . $savepoint);
+            $transaction = new Transaction($this, $isolationLevel, $savepoint, $this->events);
         }
 
-        $savepoint = 'sqlcraft_sp_' . ++$this->savepointSequence;
-        $this->execute('SAVEPOINT ' . $savepoint);
+        $this->events?->transactionBegan($this, $isolationLevel, $transaction->savepointName);
 
-        return new Transaction($this, $isolationLevel, $savepoint);
+        return $transaction;
     }
 
     #[\Override]
@@ -224,8 +233,13 @@ final class PdoConnection implements ConnectionInterface
     #[\Override]
     public function close(): void
     {
+        if ($this->closed) {
+            return;
+        }
+
         $this->pdo = null;
         $this->closed = true;
+        $this->events?->connectionClosed($this->name ?? $this->platform->getName(), $this->platform->getName());
     }
 
     /** @param array<string|int, mixed> $params */

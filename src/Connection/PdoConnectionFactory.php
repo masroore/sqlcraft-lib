@@ -10,13 +10,17 @@ use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Connection\PdoConnectionFactoryInterface;
 use SQLCraft\Contracts\Platform\PlatformInterface;
 use SQLCraft\Exceptions\ConnectionFailedException;
+use SQLCraft\Contracts\Events\ConnectionEventDispatcherInterface;
+use SQLCraft\Exceptions\OperationCancelledException;
 use SQLCraft\ValueObjects\ConnectionParameters;
 
 /** @internal */
 final class PdoConnectionFactory implements PdoConnectionFactoryInterface
 {
-    public function __construct(private readonly PdoExceptionTranslator $translator)
-    {
+    public function __construct(
+        private readonly PdoExceptionTranslator $translator,
+        private readonly ?ConnectionEventDispatcherInterface $events = null,
+    ) {
     }
 
     #[\Override]
@@ -26,6 +30,13 @@ final class PdoConnectionFactory implements PdoConnectionFactoryInterface
         PlatformInterface $platform,
         ?string $name = null,
     ): ConnectionInterface {
+        $connectionName = $name ?? $platform->getName();
+        $startedAt = hrtime(true);
+        $cancelReason = $this->events?->beforeConnectionOpened($connectionName, $parameters);
+        if ($cancelReason !== null) {
+            throw new OperationCancelledException($cancelReason);
+        }
+
         try {
             $options = [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -45,6 +56,7 @@ final class PdoConnectionFactory implements PdoConnectionFactoryInterface
                 $options,
             );
         } catch (PDOException $exception) {
+            $this->events?->connectionFailed($connectionName, $platform->getName(), $exception);
             throw new ConnectionFailedException(
                 'Database connection failed.',
                 host: $parameters->host ?? '',
@@ -53,6 +65,15 @@ final class PdoConnectionFactory implements PdoConnectionFactoryInterface
             );
         }
 
-        return new PdoConnection($pdo, $platform, $this->translator, $name, $parameters->database);
+        $connection = new PdoConnection($pdo, $platform, $this->translator, $name, $parameters->database, $this->events);
+        $this->events?->connectionOpened(
+            $connectionName,
+            $platform->getName(),
+            $parameters->host,
+            $parameters->database,
+            (hrtime(true) - $startedAt) / 1_000_000,
+        );
+
+        return $connection;
     }
 }
