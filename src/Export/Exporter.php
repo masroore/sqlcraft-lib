@@ -6,6 +6,7 @@ namespace SQLCraft\Export;
 
 use InvalidArgumentException;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
+use SQLCraft\Contracts\Events\ImportExportEventDispatcherInterface;
 use SQLCraft\Contracts\Export\ExporterInterface;
 use SQLCraft\Contracts\Export\ExportSourceInterface;
 use SQLCraft\Contracts\Export\FormatWriterInterface;
@@ -20,22 +21,32 @@ final class Exporter implements ExporterInterface
     public function __construct(
         private readonly ExportSourceInterface $source,
         QueryExecutorInterface $executor,
+        FormatWriterInterface|ImportExportEventDispatcherInterface|null $eventOrWriter = null,
         FormatWriterInterface ...$writers,
     ) {
+        $events = $eventOrWriter instanceof ImportExportEventDispatcherInterface ? $eventOrWriter : null;
+        if ($eventOrWriter instanceof FormatWriterInterface) {
+            $writers = [$eventOrWriter, ...$writers];
+        }
         $writerMap = [];
         foreach ($writers as $writer) {
             $writerMap[$writer->getFormatName()] = $writer;
         }
         $this->writers = $writerMap;
+        $this->events = $events;
         $this->dumper = new TableDumper($source, $executor);
     }
 
     private readonly TableDumper $dumper;
 
+    private readonly ?ImportExportEventDispatcherInterface $events;
+
     #[\Override]
     public function export(ConnectionInterface $conn, SinkInterface $sink, DumpOptions $options): void
     {
         $writer = $this->writer($options->format);
+        $startedAt = hrtime(true);
+        $this->events?->exportStarted($conn, $sink, $options->format, $options->scope->tables ?? []);
         $writer->writeHeader($sink, $options);
 
         match ($options->scope->kind) {
@@ -46,6 +57,7 @@ final class Exporter implements ExporterInterface
 
         $writer->writeFooter($sink, $options);
         $sink->flush();
+        $this->events?->exportFinished($conn, count($options->scope->tables ?? []), 0, (hrtime(true) - $startedAt) / 1_000_000);
     }
 
     private function exportDatabase(
@@ -54,8 +66,11 @@ final class Exporter implements ExporterInterface
         FormatWriterInterface $writer,
         DumpOptions $options,
     ): void {
+        $tablesExported = 0;
         foreach ($this->source->getTables($conn) as $table) {
             $this->dumper->dump($conn, $table, $writer, $sink, $options);
+            $tablesExported++;
+            $this->events?->exportProgress($conn, $tablesExported, 0, 0.0);
         }
     }
 
@@ -67,9 +82,12 @@ final class Exporter implements ExporterInterface
     ): void {
         $database = $options->scope->database;
         $schema = $database === $conn->getDatabaseName() ? null : $database;
+        $tablesExported = 0;
         foreach ($options->scope->tables ?? [] as $tableName) {
             $table = $this->source->getTableStatus($conn, $tableName, $schema);
             $this->dumper->dump($conn, $table, $writer, $sink, $options);
+            $tablesExported++;
+            $this->events?->exportProgress($conn, $tablesExported, 0, 0.0);
         }
     }
 
@@ -89,6 +107,7 @@ final class Exporter implements ExporterInterface
         $schema = $database === $conn->getDatabaseName() ? null : $database;
         $table = $this->source->getTableStatus($conn, $tableName, $schema);
         $this->dumper->dumpFiltered($conn, $table, $sql, $writer, $sink, $options);
+        $this->events?->exportProgress($conn, 1, 0, 0.0);
     }
 
     private function writer(string $format): FormatWriterInterface

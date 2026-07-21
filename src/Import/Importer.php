@@ -10,6 +10,7 @@ use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Execution\BatchExecutorInterface;
 use SQLCraft\Contracts\Execution\StatementBatch;
 use SQLCraft\Contracts\Execution\StatementSplitterInterface;
+use SQLCraft\Contracts\Events\ImportExportEventDispatcherInterface;
 use SQLCraft\Contracts\Import\ImportSourceInterface;
 use SQLCraft\Contracts\Import\ImporterInterface;
 
@@ -20,6 +21,7 @@ final readonly class Importer implements ImporterInterface
     public function __construct(
         private StatementSplitterInterface $splitter,
         private BatchExecutorInterface $batchExecutor,
+        private ?ImportExportEventDispatcherInterface $events = null,
     ) {
     }
 
@@ -35,6 +37,7 @@ final readonly class Importer implements ImporterInterface
         }
 
         $startedAt = hrtime(true);
+        $this->events?->importStarted($conn, $source, $source->getEstimatedSize());
         $executed = 0;
         $skipped = 0;
         $errors = [];
@@ -84,10 +87,13 @@ final readonly class Importer implements ImporterInterface
             }
 
             $transaction?->commit();
+            $elapsedMs = (hrtime(true) - $startedAt) / 1_000_000;
+            $this->events?->importFinished($conn, $executed, $errors, $elapsedMs);
         } catch (\Throwable $error) {
             if ($transaction?->isActive() === true) {
                 $transaction->rollback();
             }
+            $this->events?->importFailed($conn, $error, null, (hrtime(true) - $startedAt) / 1_000_000);
             throw $error;
         }
 
@@ -128,6 +134,9 @@ final readonly class Importer implements ImporterInterface
             }
 
             $executed++;
+            if (($executed + $skipped) % $options->progressInterval === 0) {
+                $this->events?->importProgress($connection, strlen($sql), $executed, 0.0);
+            }
         }
 
         return [$executed, $skipped, $errors];
