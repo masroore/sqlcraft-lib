@@ -27,19 +27,23 @@ final readonly class InsertQueryRenderer
             $values = [...$values, ...$valuesRow];
         }
         /** @var list<mixed> $values */
-        $prefix = match ($query->upsertMode) {
-            UpsertMode::Insert => 'INSERT',
-            UpsertMode::InsertOrIgnore => match ($this->platform->getName()) {
-                'sqlite' => 'INSERT OR IGNORE', 'mysql', 'mariadb' => 'INSERT IGNORE', default => 'INSERT'
-            },
-            UpsertMode::InsertOrReplace => match ($this->platform->getName()) {
-                'sqlite' => 'INSERT OR REPLACE', 'mysql', 'mariadb' => 'REPLACE', default => 'INSERT'
-            },
-        };
-        $sql = $prefix . ' INTO ' . $this->quoteTable($query) . ' (' . $columns . ') VALUES ' . implode(', ', array_fill(0, count($query->rows), $row));
-        if ($query->upsertMode === UpsertMode::InsertOrIgnore && $this->platform->getName() === 'pgsql') {
-            $sql .= ' ON CONFLICT DO NOTHING';
+        $quotedColumns = array_map(fn (string $name): string => $this->platform->quoteIdentifier(new Identifier($name)), $query->columns);
+        $clauses = UpsertSqlRenderer::clauses($this->platform, $query->upsertMode, $quotedColumns);
+        if ($this->platform->getName() === 'sqlserver' && $query->upsertMode !== UpsertMode::Insert) {
+            $sourceColumns = implode(', ', $quotedColumns);
+            $sourceValues = implode(', ', array_fill(0, count($query->rows), $row));
+            $key = $quotedColumns[0] ?? throw new \InvalidArgumentException('Upsert requires at least one column.');
+            $assignments = implode(', ', array_map(static fn (string $column): string => 'target.' . $column . ' = source.' . $column, $quotedColumns));
+            $insertValues = implode(', ', array_map(static fn (string $column): string => 'source.' . $column, $quotedColumns));
+            $sql = 'MERGE INTO ' . $this->quoteTable($query) . ' AS target USING (VALUES ' . $sourceValues . ') AS source (' . $sourceColumns . ') ON target.' . $key . ' = source.' . $key
+                . ' WHEN NOT MATCHED THEN INSERT (' . $sourceColumns . ') VALUES (' . $insertValues . ')';
+            if ($query->upsertMode === UpsertMode::InsertOrReplace) {
+                $sql .= ' WHEN MATCHED THEN UPDATE SET ' . $assignments;
+            }
+            return ['sql' => $sql . ';', 'params' => $values];
         }
+
+        $sql = $clauses['prefix'] . ' INTO ' . $this->quoteTable($query) . ' (' . $columns . ') VALUES ' . implode(', ', array_fill(0, count($query->rows), $row)) . $clauses['suffix'];
 
         return ['sql' => $sql, 'params' => $values];
     }

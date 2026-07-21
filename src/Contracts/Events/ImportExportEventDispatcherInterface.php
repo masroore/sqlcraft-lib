@@ -20,6 +20,9 @@ interface ImportExportEventDispatcherInterface
     /** @param list<string> $tables */
     public function exportStarted(ConnectionInterface $connection, object $target, string $format, array $tables): void;
 
+    /** @param list<string> $tables */
+    public function exportWarning(ConnectionInterface $connection, string $message, array $tables): void;
+
     public function exportProgress(ConnectionInterface $connection, int $tablesExported, int $rowsExported, float $elapsedMs): void;
 
     public function exportFinished(ConnectionInterface $connection, int $tablesExported, int $rowsExported, float $elapsedMs): void;

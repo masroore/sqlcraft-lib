@@ -35,6 +35,7 @@ use SQLCraft\Export\FormatRegistry;
 use SQLCraft\Export\SqlFormatWriter;
 use SQLCraft\Export\TsvFormatWriter;
 use SQLCraft\Import\Importer;
+use SQLCraft\Import\CsvFormatReader;
 use SQLCraft\Metadata\ExportSource;
 use SQLCraft\Platform\MySQLPlatform;
 use SQLCraft\Platform\PostgreSQLPlatform;
@@ -122,7 +123,7 @@ final class SQLCraftFactory
             new CsvFormatWriter(),
             new TsvFormatWriter(),
             new CsvSemicolonFormatWriter(),
-        ]);
+        ], [new CsvFormatReader()]);
         $exporter = new Exporter($source, $queryExecutor, $registry);
         $importer = new Importer(new StatementSplitter(), new BatchExecutor($queryExecutor));
 

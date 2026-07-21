@@ -66,6 +66,7 @@ final class SchemaManagerFactory
             new TriggerInspector($factory),
             new RoutineInspector($factory),
             new ServerInspector($factory),
+            new ForeignKeyInspector($factory),
         );
     }
 

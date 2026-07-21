@@ -136,11 +136,10 @@ final readonly class Importer implements ImporterInterface
             return [$executed, $skipped, $errors];
         }
 
-        foreach ($this->batchExecutor->executeBatch(
-            $connection,
-            new StatementBatch($remaining),
-            $options->stopOnError,
-        ) as $result) {
+        $results = $options->statementTimeoutMs > 0
+            ? $this->batchExecutor->executeBatch($connection, new StatementBatch($remaining), $options->stopOnError, $options->statementTimeoutMs)
+            : $this->batchExecutor->executeBatch($connection, new StatementBatch($remaining), $options->stopOnError);
+        foreach ($results as $result) {
             if ($result->error !== null) {
                 $errors[] = new ImportError(
                     statementIndex: $executed + $result->index,

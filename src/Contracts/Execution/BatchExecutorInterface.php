@@ -15,5 +15,6 @@ interface BatchExecutorInterface
         ConnectionInterface $connection,
         StatementBatch $batch,
         bool $stopOnError = true,
+        int $timeoutMs = 0,
     ): \Generator;
 }

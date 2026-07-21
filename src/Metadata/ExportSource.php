@@ -13,14 +13,16 @@ use SQLCraft\ValueObjects\TriggerTiming;
 use SQLCraft\Collections\TableCollection;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Export\ExportSourceInterface;
+use SQLCraft\Contracts\Export\ForeignKeyExportSourceInterface;
 use SQLCraft\Contracts\Metadata\ColumnInspectorInterface;
+use SQLCraft\Contracts\Metadata\ForeignKeyInspectorInterface;
 use SQLCraft\Contracts\Metadata\TableInspectorInterface;
 use SQLCraft\DTO\TableStatus;
 use SQLCraft\ValueObjects\Identifier;
 use SQLCraft\ValueObjects\QualifiedName;
 
 /** @internal */
-final readonly class ExportSource implements ExportSourceInterface
+final readonly class ExportSource implements ExportSourceInterface, ForeignKeyExportSourceInterface
 {
     public function __construct(
         private TableInspectorInterface $tables,
@@ -28,6 +30,7 @@ final readonly class ExportSource implements ExportSourceInterface
         private ?TriggerInspectorInterface $triggers = null,
         private ?RoutineInspectorInterface $routines = null,
         private ?ServerInspectorInterface $server = null,
+        private ?ForeignKeyInspectorInterface $foreignKeys = null,
     ) {
     }
 
@@ -47,6 +50,18 @@ final readonly class ExportSource implements ExportSourceInterface
     public function getColumns(ConnectionInterface $connection, string $table, ?string $schema = null): ColumnCollection
     {
         return $this->columns->getColumns($connection, $this->qualifiedName($connection, $table, $schema));
+    }
+
+
+    /** @return iterable<\SQLCraft\DTO\ForeignKeyMeta> */
+    #[\Override]
+    public function getForeignKeys(ConnectionInterface $connection, string $table, ?string $schema = null): iterable
+    {
+        if (!$this->foreignKeys instanceof ForeignKeyInspectorInterface) {
+            return [];
+        }
+
+        return $this->foreignKeys->getForeignKeys($connection, $this->qualifiedName($connection, $table, $schema));
     }
 
     #[\Override]

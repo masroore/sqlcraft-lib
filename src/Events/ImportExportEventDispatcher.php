@@ -46,6 +46,13 @@ final readonly class ImportExportEventDispatcher implements ImportExportEventDis
         $this->dispatcher->dispatch(new ExportStartedEvent($connection, $target, $format, $tables));
     }
 
+    /** @param list<string> $tables */
+    #[\Override]
+    public function exportWarning(ConnectionInterface $connection, string $message, array $tables): void
+    {
+        $this->dispatcher->dispatch(new ExportWarningEvent($connection, $message, $tables));
+    }
+
     #[\Override]
     public function exportProgress(ConnectionInterface $connection, int $tablesExported, int $rowsExported, float $elapsedMs): void
     {

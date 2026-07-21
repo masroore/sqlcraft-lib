@@ -24,8 +24,11 @@ final readonly class BatchExecutor implements BatchExecutorInterface
 
     /** @return \Generator<int, BatchStatementResult> */
     #[\Override]
-    public function executeBatch(ConnectionInterface $connection, StatementBatch $batch, bool $stopOnError = true): \Generator
+    public function executeBatch(ConnectionInterface $connection, StatementBatch $batch, bool $stopOnError = true, int $timeoutMs = 0): \Generator
     {
+        if ($timeoutMs < 0) {
+            throw new InvalidArgumentException('Statement timeout must be zero or greater.');
+        }
         if (count($batch->statements) > $this->maximumStatements) {
             throw new InvalidArgumentException(sprintf('Batch cannot contain more than %d statements.', $this->maximumStatements));
         }
@@ -33,6 +36,14 @@ final readonly class BatchExecutor implements BatchExecutorInterface
         foreach ($batch->statements as $index => $sql) {
             $startedAt = hrtime(true);
             try {
+                if ($timeoutMs > 0) {
+                    $rows = $this->executor->queryWithTimeout($connection, $sql, timeoutMs: $timeoutMs);
+                    if ($rows === null) {
+                        throw new \SQLCraft\Exceptions\QueryTimeoutException('Statement timeout is not supported by this platform.', $sql);
+                    }
+                    yield new BatchStatementResult($index, $sql, null, $rows, $this->elapsedMs($startedAt), null);
+                    continue;
+                }
                 if ($this->isQuery($sql)) {
                     $rows = $this->executor->query($connection, $sql);
                     yield new BatchStatementResult($index, $sql, null, $rows, $this->elapsedMs($startedAt), null);

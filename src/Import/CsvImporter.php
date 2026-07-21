@@ -7,12 +7,14 @@ namespace SQLCraft\Import;
 use InvalidArgumentException;
 use RuntimeException;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
-use SQLCraft\Contracts\Connection\PreparedStatementInterface;
+use SQLCraft\Contracts\Execution\QueryExecutorInterface;
 use SQLCraft\Contracts\Import\CsvImporterInterface;
 use SQLCraft\Contracts\Events\ImportExportEventDispatcherInterface;
 use SQLCraft\Contracts\Import\ImportSourceInterface;
 use SQLCraft\Contracts\Metadata\ColumnInspectorInterface;
 use SQLCraft\DTO\ColumnMeta;
+use SQLCraft\Query\UpsertSqlRenderer;
+use SQLCraft\Exceptions\QueryTimeoutException;
 use SQLCraft\ValueObjects\Identifier;
 use SQLCraft\ValueObjects\QualifiedName;
 
@@ -21,6 +23,7 @@ final readonly class CsvImporter implements CsvImporterInterface
     public function __construct(
         private ColumnInspectorInterface $columns,
         private ?ImportExportEventDispatcherInterface $events = null,
+        private ?QueryExecutorInterface $executor = null,
     ) {
     }
 
@@ -67,12 +70,16 @@ final readonly class CsvImporter implements CsvImporterInterface
                 if (count($batch) >= $options->batchSize) {
                     $this->executeBatch($conn, $table, $known, $batch, $options);
                     $statements++;
+                    $position = ftell($stream);
+                    $this->events?->importProgress($conn, $position === false ? 0 : $position, $statements, $this->elapsedMs($startedAt));
                     $batch = [];
                 }
             }
             if ($batch !== []) {
                 $this->executeBatch($conn, $table, $known, $batch, $options);
                 $statements++;
+                $position = ftell($stream);
+                $this->events?->importProgress($conn, $position === false ? 0 : $position, $statements, $this->elapsedMs($startedAt));
             }
             $transaction?->commit();
         } catch (\Throwable $error) {
@@ -149,34 +156,31 @@ final readonly class CsvImporter implements CsvImporterInterface
         array $known,
         array $rows,
         CsvImportOptions $options,
-    ): PreparedStatementInterface {
+    ): void {
         $columns = array_map(static fn (array $column): string => $column[1], $known);
-        $placeholderRow = '(' . implode(', ', array_fill(0, count($columns), '?')) . ')';
-        $prefix = $this->insertPrefix($conn, $options->upsertMode);
-        $sql = $prefix . ' INTO ' . $this->quoteTable($conn, $table)
-            . ' (' . implode(', ', array_map($conn->quoteIdentifier(...), $columns)) . ') VALUES '
-            . implode(', ', array_fill(0, count($rows), $placeholderRow));
-        $params = array_merge(...$rows);
+        $quotedColumns = array_map($conn->quoteIdentifier(...), $columns);
+        $row = '(' . implode(', ', array_fill(0, count($columns), '?')) . ')';
+        $clauses = UpsertSqlRenderer::clausesForName($conn->getPlatformName(), $options->upsertMode, $quotedColumns);
+        $tableSql = $this->quoteTable($conn, $table);
+        $values = [];
+        foreach ($rows as $valuesRow) {
+            $values = [...$values, ...$valuesRow];
+        }
+        $sql = $clauses['prefix'] . ' INTO ' . $tableSql . ' (' . implode(', ', $quotedColumns) . ') VALUES '
+            . implode(', ', array_fill(0, count($rows), $row)) . $clauses['suffix'];
+        if ($options->statementTimeoutMs > 0) {
+            if (!$this->executor instanceof QueryExecutorInterface) {
+                throw new InvalidArgumentException('A QueryExecutor is required for CSV statement timeouts.');
+            }
+            if ($this->executor->queryWithTimeout($conn, $sql, $values, $options->statementTimeoutMs) === null) {
+                throw new QueryTimeoutException('Statement timeout is not supported by this platform.', $sql);
+            }
+            return;
+        }
         $statement = $conn->prepare($sql);
-        $statement->execute($params);
-
-        return $statement;
+        $statement->execute($values);
     }
 
-    private function insertPrefix(ConnectionInterface $conn, UpsertMode $mode): string
-    {
-        if ($mode === UpsertMode::Insert) {
-            return 'INSERT';
-        }
-        if ($conn->getPlatformName() === 'sqlite') {
-            return $mode === UpsertMode::InsertOrIgnore ? 'INSERT OR IGNORE' : 'INSERT OR REPLACE';
-        }
-        if ($conn->getPlatformName() === 'mysql' || $conn->getPlatformName() === 'mariadb') {
-            return $mode === UpsertMode::InsertOrIgnore ? 'INSERT IGNORE' : 'REPLACE';
-        }
-
-        return 'INSERT';
-    }
 
     private function quoteTable(ConnectionInterface $conn, QualifiedName $table): string
     {
@@ -185,7 +189,6 @@ final readonly class CsvImporter implements CsvImporterInterface
             $parts[] = $conn->quoteIdentifier($table->schema->name);
         }
         $parts[] = $conn->quoteIdentifier($table->object->name);
-
         return implode('.', $parts);
     }
 
