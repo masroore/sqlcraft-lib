@@ -84,6 +84,7 @@ class MySQLPlatform extends AbstractPlatform
                 Capability::InsertUpdate,
                 Capability::Compression,
                 Capability::Partitions,
+                Capability::CrossTableSearch, Capability::BlobStreaming,
             ],
             'versioned' => [
                 [Capability::GeneratedColumns, [5, 7, 0]],

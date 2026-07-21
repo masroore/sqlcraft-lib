@@ -24,13 +24,14 @@ final readonly class SelectQueryRenderer
 
         if ($query->where !== []) {
             $clauses = [];
+            $conditionRenderer = new WhereConditionRenderer($this->platform);
             foreach ($query->where as $condition) {
-                if (!in_array($condition->operator, $this->platform->getOperators(), true)) {
-                    throw new InvalidArgumentException(sprintf('Operator %s is not supported by %s.', $condition->operator, $this->platform->getName()));
-                }
-                [$clause, $values] = $this->renderCondition($condition);
+                [$clause, $values] = $conditionRenderer->render($condition);
                 $clauses[] = $clause;
-                $params = [...$params, ...$values];
+                /** @psalm-suppress MixedAssignment */
+                foreach ($values as $value) {
+                    $params[] = $value;
+                }
             }
             $sql .= ' WHERE ' . implode(' AND ', $clauses);
         }
@@ -73,28 +74,6 @@ final readonly class SelectQueryRenderer
         }, $columns));
     }
 
-    /** @return array{0: string, 1: list<mixed>} */
-    private function renderCondition(WhereCondition $condition): array
-    {
-        $column = $this->platform->quoteIdentifier($condition->column);
-        if (in_array($condition->operator, ['IS NULL', 'IS NOT NULL'], true)) {
-            return [$column . ' ' . $condition->operator, []];
-        }
-        if (in_array($condition->operator, ['IN', 'NOT IN'], true)) {
-            if (!is_array($condition->value) || $condition->value === []) {
-                throw new InvalidArgumentException('IN conditions require a non-empty list of values.');
-            }
-            return [$column . ' ' . $condition->operator . ' (' . implode(', ', array_fill(0, count($condition->value), '?')) . ')', array_values($condition->value)];
-        }
-        if (in_array($condition->operator, ['BETWEEN', 'NOT BETWEEN'], true)) {
-            if (!is_array($condition->value) || count($condition->value) !== 2) {
-                throw new InvalidArgumentException('BETWEEN conditions require exactly two values.');
-            }
-            return [$column . ' ' . $condition->operator . ' ? AND ?', array_values($condition->value)];
-        }
-
-        return [$column . ' ' . $condition->operator . ' ?', [$condition->value]];
-    }
 
     private function quoteQualifiedName(QualifiedName $name): string
     {

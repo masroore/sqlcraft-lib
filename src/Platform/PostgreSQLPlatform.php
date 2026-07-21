@@ -80,6 +80,7 @@ final class PostgreSQLPlatform extends AbstractPlatform
                 Capability::PartialIndexes,
                 Capability::DescendingIndexes,
                 Capability::Partitions,
+                Capability::CrossTableSearch, Capability::BlobStreaming,
             ],
             'versioned' => [
                 [Capability::MaterializedView, [9, 3, 0]],

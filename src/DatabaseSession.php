@@ -15,6 +15,12 @@ use SQLCraft\DDL\DdlManager;
 use SQLCraft\Export\Exporter;
 use SQLCraft\Import\Importer;
 use SQLCraft\Query\Page;
+use SQLCraft\Query\InsertQuery;
+use SQLCraft\Query\UpdateQuery;
+use SQLCraft\Query\DeleteQuery;
+use SQLCraft\Query\InsertQueryRenderer;
+use SQLCraft\Query\UpdateQueryRenderer;
+use SQLCraft\Query\DeleteQueryRenderer;
 use SQLCraft\Query\PaginationParams;
 use SQLCraft\Query\SelectQuery;
 
@@ -42,6 +48,17 @@ final readonly class DatabaseSession
     public function query(string $sql, array $params = []): \SQLCraft\Contracts\Connection\ResultInterface
     {
         return $this->executor->query($this->connection, $sql, $params);
+    }
+
+    public function executeBuilder(InsertQuery|UpdateQuery|DeleteQuery $query): \SQLCraft\DTO\ExecutionResult
+    {
+        $rendered = match (true) {
+            $query instanceof InsertQuery => (new InsertQueryRenderer($this->connection->getPlatform()))->render($query),
+            $query instanceof UpdateQuery => (new UpdateQueryRenderer($this->connection->getPlatform()))->render($query),
+            default => (new DeleteQueryRenderer($this->connection->getPlatform()))->render($query),
+        };
+
+        return $this->executor->execute($this->connection, $rendered['sql'], $rendered['params']);
     }
 
     public function schema(): SchemaManagerInterface

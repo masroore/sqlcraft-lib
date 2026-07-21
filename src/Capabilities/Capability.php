@@ -42,6 +42,8 @@ enum Capability: string
     case QueryTimeout = 'query_timeout';
     case UserManagement = 'user_management';
     case PrivilegeManagement = 'privilege_management';
+    case CrossTableSearch = 'cross_table_search';
+    case BlobStreaming = 'blob_streaming';
     case Dump = 'dump';
     case Partitions = 'partitions';
 }

@@ -97,6 +97,7 @@ final class SqlServerPlatform extends AbstractPlatform
                 Capability::Scheme,
                 Capability::Type,
                 Capability::InsertUpdate,
+                Capability::CrossTableSearch, Capability::BlobStreaming,
             ],
             'versioned' => [
                 [Capability::Sequence, [11, 0, 0]],

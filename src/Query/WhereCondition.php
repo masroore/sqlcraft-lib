@@ -15,13 +15,8 @@ final readonly class WhereCondition
         public mixed $value,
     ) {
         $operator = strtoupper(trim($operator));
-        if (!in_array($operator, [
-            '=', '!=', '<>', '<', '<=', '>', '>=',
-            'LIKE', 'NOT LIKE', 'IN', 'NOT IN',
-            'IS NULL', 'IS NOT NULL', 'BETWEEN', 'NOT BETWEEN',
-            'REGEXP', 'NOT REGEXP',
-        ], true)) {
-            throw new InvalidArgumentException(sprintf('Unsupported WHERE operator: %s', $operator));
+        if (preg_match('/^(?:[A-Z][A-Z0-9]*(?: [A-Z0-9]+)*|[!<>=~]+)$/', $operator) !== 1) {
+            throw new InvalidArgumentException(sprintf('Invalid WHERE operator: %s', $operator));
         }
         $this->operator = $operator;
     }

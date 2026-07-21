@@ -26,6 +26,7 @@ final class CapabilityMatrixRegressionTest extends TestCase
                 Capability::Privileges, Capability::Trigger, Capability::Routine, Capability::Procedure,
                 Capability::Event, Capability::Copy, Capability::MoveColumn, Capability::InsertUpdate,
                 Capability::Compression, Capability::Partitions,
+                Capability::CrossTableSearch, Capability::BlobStreaming,
             ],
             'versioned' => [
                 [Capability::GeneratedColumns, [5, 7, 0]],
@@ -45,7 +46,8 @@ final class CapabilityMatrixRegressionTest extends TestCase
                 Capability::Status, Capability::Variables, Capability::Processlist, Capability::Kill,
                 Capability::Privileges, Capability::Trigger, Capability::Routine, Capability::Procedure,
                 Capability::Event, Capability::Copy, Capability::MoveColumn, Capability::InsertUpdate,
-                Capability::Compression, Capability::Partitions, Capability::DescendingIndexes,
+                Capability::Compression, Capability::Partitions, Capability::CrossTableSearch,
+                Capability::BlobStreaming, Capability::DescendingIndexes,
             ],
             'versioned' => [
                 [Capability::GeneratedColumns, [5, 2, 0]],
@@ -65,6 +67,7 @@ final class CapabilityMatrixRegressionTest extends TestCase
                 Capability::Kill, Capability::Trigger, Capability::Routine, Capability::Sequence,
                 Capability::Scheme, Capability::Type, Capability::CheckConstraints, Capability::PartialIndexes,
                 Capability::DescendingIndexes, Capability::Partitions,
+                Capability::CrossTableSearch, Capability::BlobStreaming,
             ],
             'versioned' => [
                 [Capability::MaterializedView, [9, 3, 0]],
@@ -83,6 +86,7 @@ final class CapabilityMatrixRegressionTest extends TestCase
                 Capability::Dump, Capability::Status, Capability::Variables, Capability::Trigger,
                 Capability::CheckConstraints, Capability::DescendingIndexes, Capability::PartialIndexes,
                 Capability::InsertUpdate,
+                Capability::CrossTableSearch, Capability::BlobStreaming,
             ],
             'versioned' => [[Capability::GeneratedColumns, [3, 31, 0]]],
         ], $this->matrix(new SqlitePlatform()));

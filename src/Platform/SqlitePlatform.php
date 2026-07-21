@@ -73,6 +73,7 @@ final class SqlitePlatform extends AbstractPlatform
                 Capability::DescendingIndexes,
                 Capability::PartialIndexes,
                 Capability::InsertUpdate,
+                Capability::CrossTableSearch, Capability::BlobStreaming,
             ],
             'versioned' => [
                 [Capability::GeneratedColumns, [3, 31, 0]],
