@@ -10,10 +10,10 @@ use SQLCraft\Contracts\Execution\TransactionManagerInterface;
 
 final class ExecutionContractsTest extends TestCase
 {
-    public function testQueryExecutorPortExposesTheThreeExecutionModes(): void
+    public function testQueryExecutorPortExposesExecutionModes(): void
     {
         self::assertSame(
-            ['execute', 'query', 'executeDdl'],
+            ['execute', 'query', 'executeDdl', 'queryWithTimeout'],
             $this->methodNames(QueryExecutorInterface::class),
         );
     }

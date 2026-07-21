@@ -423,6 +423,12 @@ abstract class AbstractPlatform implements PlatformInterface
     }
 
     #[\Override]
+    public function wrapWithTimeout(string $sql, int $milliseconds): ?string
+    {
+        return null;
+    }
+
+    #[\Override]
     public function getCapabilitySet(ServerVersion $version): CapabilitySet
     {
         return (new PlatformCapabilityResolver($this->buildCapabilityMatrix()))
