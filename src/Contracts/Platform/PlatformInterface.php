@@ -31,4 +31,7 @@ interface PlatformInterface extends
 
     /** @return list<string> */
     public function getKeywordList(): array;
+
+    /** @return list<string> */
+    public function getOperators(): array;
 }
