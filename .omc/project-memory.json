@@ -1,16 +1,33 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1784524888367,
+  "lastScanned": 1784652762395,
   "projectRoot": "/Users/masroor/projects/adminer-ng/sqlcraft",
   "techStack": {
-    "languages": [],
+    "languages": [
+      {
+        "name": "PHP",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "composer.json"
+        ]
+      },
+      {
+        "name": "C/C++",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "Makefile"
+        ]
+      }
+    ],
     "frameworks": [],
-    "packageManager": null,
+    "packageManager": "composer",
     "runtime": null
   },
   "build": {
-    "buildCommand": null,
-    "testCommand": null,
+    "buildCommand": "make build",
+    "testCommand": "make test",
     "lintCommand": null,
     "devCommand": null,
     "scripts": {}
@@ -25,18 +42,115 @@
     "isMonorepo": false,
     "workspaces": [],
     "mainDirectories": [
-      "docs"
+      "docs",
+      "examples",
+      "src",
+      "tests"
     ],
-    "gitBranches": null
+    "gitBranches": {
+      "defaultBranch": "master",
+      "branchingStrategy": null
+    }
   },
   "customNotes": [],
   "directoryMap": {
+    "docker": {
+      "path": "docker",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1784652762387,
+      "keyFiles": []
+    },
     "docs": {
       "path": "docs",
       "purpose": "Documentation",
-      "fileCount": 1,
-      "lastAccessed": 1784524888363,
+      "fileCount": 7,
+      "lastAccessed": 1784652762387,
+      "keyFiles": [
+        "IMPLEMENTATION-PROMPT.md",
+        "M10-API-AUDIT.md",
+        "M10-RELEASE-BLOCKER.md",
+        "M8-MSSQL-STATUS.md",
+        "M9-AUDIT.md"
+      ]
+    },
+    "examples": {
+      "path": "examples",
+      "purpose": "Example code",
+      "fileCount": 0,
+      "lastAccessed": 1784652762387,
       "keyFiles": []
+    },
+    "graphify-out": {
+      "path": "graphify-out",
+      "purpose": null,
+      "fileCount": 4,
+      "lastAccessed": 1784652762388,
+      "keyFiles": [
+        "graph.json",
+        "manifest.json"
+      ]
+    },
+    "resources": {
+      "path": "resources",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1784652762388,
+      "keyFiles": []
+    },
+    "src": {
+      "path": "src",
+      "purpose": "Source code",
+      "fileCount": 1,
+      "lastAccessed": 1784652762389,
+      "keyFiles": []
+    },
+    "tests": {
+      "path": "tests",
+      "purpose": "Test files",
+      "fileCount": 1,
+      "lastAccessed": 1784652762391,
+      "keyFiles": [
+        "bootstrap.php"
+      ]
+    },
+    "tools": {
+      "path": "tools",
+      "purpose": null,
+      "fileCount": 3,
+      "lastAccessed": 1784652762391,
+      "keyFiles": [
+        "composer.json",
+        "generate-contract-report.php",
+        "rector-dry-run.sh"
+      ]
+    },
+    "vendor": {
+      "path": "vendor",
+      "purpose": "Third-party code",
+      "fileCount": 1,
+      "lastAccessed": 1784652762392,
+      "keyFiles": [
+        "autoload.php"
+      ]
+    },
+    "tests/Fixtures": {
+      "path": "tests/Fixtures",
+      "purpose": "Test fixtures",
+      "fileCount": 1,
+      "lastAccessed": 1784652762394,
+      "keyFiles": []
+    },
+    "vendor/bin": {
+      "path": "vendor/bin",
+      "purpose": "Executable scripts",
+      "fileCount": 17,
+      "lastAccessed": 1784652762395,
+      "keyFiles": [
+        "deptrac",
+        "infection",
+        "json5"
+      ]
     }
   },
   "hotPaths": [
@@ -59,9 +173,15 @@
       "type": "file"
     },
     {
+      "path": "docs/plans/00-overview.md",
+      "accessCount": 2,
+      "lastAccessed": 1784655473867,
+      "type": "file"
+    },
+    {
       "path": "docs/plans/23-roadmap.md",
-      "accessCount": 1,
-      "lastAccessed": 1784524950287,
+      "accessCount": 2,
+      "lastAccessed": 1784655474714,
       "type": "file"
     },
     {
@@ -74,12 +194,6 @@
       "path": "docs/plans/20-testing.md",
       "accessCount": 1,
       "lastAccessed": 1784525434329,
-      "type": "file"
-    },
-    {
-      "path": "docs/plans/00-overview.md",
-      "accessCount": 1,
-      "lastAccessed": 1784525434650,
       "type": "file"
     },
     {
@@ -110,6 +224,18 @@
       "path": "Makefile",
       "accessCount": 1,
       "lastAccessed": 1784526750801,
+      "type": "file"
+    },
+    {
+      "path": "docs/plans/07-module-breakdown.md",
+      "accessCount": 1,
+      "lastAccessed": 1784655474955,
+      "type": "file"
+    },
+    {
+      "path": "docs/plans/04-feature-inventory.md",
+      "accessCount": 1,
+      "lastAccessed": 1784655496216,
       "type": "file"
     }
   ],
