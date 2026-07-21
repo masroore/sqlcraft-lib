@@ -1,0 +1,50 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SQLCraft\Tests\Unit\Metadata;
+
+use PHPUnit\Framework\TestCase;
+use SQLCraft\Collections\ColumnCollection;
+use SQLCraft\Collections\TableCollection;
+use SQLCraft\Contracts\Connection\ConnectionInterface;
+use SQLCraft\Contracts\Metadata\ColumnInspectorInterface;
+use SQLCraft\Contracts\Metadata\TableInspectorInterface;
+use SQLCraft\DTO\TableStatus;
+use SQLCraft\Metadata\ExportSource;
+use SQLCraft\ValueObjects\QualifiedName;
+
+final class ExportSourceTest extends TestCase
+{
+    public function testAdaptsStringTableNamesToMetadataQualifiedNames(): void
+    {
+        $connection = self::createMock(ConnectionInterface::class);
+        $table = new TableStatus('orders', schema: 'shop');
+        $tables = self::createMock(TableInspectorInterface::class);
+        $tables->expects(self::once())->method('getTableStatus')->with(
+            $connection,
+            self::callback(static fn (QualifiedName $name): bool => $name->object->name === 'orders' && $name->schema?->name === 'shop'),
+        )->willReturn($table);
+        $columns = self::createMock(ColumnInspectorInterface::class);
+        $columns->expects(self::once())->method('getColumns')->with(
+            $connection,
+            self::callback(static fn (QualifiedName $name): bool => $name->object->name === 'orders' && $name->schema?->name === 'shop'),
+        )->willReturn(new ColumnCollection([]));
+
+        $source = new ExportSource($tables, $columns);
+
+        self::assertSame($table, $source->getTableStatus($connection, 'orders', 'shop'));
+        self::assertCount(0, $source->getColumns($connection, 'orders', 'shop'));
+    }
+
+    public function testDelegatesTableListingWithoutChangingSchema(): void
+    {
+        $connection = self::createMock(ConnectionInterface::class);
+        $expected = new TableCollection([]);
+        $tables = self::createMock(TableInspectorInterface::class);
+        $tables->expects(self::once())->method('getTables')->with($connection, 'public')->willReturn($expected);
+        $columns = self::createMock(ColumnInspectorInterface::class);
+
+        self::assertSame($expected, (new ExportSource($tables, $columns))->getTables($connection, 'public'));
+    }
+}

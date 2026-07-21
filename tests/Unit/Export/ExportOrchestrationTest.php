@@ -1,0 +1,149 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SQLCraft\Tests\Unit\Export;
+
+use ArrayIterator;
+use PHPUnit\Framework\TestCase;
+use SQLCraft\Collections\ColumnCollection;
+use SQLCraft\Collections\TableCollection;
+use SQLCraft\Contracts\Connection\ConnectionInterface;
+use SQLCraft\Contracts\Connection\ResultInterface;
+use SQLCraft\Contracts\Execution\QueryExecutorInterface;
+use SQLCraft\Contracts\Export\ExportSourceInterface;
+use SQLCraft\DTO\ColumnMeta;
+use SQLCraft\DTO\TableStatus;
+use SQLCraft\Export\CsvFormatWriter;
+use SQLCraft\Export\DataStyle;
+use SQLCraft\Export\DumpOptions;
+use SQLCraft\Export\DumpScope;
+use SQLCraft\Export\Exporter;
+use SQLCraft\Export\StringBufferSink;
+use SQLCraft\Export\TableDumper;
+use SQLCraft\Platform\SqlitePlatform;
+use SQLCraft\ValueObjects\DataType;
+use SQLCraft\ValueObjects\DefaultValue;
+
+final class ExportOrchestrationTest extends TestCase
+{
+    public function testTableDumperStreamsRowsInConfiguredBatches(): void
+    {
+        $connection = $this->connection();
+        $table = new TableStatus('orders');
+        $source = self::createMock(ExportSourceInterface::class);
+        $source->expects(self::once())->method('getColumns')->with($connection, 'orders', null)->willReturn($this->columns());
+        $executor = self::createMock(QueryExecutorInterface::class);
+        $executor->expects(self::once())->method('query')->with($connection, 'SELECT * FROM "orders"', [], false)->willReturn($this->resultSet([
+            ['id' => 1],
+            ['id' => 2],
+            ['id' => 3],
+        ]));
+
+        $sink = new StringBufferSink();
+        $options = new DumpOptions('csv', DumpScope::table('shop', 'orders'), batchSize: 2);
+        (new TableDumper($source, $executor))->dump($connection, $table, new CsvFormatWriter(), $sink, $options);
+
+        self::assertSame("id\r\n1\r\n2\r\n3\r\n", $sink->contents());
+    }
+
+    public function testExporterSelectsWriterAndPreservesSelectedTableOrder(): void
+    {
+        $connection = $this->connection();
+        $first = new TableStatus('first');
+        $second = new TableStatus('second');
+        $source = self::createMock(ExportSourceInterface::class);
+        $source->expects(self::exactly(2))->method('getTableStatus')->willReturnMap([
+            [$connection, 'first', null, $first],
+            [$connection, 'second', null, $second],
+        ]);
+        $source->expects(self::exactly(2))->method('getColumns')->willReturn($this->columns());
+        $executor = self::createMock(QueryExecutorInterface::class);
+        $executor->expects(self::exactly(2))->method('query')->willReturnOnConsecutiveCalls(
+            $this->resultSet([['id' => 1]]),
+            $this->resultSet([['id' => 2]]),
+        );
+
+        $sink = new StringBufferSink();
+        $options = new DumpOptions('csv', DumpScope::tables('shop', ['first', 'second']));
+        (new Exporter($source, $executor, new CsvFormatWriter()))->export($connection, $sink, $options);
+
+        self::assertSame("id\r\n1\r\nid\r\n2\r\n", $sink->contents());
+    }
+
+    public function testFilteredScopeUsesCallerSqlAndSkipsViewDataPolicy(): void
+    {
+        $connection = $this->connection();
+        $table = new TableStatus('orders');
+        $source = self::createMock(ExportSourceInterface::class);
+        $source->method('getTableStatus')->willReturn($table);
+        $source->expects(self::once())->method('getColumns')->with($connection, 'orders', null)->willReturn($this->columns());
+        $executor = self::createMock(QueryExecutorInterface::class);
+        $executor->expects(self::once())->method('query')->with($connection, 'SELECT id FROM "orders" WHERE id > 1', [], false)->willReturn($this->resultSet([['id' => 2]]));
+
+        $sink = new StringBufferSink();
+        $options = new DumpOptions(
+            'csv',
+            DumpScope::filteredResult('shop', 'orders', 'SELECT id FROM "orders" WHERE id > 1'),
+            dataStyle: DataStyle::Insert,
+        );
+        (new Exporter($source, $executor, new CsvFormatWriter()))->export($connection, $sink, $options);
+
+        self::assertSame("id\r\n2\r\n", $sink->contents());
+    }
+
+    public function testUnknownFormatFailsBeforeWriting(): void
+    {
+        $source = self::createMock(ExportSourceInterface::class);
+        $executor = self::createMock(QueryExecutorInterface::class);
+        $sink = new StringBufferSink();
+        $options = new DumpOptions('yaml', DumpScope::database('shop'));
+
+        $this->expectException(\InvalidArgumentException::class);
+        (new Exporter($source, $executor, new CsvFormatWriter()))->export($this->connection(), $sink, $options);
+        self::assertSame('', $sink->contents());
+    }
+
+    private function connection(): ConnectionInterface
+    {
+        $connection = self::createMock(ConnectionInterface::class);
+        $connection->method('quoteIdentifier')->willReturnCallback(static fn (string $name): string => '"' . $name . '"');
+        $connection->method('getDatabaseName')->willReturn('shop');
+        $connection->method('getPlatform')->willReturn(new SqlitePlatform());
+
+        return $connection;
+    }
+
+    /** @param list<array<string, mixed>> $rows */
+    private function resultSet(array $rows): ResultInterface
+    {
+        $result = self::createMock(ResultInterface::class);
+        $result->method('getIterator')->willReturn(new ArrayIterator($rows));
+
+        return $result;
+    }
+
+    private function columns(): ColumnCollection
+    {
+        return new ColumnCollection([$this->column('id')]);
+    }
+
+    private function column(string $name): ColumnMeta
+    {
+        return new ColumnMeta(
+            name: $name,
+            dataType: new DataType('INTEGER'),
+            nullable: false,
+            autoIncrement: false,
+            primary: false,
+            generated: false,
+            default: DefaultValue::nullValue(),
+            collation: null,
+            comment: null,
+            onUpdate: null,
+            privileges: [],
+            origName: null,
+            defaultConstraintName: null,
+        );
+    }
+}
