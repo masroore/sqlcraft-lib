@@ -32,13 +32,13 @@ final readonly class ExportSource implements ExportSourceInterface
     #[\Override]
     public function getTableStatus(ConnectionInterface $connection, string $table, ?string $schema = null): TableStatus
     {
-        return $this->tables->getTableStatus($connection, $this->qualifiedName($table, $schema));
+        return $this->tables->getTableStatus($connection, $this->qualifiedName($connection, $table, $schema));
     }
 
     #[\Override]
     public function getColumns(ConnectionInterface $connection, string $table, ?string $schema = null): ColumnCollection
     {
-        return $this->columns->getColumns($connection, $this->qualifiedName($table, $schema));
+        return $this->columns->getColumns($connection, $this->qualifiedName($connection, $table, $schema));
     }
 
     #[\Override]
@@ -64,10 +64,20 @@ final readonly class ExportSource implements ExportSourceInterface
         return ['CREATE TABLE ' . $qualified . ' (' . implode(', ', $definitions) . ')'];
     }
 
-    private function qualifiedName(string $table, ?string $schema): QualifiedName
+    private function qualifiedName(ConnectionInterface $connection, string $table, ?string $schema): QualifiedName
     {
+        $identifier = new Identifier($table);
+        if (in_array($connection->getPlatformName(), ['mysql', 'mariadb'], true)) {
+            $catalog = $schema ?? $connection->getDatabaseName();
+
+            return new QualifiedName(
+                object: $identifier,
+                catalog: $catalog === null ? null : new Identifier($catalog),
+            );
+        }
+
         return new QualifiedName(
-            object: new Identifier($table),
+            object: $identifier,
             schema: $schema === null ? null : new Identifier($schema),
         );
     }

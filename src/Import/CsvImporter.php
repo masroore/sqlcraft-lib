@@ -34,7 +34,7 @@ final readonly class CsvImporter implements CsvImporterInterface
         }
 
         $startedAt = hrtime(true);
-        $header = fgetcsv($stream, 0, $options->separator);
+        $header = fgetcsv($stream, 0, $options->separator, '"', '');
         if (!is_array($header)) {
             return new ImportResult(0, 0, [], $this->elapsedMs($startedAt));
         }
@@ -52,7 +52,7 @@ final readonly class CsvImporter implements CsvImporterInterface
         $batch = [];
         try {
             while (true) {
-                $row = fgetcsv($stream, 0, $options->separator);
+                $row = fgetcsv($stream, 0, $options->separator, '"', '');
                 if (!is_array($row)) {
                     break;
                 }

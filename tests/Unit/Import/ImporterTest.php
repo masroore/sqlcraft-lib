@@ -9,6 +9,7 @@ use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Execution\BatchExecutorInterface;
 use SQLCraft\Contracts\Execution\BatchStatementResult;
 use SQLCraft\Contracts\Execution\StatementBatch;
+use SQLCraft\Contracts\Events\ImportExportEventDispatcherInterface;
 use SQLCraft\Contracts\Import\ImportSourceInterface;
 use SQLCraft\Import\ImportOptions;
 use SQLCraft\Import\Importer;
@@ -109,6 +110,31 @@ final class ImporterTest extends TestCase
 
         self::assertSame(5000, $result->statementsExecuted);
         self::assertGreaterThan(1, $batchCalls);
+    }
+
+    public function testEmitsProgressAtConfiguredStatementInterval(): void
+    {
+        $connection = self::createMock(ConnectionInterface::class);
+        $source = self::createMock(ImportSourceInterface::class);
+        $source->method('openStream')->willReturn($this->stream("one;two;three;four;"));
+        $events = self::createMock(ImportExportEventDispatcherInterface::class);
+        $events->expects(self::exactly(2))->method('importProgress')->with($connection, self::callback(static fn (int $value): bool => $value >= 0), self::callback(static fn (int $value): bool => $value >= 0), 0.0);
+        $batchExecutor = self::createMock(BatchExecutorInterface::class);
+        $batchExecutor->method('executeBatch')->willReturnCallback(
+            function (ConnectionInterface $connection, StatementBatch $batch): \Generator {
+                foreach ($batch->statements as $index => $statement) {
+                    yield new BatchStatementResult($index, $statement, null, null, 0.0, null);
+                }
+            },
+        );
+
+        $result = (new Importer(new StatementSplitter(), $batchExecutor, $events))->import(
+            $connection,
+            $source,
+            new ImportOptions(progressInterval: 2),
+        );
+
+        self::assertSame(4, $result->statementsExecuted);
     }
 
     public function testRejectsInvalidImportOptions(): void
