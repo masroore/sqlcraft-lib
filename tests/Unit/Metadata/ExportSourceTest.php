@@ -10,7 +10,10 @@ use SQLCraft\Collections\TableCollection;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Metadata\ColumnInspectorInterface;
 use SQLCraft\Contracts\Metadata\TableInspectorInterface;
+use SQLCraft\DTO\ColumnMeta;
 use SQLCraft\DTO\TableStatus;
+use SQLCraft\ValueObjects\DataType;
+use SQLCraft\ValueObjects\DefaultValue;
 use SQLCraft\Metadata\ExportSource;
 use SQLCraft\ValueObjects\QualifiedName;
 
@@ -35,6 +38,38 @@ final class ExportSourceTest extends TestCase
 
         self::assertSame($table, $source->getTableStatus($connection, 'orders', 'shop'));
         self::assertCount(0, $source->getColumns($connection, 'orders', 'shop'));
+    }
+
+    public function testBuildsPortableBasicCreateTableDdlFromColumnMetadata(): void
+    {
+        $connection = self::createMock(ConnectionInterface::class);
+        $connection->method('quoteIdentifier')->willReturnCallback(
+            static fn (string $name): string => '"' . $name . '"',
+        );
+        $tables = self::createMock(TableInspectorInterface::class);
+        $columns = self::createMock(ColumnInspectorInterface::class);
+        $columns->method('getColumns')->willReturn(new ColumnCollection([
+            new ColumnMeta(
+                name: 'id',
+                dataType: new DataType('INTEGER'),
+                nullable: false,
+                autoIncrement: false,
+                primary: true,
+                generated: false,
+                default: DefaultValue::nullValue(),
+                collation: null,
+                comment: null,
+                onUpdate: null,
+                privileges: [],
+                origName: null,
+                defaultConstraintName: null,
+            ),
+        ]));
+
+        self::assertSame(
+            ['CREATE TABLE "shop"."orders" ("id" INTEGER NOT NULL PRIMARY KEY)'],
+            (new ExportSource($tables, $columns))->getTableDdl($connection, 'orders', 'shop'),
+        );
     }
 
     public function testDelegatesTableListingWithoutChangingSchema(): void

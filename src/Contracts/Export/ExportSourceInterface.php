@@ -16,4 +16,7 @@ interface ExportSourceInterface
     public function getTableStatus(ConnectionInterface $connection, string $table, ?string $schema = null): TableStatus;
 
     public function getColumns(ConnectionInterface $connection, string $table, ?string $schema = null): ColumnCollection;
+
+    /** @return list<string> */
+    public function getTableDdl(ConnectionInterface $connection, string $table, ?string $schema = null): array;
 }

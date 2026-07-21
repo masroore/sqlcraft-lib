@@ -29,6 +29,10 @@ final readonly class TableDumper
     ): void {
         $writer->writeTableHeader($sink, $table, $options);
 
+        if ($options->tableStyle !== TableSectionStyle::None) {
+            $writer->writeTableDdl($sink, $table, $this->source->getTableDdl($connection, $table->name, $table->schema));
+        }
+
         if ($options->dataStyle !== DataStyle::None && !$table->isView) {
             $this->dumpRows($connection, $table, $writer, $sink, $options, $this->selectAllSql($connection, $table));
         }

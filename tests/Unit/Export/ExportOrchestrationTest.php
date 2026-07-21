@@ -33,6 +33,7 @@ final class ExportOrchestrationTest extends TestCase
         $table = new TableStatus('orders');
         $source = self::createMock(ExportSourceInterface::class);
         $source->expects(self::once())->method('getColumns')->with($connection, 'orders', null)->willReturn($this->columns());
+        $source->expects(self::once())->method('getTableDdl')->with($connection, 'orders', null)->willReturn([]);
         $executor = self::createMock(QueryExecutorInterface::class);
         $executor->expects(self::once())->method('query')->with($connection, 'SELECT * FROM "orders"', [], false)->willReturn($this->resultSet([
             ['id' => 1],
@@ -58,6 +59,7 @@ final class ExportOrchestrationTest extends TestCase
             [$connection, 'second', null, $second],
         ]);
         $source->expects(self::exactly(2))->method('getColumns')->willReturn($this->columns());
+        $source->expects(self::exactly(2))->method('getTableDdl')->willReturn([]);
         $executor = self::createMock(QueryExecutorInterface::class);
         $executor->expects(self::exactly(2))->method('query')->willReturnOnConsecutiveCalls(
             $this->resultSet([['id' => 1]]),

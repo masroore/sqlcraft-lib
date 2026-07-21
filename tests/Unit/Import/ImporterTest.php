@@ -89,6 +89,28 @@ final class ImporterTest extends TestCase
         self::assertSame(1, $result->statementsSkipped);
     }
 
+    public function testLargeSourceIsProcessedAcrossMultipleBoundedChunks(): void
+    {
+        $connection = self::createMock(ConnectionInterface::class);
+        $source = self::createMock(ImportSourceInterface::class);
+        $source->method('openStream')->willReturn($this->stream(str_repeat("SELECT 1;\n", 5000)));
+        $batchCalls = 0;
+        $batchExecutor = self::createMock(BatchExecutorInterface::class);
+        $batchExecutor->method('executeBatch')->willReturnCallback(
+            function (ConnectionInterface $connection, StatementBatch $batch) use (&$batchCalls): \Generator {
+                $batchCalls++;
+                foreach ($batch->statements as $index => $statement) {
+                    yield new BatchStatementResult($index, $statement, null, null, 0.0, null);
+                }
+            },
+        );
+
+        $result = (new Importer(new StatementSplitter(), $batchExecutor))->import($connection, $source, new ImportOptions());
+
+        self::assertSame(5000, $result->statementsExecuted);
+        self::assertGreaterThan(1, $batchCalls);
+    }
+
     public function testRejectsInvalidImportOptions(): void
     {
         $this->expectException(\InvalidArgumentException::class);

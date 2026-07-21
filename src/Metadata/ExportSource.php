@@ -41,6 +41,29 @@ final readonly class ExportSource implements ExportSourceInterface
         return $this->columns->getColumns($connection, $this->qualifiedName($table, $schema));
     }
 
+    #[\Override]
+    public function getTableDdl(ConnectionInterface $connection, string $table, ?string $schema = null): array
+    {
+        $columns = $this->getColumns($connection, $table, $schema);
+        $definitions = [];
+        foreach ($columns as $column) {
+            $definition = $connection->quoteIdentifier($column->name) . ' ' . $column->dataType->name;
+            if (!$column->nullable) {
+                $definition .= ' NOT NULL';
+            }
+            if ($column->primary) {
+                $definition .= ' PRIMARY KEY';
+            }
+            $definitions[] = $definition;
+        }
+
+        $qualified = $schema === null
+            ? $connection->quoteIdentifier($table)
+            : $connection->quoteIdentifier($schema) . '.' . $connection->quoteIdentifier($table);
+
+        return ['CREATE TABLE ' . $qualified . ' (' . implode(', ', $definitions) . ')'];
+    }
+
     private function qualifiedName(string $table, ?string $schema): QualifiedName
     {
         return new QualifiedName(
