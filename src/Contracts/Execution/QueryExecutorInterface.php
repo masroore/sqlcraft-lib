@@ -31,4 +31,12 @@ interface QueryExecutorInterface
         string $sql,
         array $params = [],
     ): void;
+
+    /** @param array<string|int, mixed> $params */
+    public function queryWithTimeout(
+        ConnectionInterface $connection,
+        string $sql,
+        array $params = [],
+        int $timeoutMs = 0,
+    ): ?ResultInterface;
 }
