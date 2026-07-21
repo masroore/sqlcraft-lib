@@ -27,6 +27,7 @@ use SQLCraft\Platform\MySQLPlatform;
 use SQLCraft\Platform\SqlitePlatform;
 use SQLCraft\ValueObjects\DataType;
 use SQLCraft\ValueObjects\DefaultValue;
+use SQLCraft\ValueObjects\ServerVersion;
 
 final class ExportOrchestrationTest extends TestCase
 {
@@ -129,6 +130,34 @@ final class ExportOrchestrationTest extends TestCase
         self::assertStringContainsString('ALTER TABLE "orders" AUTO_INCREMENT = 42;', $sink->contents());
     }
 
+    public function testTableDumperEmitsRequestedTriggerAndRoutineDdl(): void
+    {
+        $connection = $this->connection('mysql', new MySQLPlatform());
+        $table = new TableStatus('orders');
+        $source = self::createMock(ExportSourceInterface::class);
+        $source->expects(self::once())->method('getTableDdl')->willReturn(['CREATE TABLE "orders" ("id" INT)']);
+        $source->expects(self::once())->method('getTriggerDdl')->with($connection, 'orders', null)->willReturn(['CREATE TRIGGER audit']);
+        $source->expects(self::once())->method('getRoutineDdl')->with($connection, null)->willReturn(['CREATE FUNCTION total']);
+
+        $sink = new StringBufferSink();
+        (new TableDumper($source, self::createMock(QueryExecutorInterface::class)))->dump(
+            $connection,
+            $table,
+            new SqlFormatWriter($connection),
+            $sink,
+            new DumpOptions(
+                'sql',
+                DumpScope::table('shop', 'orders'),
+                dataStyle: DataStyle::None,
+                includeTriggers: true,
+                includeRoutines: true,
+            ),
+        );
+
+        self::assertStringContainsString('CREATE TRIGGER audit;', $sink->contents());
+        self::assertStringContainsString('CREATE FUNCTION total;', $sink->contents());
+    }
+
     private function connection(string $platformName = 'sqlite', ?PlatformInterface $platform = null): ConnectionInterface
     {
         $connection = self::createMock(ConnectionInterface::class);
@@ -136,6 +165,7 @@ final class ExportOrchestrationTest extends TestCase
         $connection->method('getDatabaseName')->willReturn('shop');
         $connection->method('getPlatformName')->willReturn($platformName);
         $connection->method('getPlatform')->willReturn($platform ?? new SqlitePlatform());
+        $connection->method('getServerVersion')->willReturn(new ServerVersion('8.0.36'));
 
         return $connection;
     }
