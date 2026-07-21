@@ -111,3 +111,5 @@
 - [ ] T5: statement import pipeline — not started
 - [x] T5: statement import pipeline — commit f25da34 — green — 2026-07-21
 - [ ] T6: progress events and emission seam — not started
+- [x] T6: progress events and emission seam — commit cfac6fd — green — 2026-07-21
+- [ ] T7: round-trip and large-file coverage — not started
