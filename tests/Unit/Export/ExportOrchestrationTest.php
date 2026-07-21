@@ -47,8 +47,9 @@ final class ExportOrchestrationTest extends TestCase
 
         $sink = new StringBufferSink();
         $options = new DumpOptions('csv', DumpScope::table('shop', 'orders'), batchSize: 2);
-        (new TableDumper($source, $executor))->dump($connection, $table, new CsvFormatWriter(), $sink, $options);
+        $rows = (new TableDumper($source, $executor))->dump($connection, $table, new CsvFormatWriter(), $sink, $options);
 
+        self::assertSame(3, $rows);
         self::assertSame("id\r\n1\r\n2\r\n3\r\n", $sink->contents());
     }
 
@@ -156,6 +157,78 @@ final class ExportOrchestrationTest extends TestCase
 
         self::assertStringContainsString('CREATE TRIGGER audit;', $sink->contents());
         self::assertStringContainsString('CREATE FUNCTION total;', $sink->contents());
+    }
+
+    public function testTableDumperDoesNotEmitOptionalDdlWhenFlagsAreFalse(): void
+    {
+        $connection = $this->connection('mysql', new MySQLPlatform());
+        $source = self::createMock(ExportSourceInterface::class);
+        $source->expects(self::once())->method('getTableDdl')->willReturn([]);
+        $source->expects(self::never())->method('getTriggerDdl');
+        $source->expects(self::never())->method('getRoutineDdl');
+
+        $sink = new StringBufferSink();
+        (new TableDumper($source, self::createMock(QueryExecutorInterface::class)))->dump(
+            $connection,
+            new TableStatus('orders'),
+            new SqlFormatWriter($connection),
+            $sink,
+            new DumpOptions('sql', DumpScope::table('shop', 'orders'), dataStyle: DataStyle::None),
+        );
+
+        self::assertStringNotContainsString('CREATE TRIGGER', $sink->contents());
+        self::assertStringNotContainsString('CREATE FUNCTION', $sink->contents());
+    }
+
+    public function testTableDumperPreservesBatchBoundariesInSqlOutput(): void
+    {
+        $connection = $this->connection('mysql', new MySQLPlatform());
+        $source = self::createMock(ExportSourceInterface::class);
+        $source->method('getColumns')->willReturn($this->columns());
+        $source->method('getTableDdl')->willReturn([]);
+        $executor = self::createMock(QueryExecutorInterface::class);
+        $executor->method('query')->willReturn($this->resultSet([
+            ['id' => 1],
+            ['id' => 2],
+            ['id' => 3],
+        ]));
+
+        $sink = new StringBufferSink();
+        (new TableDumper($source, $executor))->dump(
+            $connection,
+            new TableStatus('orders'),
+            new SqlFormatWriter($connection),
+            $sink,
+            new DumpOptions('sql', DumpScope::table('shop', 'orders'), batchSize: 2),
+        );
+
+        self::assertSame(2, substr_count($sink->contents(), 'INSERT INTO'));
+    }
+
+    public function testTableDumperTreatsCapabilityLookupFailureAsUnsupported(): void
+    {
+        /** @var ConnectionInterface&\PHPUnit\Framework\MockObject\MockObject $connection */
+        $connection = self::createMock(ConnectionInterface::class);
+        $connection->method('quoteIdentifier')->willReturnCallback(static fn (string $name): string => '"' . $name . '"');
+        $connection->method('getDatabaseName')->willReturn('shop');
+        $connection->method('getPlatformName')->willReturn('mysql');
+        $connection->method('getPlatform')->willThrowException(new \RuntimeException('platform unavailable'));
+        $source = self::createMock(ExportSourceInterface::class);
+        $source->expects(self::once())->method('getTableDdl')->willReturn([]);
+        $source->expects(self::never())->method('getTriggerDdl');
+
+        (new TableDumper($source, self::createMock(QueryExecutorInterface::class)))->dump(
+            $connection,
+            new TableStatus('orders'),
+            new SqlFormatWriter($connection),
+            new StringBufferSink(),
+            new DumpOptions(
+                'sql',
+                DumpScope::table('shop', 'orders'),
+                dataStyle: DataStyle::None,
+                includeTriggers: true,
+            ),
+        );
     }
 
     private function connection(string $platformName = 'sqlite', ?PlatformInterface $platform = null): ConnectionInterface
