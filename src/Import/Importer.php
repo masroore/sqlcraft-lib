@@ -71,6 +71,8 @@ final readonly class Importer implements ImporterInterface
                         $executed,
                         $skipped,
                         $errors,
+                        $startedAt,
+                        $bytesProcessed,
                     );
                     $buffer = '';
                     if ($this->reachedMaximum($executed, $skipped, $options)) {
@@ -87,6 +89,8 @@ final readonly class Importer implements ImporterInterface
                     $executed,
                     $skipped,
                     $errors,
+                    $startedAt,
+                    $bytesProcessed,
                 );
             }
 
@@ -120,6 +124,8 @@ final readonly class Importer implements ImporterInterface
         int $executed,
         int $skipped,
         array $errors,
+        int $startedAt,
+        int $bytesProcessed,
     ): array {
         $batch = $this->splitter->split($sql);
         $remaining = $this->remainingStatements($batch, $executed, $options);
@@ -139,7 +145,7 @@ final readonly class Importer implements ImporterInterface
 
             $executed++;
             if (($executed + $skipped) % $options->progressInterval === 0) {
-                $this->events?->importProgress($connection, strlen($sql), $executed, 0.0);
+                $this->events?->importProgress($connection, $bytesProcessed, $executed, (hrtime(true) - $startedAt) / 1_000_000);
             }
         }
 

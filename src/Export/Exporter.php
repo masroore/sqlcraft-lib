@@ -50,9 +50,9 @@ final class Exporter implements ExporterInterface
         $writer->writeHeader($sink, $options);
 
         [$tablesExported, $rowsExported] = match ($options->scope->kind) {
-            ScopeKind::FilteredResult => $this->exportFiltered($conn, $sink, $writer, $options),
-            ScopeKind::Tables => $this->exportSelectedTables($conn, $sink, $writer, $options),
-            ScopeKind::Database, ScopeKind::AllDatabases => $this->exportDatabase($conn, $sink, $writer, $options),
+            ScopeKind::FilteredResult => $this->exportFiltered($conn, $sink, $writer, $options, $startedAt),
+            ScopeKind::Tables => $this->exportSelectedTables($conn, $sink, $writer, $options, $startedAt),
+            ScopeKind::Database, ScopeKind::AllDatabases => $this->exportDatabase($conn, $sink, $writer, $options, $startedAt),
         };
 
         $writer->writeFooter($sink, $options);
@@ -66,13 +66,14 @@ final class Exporter implements ExporterInterface
         SinkInterface $sink,
         FormatWriterInterface $writer,
         DumpOptions $options,
+        int $startedAt,
     ): array {
         $tablesExported = 0;
         $rowsExported = 0;
         foreach ($this->source->getTables($conn) as $table) {
             $rowsExported += $this->dumper->dump($conn, $table, $writer, $sink, $options);
             ++$tablesExported;
-            $this->events?->exportProgress($conn, $tablesExported, $rowsExported, 0.0);
+            $this->events?->exportProgress($conn, $tablesExported, $rowsExported, (hrtime(true) - $startedAt) / 1_000_000);
         }
 
         return [$tablesExported, $rowsExported];
@@ -84,6 +85,7 @@ final class Exporter implements ExporterInterface
         SinkInterface $sink,
         FormatWriterInterface $writer,
         DumpOptions $options,
+        int $startedAt,
     ): array {
         $database = $options->scope->database;
         $schema = $database === $conn->getDatabaseName() ? null : $database;
@@ -93,7 +95,7 @@ final class Exporter implements ExporterInterface
             $table = $this->source->getTableStatus($conn, $tableName, $schema);
             $rowsExported += $this->dumper->dump($conn, $table, $writer, $sink, $options);
             ++$tablesExported;
-            $this->events?->exportProgress($conn, $tablesExported, $rowsExported, 0.0);
+            $this->events?->exportProgress($conn, $tablesExported, $rowsExported, (hrtime(true) - $startedAt) / 1_000_000);
         }
 
         return [$tablesExported, $rowsExported];
@@ -105,6 +107,7 @@ final class Exporter implements ExporterInterface
         SinkInterface $sink,
         FormatWriterInterface $writer,
         DumpOptions $options,
+        int $startedAt,
     ): array {
         $database = $options->scope->database;
         $tableName = $options->scope->tables[0] ?? null;
@@ -116,7 +119,7 @@ final class Exporter implements ExporterInterface
         $schema = $database === $conn->getDatabaseName() ? null : $database;
         $table = $this->source->getTableStatus($conn, $tableName, $schema);
         $rowsExported = $this->dumper->dumpFiltered($conn, $table, $sql, $writer, $sink, $options);
-        $this->events?->exportProgress($conn, 1, $rowsExported, 0.0);
+        $this->events?->exportProgress($conn, 1, $rowsExported, (hrtime(true) - $startedAt) / 1_000_000);
 
         return [1, $rowsExported];
     }

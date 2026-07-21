@@ -118,7 +118,7 @@ final class ImporterTest extends TestCase
         $source = self::createMock(ImportSourceInterface::class);
         $source->method('openStream')->willReturn($this->stream("one;two;three;four;"));
         $events = self::createMock(ImportExportEventDispatcherInterface::class);
-        $events->expects(self::exactly(2))->method('importProgress')->with($connection, self::callback(static fn (int $value): bool => $value >= 0), self::callback(static fn (int $value): bool => $value >= 0), 0.0);
+        $events->expects(self::exactly(2))->method('importProgress')->with($connection, self::callback(static fn (int $value): bool => $value >= 0), self::callback(static fn (int|float $value): bool => $value >= 0), self::callback(static fn (float $value): bool => $value >= 0));
         $batchExecutor = self::createMock(BatchExecutorInterface::class);
         $batchExecutor->method('executeBatch')->willReturnCallback(
             function (ConnectionInterface $connection, StatementBatch $batch): \Generator {
