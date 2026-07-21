@@ -130,6 +130,45 @@ abstract class AbstractPlatform implements PlatformInterface
     }
 
     #[\Override]
+    public function renderAlterDatabaseStatement(Identifier $name, ?string $charset, ?string $collation): string
+    {
+        $sql = 'ALTER DATABASE ' . $this->quoteIdentifier($name);
+        if ($charset !== null) {
+            $sql .= ' CHARACTER SET ' . $charset;
+        }
+        if ($collation !== null) {
+            $sql .= ' COLLATE ' . $collation;
+        }
+        return $sql;
+    }
+
+    #[\Override]
+    public function renderCopyTableStatement(QualifiedName $source, QualifiedName $target, bool $includeData): string
+    {
+        return 'CREATE TABLE ' . $this->quoteQualifiedName($target) . ' AS SELECT * FROM ' . $this->quoteQualifiedName($source)
+            . ($includeData ? '' : ' WITH NO DATA');
+    }
+
+    #[\Override]
+    public function renderAlterViewStatement(QualifiedName $name, string $selectSql, array $columns, ?string $checkOption): string
+    {
+        return $this->renderCreateViewStatement($name, $selectSql, true, $columns, $checkOption);
+    }
+
+    #[\Override]
+    public function renderAlterRoutineStatement(
+        QualifiedName $name,
+        string $type,
+        array $parameters,
+        ?DataType $returnType,
+        string $body,
+        ?string $language,
+        bool $deterministic,
+    ): string {
+        return $this->renderCreateRoutineStatement($name, $type, $parameters, $returnType, $body, $language, $deterministic, true);
+    }
+
+    #[\Override]
     public function renderDropDatabaseStatement(Identifier $name, bool $ifExists): string
     {
         return 'DROP DATABASE' . ($ifExists ? ' IF EXISTS' : '') . ' ' . $this->quoteIdentifier($name);

@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace SQLCraft\DDL;
 
 use SQLCraft\Contracts\Connection\ConnectionInterface;
-use SQLCraft\Capabilities\Capability;
 use SQLCraft\Contracts\DDL\DdlBuilderInterface;
 use SQLCraft\Contracts\Platform\DdlDialectInterface;
 use SQLCraft\ValueObjects\Identifier;
 
 final readonly class DropSchemaBuilder implements DdlBuilderInterface, \SQLCraft\Contracts\DDL\ObjectNameAwareDdlBuilderInterface
 {
+    use LegacyDdlExecution;
+
     public function __construct(public Identifier $name, public bool $ifExists = false, public bool $cascade = false)
     {
     }
@@ -33,11 +34,5 @@ final readonly class DropSchemaBuilder implements DdlBuilderInterface, \SQLCraft
 
 
 
-    #[\Override]
-    public function execute(\SQLCraft\Contracts\Connection\ConnectionInterface $connection): void
-    {
-        $connection->getPlatform()->getCapabilitySet($connection->getServerVersion())->require(\SQLCraft\Capabilities\Capability::Scheme);
-        (new DdlManager(new \SQLCraft\Execution\QueryExecutor()))->execute($connection, $this);
-    }
 
 }

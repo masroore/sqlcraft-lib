@@ -71,6 +71,24 @@ interface DdlDialectInterface
     public function renderDropSequenceStatement(Identifier $name, bool $ifExists): string;
 
     public function renderCreateDatabaseStatement(Identifier $name, ?string $charset, ?string $collation, bool $ifNotExists): string;
+    public function renderAlterDatabaseStatement(Identifier $name, ?string $charset, ?string $collation): string;
+
+    public function renderCopyTableStatement(QualifiedName $source, QualifiedName $target, bool $includeData): string;
+
+    /** @param list<Identifier> $columns */
+    public function renderAlterViewStatement(QualifiedName $name, string $selectSql, array $columns, ?string $checkOption): string;
+
+    /** @param list<RoutineParameterDefinitionInterface> $parameters */
+    public function renderAlterRoutineStatement(
+        QualifiedName $name,
+        string $type,
+        array $parameters,
+        ?DataType $returnType,
+        string $body,
+        ?string $language,
+        bool $deterministic,
+    ): string;
+
 
     public function renderDropDatabaseStatement(Identifier $name, bool $ifExists): string;
 

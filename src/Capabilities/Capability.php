@@ -24,6 +24,8 @@ enum Capability: string
     case PartialIndexes = 'partial_indexes';
     case DescendingIndexes = 'descidx';
     case Copy = 'copy';
+    case DatabaseManagement = 'database_management';
+    case TableCopy = 'table_copy';
     case InsertUpdate = 'insert_update';
     case DropColumn = 'drop_col';
     case MoveColumn = 'move_col';

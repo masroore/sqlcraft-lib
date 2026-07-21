@@ -52,31 +52,21 @@ final class SequenceSchemaBuilderTest extends TestCase
         self::assertSame(['DROP SEQUENCE IF EXISTS "user_ids"'], (new DropSequenceBuilder(new Identifier('user_ids'), true))->toSql($sqlite));
         self::assertSame(['CREATE DATABASE IF NOT EXISTS "analytics"'], (new CreateDatabaseBuilder(new Identifier('analytics'), null, null, true))->toSql($sqlite));
         self::assertSame(['DROP DATABASE "analytics"'], (new DropDatabaseBuilder(new Identifier('analytics')))->toSql($sqlite));
-        self::assertSame(['CREATE SCHEMA "reporting"'], (new CreateSchemaBuilder(new Identifier('reporting')))->toSql($sqlite));
-        self::assertSame(['DROP SCHEMA "reporting"'], (new DropSchemaBuilder(new Identifier('reporting')))->toSql($sqlite));
-        self::assertSame(['USE "analytics"'], (new UseDatabaseBuilder(new Identifier('analytics')))->toSql($sqlite));
+        $this->expectException(CapabilityNotSupportedException::class);
+        (new CreateSchemaBuilder(new Identifier('reporting')))->toSql($sqlite);
+
     }
 
-    public function testSqliteRejectsSchemaCreationAtExecutionTime(): void
+    public function testSqliteRejectsSchemaCreationAtPreviewTime(): void
     {
-        $connection = self::createMock(ConnectionInterface::class);
-        $connection->expects(self::once())->method('getPlatform')->willReturn(new SqlitePlatform());
-        $connection->expects(self::once())->method('getServerVersion')->willReturn(new ServerVersion('3.45.0'));
-
         $this->expectException(CapabilityNotSupportedException::class);
-
-        (new CreateSchemaBuilder(new Identifier('reporting')))->execute($connection);
+        (new CreateSchemaBuilder(new Identifier('reporting')))->toSql(new SqlitePlatform());
     }
 
-    public function testSqliteRejectsSchemaDropAtExecutionTime(): void
+    public function testSqliteRejectsSchemaDropAtPreviewTime(): void
     {
-        $connection = self::createMock(ConnectionInterface::class);
-        $connection->expects(self::once())->method('getPlatform')->willReturn(new SqlitePlatform());
-        $connection->expects(self::once())->method('getServerVersion')->willReturn(new ServerVersion('3.45.0'));
-
         $this->expectException(CapabilityNotSupportedException::class);
-
-        (new DropSchemaBuilder(new Identifier('reporting')))->execute($connection);
+        (new DropSchemaBuilder(new Identifier('reporting')))->toSql(new SqlitePlatform());
     }
 
     public function testMysqlRejectsNativeSequences(): void

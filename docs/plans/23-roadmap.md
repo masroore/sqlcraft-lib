@@ -357,3 +357,8 @@ S = a few days of focused work. M = one to two weeks. L = two to four weeks. XL 
 ```
 
 **Reading notes on parallelism:** M6 (Query Engine) has a hard dependency only on M2, not on M3/M4/M5 — a team with enough capacity could run M3-M5 and M6 concurrently after M2 lands, converging at M7 (which needs both). M8 (remaining platforms) has a hard dependency only on M3's *contract* being stable, not on M3 being fully "done" in the sizing sense — in practice M8 could start as soon as M4/M5's patterns are proven against the first four engines, running concurrently with M6/M7/M9, and this is the recommended real-world sequencing despite the linear layout above (drawn linearly for readability, not to imply serialization is mandatory). M9 depends on M6 and M7 being complete because it audits their event-emission surfaces — it cannot meaningfully start earlier. M10 is a hard convergence point: every other milestone must be done first.
+
+
+### DDL scope deferrals
+
+Rename database, move table, alter trigger, scheduled events, and user-defined types remain explicitly deferred to a future version.

@@ -232,6 +232,18 @@ final class SqlitePlatform extends AbstractPlatform
     }
 
     #[\Override]
+    public function renderCreateSchemaStatement(Identifier $name, ?string $authorization, bool $ifNotExists): string
+    {
+        throw CapabilityNotSupportedException::for(Capability::Scheme, $this->getName(), '');
+    }
+
+    #[\Override]
+    public function renderDropSchemaStatement(Identifier $name, bool $ifExists, bool $cascade): string
+    {
+        throw CapabilityNotSupportedException::for(Capability::Scheme, $this->getName(), '');
+    }
+
+    #[\Override]
     public function renderCreateRoutineStatement(
         QualifiedName $name,
         string $type,

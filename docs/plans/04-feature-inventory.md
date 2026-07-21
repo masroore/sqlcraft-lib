@@ -29,7 +29,7 @@ Legend for the coverage matrix at the end: **F** = Full support, **P** = Partial
 | Create database | DDL | `Capability::DatabaseManagement` | Charset/collation options vary |
 | Alter database (charset/collation) | DDL | `Capability::DatabaseManagement` | MySQL/MariaDB yes; PG limited; SQLite N/A (file-based) |
 | Drop database | DDL | `Capability::DatabaseManagement` | — |
-| Rename database | DDL | `Capability::DatabaseRename` | MySQL: no direct rename (dump/recreate pattern); PG: `ALTER DATABASE RENAME` |
+| Rename database | DDL | `Capability::DatabaseRename` | **Status: Deferred to a future version.**  MySQL: no direct rename (dump/recreate pattern); PG: `ALTER DATABASE RENAME` |
 | List schemas/namespaces | Metadata | `Capability::Schemas` | PG `information_schema.schemata`, MSSQL schemas; MySQL/MariaDB/SQLite have no separate namespace layer (schema == database) |
 | Create/alter/drop schema | DDL | `Capability::Schemas` | PG `CREATE SCHEMA`; MSSQL `CREATE SCHEMA`; absent elsewhere |
 | List collations | Metadata | `Capability::Collations` | MySQL/MariaDB rich; PG uses OS collations; SQLite minimal; MSSQL yes |
@@ -45,7 +45,7 @@ Legend for the coverage matrix at the end: **F** = Full support, **P** = Partial
 | Alter table (rename, comment) | DDL | *(none — baseline)* | — |
 | Drop table | DDL | *(none — baseline)* | — |
 | Copy table | DDL | `Capability::TableCopy` | `CREATE TABLE ... AS SELECT` pattern varies; MSSQL `SELECT INTO` |
-| Move table (between DBs/schemas) | DDL | `Capability::TableMove` | MySQL `RENAME TABLE db1.t TO db2.t`; PG requires dump/restore across DBs, only cross-schema move is native |
+| Move table (between DBs/schemas) | DDL | `Capability::TableMove` | **Status: Deferred to a future version.**  MySQL `RENAME TABLE db1.t TO db2.t`; PG requires dump/restore across DBs, only cross-schema move is native |
 | Truncate table | DDL | *(none — baseline)* | — |
 | Analyze table | Execution | `Capability::TableAnalyze` | MySQL/MariaDB `ANALYZE TABLE`; PG `ANALYZE`; SQLite `ANALYZE`; MSSQL stats update; Oracle `DBMS_STATS` |
 | Optimize table | Execution | `Capability::TableOptimize` | MySQL/MariaDB `OPTIMIZE TABLE`; others absent or different (PG `VACUUM FULL`) |
@@ -287,3 +287,14 @@ Covered inline in §3 (Analyze/Optimize/Check/Repair/Vacuum) to keep table-lifec
 | User/privilege management | F | F | F | A (no user model) | F | F |
 
 This matrix is the authoritative source for `Capability` map defaults in `08-capability-model.md` — any platform implementation that diverges from a `Full` or `Absent` marker here without a documented reason should be treated as a bug in the capability map, not in this inventory.
+
+
+## Explicit DDL scope decisions
+
+The following feature groups are intentionally deferred from v1.0 because engine semantics are uneven or the implementation cost is disproportionate to the baseline admin workflow:
+
+- Rename database — deferred; use dump/recreate workflows.
+- Move table between databases/schemas — deferred; use engine-specific migration tooling.
+- Alter trigger — deferred; engines generally require drop-and-recreate.
+- Scheduled events — deferred; MySQL/MariaDB-only and low priority.
+- User-defined types — deferred; PostgreSQL-centric and complex to reconcile across engines.
