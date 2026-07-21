@@ -88,4 +88,5 @@
 - [x] M5 gate: DDL acceptance review — commit e704a0b — green — 2026-07-21
 
 ## M6 — Query Engine
-- [ ] T1: Query executor — not started
+- [x] T1: Query executor — commit be5deb8 — green — 2026-07-21
+- [ ] T2: statement splitter and batch execution — not started
