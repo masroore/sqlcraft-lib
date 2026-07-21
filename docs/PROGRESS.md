@@ -103,3 +103,5 @@
 - [ ] T1: sinks and format writer contracts — not started
 - [x] T1: export sinks — commit f2439ec — green — 2026-07-21
 - [ ] T2: format writer contracts and dump options hardening — not started
+- [x] T2: format writer contracts and dump options hardening — commit 1774562 — green — 2026-07-21
+- [ ] T3: SQL/CSV/TSV format writers — not started
