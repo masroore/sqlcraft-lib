@@ -386,13 +386,21 @@ try {
 
 | Public (stable, SemVer-covered) | `@internal` (may change without a major version bump) |
 |---|---|
-| `SQLCraftFactory`, `DatabaseSession` and its 8 accessor methods | `PdoConnection` concrete class (07 §5) — only `ConnectionInterface` is public |
-| All `SQLCraft\Contracts\*` interfaces (06 §3) | `MetadataFactoryInterface` implementations (`MySQLMetadataFactory` etc., 05 §8) — internal to Metadata module |
-| All `SQLCraft\ValueObjects\*`, `SQLCraft\DTO\*`, `SQLCraft\Collections\*` classes (05) | `PlatformCapabilityResolver`'s internal matrix format (08 §7) — the *shape* of `buildCapabilityMatrix()` output is internal even though `AbstractPlatform` is extensible |
-| `SQLCraft\Exceptions\*` hierarchy (05 §9) | `AbstractDriver`/`AbstractPlatform` **protected** methods not mentioned in 08's public sketches |
-| `Capability` enum, `CapabilitySet`, `ExtendedCapability` (09) | Internal SQL string templates used by `DdlDialectInterface` implementations |
-| `DriverRegistry::register()`/`get()`/`getRegisteredNames()` (08 §8) | Any class or method explicitly tagged `@internal` in its docblock |
-| `SchemaManager`, `DdlManager`, `QueryManager` public methods | Constructor signatures of concrete `*Manager` classes (consumers should type against the interface or against `DatabaseSession`, not `new SchemaManager(...)` directly) |
+| `SQLCraft\Contracts\*` interfaces and contract DTOs | `Connection\ConnectionFactory`, `PdoConnection`, `PdoConnectionFactory`, `PdoExceptionTranslator`, `PdoPreparedStatement`, `TransactionManager`, and concrete result adapters |
+| `SQLCraft\ValueObjects\*`, `SQLCraft\DTO\*`, `SQLCraft\Collections\*` | `Metadata\*` implementations and `MetadataFactoryInterface` |
+| `SQLCraft\Exceptions\*` hierarchy | `DDL\Sqlite\TableRecreationStrategy` |
+| `Capability`, `CapabilitySet`, `ExtendedCapability`, and `CapabilityNotSupportedException` | `Platform\SqlitePlatform` M2 implementation stub |
+| `Connection\Transaction`, `DriverRegistry`, and built-in driver/platform adapters | Platform SQL template strings and capability-matrix storage shape |
+| `Schema\*`, `DDL\*`, `Execution\*`, and `Query\*` service/builder APIs | Any class or method explicitly tagged `@internal` in its docblock |
+| `Import\*`, `Export\*`, `Events\*`, `Security\*`, and `Support\*` APIs | Concrete manager constructor signatures when a contract or factory is available |
+
+The convenience `SQLCraftFactory` / `DatabaseSession` aggregate shown in §2.2 is
+planned composition-root API, not claimed as an implemented class in this
+release. The current release exposes the same typed graph through
+`DriverRegistry`, drivers, `SchemaManagerFactory`, and the service constructors.
+`SecurityGuardInterface` is also deferred; the shipped security surface is the
+construction-time validation and allowlisting layer in `SQLCraft\Security`.
+
 
 Every `@internal`-tagged class still ships with the package (PHP has no true package-private visibility) but is excluded from the public API surface for BC purposes — see §10.
 
