@@ -80,7 +80,8 @@
 - [x] T2: alter table builder and dialect support — commit 4e33923 — green — 2026-07-21
 - [x] T3: table and view lifecycle builders — commit b164516 — green — 2026-07-21
 - [x] T4: trigger and routine builders — commit 56acebe — green — 2026-07-21
-- [ ] T5: sequence, database, schema, and database-selection builders — not started
+- [x] T5: sequence, database, schema, and database-selection builders — commit c8d2f01 — green — 2026-07-21
+- [ ] T6: SQLite table recreation strategy — not started
 - [ ] T4: SQLite table recreation strategy — not started
 - [ ] T5: DdlManager and execution wiring — not started
 - [ ] M5 gate: DDL acceptance review — not started
