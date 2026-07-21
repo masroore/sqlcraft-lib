@@ -89,4 +89,5 @@
 
 ## M6 — Query Engine
 - [x] T1: Query executor — commit be5deb8 — green — 2026-07-21
-- [ ] T2: statement splitter and batch execution — not started
+- [x] T2: statement splitter and batch execution — commit e6beff2 — green — 2026-07-21
+- [ ] T3: SelectQuery builder and renderer — not started
