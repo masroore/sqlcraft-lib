@@ -120,7 +120,7 @@
 
 ## M8 — Remaining Platforms
 - [x] T1: SQL Server platform — commit 36ee826 — green — 2026-07-21
-- [ ] T2: SQL Server driver — not started
+- [x] T2: SQL Server driver — commit 0efc334 — green — 2026-07-21
 - [ ] T3: SQL Server connection and integration coverage — not started
 - [ ] T4: M8 MSSQL acceptance gate; Oracle deferred — not started
 
