@@ -22,6 +22,12 @@ use SQLCraft\ValueObjects\ServerVersion;
 final class PostgreSQLPlatform extends AbstractPlatform
 {
     #[\Override]
+    public function getExplainSql(string $sql, bool $analyze = false): string
+    {
+        return 'EXPLAIN (FORMAT JSON' . ($analyze ? ', ANALYZE' : '') . ') ' . $sql;
+    }
+
+    #[\Override]
     public function getName(): string
     {
         return 'pgsql';
