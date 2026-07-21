@@ -21,6 +21,14 @@ interface DdlDialectInterface
     /** @return list<string> */
     public function renderDdlAlterTable(AlterTableDefinitionInterface $alterTable): array;
 
+    /** @param list<Identifier> $columns */
+    public function renderCreateViewStatement(QualifiedName $name, string $selectSql, bool $orReplace, array $columns, ?string $checkOption): string;
+
+    public function renderDropViewStatement(QualifiedName $name, bool $ifExists, bool $cascade): string;
+
+    public function renderTruncateStatement(QualifiedName $table, bool $cascade, bool $restartIdentity): string;
+
+
     public function renderDdlColumnDefinition(ColumnDefinitionInterface $column): string;
 
     public function renderDdlPrimaryKeyClause(IndexDefinitionInterface $index): string;

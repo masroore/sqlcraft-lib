@@ -41,6 +41,37 @@ abstract class AbstractPlatform implements PlatformInterface
         return $cascade ? $sql . ' CASCADE' : $sql;
     }
 
+    /**
+     * @param list<Identifier> $columns
+     */
+    #[\Override]
+    public function renderCreateViewStatement(QualifiedName $name, string $selectSql, bool $orReplace, array $columns, ?string $checkOption): string
+    {
+        $columnList = $columns === [] ? '' : ' (' . implode(', ', array_map($this->quoteIdentifier(...), $columns)) . ')';
+        $sql = 'CREATE ' . ($orReplace ? 'OR REPLACE ' : '') . 'VIEW ' . $this->quoteQualifiedName($name) . $columnList . ' AS ' . $selectSql;
+
+        return $checkOption === null ? $sql : $sql . ' WITH ' . $checkOption . ' CHECK OPTION';
+    }
+
+    #[\Override]
+    public function renderDropViewStatement(QualifiedName $name, bool $ifExists, bool $cascade): string
+    {
+        $sql = 'DROP VIEW' . ($ifExists ? ' IF EXISTS' : '') . ' ' . $this->quoteQualifiedName($name);
+
+        return $cascade ? $sql . ' CASCADE' : $sql;
+    }
+
+    #[\Override]
+    public function renderTruncateStatement(QualifiedName $table, bool $cascade, bool $restartIdentity): string
+    {
+        $sql = 'TRUNCATE TABLE ' . $this->quoteQualifiedName($table);
+        if ($restartIdentity) {
+            $sql .= ' RESTART IDENTITY';
+        }
+
+        return $cascade ? $sql . ' CASCADE' : $sql;
+    }
+
     /** @return list<string> */
     #[\Override]
     public function renderDdlAlterTable(AlterTableDefinitionInterface $alterTable): array

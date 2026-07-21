@@ -224,7 +224,17 @@ final class SqlitePlatform extends AbstractPlatform
         return 'CONSTRAINT ' . $this->quoteIdentifier(new Identifier($check->name)) . ' CHECK (' . $check->expression . ')';
     }
 
-    /** @param list<string> $columnClauses @param list<string> $constraintClauses @param array<string, scalar|null> $tableOptions */
+    #[\Override]
+    public function renderTruncateStatement(QualifiedName $table, bool $cascade, bool $restartIdentity): string
+    {
+        return 'DELETE FROM ' . $this->quoteQualifiedName($table);
+    }
+
+    /**
+     * @param list<string> $columnClauses
+     * @param list<string> $constraintClauses
+     * @param array<string, scalar|null> $tableOptions
+     */
     #[\Override]
     public function renderCreateTableStatement(QualifiedName $table, array $columnClauses, array $constraintClauses, array $tableOptions): string
     {
