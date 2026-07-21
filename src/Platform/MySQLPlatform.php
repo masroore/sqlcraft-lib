@@ -22,6 +22,12 @@ use SQLCraft\ValueObjects\ServerVersion;
 class MySQLPlatform extends AbstractPlatform
 {
     #[\Override]
+    public function getExplainSql(string $sql, bool $analyze = false): string
+    {
+        return ($analyze ? 'EXPLAIN ANALYZE ' : 'EXPLAIN FORMAT=JSON ') . $sql;
+    }
+
+    #[\Override]
     public function getName(): string
     {
         return 'mysql';

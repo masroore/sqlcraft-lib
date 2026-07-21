@@ -21,6 +21,12 @@ use SQLCraft\ValueObjects\ServerVersion;
 final class SqlitePlatform extends AbstractPlatform
 {
     #[\Override]
+    public function getExplainSql(string $sql, bool $analyze = false): string
+    {
+        return 'EXPLAIN QUERY PLAN ' . $sql;
+    }
+
+    #[\Override]
     public function getName(): string
     {
         return 'sqlite';

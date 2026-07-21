@@ -435,6 +435,12 @@ abstract class AbstractPlatform implements PlatformInterface
     }
 
     #[\Override]
+    public function getExplainSql(string $sql, bool $analyze = false): string
+    {
+        return ($analyze ? 'EXPLAIN ANALYZE ' : 'EXPLAIN ') . $sql;
+    }
+
+    #[\Override]
     public function wrapWithTimeout(string $sql, int $milliseconds): ?string
     {
         return null;
