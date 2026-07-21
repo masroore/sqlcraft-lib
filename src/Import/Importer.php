@@ -17,6 +17,7 @@ use SQLCraft\Contracts\Import\ImporterInterface;
 final readonly class Importer implements ImporterInterface
 {
     private const int CHUNK_SIZE = 8192;
+    private const int MAX_BATCH_SIZE = 1000;
 
     public function __construct(
         private StatementSplitterInterface $splitter,
@@ -131,22 +132,30 @@ final readonly class Importer implements ImporterInterface
         $remaining = $this->remainingStatements($batch, $executed, $options);
         $skipped += count($batch->statements) - count($remaining->statements);
 
-        foreach ($this->batchExecutor->executeBatch($connection, $remaining, $options->stopOnError) as $result) {
-            if ($result->error !== null) {
-                $errors[] = new ImportError(
-                    statementIndex: $executed + $result->index,
-                    sql: $result->sql,
-                    errorMessage: $result->error->getMessage(),
-                    errorCode: (int) $result->error->getCode(),
-                );
-                $skipped++;
-                continue;
-            }
+        $batchOffset = 0;
+        foreach (array_chunk($remaining->statements, self::MAX_BATCH_SIZE) as $statements) {
+            foreach ($this->batchExecutor->executeBatch(
+                $connection,
+                new StatementBatch($statements),
+                $options->stopOnError,
+            ) as $result) {
+                if ($result->error !== null) {
+                    $errors[] = new ImportError(
+                        statementIndex: $executed + $batchOffset + $result->index,
+                        sql: $result->sql,
+                        errorMessage: $result->error->getMessage(),
+                        errorCode: (int) $result->error->getCode(),
+                    );
+                    $skipped++;
+                    continue;
+                }
 
-            $executed++;
-            if (($executed + $skipped) % $options->progressInterval === 0) {
-                $this->events?->importProgress($connection, $bytesProcessed, $executed, (hrtime(true) - $startedAt) / 1_000_000);
+                $executed++;
+                if (($executed + $skipped) % $options->progressInterval === 0) {
+                    $this->events?->importProgress($connection, $bytesProcessed, $executed, (hrtime(true) - $startedAt) / 1_000_000);
+                }
             }
+            $batchOffset += count($statements);
         }
 
         return [$executed, $skipped, $errors];

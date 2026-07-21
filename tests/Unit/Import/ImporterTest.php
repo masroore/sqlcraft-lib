@@ -96,10 +96,12 @@ final class ImporterTest extends TestCase
         $source = self::createMock(ImportSourceInterface::class);
         $source->method('openStream')->willReturn($this->stream(str_repeat("SELECT 1;\n", 5000)));
         $batchCalls = 0;
+        $maximumBatchSize = 0;
         $batchExecutor = self::createMock(BatchExecutorInterface::class);
         $batchExecutor->method('executeBatch')->willReturnCallback(
-            function (ConnectionInterface $connection, StatementBatch $batch) use (&$batchCalls): \Generator {
+            function (ConnectionInterface $connection, StatementBatch $batch) use (&$batchCalls, &$maximumBatchSize): \Generator {
                 $batchCalls++;
+                $maximumBatchSize = max($maximumBatchSize, count($batch->statements));
                 foreach ($batch->statements as $index => $statement) {
                     yield new BatchStatementResult($index, $statement, null, null, 0.0, null);
                 }
@@ -110,6 +112,7 @@ final class ImporterTest extends TestCase
 
         self::assertSame(5000, $result->statementsExecuted);
         self::assertGreaterThan(1, $batchCalls);
+        self::assertLessThanOrEqual(1000, $maximumBatchSize);
     }
 
     public function testEmitsProgressAtConfiguredStatementInterval(): void
