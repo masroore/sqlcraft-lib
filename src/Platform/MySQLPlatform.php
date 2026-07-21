@@ -205,6 +205,25 @@ class MySQLPlatform extends AbstractPlatform
     }
 
     #[\Override]
+    public function renderCreateSequenceStatement(
+        \SQLCraft\ValueObjects\Identifier $name,
+        int $start,
+        int $increment,
+        ?int $min,
+        ?int $max,
+        bool $cycle,
+        ?int $cache,
+    ): string {
+        throw CapabilityNotSupportedException::for(Capability::Sequence, 'mysql');
+    }
+
+    #[\Override]
+    public function renderDropSequenceStatement(\SQLCraft\ValueObjects\Identifier $name, bool $ifExists): string
+    {
+        throw CapabilityNotSupportedException::for(Capability::Sequence, 'mysql');
+    }
+
+    #[\Override]
     public function renderColumnDefinition(ColumnMeta $column): string
     {
         $dataType = $column->dataType;
