@@ -95,9 +95,10 @@ Historical milestone tasks above remain recorded for traceability. Their origina
 - [x] Gap-analysis phase 5 — query completeness — commit `8501ef7`
 - [x] Gap-analysis phase 6 — import/export completeness — commit `a0d99be`
 - [x] Gap-analysis phase 7 — DDL scope reconciliation — commit `62f0b8a`
-- [x] Gap-analysis phase 8 — docs/config hygiene — in progress
+- [x] Gap-analysis phase 8 — docs/config hygiene — commit `e9358ae`
+- [x] Gap-analysis phase 9 seam-liveness guard — architectural regression test and deferred-export warnings implemented
 
 ## M10 — Documentation & v1.0
 
-- [ ] Phase 9 release verification — blocked until mutation testing meets MSI ≥ 80% and covered MSI ≥ 90%.
+- [ ] Phase 9 release verification — blocked: mutation gate remains below MSI ≥ 80% / covered MSI ≥ 90%; external DB services are unavailable in this environment.
 - [ ] v1.0.0 tag — only after phase 9 passes.

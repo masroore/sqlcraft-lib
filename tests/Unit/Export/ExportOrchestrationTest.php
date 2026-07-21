@@ -12,6 +12,7 @@ use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Connection\ResultInterface;
 use SQLCraft\Contracts\Execution\QueryExecutorInterface;
 use SQLCraft\Contracts\Export\ExportSourceInterface;
+use SQLCraft\Contracts\Platform\PlatformInterface;
 use SQLCraft\DTO\ColumnMeta;
 use SQLCraft\DTO\TableStatus;
 use SQLCraft\Export\CsvFormatWriter;
@@ -19,8 +20,10 @@ use SQLCraft\Export\DataStyle;
 use SQLCraft\Export\DumpOptions;
 use SQLCraft\Export\DumpScope;
 use SQLCraft\Export\Exporter;
+use SQLCraft\Export\SqlFormatWriter;
 use SQLCraft\Export\StringBufferSink;
 use SQLCraft\Export\TableDumper;
+use SQLCraft\Platform\MySQLPlatform;
 use SQLCraft\Platform\SqlitePlatform;
 use SQLCraft\ValueObjects\DataType;
 use SQLCraft\ValueObjects\DefaultValue;
@@ -106,12 +109,33 @@ final class ExportOrchestrationTest extends TestCase
         self::assertSame('', $sink->contents());
     }
 
-    private function connection(): ConnectionInterface
+    public function testTableDumperEmitsMysqlAutoIncrementStateWhenRequested(): void
+    {
+        $connection = $this->connection('mysql', new MySQLPlatform());
+        $table = new TableStatus('orders', autoIncrement: 42);
+        $source = self::createMock(ExportSourceInterface::class);
+        $source->expects(self::once())->method('getTableDdl')->willReturn([]);
+        $executor = self::createMock(QueryExecutorInterface::class);
+
+        $sink = new StringBufferSink();
+        (new TableDumper($source, $executor))->dump(
+            $connection,
+            $table,
+            new SqlFormatWriter($connection),
+            $sink,
+            new DumpOptions('sql', DumpScope::table('shop', 'orders'), dataStyle: DataStyle::None),
+        );
+
+        self::assertStringContainsString('ALTER TABLE "orders" AUTO_INCREMENT = 42;', $sink->contents());
+    }
+
+    private function connection(string $platformName = 'sqlite', ?PlatformInterface $platform = null): ConnectionInterface
     {
         $connection = self::createMock(ConnectionInterface::class);
         $connection->method('quoteIdentifier')->willReturnCallback(static fn (string $name): string => '"' . $name . '"');
         $connection->method('getDatabaseName')->willReturn('shop');
-        $connection->method('getPlatform')->willReturn(new SqlitePlatform());
+        $connection->method('getPlatformName')->willReturn($platformName);
+        $connection->method('getPlatform')->willReturn($platform ?? new SqlitePlatform());
 
         return $connection;
     }

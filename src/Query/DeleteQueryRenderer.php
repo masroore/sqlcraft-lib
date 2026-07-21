@@ -16,7 +16,7 @@ final readonly class DeleteQueryRenderer
     public function render(DeleteQuery $query): array
     {
         $parts = [];
-        if ($query->table->schema !== null) {
+        if ($query->table->schema instanceof \SQLCraft\ValueObjects\Identifier) {
             $parts[] = $this->platform->quoteIdentifier($query->table->schema);
         }
         $parts[] = $this->platform->quoteIdentifier($query->table->object);

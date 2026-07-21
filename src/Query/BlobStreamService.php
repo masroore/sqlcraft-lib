@@ -24,7 +24,7 @@ final readonly class BlobStreamService
     {
         $connection->getPlatform()->getCapabilitySet($connection->getServerVersion())->require(Capability::BlobStreaming);
         $parts = [];
-        if ($table->schema !== null) {
+        if ($table->schema instanceof \SQLCraft\ValueObjects\Identifier) {
             $parts[] = $connection->quoteIdentifier($table->schema->name);
         }$parts[] = $connection->quoteIdentifier($table->object->name);
         $conditions = [];
@@ -39,13 +39,13 @@ final readonly class BlobStreamService
         if ($stream === false) {
             throw new \RuntimeException('Unable to allocate BLOB stream.');
         }
-        fwrite($stream, self::contents($values));
+        fwrite($stream, $this->contents($values));
         rewind($stream);
         return $stream;
     }
 
     /** @param list<mixed> $values */
-    private static function contents(array $values): string
+    private function contents(array $values): string
     {
         if ($values === []) {
             return '';

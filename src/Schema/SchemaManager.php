@@ -85,7 +85,6 @@ final class SchemaManager implements SchemaManagerInterface
         return $diff === [] ? '' : json_encode($diff, JSON_THROW_ON_ERROR);
     }
 
-    /** @return LazyCollection */
     public function lazyTables(ConnectionInterface $conn, ?string $schema = null): LazyCollection
     {
         return new LazyCollection(fn (): iterable => $this->getTables($conn, $schema));

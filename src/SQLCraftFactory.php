@@ -65,24 +65,24 @@ final class SQLCraftFactory
         ?EventDispatcherInterface $events = null,
         ?MetadataCacheInterface $cache = null,
     ) {
-        $pdo = new PdoConnectionFactory(new PdoExceptionTranslator(), $events === null ? null : new ConnectionEventDispatcher($events));
+        $pdo = new PdoConnectionFactory(new PdoExceptionTranslator(), $events instanceof \Psr\EventDispatcher\EventDispatcherInterface ? new ConnectionEventDispatcher($events) : null);
         $this->drivers = $drivers ?? new DriverRegistry([
             new MySQLDriver($pdo, new MySQLPlatform()),
             new PostgreSQLDriver($pdo, new PostgreSQLPlatform()),
             new SqliteDriver($pdo, new SqlitePlatform()),
             new SqlServerDriver($pdo, new SqlServerPlatform()),
         ]);
-        if ($drivers === null) {
+        if (!$drivers instanceof \SQLCraft\Driver\DriverRegistry) {
             $this->drivers->registerAlias('mariadb', $this->drivers->get('mysql'));
         }
         $this->credentials = $credentials ?? new EnvCredentialProvider();
         $this->connections = new ConnectionManager();
         $this->cache = $cache;
 
-        if ($events === null) {
+        if (!$events instanceof \Psr\EventDispatcher\EventDispatcherInterface) {
             $provider = new SimpleListenerProvider();
             $this->events = new SimpleEventDispatcher($provider);
-            if ($cache !== null) {
+            if ($cache instanceof \SQLCraft\Contracts\Metadata\MetadataCacheInterface) {
                 $listener = new CacheInvalidationListener($cache);
                 $provider->listen(AfterDdlExecuted::class, $listener);
                 $provider->listen(SchemaChangedEvent::class, $listener);

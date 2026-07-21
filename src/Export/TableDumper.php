@@ -31,6 +31,10 @@ final readonly class TableDumper
 
         if ($options->tableStyle !== TableSectionStyle::None) {
             $ddl = $this->source->getTableDdl($connection, $table->name, $table->schema);
+            $autoIncrement = $this->autoIncrementDdl($connection, $table, $options);
+            if ($autoIncrement !== null) {
+                $ddl[] = $autoIncrement;
+            }
             if ($options->includeTriggers && $this->supports($connection, \SQLCraft\Capabilities\Capability::Trigger)) {
                 $ddl = [...$ddl, ...$this->source->getTriggerDdl($connection, $table->name, $table->schema)];
             }
@@ -114,5 +118,27 @@ final readonly class TableDumper
         $parts[] = $connection->quoteIdentifier($table->name);
 
         return 'SELECT * FROM ' . implode('.', $parts);
+    }
+
+    private function autoIncrementDdl(
+        ConnectionInterface $connection,
+        TableStatus $table,
+        DumpOptions $options,
+    ): ?string {
+        if (!$options->includeAutoIncrement || $table->autoIncrement === null) {
+            return null;
+        }
+
+        if (!in_array($connection->getPlatformName(), ['mysql', 'maria'], true)) {
+            return null;
+        }
+
+        $parts = [];
+        if ($table->schema !== null) {
+            $parts[] = $connection->quoteIdentifier($table->schema);
+        }
+        $parts[] = $connection->quoteIdentifier($table->name);
+
+        return 'ALTER TABLE ' . implode('.', $parts) . ' AUTO_INCREMENT = ' . $table->autoIncrement;
     }
 }

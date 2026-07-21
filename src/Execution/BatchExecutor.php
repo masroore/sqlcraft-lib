@@ -38,7 +38,7 @@ final readonly class BatchExecutor implements BatchExecutorInterface
             try {
                 if ($timeoutMs > 0) {
                     $rows = $this->executor->queryWithTimeout($connection, $sql, timeoutMs: $timeoutMs);
-                    if ($rows === null) {
+                    if (!$rows instanceof \SQLCraft\Contracts\Connection\ResultInterface) {
                         throw new \SQLCraft\Exceptions\QueryTimeoutException('Statement timeout is not supported by this platform.', $sql);
                     }
                     yield new BatchStatementResult($index, $sql, null, $rows, $this->elapsedMs($startedAt), null);

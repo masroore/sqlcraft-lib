@@ -38,7 +38,7 @@ final readonly class PrivilegeManager implements PrivilegeManagerInterface
     private function object(QualifiedName $name): string
     {
         $parts = [];
-        if ($name->schema !== null) {
+        if ($name->schema instanceof \SQLCraft\ValueObjects\Identifier) {
             $parts[] = $this->connection->quoteIdentifier($name->schema->name);
         }
         $parts[] = $this->connection->quoteIdentifier($name->object->name);

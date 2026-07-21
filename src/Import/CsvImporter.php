@@ -172,7 +172,7 @@ final readonly class CsvImporter implements CsvImporterInterface
             if (!$this->executor instanceof QueryExecutorInterface) {
                 throw new InvalidArgumentException('A QueryExecutor is required for CSV statement timeouts.');
             }
-            if ($this->executor->queryWithTimeout($conn, $sql, $values, $options->statementTimeoutMs) === null) {
+            if (!$this->executor->queryWithTimeout($conn, $sql, $values, $options->statementTimeoutMs) instanceof \SQLCraft\Contracts\Connection\ResultInterface) {
                 throw new QueryTimeoutException('Statement timeout is not supported by this platform.', $sql);
             }
             return;

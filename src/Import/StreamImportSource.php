@@ -9,7 +9,6 @@ use SQLCraft\Contracts\Import\ImportSourceInterface;
 
 final readonly class StreamImportSource implements ImportSourceInterface
 {
-    /** @param mixed $stream */
     public function __construct(private mixed $stream)
     {
         if (!is_resource($stream)) {

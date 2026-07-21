@@ -50,7 +50,7 @@ final readonly class InsertQueryRenderer
     private function quoteTable(InsertQuery $query): string
     {
         $parts = [];
-        if ($query->table->schema !== null) {
+        if ($query->table->schema instanceof \SQLCraft\ValueObjects\Identifier) {
             $parts[] = $this->platform->quoteIdentifier($query->table->schema);
         } $parts[] = $this->platform->quoteIdentifier($query->table->object);
         return implode('.', $parts);

@@ -46,7 +46,7 @@ final class PrivilegeInspector implements PrivilegeInspectorInterface
         if ($user !== null) {
             $conditions[] = " GRANTEE = '" . str_replace("'", "''", $user) . "'";
         }
-        if ($object !== null) {
+        if ($object instanceof \SQLCraft\ValueObjects\QualifiedName) {
             $conditions[] = " TABLE_NAME = '" . str_replace("'", "''", $object->object->name) . "'";
         }
 
@@ -59,7 +59,7 @@ final class PrivilegeInspector implements PrivilegeInspectorInterface
         if ($user !== null) {
             $conditions[] = " grantee = '" . str_replace("'", "''", $user) . "'";
         }
-        if ($object !== null) {
+        if ($object instanceof \SQLCraft\ValueObjects\QualifiedName) {
             $conditions[] = " table_name = '" . str_replace("'", "''", $object->object->name) . "'";
         }
 

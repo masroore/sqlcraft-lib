@@ -7,7 +7,13 @@ and the public surface follows Semantic Versioning.
 
 ## [Unreleased]
 
-No unreleased changes.
+- Gap-analysis phase 8 reconciled architecture, capability, driver, Oracle-deferral,
+  import/export, roadmap, and dependency-boundary documentation.
+- Added seam-liveness architectural tests for metadata-cache invalidation,
+  export-option consumers, event construction, and capability enum integrity.
+- Export now emits MySQL/MariaDB auto-increment state when requested and warns
+  explicitly when deferred scheduler-event or user-defined-type export options are selected.
+- Release verification remains blocked by the Infection mutation threshold; no v1.0.0 tag is claimed.
 
 ## [1.0.0] - 2026-07-21
 

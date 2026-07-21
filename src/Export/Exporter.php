@@ -54,6 +54,7 @@ final class Exporter implements ExporterInterface
     #[\Override]
     public function export(ConnectionInterface $conn, SinkInterface $sink, DumpOptions $options): void
     {
+        $this->warnAboutDeferredOptions($conn, $options);
         $writer = $this->writer($options->format);
         $startedAt = hrtime(true);
         $this->events?->exportStarted($conn, $sink, $options->format, $options->scope->tables ?? []);
@@ -206,5 +207,23 @@ final class Exporter implements ExporterInterface
         }
 
         return $this->writers[$format];
+    }
+
+    private function warnAboutDeferredOptions(ConnectionInterface $connection, DumpOptions $options): void
+    {
+        if ($options->includeEvents) {
+            $this->events?->exportWarning(
+                $connection,
+                'Scheduler-event export is deferred; event definitions were omitted.',
+                [],
+            );
+        }
+        if ($options->includeUserTypes) {
+            $this->events?->exportWarning(
+                $connection,
+                'User-defined-type export is deferred; type definitions were omitted.',
+                [],
+            );
+        }
     }
 }

@@ -6,6 +6,5 @@ namespace SQLCraft\Contracts\Execution;
 
 interface StatementSplitterInterface
 {
-    /** @return StatementBatch */
     public function split(string $sql, string $delimiter = ';'): StatementBatch;
 }
