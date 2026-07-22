@@ -16,4 +16,5 @@ return (new Config())
         'strict_comparison' => true,
         'strict_param' => true,
     ])
-    ->setFinder($finder);
+    ->setFinder($finder)
+    ->setRiskyAllowed(true);
