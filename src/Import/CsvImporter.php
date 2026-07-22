@@ -160,15 +160,15 @@ final readonly class CsvImporter implements CsvImporterInterface
     ): void {
         $columns = array_map(static fn (array $column): string => $column[1], $known);
         $quotedColumns = array_map($conn->quoteIdentifier(...), $columns);
-        $row = '('.implode(', ', array_fill(0, count($columns), '?')).')';
+        $row = '(' . implode(', ', array_fill(0, count($columns), '?')) . ')';
         $clauses = UpsertSqlRenderer::clausesForName($conn->getPlatformName(), $options->upsertMode, $quotedColumns);
         $tableSql = $this->quoteTable($conn, $table);
         $values = [];
         foreach ($rows as $valuesRow) {
             $values = [...$values, ...$valuesRow];
         }
-        $sql = $clauses['prefix'].' INTO '.$tableSql.' ('.implode(', ', $quotedColumns).') VALUES '
-            .implode(', ', array_fill(0, count($rows), $row)).$clauses['suffix'];
+        $sql = $clauses['prefix'] . ' INTO ' . $tableSql . ' (' . implode(', ', $quotedColumns) . ') VALUES '
+            . implode(', ', array_fill(0, count($rows), $row)) . $clauses['suffix'];
         if ($options->statementTimeoutMs > 0) {
             if (! $this->executor instanceof QueryExecutorInterface) {
                 throw new InvalidArgumentException('A QueryExecutor is required for CSV statement timeouts.');

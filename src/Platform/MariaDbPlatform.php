@@ -25,7 +25,7 @@ final class MariaDbPlatform extends MySQLPlatform
     public function getSequencesSql(?string $schema = null): string
     {
         return "SELECT TABLE_SCHEMA, TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE ENGINE = 'SEQUENCE'"
-            .($schema === null ? '' : ' AND TABLE_SCHEMA = '.$this->quoteValue($schema));
+            . ($schema === null ? '' : ' AND TABLE_SCHEMA = ' . $this->quoteValue($schema));
     }
 
     /**
@@ -55,19 +55,19 @@ final class MariaDbPlatform extends MySQLPlatform
         bool $cycle,
         ?int $cache,
     ): string {
-        $sql = 'CREATE SEQUENCE '.$this->quoteIdentifier($name)
-            .' START WITH '.$start.' INCREMENT BY '.$increment;
+        $sql = 'CREATE SEQUENCE ' . $this->quoteIdentifier($name)
+            . ' START WITH ' . $start . ' INCREMENT BY ' . $increment;
         if ($min !== null) {
-            $sql .= ' MINVALUE '.$min;
+            $sql .= ' MINVALUE ' . $min;
         }
         if ($max !== null) {
-            $sql .= ' MAXVALUE '.$max;
+            $sql .= ' MAXVALUE ' . $max;
         }
         if ($cycle) {
             $sql .= ' CYCLE';
         }
         if ($cache !== null) {
-            $sql .= ' CACHE '.$cache;
+            $sql .= ' CACHE ' . $cache;
         }
 
         return $sql;
@@ -76,6 +76,6 @@ final class MariaDbPlatform extends MySQLPlatform
     #[\Override]
     public function renderDropSequenceStatement(Identifier $name, bool $ifExists): string
     {
-        return 'DROP SEQUENCE'.($ifExists ? ' IF EXISTS' : '').' '.$this->quoteIdentifier($name);
+        return 'DROP SEQUENCE' . ($ifExists ? ' IF EXISTS' : '') . ' ' . $this->quoteIdentifier($name);
     }
 }

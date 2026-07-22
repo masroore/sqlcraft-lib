@@ -21,7 +21,7 @@ abstract class PlatformConformanceTestCase extends TestCase
         $this->connection->execute('DROP TABLE IF EXISTS contract_fixture_rows');
         $this->connection->execute('CREATE TABLE contract_fixture_rows (id INTEGER PRIMARY KEY, value TEXT NOT NULL)');
         for ($id = 1; $id <= 10; $id++) {
-            $this->connection->execute('INSERT INTO contract_fixture_rows (id, value) VALUES (?, ?)', [$id, 'row-'.$id]);
+            $this->connection->execute('INSERT INTO contract_fixture_rows (id, value) VALUES (?, ?)', [$id, 'row-' . $id]);
         }
     }
 
@@ -34,7 +34,7 @@ abstract class PlatformConformanceTestCase extends TestCase
     public function test_quoted_identifier_is_accepted_by_the_live_engine(): void
     {
         $identifier = new Identifier('weird`alias');
-        $row = $this->connection->query('SELECT 1 AS '.$this->platform()->quoteIdentifier($identifier))->fetchAssoc();
+        $row = $this->connection->query('SELECT 1 AS ' . $this->platform()->quoteIdentifier($identifier))->fetchAssoc();
 
         self::assertSame(1, $row['weird`alias'] ?? null);
     }
@@ -67,7 +67,7 @@ abstract class PlatformConformanceTestCase extends TestCase
     public function test_quoted_string_is_accepted_as_a_value(): void
     {
         $row = $this->connection->query(
-            'SELECT '.$this->platform()->quoteValue("O'Reilly").' AS value',
+            'SELECT ' . $this->platform()->quoteValue("O'Reilly") . ' AS value',
         )->fetchAssoc();
 
         self::assertSame("O'Reilly", $row['value'] ?? null);

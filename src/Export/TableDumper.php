@@ -116,7 +116,7 @@ final readonly class TableDumper
         }
         $parts[] = $connection->quoteIdentifier($table->name);
 
-        return 'SELECT * FROM '.implode('.', $parts);
+        return 'SELECT * FROM ' . implode('.', $parts);
     }
 
     private function autoIncrementDdl(
@@ -138,6 +138,6 @@ final readonly class TableDumper
         }
         $parts[] = $connection->quoteIdentifier($table->name);
 
-        return 'ALTER TABLE '.implode('.', $parts).' AUTO_INCREMENT = '.$table->autoIncrement;
+        return 'ALTER TABLE ' . implode('.', $parts) . ' AUTO_INCREMENT = ' . $table->autoIncrement;
     }
 }

@@ -18,24 +18,24 @@ final readonly class UpdateQueryRenderer
         $assignments = [];
         /** @psalm-suppress MixedAssignment */
         foreach ($query->assignments as $column => $value) {
-            $assignments[] = $this->platform->quoteIdentifier(new Identifier($column)).' = ?';
+            $assignments[] = $this->platform->quoteIdentifier(new Identifier($column)) . ' = ?';
             /** @psalm-suppress MixedAssignment */
             $params[] = $value;
         }
 
-        $sql = 'UPDATE '.$this->table($query).' SET '.implode(', ', $assignments);
+        $sql = 'UPDATE ' . $this->table($query) . ' SET ' . implode(', ', $assignments);
         /** @var array{0: string, 1: list<mixed>} $whereResult */
         $whereResult = $this->where($query->where);
         [$where, $values] = $whereResult;
         if ($where !== '') {
-            $sql .= ' WHERE '.$where;
+            $sql .= ' WHERE ' . $where;
             /** @psalm-suppress MixedAssignment */
             foreach ($values as $value) {
                 $params[] = $value;
             }
         }
         if ($query->limit !== null) {
-            $sql .= ' LIMIT '.$query->limit;
+            $sql .= ' LIMIT ' . $query->limit;
         }
 
         /** @var list<mixed> $params */

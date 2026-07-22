@@ -63,10 +63,10 @@ final class ImportExportRoundTripTest extends TestCase
         $connection = $this->connection($engine);
         $table = 'sqlcraft_m7_roundtrip';
         $quoted = $connection->quoteIdentifier($table);
-        $connection->execute('DROP TABLE IF EXISTS '.$quoted);
-        $connection->execute('CREATE TABLE '.$quoted.' (id INTEGER PRIMARY KEY, label TEXT NOT NULL, note TEXT)');
-        $connection->execute('INSERT INTO '.$quoted.' (id, label, note) VALUES (?, ?, ?)', [1, 'a, "quoted"', null]);
-        $connection->execute('INSERT INTO '.$quoted.' (id, label, note) VALUES (?, ?, ?)', [2, 'plain', 'value']);
+        $connection->execute('DROP TABLE IF EXISTS ' . $quoted);
+        $connection->execute('CREATE TABLE ' . $quoted . ' (id INTEGER PRIMARY KEY, label TEXT NOT NULL, note TEXT)');
+        $connection->execute('INSERT INTO ' . $quoted . ' (id, label, note) VALUES (?, ?, ?)', [1, 'a, "quoted"', null]);
+        $connection->execute('INSERT INTO ' . $quoted . ' (id, label, note) VALUES (?, ?, ?)', [2, 'plain', 'value']);
 
         try {
             $source = $this->source($connection);
@@ -75,7 +75,7 @@ final class ImportExportRoundTripTest extends TestCase
             (new Exporter($source, new QueryExecutor, new SqlFormatWriter($connection)))->export($connection, $sink, $options);
             $dump = $sink->contents();
 
-            $connection->execute('DROP TABLE '.$quoted);
+            $connection->execute('DROP TABLE ' . $quoted);
             $importSource = $this->sourceFromString($dump);
             $result = (new Importer(new StatementSplitter, new BatchExecutor(new QueryExecutor)))->import(
                 $connection,
@@ -87,9 +87,9 @@ final class ImportExportRoundTripTest extends TestCase
             self::assertSame([
                 ['id' => 1, 'label' => 'a, "quoted"', 'note' => null],
                 ['id' => 2, 'label' => 'plain', 'note' => 'value'],
-            ], $connection->query('SELECT id, label, note FROM '.$quoted.' ORDER BY id')->fetchAll());
+            ], $connection->query('SELECT id, label, note FROM ' . $quoted . ' ORDER BY id')->fetchAll());
         } finally {
-            $connection->execute('DROP TABLE IF EXISTS '.$quoted);
+            $connection->execute('DROP TABLE IF EXISTS ' . $quoted);
             $connection->close();
         }
     }
@@ -103,7 +103,7 @@ final class ImportExportRoundTripTest extends TestCase
         $handle = fopen($path, 'wb');
         self::assertIsResource($handle);
         for ($id = 1; $id <= 20000; $id++) {
-            fwrite($handle, 'INSERT INTO sqlcraft_m7_large (id) VALUES ('.$id.");\n");
+            fwrite($handle, 'INSERT INTO sqlcraft_m7_large (id) VALUES (' . $id . ");\n");
         }
         fclose($handle);
 
@@ -155,8 +155,8 @@ final class ImportExportRoundTripTest extends TestCase
         $connection = $this->connection('sqlite');
         $table = 'sqlcraft_m7_csv';
         $quoted = $connection->quoteIdentifier($table);
-        $connection->execute('CREATE TABLE '.$quoted.' (id INTEGER PRIMARY KEY, label TEXT, payload BLOB, note TEXT)');
-        $connection->execute('INSERT INTO '.$quoted.' (id, label, payload, note) VALUES (?, ?, ?, ?)', [1, 'a, "quoted"', "\x00\x01\xFF", null]);
+        $connection->execute('CREATE TABLE ' . $quoted . ' (id INTEGER PRIMARY KEY, label TEXT, payload BLOB, note TEXT)');
+        $connection->execute('INSERT INTO ' . $quoted . ' (id, label, payload, note) VALUES (?, ?, ?, ?)', [1, 'a, "quoted"', "\x00\x01\xFF", null]);
 
         try {
             $source = $this->source($connection);
@@ -167,7 +167,7 @@ final class ImportExportRoundTripTest extends TestCase
                 new DumpOptions('csv', DumpScope::table('main', $table), tableStyle: TableSectionStyle::None),
             );
             $csv = $sink->contents();
-            $connection->execute('DELETE FROM '.$quoted);
+            $connection->execute('DELETE FROM ' . $quoted);
 
             $result = (new CsvImporter(new ColumnInspector(new SqliteMetadataFactory)))->importCsv(
                 $connection,
@@ -179,9 +179,9 @@ final class ImportExportRoundTripTest extends TestCase
             self::assertSame(1, $result->statementsExecuted);
             self::assertSame([
                 ['id' => 1, 'label' => 'a, "quoted"', 'payload' => "\x00\x01\xFF", 'note' => null],
-            ], $connection->query('SELECT id, label, payload, note FROM '.$quoted)->fetchAll());
+            ], $connection->query('SELECT id, label, payload, note FROM ' . $quoted)->fetchAll());
         } finally {
-            $connection->execute('DROP TABLE IF EXISTS '.$quoted);
+            $connection->execute('DROP TABLE IF EXISTS ' . $quoted);
             $connection->close();
         }
     }
@@ -201,7 +201,7 @@ final class ImportExportRoundTripTest extends TestCase
             'mysql' => (new MySQLDriver($factory, new MySQLPlatform))->connect(new ConnectionParameters(host: 'mysql', port: 3306, database: 'sqlcraft_test', username: 'sqlcraft', password: 'secret')),
             'mariadb' => (new MySQLDriver($factory, new MariaDbPlatform))->connect(new ConnectionParameters(host: 'mariadb', port: 3306, database: 'sqlcraft_test', username: 'sqlcraft', password: 'secret')),
             'pgsql' => (new PostgreSQLDriver($factory, new PostgreSQLPlatform))->connect(new ConnectionParameters(host: 'postgres', port: 5432, database: 'sqlcraft_test', username: 'sqlcraft', password: 'secret')),
-            default => throw new \InvalidArgumentException('Unknown engine: '.$engine),
+            default => throw new \InvalidArgumentException('Unknown engine: ' . $engine),
         };
     }
 

@@ -44,10 +44,10 @@ final class SchemaManagerEngineIntegrationTest extends TestCase
         $connection = $this->connect($platformName, $host, $database, $username, $password);
         $users = $platformName === 'pgsql' ? '"public"."users"' : ($platformName === 'mysql' || $platformName === 'mariadb' ? '`sqlcraft_test`.`users`' : '"users"');
         $orders = $platformName === 'pgsql' ? '"public"."orders"' : ($platformName === 'mysql' || $platformName === 'mariadb' ? '`sqlcraft_test`.`orders`' : '"orders"');
-        $connection->execute('DROP TABLE IF EXISTS '.$orders);
-        $connection->execute('DROP TABLE IF EXISTS '.$users);
-        $connection->execute('CREATE TABLE '.$users.' (id INTEGER PRIMARY KEY, email VARCHAR(255) NOT NULL UNIQUE)');
-        $connection->execute('CREATE TABLE '.$orders.' (id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL, CONSTRAINT orders_user_fk FOREIGN KEY (user_id) REFERENCES users(id))');
+        $connection->execute('DROP TABLE IF EXISTS ' . $orders);
+        $connection->execute('DROP TABLE IF EXISTS ' . $users);
+        $connection->execute('CREATE TABLE ' . $users . ' (id INTEGER PRIMARY KEY, email VARCHAR(255) NOT NULL UNIQUE)');
+        $connection->execute('CREATE TABLE ' . $orders . ' (id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL, CONSTRAINT orders_user_fk FOREIGN KEY (user_id) REFERENCES users(id))');
 
         try {
             $manager = SchemaManagerFactory::forConnection($connection);
@@ -60,8 +60,8 @@ final class SchemaManagerEngineIntegrationTest extends TestCase
             self::assertSame('user_id', $structure->columns->get('user_id')->name);
             self::assertNotEmpty($structure->foreignKeys);
         } finally {
-            $connection->execute('DROP TABLE '.$orders);
-            $connection->execute('DROP TABLE '.$users);
+            $connection->execute('DROP TABLE ' . $orders);
+            $connection->execute('DROP TABLE ' . $users);
         }
     }
 
@@ -74,7 +74,7 @@ final class SchemaManagerEngineIntegrationTest extends TestCase
             'mysql' => (new MySQLDriver($factory, new MySQLPlatform))->connect($parameters),
             'mariadb' => (new MySQLDriver($factory, new MariaDbPlatform))->connect($parameters),
             'pgsql' => (new PostgreSQLDriver($factory, new PostgreSQLPlatform))->connect($parameters),
-            default => throw new \InvalidArgumentException('Unknown engine: '.$platformName),
+            default => throw new \InvalidArgumentException('Unknown engine: ' . $platformName),
         };
     }
 }

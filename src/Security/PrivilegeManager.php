@@ -19,13 +19,13 @@ final readonly class PrivilegeManager implements PrivilegeManagerInterface
     #[\Override]
     public function grant(Privilege $privilege, QualifiedName $object, string $grantee): void
     {
-        $this->execute('GRANT '.$privilege->name.' ON '.$this->object($object).' TO '.$this->connection->quoteValue($grantee));
+        $this->execute('GRANT ' . $privilege->name . ' ON ' . $this->object($object) . ' TO ' . $this->connection->quoteValue($grantee));
     }
 
     #[\Override]
     public function revoke(Privilege $privilege, QualifiedName $object, string $grantee): void
     {
-        $this->execute('REVOKE '.$privilege->name.' ON '.$this->object($object).' FROM '.$this->connection->quoteValue($grantee));
+        $this->execute('REVOKE ' . $privilege->name . ' ON ' . $this->object($object) . ' FROM ' . $this->connection->quoteValue($grantee));
     }
 
     private function execute(string $sql): void

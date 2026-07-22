@@ -66,7 +66,7 @@ final class SqliteTableRecreationIntegrationTest extends TestCase
         self::assertNotFalse($path);
 
         try {
-            $pdo = new PDO('sqlite:'.$path);
+            $pdo = new PDO('sqlite:' . $path);
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $connection = new PdoConnection($pdo, new SqlitePlatform, new PdoExceptionTranslator, databaseName: 'main');
             $connection->execute('CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT NOT NULL)');

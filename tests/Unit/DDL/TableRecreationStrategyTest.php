@@ -61,7 +61,7 @@ final class TableRecreationStrategyTest extends TestCase
     {
         $connection = self::createMock(ConnectionInterface::class);
         $connection->method('getPlatform')->willReturn(new SqlitePlatform);
-        $connection->method('quoteIdentifier')->willReturnCallback(static fn (string $name): string => '"'.$name.'"');
+        $connection->method('quoteIdentifier')->willReturnCallback(static fn (string $name): string => '"' . $name . '"');
         $connection->method('execute')->willReturnCallback(function (string $sql) use (&$executed): ExecutionResult {
             $executed[] = $sql;
 

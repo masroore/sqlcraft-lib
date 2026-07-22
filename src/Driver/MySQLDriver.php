@@ -21,13 +21,13 @@ final class MySQLDriver implements DriverInterface
     public function buildDsn(ConnectionParameters $params): string
     {
         $dsn = $params->socket === null
-            ? 'mysql:host='.($params->host ?? '127.0.0.1').';port='.($params->port ?? 3306)
-            : 'mysql:unix_socket='.$params->socket;
+            ? 'mysql:host=' . ($params->host ?? '127.0.0.1') . ';port=' . ($params->port ?? 3306)
+            : 'mysql:unix_socket=' . $params->socket;
         if ($params->database !== null) {
-            $dsn .= ';dbname='.$params->database;
+            $dsn .= ';dbname=' . $params->database;
         }
         if ($params->charset !== null) {
-            $dsn .= ';charset='.$params->charset;
+            $dsn .= ';charset=' . $params->charset;
         }
 
         return $dsn;

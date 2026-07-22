@@ -21,7 +21,7 @@ final readonly class Psr6MetadataCache implements MetadataCacheInterface
     {
         /** @var callable(string): object $getItem */
         $getItem = [$this->pool, 'getItem'];
-        $item = $getItem($this->prefix.$key);
+        $item = $getItem($this->prefix . $key);
         if (method_exists($item, 'isHit') && $item->isHit() && method_exists($item, 'get')) {
             /** @psalm-suppress MixedReturnStatement */
             return $item->get();

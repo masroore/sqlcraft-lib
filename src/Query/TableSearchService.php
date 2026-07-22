@@ -34,8 +34,8 @@ final readonly class TableSearchService
             if ($text === []) {
                 continue;
             }
-            $where = implode(' OR ', array_map(fn (string $column): string => $connection->quoteIdentifier($column).' LIKE ?', $text));
-            $rows = $this->executor->query($connection, 'SELECT * FROM '.$connection->quoteIdentifier($table->name).' WHERE '.$where.' LIMIT '.$this->rowCap, array_fill(0, count($text), '%'.$term.'%'), buffered: true)->fetchAll();
+            $where = implode(' OR ', array_map(fn (string $column): string => $connection->quoteIdentifier($column) . ' LIKE ?', $text));
+            $rows = $this->executor->query($connection, 'SELECT * FROM ' . $connection->quoteIdentifier($table->name) . ' WHERE ' . $where . ' LIMIT ' . $this->rowCap, array_fill(0, count($text), '%' . $term . '%'), buffered: true)->fetchAll();
             if ($rows !== []) {
                 $results[] = ['table' => $table->name, 'rows' => $rows];
             }

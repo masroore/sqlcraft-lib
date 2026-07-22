@@ -58,17 +58,17 @@ final readonly class TableRecreationStrategy
             $columnList = implode(', ', $columns);
             $this->executeSql(
                 $connection,
-                'INSERT INTO '.$connection->quoteIdentifier($temporary->object->name)
-                .' ('.$columnList.') SELECT '.$columnList
-                .' FROM '.$connection->quoteIdentifier($original->object->name),
+                'INSERT INTO ' . $connection->quoteIdentifier($temporary->object->name)
+                . ' (' . $columnList . ') SELECT ' . $columnList
+                . ' FROM ' . $connection->quoteIdentifier($original->object->name),
                 $original->object->name,
             );
 
             $this->executeBuilder($connection, new DropTableBuilder($original));
             $this->executeSql(
                 $connection,
-                'ALTER TABLE '.$connection->quoteIdentifier($temporary->object->name)
-                .' RENAME TO '.$connection->quoteIdentifier($original->object->name),
+                'ALTER TABLE ' . $connection->quoteIdentifier($temporary->object->name)
+                . ' RENAME TO ' . $connection->quoteIdentifier($original->object->name),
                 $original->object->name,
             );
 
@@ -116,7 +116,7 @@ final readonly class TableRecreationStrategy
 
     private function temporaryName(QualifiedName $original): Identifier
     {
-        return new Identifier('_sqlcraft_recreate_'.$original->object->name.'_'.bin2hex(random_bytes(4)));
+        return new Identifier('_sqlcraft_recreate_' . $original->object->name . '_' . bin2hex(random_bytes(4)));
     }
 
     private function finalDefinition(TableRecreationDefinitionInterface $definition, AlterTableBuilder $builder): TableRecreationDefinition

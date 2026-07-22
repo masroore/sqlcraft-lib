@@ -20,7 +20,7 @@ final readonly class DeleteQueryRenderer
         }
         $parts[] = $this->platform->quoteIdentifier($query->table->object);
 
-        $sql = 'DELETE FROM '.implode('.', $parts);
+        $sql = 'DELETE FROM ' . implode('.', $parts);
         $params = [];
         $where = [];
         $renderer = new WhereConditionRenderer($this->platform);
@@ -33,10 +33,10 @@ final readonly class DeleteQueryRenderer
             }
         }
         if ($where !== []) {
-            $sql .= ' WHERE '.implode(' AND ', $where);
+            $sql .= ' WHERE ' . implode(' AND ', $where);
         }
         if ($query->limit !== null) {
-            $sql .= ' LIMIT '.$query->limit;
+            $sql .= ' LIMIT ' . $query->limit;
         }
 
         return ['sql' => $sql, 'params' => $params];

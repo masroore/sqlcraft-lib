@@ -20,7 +20,7 @@ final class SqliteDriver implements DriverInterface
     #[\Override]
     public function buildDsn(ConnectionParameters $params): string
     {
-        return 'sqlite:'.($params->database ?? ':memory:');
+        return 'sqlite:' . ($params->database ?? ':memory:');
     }
 
     #[\Override]

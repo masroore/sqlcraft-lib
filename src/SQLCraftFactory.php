@@ -113,7 +113,7 @@ final class SQLCraftFactory
         if ($parameters->driver === null) {
             throw new \InvalidArgumentException(
                 'ConnectionParameters::$driver must be set when using SQLCraftFactory::session(). '
-                .'Pass a DatabaseDriver enum case, e.g. driver: DatabaseDriver::SQLite.'
+                . 'Pass a DatabaseDriver enum case, e.g. driver: DatabaseDriver::SQLite.'
             );
         }
         $connection = $this->drivers->getByDriver($parameters->driver)->connect($parameters);

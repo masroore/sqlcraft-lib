@@ -29,11 +29,11 @@ final class FormatWriterTest extends TestCase
         $columns = $this->columns();
         $options = new DumpOptions('sql', DumpScope::table('shop', 'orders'), tableStyle: TableSectionStyle::DropCreate);
         $connection = self::createMock(ConnectionInterface::class);
-        $connection->method('quoteIdentifier')->willReturnCallback(static fn (string $name): string => '"'.$name.'"');
+        $connection->method('quoteIdentifier')->willReturnCallback(static fn (string $name): string => '"' . $name . '"');
         $connection->method('quoteValue')->willReturnCallback(static fn (mixed $value): string => match (true) {
             $value === null => 'NULL',
             is_int($value), is_float($value) => (string) $value,
-            is_string($value) => "'".str_replace("'", "''", $value)."'",
+            is_string($value) => "'" . str_replace("'", "''", $value) . "'",
             default => throw new \InvalidArgumentException,
         });
         $connection->method('getPlatform')->willReturn(new SqlitePlatform);
@@ -51,12 +51,12 @@ final class FormatWriterTest extends TestCase
 
         self::assertSame(
             "-- SQLCraft dump\n\n"
-            ."-- Table: orders\n"
-            ."DROP TABLE IF EXISTS \"shop\".\"orders\";\n"
-            ."CREATE TABLE \"orders\" (\"id\" INTEGER);\n"
-            .'INSERT INTO "shop"."orders" ("id", "name", "payload") VALUES '
-            ."(1, 'O''Reilly', X'0001'), (2, '', NULL);\n\n"
-            ."-- End SQLCraft dump\n",
+            . "-- Table: orders\n"
+            . "DROP TABLE IF EXISTS \"shop\".\"orders\";\n"
+            . "CREATE TABLE \"orders\" (\"id\" INTEGER);\n"
+            . 'INSERT INTO "shop"."orders" ("id", "name", "payload") VALUES '
+            . "(1, 'O''Reilly', X'0001'), (2, '', NULL);\n\n"
+            . "-- End SQLCraft dump\n",
             $sink->contents(),
         );
     }
@@ -79,8 +79,8 @@ final class FormatWriterTest extends TestCase
 
         self::assertSame(
             "id,name,payload\r\n"
-            ."1,\"A, \"\"quoted\"\"\nname\",AQI=\r\n"
-            ."2,\\N,\\N\r\n",
+            . "1,\"A, \"\"quoted\"\"\nname\",AQI=\r\n"
+            . "2,\\N,\\N\r\n",
             $sink->contents(),
         );
     }

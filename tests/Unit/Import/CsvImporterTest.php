@@ -25,7 +25,7 @@ final class CsvImporterTest extends TestCase
     public function test_maps_known_columns_nulls_and_binary_values_into_one_prepared_batch(): void
     {
         $connection = self::createMock(ConnectionInterface::class);
-        $connection->method('quoteIdentifier')->willReturnCallback(static fn (string $name): string => '"'.$name.'"');
+        $connection->method('quoteIdentifier')->willReturnCallback(static fn (string $name): string => '"' . $name . '"');
         $connection->method('getPlatformName')->willReturn('sqlite');
         $statement = self::createMock(PreparedStatementInterface::class);
         $statement->expects(self::once())->method('execute')->with([
@@ -65,7 +65,7 @@ final class CsvImporterTest extends TestCase
     public function test_maps_replace_mode_for_sqlite_and_validates_options(): void
     {
         $connection = self::createMock(ConnectionInterface::class);
-        $connection->method('quoteIdentifier')->willReturnCallback(static fn (string $name): string => '"'.$name.'"');
+        $connection->method('quoteIdentifier')->willReturnCallback(static fn (string $name): string => '"' . $name . '"');
         $connection->method('getPlatformName')->willReturn('sqlite');
         $statement = self::createMock(PreparedStatementInterface::class);
         $statement->method('execute')->willReturn(new ExecutionResult(1, '', 0.0, 'INSERT'));

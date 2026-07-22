@@ -17,7 +17,7 @@ final class SeamLivenessTest extends TestCase
 
         foreach (['invalidateTable', 'invalidateDatabase', 'clear'] as $method) {
             self::assertStringContainsString(
-                '->'.$method.'(',
+                '->' . $method . '(',
                 $source,
                 sprintf('Metadata cache method %s has no caller.', $method),
             );
@@ -37,7 +37,7 @@ final class SeamLivenessTest extends TestCase
             }
 
             self::assertStringContainsString(
-                '->'.$property->getName(),
+                '->' . $property->getName(),
                 $exportSource,
                 sprintf('DumpOptions flag %s has no export consumer.', $property->getName()),
             );
@@ -46,21 +46,21 @@ final class SeamLivenessTest extends TestCase
 
     public function test_every_concrete_event_is_constructed_by_an_application_path(): void
     {
-        $eventDirectory = dirname(__DIR__, 3).'/src/Events';
+        $eventDirectory = dirname(__DIR__, 3) . '/src/Events';
         $source = $this->source('src', except: []);
 
-        $eventFiles = glob($eventDirectory.'/*.php');
+        $eventFiles = glob($eventDirectory . '/*.php');
         foreach ($eventFiles === false ? [] : $eventFiles as $file) {
             $class = basename($file, '.php');
             /** @var class-string $eventClass */
-            $eventClass = 'SQLCraft\\Events\\'.$class;
+            $eventClass = 'SQLCraft\\Events\\' . $class;
             $reflection = new \ReflectionClass($eventClass);
             if ($reflection->isAbstract() || $reflection->isInterface() || str_ends_with($class, 'Dispatcher')) {
                 continue;
             }
 
             self::assertStringContainsString(
-                'new '.$class.'(',
+                'new ' . $class . '(',
                 $source,
                 sprintf('Event %s has no construction/dispatch path.', $class),
             );
@@ -71,7 +71,7 @@ final class SeamLivenessTest extends TestCase
     {
         $enumCases = array_fill_keys(array_map(static fn (Capability $case): string => $case->name, Capability::cases()), true);
 
-        $platformFiles = glob(dirname(__DIR__, 3).'/src/Platform/*Platform.php');
+        $platformFiles = glob(dirname(__DIR__, 3) . '/src/Platform/*Platform.php');
         foreach ($platformFiles === false ? [] : $platformFiles as $file) {
             $platformSource = file_get_contents($file);
             self::assertIsString($platformSource);
@@ -90,7 +90,7 @@ final class SeamLivenessTest extends TestCase
     /** @param list<string> $except */
     private function source(string $relativeDirectory, array $except = []): string
     {
-        $root = dirname(__DIR__, 3).'/'.$relativeDirectory;
+        $root = dirname(__DIR__, 3) . '/' . $relativeDirectory;
         $contents = [];
         $iterator = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator($root, \FilesystemIterator::SKIP_DOTS),

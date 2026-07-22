@@ -53,12 +53,12 @@ final class PdoConnectionIntegrationTest extends TestCase
         }
 
         $this->databasePath = $databasePath;
-        $first = $this->connection('sqlite:'.$databasePath);
+        $first = $this->connection('sqlite:' . $databasePath);
         $first->execute('CREATE TABLE records (value TEXT NOT NULL)');
         $first->execute('INSERT INTO records (value) VALUES (?)', ['persisted']);
         $first->close();
 
-        $second = $this->connection('sqlite:'.$this->databasePath);
+        $second = $this->connection('sqlite:' . $this->databasePath);
         self::assertSame([['value' => 'persisted']], $second->query('SELECT value FROM records')->fetchAll());
     }
 
@@ -94,7 +94,7 @@ final class PdoConnectionIntegrationTest extends TestCase
         $platform = $this->createMock(PlatformInterface::class);
         $platform->method('getName')->willReturn('sqlite');
         $platform->method('quoteIdentifier')->willReturnCallback(
-            static fn (Identifier $identifier): string => '"'.$identifier->name.'"',
+            static fn (Identifier $identifier): string => '"' . $identifier->name . '"',
         );
         $platform->method('quoteValue')->willReturn('quoted');
 

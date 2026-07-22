@@ -56,21 +56,21 @@ final class SqlServerIntegrationTest extends TestCase
     {
         $connection = $this->connection();
         $quoted = '[dbo].[sqlcraft_platform_fixture]';
-        $connection->execute('IF OBJECT_ID(N\'dbo.sqlcraft_platform_fixture\', N\'U\') IS NOT NULL DROP TABLE '.$quoted);
-        $connection->execute('CREATE TABLE '.$quoted.' ([id] INT IDENTITY(1,1) NOT NULL PRIMARY KEY, [value] NVARCHAR(100) NOT NULL)');
+        $connection->execute('IF OBJECT_ID(N\'dbo.sqlcraft_platform_fixture\', N\'U\') IS NOT NULL DROP TABLE ' . $quoted);
+        $connection->execute('CREATE TABLE ' . $quoted . ' ([id] INT IDENTITY(1,1) NOT NULL PRIMARY KEY, [value] NVARCHAR(100) NOT NULL)');
 
         try {
             for ($id = 1; $id <= 5; $id++) {
-                $connection->execute('INSERT INTO '.$quoted.' ([value]) VALUES (?)', ['row-'.$id]);
+                $connection->execute('INSERT INTO ' . $quoted . ' ([value]) VALUES (?)', ['row-' . $id]);
             }
 
-            $sql = $connection->getPlatform()->applyPagination('SELECT [id], [value] FROM '.$quoted.' ORDER BY [id]', 2, 2);
+            $sql = $connection->getPlatform()->applyPagination('SELECT [id], [value] FROM ' . $quoted . ' ORDER BY [id]', 2, 2);
             self::assertSame(
                 [['id' => 3, 'value' => 'row-3'], ['id' => 4, 'value' => 'row-4']],
                 $connection->query($sql)->fetchAll(),
             );
         } finally {
-            $connection->execute('DROP TABLE '.$quoted);
+            $connection->execute('DROP TABLE ' . $quoted);
         }
     }
 

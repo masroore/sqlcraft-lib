@@ -41,7 +41,7 @@ final class IntrospectionSqlGoldenTest extends TestCase
             catalog: new Identifier($database),
         );
         $snapshot = $this->snapshot($platform, $database, $schema, $table);
-        $expected = file_get_contents(__DIR__.'/fixtures/'.$fixture.'-introspection.sql');
+        $expected = file_get_contents(__DIR__ . '/fixtures/' . $fixture . '-introspection.sql');
 
         self::assertIsString($expected);
         self::assertSame($expected, $snapshot);
@@ -53,7 +53,7 @@ final class IntrospectionSqlGoldenTest extends TestCase
         try {
             return $operation();
         } catch (CapabilityNotSupportedException $exception) {
-            return 'UNSUPPORTED: '.$exception->getMessage();
+            return 'UNSUPPORTED: ' . $exception->getMessage();
         }
     }
 
@@ -80,7 +80,7 @@ final class IntrospectionSqlGoldenTest extends TestCase
         ];
 
         return implode('', array_map(
-            static fn (string $method, string $query): string => $method.': '.$query."\n",
+            static fn (string $method, string $query): string => $method . ': ' . $query . "\n",
             array_keys($sql),
             $sql,
         ));

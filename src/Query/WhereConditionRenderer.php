@@ -24,7 +24,7 @@ final readonly class WhereConditionRenderer
 
         $column = $this->platform->quoteIdentifier($condition->column);
         if (in_array($condition->operator, ['IS NULL', 'IS NOT NULL'], true)) {
-            return [$column.' '.$condition->operator, []];
+            return [$column . ' ' . $condition->operator, []];
         }
         if (in_array($condition->operator, ['IN', 'NOT IN'], true)) {
             if (! is_array($condition->value) || $condition->value === []) {
@@ -35,7 +35,7 @@ final readonly class WhereConditionRenderer
             $values = array_values($condition->value);
 
             return [
-                $column.' '.$condition->operator.' ('.implode(', ', array_fill(0, count($values), '?')).')',
+                $column . ' ' . $condition->operator . ' (' . implode(', ', array_fill(0, count($values), '?')) . ')',
                 $values,
             ];
         }
@@ -47,9 +47,9 @@ final readonly class WhereConditionRenderer
             /** @var list<mixed> $values */
             $values = array_values($condition->value);
 
-            return [$column.' '.$condition->operator.' ? AND ?', $values];
+            return [$column . ' ' . $condition->operator . ' ? AND ?', $values];
         }
 
-        return [$column.' '.$condition->operator.' ?', [$condition->value]];
+        return [$column . ' ' . $condition->operator . ' ?', [$condition->value]];
     }
 }

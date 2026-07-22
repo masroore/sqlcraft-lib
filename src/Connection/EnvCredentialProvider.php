@@ -15,8 +15,8 @@ final readonly class EnvCredentialProvider implements CredentialProviderInterfac
     public function resolve(string $key): Credential
     {
         $name = strtoupper(preg_replace('/[^A-Z0-9]+/i', '_', $key) ?? $key);
-        $username = getenv($this->prefix.$name.'_USERNAME');
-        $password = getenv($this->prefix.$name.'_PASSWORD');
+        $username = getenv($this->prefix . $name . '_USERNAME');
+        $password = getenv($this->prefix . $name . '_PASSWORD');
 
         return new Credential(
             $username === false ? null : $username,

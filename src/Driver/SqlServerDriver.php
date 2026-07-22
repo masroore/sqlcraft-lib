@@ -22,15 +22,15 @@ final class SqlServerDriver implements DriverInterface
     {
         $server = $params->socket ?? $params->host ?? '127.0.0.1';
         if ($params->port !== null) {
-            $server .= ','.$params->port;
+            $server .= ',' . $params->port;
         }
 
-        $dsn = 'sqlsrv:Server='.$server;
+        $dsn = 'sqlsrv:Server=' . $server;
         if ($params->database !== null) {
-            $dsn .= ';Database='.$params->database;
+            $dsn .= ';Database=' . $params->database;
         }
 
-        return $dsn.';TrustServerCertificate=Yes';
+        return $dsn . ';TrustServerCertificate=Yes';
     }
 
     #[\Override]

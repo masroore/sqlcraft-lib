@@ -27,7 +27,7 @@ final class PdoConnectionTest extends TestCase
         $platform = $this->createMock(PlatformInterface::class);
         $platform->method('getName')->willReturn('sqlite');
         $platform->method('quoteIdentifier')->willReturnCallback(
-            static fn (Identifier $identifier): string => '"'.$identifier->name.'"',
+            static fn (Identifier $identifier): string => '"' . $identifier->name . '"',
         );
         $platform->method('quoteValue')->willReturn('quoted');
 

@@ -77,7 +77,7 @@ final class SelectQueryTest extends TestCase
     {
         $platform = self::createMock(PlatformInterface::class);
         $platform->method('getSupportedAggregateFunctions')->willReturn(['COUNT']);
-        $platform->method('quoteIdentifier')->willReturnCallback(static fn (Identifier $identifier): string => '"'.$identifier->name.'"');
+        $platform->method('quoteIdentifier')->willReturnCallback(static fn (Identifier $identifier): string => '"' . $identifier->name . '"');
         $platform->method('getOperators')->willReturn(['=']);
         $platform->method('getName')->willReturn('test');
         $query = new SelectQuery(new QualifiedName(new Identifier('users')), [new ColumnSelection(new Identifier('id'), 'SUM')]);

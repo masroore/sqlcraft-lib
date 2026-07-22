@@ -13,7 +13,7 @@ final readonly class Psr7StreamImportSource implements ImportSourceInterface
     {
         foreach (['rewind', 'read', 'eof'] as $method) {
             if (! method_exists($stream, $method)) {
-                throw new InvalidArgumentException('PSR-7 stream is missing '.$method.'().');
+                throw new InvalidArgumentException('PSR-7 stream is missing ' . $method . '().');
             }
         }
     }

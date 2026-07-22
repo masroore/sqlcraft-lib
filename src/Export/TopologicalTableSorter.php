@@ -63,6 +63,6 @@ final class TopologicalTableSorter
 
     private function normalize(string $table, ?string $schema): string
     {
-        return strtolower(($schema === null ? '' : $schema.'.').$table);
+        return strtolower(($schema === null ? '' : $schema . '.') . $table);
     }
 }

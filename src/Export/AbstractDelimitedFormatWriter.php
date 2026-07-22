@@ -79,16 +79,16 @@ abstract class AbstractDelimitedFormatWriter implements FormatWriterInterface
         return implode($separator, array_map(
             fn (string $value): string => $this->quoteField($value, $separator),
             $values,
-        ))."\r\n";
+        )) . "\r\n";
     }
 
     private function quoteField(string $value, string $separator): string
     {
-        if (strpbrk($value, $separator."\"\r\n") === false) {
+        if (strpbrk($value, $separator . "\"\r\n") === false) {
             return $value;
         }
 
-        return '"'.str_replace('"', '""', $value).'"';
+        return '"' . str_replace('"', '""', $value) . '"';
     }
 
     private function renderValue(mixed $value, ColumnMeta $column, string $nullRepresentation): string

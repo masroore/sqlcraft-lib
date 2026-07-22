@@ -35,7 +35,7 @@ final class SqlServerPlatform extends AbstractPlatform
     #[\Override]
     public function getExplainSql(string $sql, bool $analyze = false): string
     {
-        return 'SET SHOWPLAN_ALL ON; '.$sql.'; SET SHOWPLAN_ALL OFF';
+        return 'SET SHOWPLAN_ALL ON; ' . $sql . '; SET SHOWPLAN_ALL OFF';
     }
 
     #[\Override]
@@ -134,7 +134,7 @@ final class SqlServerPlatform extends AbstractPlatform
     #[\Override]
     public function quoteIdentifier(Identifier $identifier): string
     {
-        return '['.str_replace(']', ']]', $identifier->name).']';
+        return '[' . str_replace(']', ']]', $identifier->name) . ']';
     }
 
     #[\Override]
@@ -144,7 +144,7 @@ final class SqlServerPlatform extends AbstractPlatform
             $value === null => 'NULL',
             is_bool($value) => $value ? '1' : '0',
             is_int($value), is_float($value) => (string) $value,
-            is_string($value) => "'".str_replace(['\\', "'"], ['\\\\', "''"], $value)."'",
+            is_string($value) => "'" . str_replace(['\\', "'"], ['\\\\', "''"], $value) . "'",
             default => throw new InvalidArgumentException('SQL Server values must be scalar or null.'),
         };
     }
@@ -152,7 +152,7 @@ final class SqlServerPlatform extends AbstractPlatform
     #[\Override]
     public function quoteBinary(string $bytes): string
     {
-        return '0x'.bin2hex($bytes);
+        return '0x' . bin2hex($bytes);
     }
 
     #[\Override]
@@ -174,13 +174,13 @@ final class SqlServerPlatform extends AbstractPlatform
             throw new InvalidArgumentException('Pagination values must not be negative.');
         }
 
-        return $sql.' OFFSET '.$offset.' ROWS FETCH NEXT '.$limit.' ROWS ONLY';
+        return $sql . ' OFFSET ' . $offset . ' ROWS FETCH NEXT ' . $limit . ' ROWS ONLY';
     }
 
     #[\Override]
     public function applySingleRowLimit(string $sql, string $whereClause): string
     {
-        return 'SELECT TOP 1 * FROM ('.$sql.($whereClause === '' ? '' : ' '.$whereClause).') AS [sqlcraft_single_row]';
+        return 'SELECT TOP 1 * FROM (' . $sql . ($whereClause === '' ? '' : ' ' . $whereClause) . ') AS [sqlcraft_single_row]';
     }
 
     #[\Override]
@@ -239,14 +239,14 @@ final class SqlServerPlatform extends AbstractPlatform
     #[\Override]
     public function renderDropSequenceStatement(Identifier $name, bool $ifExists): string
     {
-        return 'DROP SEQUENCE'.($ifExists ? ' IF EXISTS' : '').' '.$this->quoteIdentifier($name);
+        return 'DROP SEQUENCE' . ($ifExists ? ' IF EXISTS' : '') . ' ' . $this->quoteIdentifier($name);
     }
 
     #[\Override]
     public function renderColumnDefinition(ColumnMeta $column): string
     {
         $dataType = $column->dataType;
-        $definition = $this->quoteIdentifier(new Identifier($column->name)).' '.$this->renderDataType($dataType);
+        $definition = $this->quoteIdentifier(new Identifier($column->name)) . ' ' . $this->renderDataType($dataType);
         if (! $column->nullable) {
             $definition .= ' NOT NULL';
         }
@@ -255,7 +255,7 @@ final class SqlServerPlatform extends AbstractPlatform
             if ($defaultValue === null) {
                 throw new InvalidArgumentException('Non-NULL column defaults require a value.');
             }
-            $definition .= ' DEFAULT '.($column->default->kind === DefaultValueKind::EXPRESSION
+            $definition .= ' DEFAULT ' . ($column->default->kind === DefaultValueKind::EXPRESSION
                 ? $defaultValue
                 : $this->quoteValue($defaultValue));
         }
@@ -269,24 +269,24 @@ final class SqlServerPlatform extends AbstractPlatform
     #[\Override]
     public function renderPrimaryKeyClause(IndexMeta $index): string
     {
-        return 'PRIMARY KEY ('.$this->indexColumns($index).')';
+        return 'PRIMARY KEY (' . $this->indexColumns($index) . ')';
     }
 
     #[\Override]
     public function renderForeignKeyClause(ForeignKeyMeta $foreignKey): string
     {
-        return 'CONSTRAINT '.$this->quoteIdentifier(new Identifier($foreignKey->constraintName))
-            .' FOREIGN KEY ('.$this->quoteList($foreignKey->sourceColumns).')'
-            .' REFERENCES '.$this->quoteQualifiedParts($foreignKey->targetDatabase, $foreignKey->targetSchema, $foreignKey->targetTable)
-            .' ('.$this->quoteList($foreignKey->targetColumns).')'
-            .' ON DELETE '.$foreignKey->onDelete->value
-            .' ON UPDATE '.$foreignKey->onUpdate->value;
+        return 'CONSTRAINT ' . $this->quoteIdentifier(new Identifier($foreignKey->constraintName))
+            . ' FOREIGN KEY (' . $this->quoteList($foreignKey->sourceColumns) . ')'
+            . ' REFERENCES ' . $this->quoteQualifiedParts($foreignKey->targetDatabase, $foreignKey->targetSchema, $foreignKey->targetTable)
+            . ' (' . $this->quoteList($foreignKey->targetColumns) . ')'
+            . ' ON DELETE ' . $foreignKey->onDelete->value
+            . ' ON UPDATE ' . $foreignKey->onUpdate->value;
     }
 
     #[\Override]
     public function renderCheckConstraintClause(CheckConstraintMeta $check): string
     {
-        return 'CONSTRAINT '.$this->quoteIdentifier(new Identifier($check->name)).' CHECK ('.$check->expression.')';
+        return 'CONSTRAINT ' . $this->quoteIdentifier(new Identifier($check->name)) . ' CHECK (' . $check->expression . ')';
     }
 
     /**
@@ -299,19 +299,19 @@ final class SqlServerPlatform extends AbstractPlatform
     {
         $clauses = [...$columnClauses, ...$constraintClauses];
 
-        return 'CREATE TABLE '.$this->quoteQualifiedName($table).' ('.implode(', ', $clauses).')';
+        return 'CREATE TABLE ' . $this->quoteQualifiedName($table) . ' (' . implode(', ', $clauses) . ')';
     }
 
     #[\Override]
     public function renderAlterTableAddColumn(QualifiedName $table, ColumnMeta $column): string
     {
-        return 'ALTER TABLE '.$this->quoteQualifiedName($table).' ADD '.$this->renderColumnDefinition($column);
+        return 'ALTER TABLE ' . $this->quoteQualifiedName($table) . ' ADD ' . $this->renderColumnDefinition($column);
     }
 
     #[\Override]
     public function renderAlterTableDropColumn(QualifiedName $table, Identifier $column): string
     {
-        return 'ALTER TABLE '.$this->quoteQualifiedName($table).' DROP COLUMN '.$this->quoteIdentifier($column);
+        return 'ALTER TABLE ' . $this->quoteQualifiedName($table) . ' DROP COLUMN ' . $this->quoteIdentifier($column);
     }
 
     #[\Override]
@@ -319,14 +319,14 @@ final class SqlServerPlatform extends AbstractPlatform
     {
         $prefix = $index->unique ? 'UNIQUE ' : '';
 
-        return 'CREATE '.$prefix.'INDEX '.$this->quoteIdentifier(new Identifier($index->name))
-            .' ON '.$this->quoteQualifiedName($table).' ('.$this->indexColumns($index).')';
+        return 'CREATE ' . $prefix . 'INDEX ' . $this->quoteIdentifier(new Identifier($index->name))
+            . ' ON ' . $this->quoteQualifiedName($table) . ' (' . $this->indexColumns($index) . ')';
     }
 
     #[\Override]
     public function renderDropIndexStatement(QualifiedName $table, Identifier $indexName): string
     {
-        return 'DROP INDEX '.$this->quoteIdentifier($indexName).' ON '.$this->quoteQualifiedName($table);
+        return 'DROP INDEX ' . $this->quoteIdentifier($indexName) . ' ON ' . $this->quoteQualifiedName($table);
     }
 
     #[\Override]
@@ -344,19 +344,19 @@ final class SqlServerPlatform extends AbstractPlatform
     #[\Override]
     public function getTypesSql(?string $schema = null): string
     {
-        return 'SELECT DISTINCT DATA_TYPE AS type_name FROM INFORMATION_SCHEMA.COLUMNS'.($schema === null ? '' : ' WHERE TABLE_SCHEMA = '.$this->quoteValue($schema)).' ORDER BY DATA_TYPE';
+        return 'SELECT DISTINCT DATA_TYPE AS type_name FROM INFORMATION_SCHEMA.COLUMNS' . ($schema === null ? '' : ' WHERE TABLE_SCHEMA = ' . $this->quoteValue($schema)) . ' ORDER BY DATA_TYPE';
     }
 
     #[\Override]
     public function getTablesSql(string $database, ?string $schema = null): string
     {
-        return 'SELECT TABLE_NAME AS table_name, TABLE_TYPE AS table_type, TABLE_SCHEMA AS table_schema FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_CATALOG = '.$this->quoteValue($database).($schema === null ? '' : ' AND TABLE_SCHEMA = '.$this->quoteValue($schema)).' ORDER BY TABLE_SCHEMA, TABLE_NAME';
+        return 'SELECT TABLE_NAME AS table_name, TABLE_TYPE AS table_type, TABLE_SCHEMA AS table_schema FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_CATALOG = ' . $this->quoteValue($database) . ($schema === null ? '' : ' AND TABLE_SCHEMA = ' . $this->quoteValue($schema)) . ' ORDER BY TABLE_SCHEMA, TABLE_NAME';
     }
 
     #[\Override]
     public function getTableStatusSql(QualifiedName $table): string
     {
-        return 'SELECT TABLE_NAME AS table_name, TABLE_TYPE AS table_type, TABLE_SCHEMA AS table_schema FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_CATALOG = '.$this->quoteValue($this->databaseName($table)).' AND TABLE_SCHEMA = '.$this->quoteValue($this->schemaName($table)).' AND TABLE_NAME = '.$this->quoteValue($table->object->name);
+        return 'SELECT TABLE_NAME AS table_name, TABLE_TYPE AS table_type, TABLE_SCHEMA AS table_schema FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_CATALOG = ' . $this->quoteValue($this->databaseName($table)) . ' AND TABLE_SCHEMA = ' . $this->quoteValue($this->schemaName($table)) . ' AND TABLE_NAME = ' . $this->quoteValue($table->object->name);
     }
 
     #[\Override]
@@ -375,17 +375,17 @@ final class SqlServerPlatform extends AbstractPlatform
     public function getViewsSql(?string $schema = null): string
     {
         return 'SELECT TABLE_NAME AS view_name, TABLE_SCHEMA AS table_schema, VIEW_DEFINITION AS view_definition, '
-            .'0 AS materialized FROM INFORMATION_SCHEMA.VIEWS'
-            .($schema === null ? '' : ' WHERE TABLE_SCHEMA = '.$this->quoteValue($schema))
-            .' ORDER BY TABLE_SCHEMA, TABLE_NAME';
+            . '0 AS materialized FROM INFORMATION_SCHEMA.VIEWS'
+            . ($schema === null ? '' : ' WHERE TABLE_SCHEMA = ' . $this->quoteValue($schema))
+            . ' ORDER BY TABLE_SCHEMA, TABLE_NAME';
     }
 
     #[\Override]
     public function getViewDefinitionSql(QualifiedName $view): string
     {
         return 'SELECT VIEW_DEFINITION AS definition FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_SCHEMA = '
-            .$this->quoteValue($this->schemaName($view)).' AND TABLE_NAME = '
-            .$this->quoteValue($view->object->name);
+            . $this->quoteValue($this->schemaName($view)) . ' AND TABLE_NAME = '
+            . $this->quoteValue($view->object->name);
     }
 
     #[\Override]
@@ -398,80 +398,80 @@ final class SqlServerPlatform extends AbstractPlatform
     public function getColumnsSql(QualifiedName $table): string
     {
         return 'SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '
-            .$this->quoteValue($this->schemaName($table))
-            .' AND TABLE_NAME = '.$this->quoteValue($table->object->name)
-            .' ORDER BY ORDINAL_POSITION';
+            . $this->quoteValue($this->schemaName($table))
+            . ' AND TABLE_NAME = ' . $this->quoteValue($table->object->name)
+            . ' ORDER BY ORDINAL_POSITION';
     }
 
     #[\Override]
     public function getAllColumnsSql(string $database, ?string $schema = null): string
     {
         return 'SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '
-            .$this->quoteValue($schema ?? $database)
-            .' ORDER BY TABLE_NAME, ORDINAL_POSITION';
+            . $this->quoteValue($schema ?? $database)
+            . ' ORDER BY TABLE_NAME, ORDINAL_POSITION';
     }
 
     #[\Override]
     public function getAllIndexesSql(string $database, ?string $schema = null): string
     {
         return "SELECT i.name AS index_name, i.is_unique AS non_unique, i.type_desc AS index_type, c.name AS column_name, ic.key_ordinal AS seq_in_index, ic.is_descending_key AS descending FROM sys.indexes i JOIN sys.index_columns ic ON ic.object_id = i.object_id AND ic.index_id = i.index_id JOIN sys.columns c ON c.object_id = ic.object_id AND c.column_id = ic.column_id WHERE SCHEMA_NAME(OBJECTPROPERTY(i.object_id, 'SchemaId')) = "
-            .$this->quoteValue($schema ?? $database)
-            .' ORDER BY i.name, ic.key_ordinal';
+            . $this->quoteValue($schema ?? $database)
+            . ' ORDER BY i.name, ic.key_ordinal';
     }
 
     #[\Override]
     public function getAllForeignKeysSql(string $database, ?string $schema = null): string
     {
         return 'SELECT fk.name AS constraint_name, OBJECT_SCHEMA_NAME(fkc.parent_object_id) AS table_schema, OBJECT_NAME(fkc.parent_object_id) AS table_name, COL_NAME(fkc.parent_object_id, fkc.parent_column_id) AS column_name, OBJECT_SCHEMA_NAME(fkc.referenced_object_id) AS referenced_table_schema, OBJECT_NAME(fkc.referenced_object_id) AS referenced_table_name, COL_NAME(fkc.referenced_object_id, fkc.referenced_column_id) AS referenced_column_name FROM sys.foreign_keys fk JOIN sys.foreign_key_columns fkc ON fkc.constraint_object_id = fk.object_id WHERE OBJECT_SCHEMA_NAME(fkc.parent_object_id) = '
-            .$this->quoteValue($schema ?? $database)
-            .' ORDER BY constraint_name';
+            . $this->quoteValue($schema ?? $database)
+            . ' ORDER BY constraint_name';
     }
 
     #[\Override]
     public function getIndexesSql(QualifiedName $table): string
     {
-        return 'SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID('.$this->quoteValue($this->quoteQualifiedName($table)).') ORDER BY name';
+        return 'SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID(' . $this->quoteValue($this->quoteQualifiedName($table)) . ') ORDER BY name';
     }
 
     #[\Override]
     public function getForeignKeysSql(QualifiedName $table): string
     {
         return 'SELECT fk.name AS constraint_name, OBJECT_SCHEMA_NAME(fkc.parent_object_id) AS table_schema, OBJECT_NAME(fkc.parent_object_id) AS table_name, COL_NAME(fkc.parent_object_id, fkc.parent_column_id) AS column_name, OBJECT_SCHEMA_NAME(fkc.referenced_object_id) AS referenced_table_schema, OBJECT_NAME(fkc.referenced_object_id) AS referenced_table_name, COL_NAME(fkc.referenced_object_id, fkc.referenced_column_id) AS referenced_column_name FROM sys.foreign_keys fk JOIN sys.foreign_key_columns fkc ON fkc.constraint_object_id = fk.object_id WHERE OBJECT_SCHEMA_NAME(fkc.parent_object_id) = '
-            .$this->quoteValue($this->schemaName($table))
-            .' AND TABLE_NAME = '.$this->quoteValue($table->object->name)
-            .' AND REFERENCED_TABLE_NAME IS NOT NULL';
+            . $this->quoteValue($this->schemaName($table))
+            . ' AND TABLE_NAME = ' . $this->quoteValue($table->object->name)
+            . ' AND REFERENCED_TABLE_NAME IS NOT NULL';
     }
 
     #[\Override]
     public function getReferencingForeignKeysSql(QualifiedName $table): string
     {
         return 'SELECT * FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE REFERENCED_TABLE_SCHEMA = '
-            .$this->quoteValue($this->schemaName($table))
-            .' AND REFERENCED_TABLE_NAME = '.$this->quoteValue($table->object->name)
-            .' AND REFERENCED_COLUMN_NAME IS NOT NULL';
+            . $this->quoteValue($this->schemaName($table))
+            . ' AND REFERENCED_TABLE_NAME = ' . $this->quoteValue($table->object->name)
+            . ' AND REFERENCED_COLUMN_NAME IS NOT NULL';
     }
 
     #[\Override]
     public function getTriggersSql(QualifiedName $table): string
     {
-        return 'SELECT * FROM INFORMATION_SCHEMA.TRIGGERS WHERE EVENT_OBJECT_SCHEMA = '.$this->quoteValue($this->schemaName($table)).' AND EVENT_OBJECT_TABLE = '.$this->quoteValue($table->object->name);
+        return 'SELECT * FROM INFORMATION_SCHEMA.TRIGGERS WHERE EVENT_OBJECT_SCHEMA = ' . $this->quoteValue($this->schemaName($table)) . ' AND EVENT_OBJECT_TABLE = ' . $this->quoteValue($table->object->name);
     }
 
     #[\Override]
     public function getRoutineDetailSql(QualifiedName $routine): string
     {
         return 'SELECT * FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_SCHEMA = '
-            .$this->quoteValue($this->schemaName($routine)).' AND ROUTINE_NAME = '
-            .$this->quoteValue($routine->object->name);
+            . $this->quoteValue($this->schemaName($routine)) . ' AND ROUTINE_NAME = '
+            . $this->quoteValue($routine->object->name);
     }
 
     #[\Override]
     public function getCheckConstraintsSql(QualifiedName $table): string
     {
         return 'SELECT CONSTRAINT_NAME AS constraint_name, CHECK_CLAUSE AS check_clause, 0 AS not_enforced '
-            .'FROM INFORMATION_SCHEMA.CHECK_CONSTRAINTS WHERE CONSTRAINT_SCHEMA = '
-            .$this->quoteValue($this->schemaName($table)).' AND TABLE_NAME = '
-            .$this->quoteValue($table->object->name);
+            . 'FROM INFORMATION_SCHEMA.CHECK_CONSTRAINTS WHERE CONSTRAINT_SCHEMA = '
+            . $this->quoteValue($this->schemaName($table)) . ' AND TABLE_NAME = '
+            . $this->quoteValue($table->object->name);
     }
 
     #[\Override]
@@ -484,18 +484,18 @@ final class SqlServerPlatform extends AbstractPlatform
     public function getRoutinesSql(?string $schema = null): string
     {
         return 'SELECT * FROM INFORMATION_SCHEMA.ROUTINES'
-            .($schema === null ? '' : ' WHERE ROUTINE_SCHEMA = '.$this->quoteValue($schema));
+            . ($schema === null ? '' : ' WHERE ROUTINE_SCHEMA = ' . $this->quoteValue($schema));
     }
 
     #[\Override]
     public function getSequencesSql(?string $schema = null): string
     {
         return 'SELECT s.name AS sequence_name, SCHEMA_NAME(s.schema_id) AS sequence_schema, '
-            .'s.start_value AS start_value, s.minimum_value AS minimum_value, s.maximum_value AS maximum_value, '
-            .'s.increment AS increment, s.is_cycling AS cycle, s.cache_size AS cache '
-            .'FROM sys.sequences s'
-            .($schema === null ? '' : ' WHERE SCHEMA_NAME(s.schema_id) = '.$this->quoteValue($schema))
-            .' ORDER BY sequence_schema, sequence_name';
+            . 's.start_value AS start_value, s.minimum_value AS minimum_value, s.maximum_value AS maximum_value, '
+            . 's.increment AS increment, s.is_cycling AS cycle, s.cache_size AS cache '
+            . 'FROM sys.sequences s'
+            . ($schema === null ? '' : ' WHERE SCHEMA_NAME(s.schema_id) = ' . $this->quoteValue($schema))
+            . ' ORDER BY sequence_schema, sequence_name';
     }
 
     #[\Override]
@@ -549,9 +549,9 @@ final class SqlServerPlatform extends AbstractPlatform
     {
         $type = strtoupper($dataType->name);
         if ($dataType->length !== null) {
-            $type .= '('.($dataType->length < 0 ? 'MAX' : $dataType->length).')';
+            $type .= '(' . ($dataType->length < 0 ? 'MAX' : $dataType->length) . ')';
         } elseif ($dataType->precision !== null) {
-            $type .= '('.$dataType->precision.($dataType->scale === null ? '' : ', '.$dataType->scale).')';
+            $type .= '(' . $dataType->precision . ($dataType->scale === null ? '' : ', ' . $dataType->scale) . ')';
         }
 
         return $type;
@@ -593,7 +593,7 @@ final class SqlServerPlatform extends AbstractPlatform
     {
         return implode(', ', array_map(
             fn (IndexColumnMeta $column): string => $column->expression
-                ?? $this->quoteIdentifier(new Identifier($column->columnName)).($column->descending ? ' DESC' : ' ASC'),
+                ?? $this->quoteIdentifier(new Identifier($column->columnName)) . ($column->descending ? ' DESC' : ' ASC'),
             $index->columns,
         ));
     }

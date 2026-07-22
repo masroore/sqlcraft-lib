@@ -68,7 +68,7 @@ final readonly class ExportSource implements ExportSourceInterface, ForeignKeyEx
         $columns = $this->getColumns($connection, $table, $schema);
         $definitions = [];
         foreach ($columns as $column) {
-            $definition = $connection->quoteIdentifier($column->name).' '.$column->dataType->name;
+            $definition = $connection->quoteIdentifier($column->name) . ' ' . $column->dataType->name;
             if (! $column->nullable) {
                 $definition .= ' NOT NULL';
             }
@@ -80,9 +80,9 @@ final readonly class ExportSource implements ExportSourceInterface, ForeignKeyEx
 
         $qualified = $schema === null
             ? $connection->quoteIdentifier($table)
-            : $connection->quoteIdentifier($schema).'.'.$connection->quoteIdentifier($table);
+            : $connection->quoteIdentifier($schema) . '.' . $connection->quoteIdentifier($table);
 
-        return ['CREATE TABLE '.$qualified.' ('.implode(', ', $definitions).')'];
+        return ['CREATE TABLE ' . $qualified . ' (' . implode(', ', $definitions) . ')'];
     }
 
     #[\Override]
@@ -105,10 +105,10 @@ final readonly class ExportSource implements ExportSourceInterface, ForeignKeyEx
 
         $definitions = [];
         foreach ($this->triggers->getTriggers($connection, $this->qualifiedName($connection, $table, $schema)) as $trigger) {
-            $sql = 'CREATE TRIGGER '.$connection->quoteIdentifier($trigger->name)
-                .' '.$trigger->timing->value.' '.$trigger->event->value
-                .' ON '.$connection->quoteIdentifier($table)
-                .' FOR EACH ROW '.$trigger->body;
+            $sql = 'CREATE TRIGGER ' . $connection->quoteIdentifier($trigger->name)
+                . ' ' . $trigger->timing->value . ' ' . $trigger->event->value
+                . ' ON ' . $connection->quoteIdentifier($table)
+                . ' FOR EACH ROW ' . $trigger->body;
             $definitions[] = $sql;
         }
 
@@ -126,7 +126,7 @@ final readonly class ExportSource implements ExportSourceInterface, ForeignKeyEx
         $definitions = [];
         foreach ([$this->routines->getFunctions($connection, $schema), $this->routines->getProcedures($connection, $schema)] as $routines) {
             foreach ($routines as $routine) {
-                $definitions[] = 'CREATE '.$routine->type.' '.$connection->quoteIdentifier($routine->name).' '.$routine->body;
+                $definitions[] = 'CREATE ' . $routine->type . ' ' . $connection->quoteIdentifier($routine->name) . ' ' . $routine->body;
             }
         }
 

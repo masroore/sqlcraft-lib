@@ -68,7 +68,7 @@ final class ColumnInspector implements ColumnInspectorInterface
 
         throw new ObjectNotFoundException(
             sprintf('Column %s does not exist on table %s.', $column->name, $table->object->name),
-            $table->object->name.'.'.$column->name,
+            $table->object->name . '.' . $column->name,
         );
     }
 

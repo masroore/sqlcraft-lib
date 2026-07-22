@@ -213,7 +213,7 @@ final class ExportOrchestrationTest extends TestCase
     {
         /** @var ConnectionInterface&MockObject $connection */
         $connection = self::createMock(ConnectionInterface::class);
-        $connection->method('quoteIdentifier')->willReturnCallback(static fn (string $name): string => '"'.$name.'"');
+        $connection->method('quoteIdentifier')->willReturnCallback(static fn (string $name): string => '"' . $name . '"');
         $connection->method('getDatabaseName')->willReturn('shop');
         $connection->method('getPlatformName')->willReturn('mysql');
         $connection->method('getPlatform')->willThrowException(new \RuntimeException('platform unavailable'));
@@ -238,7 +238,7 @@ final class ExportOrchestrationTest extends TestCase
     private function connection(string $platformName = 'sqlite', ?PlatformInterface $platform = null): ConnectionInterface
     {
         $connection = self::createMock(ConnectionInterface::class);
-        $connection->method('quoteIdentifier')->willReturnCallback(static fn (string $name): string => '"'.$name.'"');
+        $connection->method('quoteIdentifier')->willReturnCallback(static fn (string $name): string => '"' . $name . '"');
         $connection->method('getDatabaseName')->willReturn('shop');
         $connection->method('getPlatformName')->willReturn($platformName);
         $connection->method('getPlatform')->willReturn($platform ?? new SqlitePlatform);

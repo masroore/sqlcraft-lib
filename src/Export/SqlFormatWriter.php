@@ -31,7 +31,7 @@ final class SqlFormatWriter implements FormatWriterInterface
     public function writeTableHeader(SinkInterface $sink, TableStatus $table, DumpOptions $options): void
     {
         $kind = $table->isView ? 'View' : 'Table';
-        $sink->write('-- '.$kind.': '.$table->name."\n");
+        $sink->write('-- ' . $kind . ': ' . $table->name . "\n");
 
         if ($options->tableStyle !== TableSectionStyle::DropCreate) {
             return;
@@ -39,7 +39,7 @@ final class SqlFormatWriter implements FormatWriterInterface
 
         $object = $this->quoteTable($table);
         $type = $table->isView ? 'VIEW' : 'TABLE';
-        $sink->write('DROP '.$type.' IF EXISTS '.$object.";\n");
+        $sink->write('DROP ' . $type . ' IF EXISTS ' . $object . ";\n");
     }
 
     /** @param list<string> $ddlStatements */
@@ -52,7 +52,7 @@ final class SqlFormatWriter implements FormatWriterInterface
                 continue;
             }
 
-            $sink->write(rtrim($statement, ';').";\n");
+            $sink->write(rtrim($statement, ';') . ";\n");
         }
     }
 
@@ -78,13 +78,13 @@ final class SqlFormatWriter implements FormatWriterInterface
         }
         $values = [];
         foreach ($rows as $row) {
-            $values[] = '('.implode(', ', $this->renderRow($row, $columns)).')';
+            $values[] = '(' . implode(', ', $this->renderRow($row, $columns)) . ')';
         }
 
         $sink->write(
-            'INSERT INTO '.$this->quoteTable($table)
-            .' ('.implode(', ', $columnNames).') VALUES '
-            .implode(', ', $values).";\n",
+            'INSERT INTO ' . $this->quoteTable($table)
+            . ' (' . implode(', ', $columnNames) . ') VALUES '
+            . implode(', ', $values) . ";\n",
         );
     }
 

@@ -16,8 +16,8 @@ final class TransactionManager implements TransactionManagerInterface
         string $isolationLevel = '',
     ): Transaction {
         if ($connection->inTransaction()) {
-            $savepoint = 'sp_'.bin2hex(random_bytes(6));
-            $connection->execute('SAVEPOINT '.$savepoint);
+            $savepoint = 'sp_' . bin2hex(random_bytes(6));
+            $connection->execute('SAVEPOINT ' . $savepoint);
 
             return new Transaction($connection, savepointName: $savepoint);
         }

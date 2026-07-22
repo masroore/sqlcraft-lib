@@ -30,14 +30,14 @@ final class InMemoryMetadataCache implements MetadataCacheInterface
     #[\Override]
     public function invalidateTable(string $database, string $table): void
     {
-        $this->remove($database.'/table:'.$table);
+        $this->remove($database . '/table:' . $table);
     }
 
     #[\Override]
     public function invalidateDatabase(string $database): void
     {
         foreach (array_keys($this->entries) as $key) {
-            if (str_starts_with($key, $database.'/')) {
+            if (str_starts_with($key, $database . '/')) {
                 unset($this->entries[$key]);
             }
         }

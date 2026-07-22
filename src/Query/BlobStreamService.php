@@ -28,10 +28,10 @@ final readonly class BlobStreamService
         $conditions = [];
         $params = [];
         foreach ($where as $name => $value) {
-            $conditions[] = $connection->quoteIdentifier($name).' = ?';
+            $conditions[] = $connection->quoteIdentifier($name) . ' = ?';
             $params[] = $value;
         }
-        $sql = 'SELECT '.$connection->quoteIdentifier($column->name).' FROM '.implode('.', $parts).($conditions === [] ? '' : ' WHERE '.implode(' AND ', $conditions));
+        $sql = 'SELECT ' . $connection->quoteIdentifier($column->name) . ' FROM ' . implode('.', $parts) . ($conditions === [] ? '' : ' WHERE ' . implode(' AND ', $conditions));
         $values = $this->executor->query($connection, $sql, $params, buffered: false)->fetchColumn();
         $stream = fopen('php://temp', 'w+b');
         if ($stream === false) {

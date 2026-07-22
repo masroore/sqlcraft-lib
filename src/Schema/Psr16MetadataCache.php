@@ -14,7 +14,7 @@ final readonly class Psr16MetadataCache implements MetadataCacheInterface
     #[\Override]
     public function remember(string $key, callable $loader, int $ttl = 0): mixed
     {
-        $key = $this->prefix.$key;
+        $key = $this->prefix . $key;
         $value = $this->cache->get($key);
         if ($value !== null) {
             /** @psalm-suppress MixedReturnStatement */

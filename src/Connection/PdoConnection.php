@@ -197,8 +197,8 @@ final class PdoConnection implements ConnectionInterface
 
             $transaction = new Transaction($this, $isolationLevel, events: $this->events);
         } else {
-            $savepoint = 'sqlcraft_sp_'.++$this->savepointSequence;
-            $this->execute('SAVEPOINT '.$savepoint);
+            $savepoint = 'sqlcraft_sp_' . ++$this->savepointSequence;
+            $this->execute('SAVEPOINT ' . $savepoint);
             $transaction = new Transaction($this, $isolationLevel, $savepoint, $this->events);
         }
 
@@ -282,7 +282,7 @@ final class PdoConnection implements ConnectionInterface
         for ($index = 0; $index < $count; $index++) {
             $meta = $statement->getColumnMeta($index);
             if ($meta === false) {
-                $columns[] = new ResultColumn('column_'.$index, null, null, null, true);
+                $columns[] = new ResultColumn('column_' . $index, null, null, null, true);
 
                 continue;
             }

@@ -23,7 +23,7 @@ final class MultiFileSink
             throw new InvalidArgumentException(sprintf('Unable to create export directory: %s.', $directory));
         }
         $this->namer = $naming === null
-            ? static fn (string $table): string => $table.'.csv'
+            ? static fn (string $table): string => $table . '.csv'
             : Closure::fromCallable($naming);
         $this->factory = $factory === null
             ? static function (string $path, string $table): SinkInterface {
@@ -49,7 +49,7 @@ final class MultiFileSink
         if (! is_string($name) || $name === '' || str_contains($name, DIRECTORY_SEPARATOR)) {
             throw new InvalidArgumentException('Table naming callback must return a single non-empty filename.');
         }
-        $sink = ($this->factory)($this->directory.DIRECTORY_SEPARATOR.$name, $table);
+        $sink = ($this->factory)($this->directory . DIRECTORY_SEPARATOR . $name, $table);
         if (! $sink instanceof SinkInterface) {
             throw new InvalidArgumentException('Multi-file sink factory must return a SinkInterface.');
         }

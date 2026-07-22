@@ -44,7 +44,7 @@ final class ExportSourceTest extends TestCase
     {
         $connection = self::createMock(ConnectionInterface::class);
         $connection->method('quoteIdentifier')->willReturnCallback(
-            static fn (string $name): string => '"'.$name.'"',
+            static fn (string $name): string => '"' . $name . '"',
         );
         $tables = self::createMock(TableInspectorInterface::class);
         $columns = self::createMock(ColumnInspectorInterface::class);

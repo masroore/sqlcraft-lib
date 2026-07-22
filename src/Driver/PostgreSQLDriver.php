@@ -20,10 +20,10 @@ final class PostgreSQLDriver implements DriverInterface
     #[\Override]
     public function buildDsn(ConnectionParameters $params): string
     {
-        $dsn = 'pgsql:host='.($params->socket ?? $params->host ?? '127.0.0.1')
-            .';port='.($params->port ?? 5432);
+        $dsn = 'pgsql:host=' . ($params->socket ?? $params->host ?? '127.0.0.1')
+            . ';port=' . ($params->port ?? 5432);
         if ($params->database !== null) {
-            $dsn .= ';dbname='.$params->database;
+            $dsn .= ';dbname=' . $params->database;
         }
 
         return $dsn;
