@@ -16,6 +16,7 @@ use SQLCraft\Exceptions\ConnectionLostException;
 use SQLCraft\Exceptions\ConstraintViolationException;
 use SQLCraft\Exceptions\DeadlockException;
 use SQLCraft\Exceptions\DriverException;
+use SQLCraft\Enums\DatabaseDriver;
 use SQLCraft\Exceptions\DriverMisconfiguredException;
 use SQLCraft\Exceptions\DriverNotFoundException;
 use SQLCraft\Exceptions\ExportFailedException;
@@ -154,6 +155,15 @@ final class ExceptionHierarchyTest extends TestCase
         self::assertSame(12, $import->rowIndex);
         self::assertSame(7, $export->statementIndex);
         self::assertSame(20, $export->rowIndex);
+    }
+
+    public function testDriverExceptionsAcceptEnumCase(): void
+    {
+        $notFound = new DriverNotFoundException('not found', DatabaseDriver::MySQL);
+        $misconfigured = new DriverMisconfiguredException('bad config', DatabaseDriver::PostgreSQL);
+
+        self::assertSame(DatabaseDriver::MySQL, $notFound->driver);
+        self::assertSame(DatabaseDriver::PostgreSQL, $misconfigured->driver);
     }
 
     public function testHierarchyIntermediateTypesAreAbstract(): void

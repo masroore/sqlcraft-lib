@@ -9,6 +9,7 @@ use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Driver\DriverInterface;
 use SQLCraft\Contracts\Platform\PlatformInterface;
 use SQLCraft\Driver\DriverRegistry;
+use SQLCraft\Enums\DatabaseDriver;
 use SQLCraft\Exceptions\DriverNotFoundException;
 use SQLCraft\ValueObjects\ConnectionParameters;
 
@@ -65,6 +66,16 @@ final class DriverRegistryTest extends TestCase
         $this->expectException(DriverNotFoundException::class);
         $this->expectExceptionMessage('Driver not found: missing.');
         (new DriverRegistry())->get('missing');
+    }
+
+    public function testGetByDriverDelegatesToGetUsingBackingValue(): void
+    {
+        $driver = $this->fakeDriver(); // getName() returns 'fake'
+        $registry = new DriverRegistry();
+        // Register the fake driver under the 'sqlite' key so we can look it up via the enum
+        $registry->registerAlias('sqlite', $driver);
+
+        self::assertSame($driver, $registry->getByDriver(DatabaseDriver::SQLite));
     }
 
     private function fakeDriver(): DriverInterface

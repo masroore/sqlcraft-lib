@@ -8,6 +8,7 @@ use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use SQLCraft\ValueObjects\Charset;
 use SQLCraft\ValueObjects\Collation;
+use SQLCraft\Enums\DatabaseDriver;
 use SQLCraft\ValueObjects\ConnectionParameters;
 use SQLCraft\ValueObjects\Engine;
 use SQLCraft\ValueObjects\Privilege;
@@ -145,6 +146,7 @@ final class NamedAndConnectionValueObjectsTest extends TestCase
             charset: 'utf8mb4',
             ssl: ['verifyPeer' => true],
             extras: ['applicationName' => 'sqlcraft'],
+            driver: DatabaseDriver::MySQL,
         );
 
         self::assertSame('db.internal', $parameters->host);
@@ -155,6 +157,14 @@ final class NamedAndConnectionValueObjectsTest extends TestCase
         self::assertSame('utf8mb4', $parameters->charset);
         self::assertSame(['verifyPeer' => true], $parameters->ssl);
         self::assertSame(['applicationName' => 'sqlcraft'], $parameters->extras);
+        self::assertSame(DatabaseDriver::MySQL, $parameters->driver);
+    }
+
+    public function testConnectionParametersDefaultsDriverToNull(): void
+    {
+        $parameters = new ConnectionParameters(database: 'shop');
+
+        self::assertNull($parameters->driver);
     }
 
     public function testConnectionParametersAllowsSocketOnlyConnections(): void
