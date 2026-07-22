@@ -6,7 +6,6 @@ namespace SQLCraft\Tests\Unit\Execution;
 
 use PHPUnit\Framework\TestCase;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
-use SQLCraft\Contracts\Execution\BatchExecutorInterface;
 use SQLCraft\Contracts\Execution\QueryExecutorInterface;
 use SQLCraft\Contracts\Execution\StatementBatch;
 use SQLCraft\Contracts\Execution\StatementSplitterInterface;
@@ -15,7 +14,7 @@ use SQLCraft\Execution\QueryManager;
 
 final class QueryManagerTest extends TestCase
 {
-    public function testDelegatesExecutionAndSplitting(): void
+    public function test_delegates_execution_and_splitting(): void
     {
         $connection = self::createMock(ConnectionInterface::class);
         $executor = self::createMock(QueryExecutorInterface::class);
@@ -29,7 +28,7 @@ final class QueryManagerTest extends TestCase
         self::assertSame('SELECT 1', $manager->execute($connection, 'SELECT 1')->sql);
     }
 
-    public function testRequiresConfiguredBatchExecutor(): void
+    public function test_requires_configured_batch_executor(): void
     {
         $this->expectException(\LogicException::class);
         iterator_to_array((new QueryManager(self::createMock(QueryExecutorInterface::class)))->executeBatch(self::createMock(ConnectionInterface::class), new StatementBatch(['SELECT 1'])));

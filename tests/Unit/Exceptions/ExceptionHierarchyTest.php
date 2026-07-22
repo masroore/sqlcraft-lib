@@ -6,17 +6,18 @@ namespace SQLCraft\Tests\Unit\Exceptions;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
+use RuntimeException;
+use SQLCraft\Capabilities\Capability;
+use SQLCraft\Capabilities\CapabilityNotSupportedException;
+use SQLCraft\Enums\DatabaseDriver;
 use SQLCraft\Exceptions\AuthenticationException;
 use SQLCraft\Exceptions\CapabilityException;
-use SQLCraft\Capabilities\CapabilityNotSupportedException;
-use SQLCraft\Capabilities\Capability;
 use SQLCraft\Exceptions\ConnectionException;
 use SQLCraft\Exceptions\ConnectionFailedException;
 use SQLCraft\Exceptions\ConnectionLostException;
-use SQLCraft\Exceptions\ConstraintViolationException;
 use SQLCraft\Exceptions\DeadlockException;
 use SQLCraft\Exceptions\DriverException;
-use SQLCraft\Enums\DatabaseDriver;
 use SQLCraft\Exceptions\DriverMisconfiguredException;
 use SQLCraft\Exceptions\DriverNotFoundException;
 use SQLCraft\Exceptions\ExportFailedException;
@@ -27,17 +28,15 @@ use SQLCraft\Exceptions\InsufficientPrivilegesException;
 use SQLCraft\Exceptions\MetadataException;
 use SQLCraft\Exceptions\ObjectNotFoundException;
 use SQLCraft\Exceptions\QueryException;
-use SQLCraft\Exceptions\SQLCraftException;
 use SQLCraft\Exceptions\SecurityException;
+use SQLCraft\Exceptions\SQLCraftException;
 use SQLCraft\Exceptions\SyntaxErrorException;
 use SQLCraft\Exceptions\UniqueConstraintException;
-use ReflectionClass;
-use RuntimeException;
 
 final class ExceptionHierarchyTest extends TestCase
 {
     #[DataProvider('concreteExceptionClasses')]
-    public function testConcreteExceptionsAreFinalAndTyped(string $class): void
+    public function test_concrete_exceptions_are_final_and_typed(string $class): void
     {
         /** @var class-string<SQLCraftException> $class */
         $reflection = new ReflectionClass($class);
@@ -68,7 +67,7 @@ final class ExceptionHierarchyTest extends TestCase
         ];
     }
 
-    public function testTypedExceptionConstructorsPreserveCodesAndPreviousExceptions(): void
+    public function test_typed_exception_constructors_preserve_codes_and_previous_exceptions(): void
     {
         $previous = new RuntimeException('native failure');
         $exceptions = [
@@ -90,7 +89,7 @@ final class ExceptionHierarchyTest extends TestCase
         }
     }
 
-    public function testSyntaxErrorPreservesSqlAndPreviousException(): void
+    public function test_syntax_error_preserves_sql_and_previous_exception(): void
     {
         $previous = new RuntimeException('native failure');
         $exception = new SyntaxErrorException('SELECT * FRM users', 'syntax error', previous: $previous);
@@ -100,7 +99,7 @@ final class ExceptionHierarchyTest extends TestCase
         self::assertSame('syntax error', $exception->getMessage());
     }
 
-    public function testConnectionExceptionCarriesHostAndDriver(): void
+    public function test_connection_exception_carries_host_and_driver(): void
     {
         $exception = new ConnectionFailedException('connection failed', 'db.example.test', 'pgsql');
 
@@ -108,7 +107,7 @@ final class ExceptionHierarchyTest extends TestCase
         self::assertSame('pgsql', $exception->driver);
     }
 
-    public function testConstraintExceptionCarriesSqlConstraintAndTable(): void
+    public function test_constraint_exception_carries_sql_constraint_and_table(): void
     {
         $exception = new UniqueConstraintException(
             'duplicate value',
@@ -122,12 +121,12 @@ final class ExceptionHierarchyTest extends TestCase
         self::assertSame('users', $exception->table);
     }
 
-    public function testDeadlockIsAlwaysRetryable(): void
+    public function test_deadlock_is_always_retryable(): void
     {
         self::assertTrue((new DeadlockException('deadlock'))->retryable);
     }
 
-    public function testCapabilityExceptionFactoryCarriesScalarContext(): void
+    public function test_capability_exception_factory_carries_scalar_context(): void
     {
         $exception = CapabilityNotSupportedException::for(Capability::Trigger, 'sqlite', '3.45');
 
@@ -137,7 +136,7 @@ final class ExceptionHierarchyTest extends TestCase
         self::assertSame('Capability not supported: trigger on sqlite 3.45.', $exception->getMessage());
     }
 
-    public function testOtherTypedPayloadsAreExposed(): void
+    public function test_other_typed_payloads_are_exposed(): void
     {
         $object = new ObjectNotFoundException('table missing', 'public.users');
         $privilege = new InsufficientPrivilegesException('denied', 'SELECT', 'public.users');
@@ -157,7 +156,7 @@ final class ExceptionHierarchyTest extends TestCase
         self::assertSame(20, $export->rowIndex);
     }
 
-    public function testDriverExceptionsAcceptEnumCase(): void
+    public function test_driver_exceptions_accept_enum_case(): void
     {
         $notFound = new DriverNotFoundException('not found', DatabaseDriver::MySQL);
         $misconfigured = new DriverMisconfiguredException('bad config', DatabaseDriver::PostgreSQL);
@@ -166,7 +165,7 @@ final class ExceptionHierarchyTest extends TestCase
         self::assertSame(DatabaseDriver::PostgreSQL, $misconfigured->driver);
     }
 
-    public function testHierarchyIntermediateTypesAreAbstract(): void
+    public function test_hierarchy_intermediate_types_are_abstract(): void
     {
         foreach ([
             SQLCraftException::class,
@@ -180,14 +179,14 @@ final class ExceptionHierarchyTest extends TestCase
             self::assertTrue((new ReflectionClass($class))->isAbstract());
         }
     }
-    public function testStringifiedSqlCraftExceptionsDoNotIncludeNativeCauseText(): void
+
+    public function test_stringified_sql_craft_exceptions_do_not_include_native_cause_text(): void
     {
-        $exception = new \SQLCraft\Exceptions\QueryException(
+        $exception = new QueryException(
             'SQL execution failed.',
-            previous: new \RuntimeException('password=secret'),
+            previous: new RuntimeException('password=secret'),
         );
 
         self::assertStringNotContainsString('password=secret', (string) $exception);
     }
-
 }

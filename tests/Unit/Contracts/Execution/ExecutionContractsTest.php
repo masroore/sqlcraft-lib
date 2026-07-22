@@ -10,7 +10,7 @@ use SQLCraft\Contracts\Execution\TransactionManagerInterface;
 
 final class ExecutionContractsTest extends TestCase
 {
-    public function testQueryExecutorPortExposesExecutionModes(): void
+    public function test_query_executor_port_exposes_execution_modes(): void
     {
         self::assertSame(
             ['execute', 'query', 'executeDdl', 'queryWithTimeout'],
@@ -18,7 +18,7 @@ final class ExecutionContractsTest extends TestCase
         );
     }
 
-    public function testTransactionManagerPortExposesNestedTransactionOperations(): void
+    public function test_transaction_manager_port_exposes_nested_transaction_operations(): void
     {
         self::assertSame(
             ['begin', 'transactional'],
@@ -27,7 +27,7 @@ final class ExecutionContractsTest extends TestCase
     }
 
     /**
-     * @param class-string $interface
+     * @param  class-string  $interface
      * @return list<string>
      */
     private function methodNames(string $interface): array

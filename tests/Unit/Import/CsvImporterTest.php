@@ -8,11 +8,12 @@ use PHPUnit\Framework\TestCase;
 use SQLCraft\Collections\ColumnCollection;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Connection\PreparedStatementInterface;
+use SQLCraft\Contracts\Import\ImportSourceInterface;
 use SQLCraft\Contracts\Metadata\ColumnInspectorInterface;
 use SQLCraft\DTO\ColumnMeta;
 use SQLCraft\DTO\ExecutionResult;
-use SQLCraft\Import\CsvImportOptions;
 use SQLCraft\Import\CsvImporter;
+use SQLCraft\Import\CsvImportOptions;
 use SQLCraft\Import\UpsertMode;
 use SQLCraft\ValueObjects\DataType;
 use SQLCraft\ValueObjects\DefaultValue;
@@ -21,10 +22,10 @@ use SQLCraft\ValueObjects\QualifiedName;
 
 final class CsvImporterTest extends TestCase
 {
-    public function testMapsKnownColumnsNullsAndBinaryValuesIntoOnePreparedBatch(): void
+    public function test_maps_known_columns_nulls_and_binary_values_into_one_prepared_batch(): void
     {
         $connection = self::createMock(ConnectionInterface::class);
-        $connection->method('quoteIdentifier')->willReturnCallback(static fn (string $name): string => '"' . $name . '"');
+        $connection->method('quoteIdentifier')->willReturnCallback(static fn (string $name): string => '"'.$name.'"');
         $connection->method('getPlatformName')->willReturn('sqlite');
         $statement = self::createMock(PreparedStatementInterface::class);
         $statement->expects(self::once())->method('execute')->with([
@@ -47,7 +48,7 @@ final class CsvImporterTest extends TestCase
             $this->column('name', 'TEXT'),
             $this->column('payload', 'BLOB'),
         ]));
-        $source = self::createMock(\SQLCraft\Contracts\Import\ImportSourceInterface::class);
+        $source = self::createMock(ImportSourceInterface::class);
         $source->method('openStream')->willReturn($this->stream("id,name,payload,unknown\n1,\"hello,world\",AQI=,ignored\n2,\\N,\\N,ignored\n"));
 
         $result = (new CsvImporter($columns))->importCsv(
@@ -61,17 +62,17 @@ final class CsvImporterTest extends TestCase
         self::assertSame([], $result->errors);
     }
 
-    public function testMapsReplaceModeForSqliteAndValidatesOptions(): void
+    public function test_maps_replace_mode_for_sqlite_and_validates_options(): void
     {
         $connection = self::createMock(ConnectionInterface::class);
-        $connection->method('quoteIdentifier')->willReturnCallback(static fn (string $name): string => '"' . $name . '"');
+        $connection->method('quoteIdentifier')->willReturnCallback(static fn (string $name): string => '"'.$name.'"');
         $connection->method('getPlatformName')->willReturn('sqlite');
         $statement = self::createMock(PreparedStatementInterface::class);
         $statement->method('execute')->willReturn(new ExecutionResult(1, '', 0.0, 'INSERT'));
         $connection->expects(self::once())->method('prepare')->with('INSERT OR REPLACE INTO "orders" ("id") VALUES (?)')->willReturn($statement);
         $columns = self::createMock(ColumnInspectorInterface::class);
         $columns->method('getColumns')->willReturn(new ColumnCollection([$this->column('id', 'INTEGER')]));
-        $source = self::createMock(\SQLCraft\Contracts\Import\ImportSourceInterface::class);
+        $source = self::createMock(ImportSourceInterface::class);
         $source->method('openStream')->willReturn($this->stream("id\n1\n"));
 
         (new CsvImporter($columns))->importCsv(

@@ -12,14 +12,14 @@ use SQLCraft\Contracts\Metadata\ColumnInspectorInterface;
 use SQLCraft\Contracts\Metadata\TableInspectorInterface;
 use SQLCraft\DTO\ColumnMeta;
 use SQLCraft\DTO\TableStatus;
+use SQLCraft\Metadata\ExportSource;
 use SQLCraft\ValueObjects\DataType;
 use SQLCraft\ValueObjects\DefaultValue;
-use SQLCraft\Metadata\ExportSource;
 use SQLCraft\ValueObjects\QualifiedName;
 
 final class ExportSourceTest extends TestCase
 {
-    public function testAdaptsStringTableNamesToMetadataQualifiedNames(): void
+    public function test_adapts_string_table_names_to_metadata_qualified_names(): void
     {
         $connection = self::createMock(ConnectionInterface::class);
         $table = new TableStatus('orders', schema: 'shop');
@@ -40,11 +40,11 @@ final class ExportSourceTest extends TestCase
         self::assertCount(0, $source->getColumns($connection, 'orders', 'shop'));
     }
 
-    public function testBuildsPortableBasicCreateTableDdlFromColumnMetadata(): void
+    public function test_builds_portable_basic_create_table_ddl_from_column_metadata(): void
     {
         $connection = self::createMock(ConnectionInterface::class);
         $connection->method('quoteIdentifier')->willReturnCallback(
-            static fn (string $name): string => '"' . $name . '"',
+            static fn (string $name): string => '"'.$name.'"',
         );
         $tables = self::createMock(TableInspectorInterface::class);
         $columns = self::createMock(ColumnInspectorInterface::class);
@@ -72,7 +72,7 @@ final class ExportSourceTest extends TestCase
         );
     }
 
-    public function testDelegatesTableListingWithoutChangingSchema(): void
+    public function test_delegates_table_listing_without_changing_schema(): void
     {
         $connection = self::createMock(ConnectionInterface::class);
         $expected = new TableCollection([]);

@@ -11,9 +11,9 @@ use SQLCraft\ValueObjects\TriggerEvent;
 
 final class SqliteMetadataFactoryTest extends TestCase
 {
-    public function testHydratesSqlitePragmaColumnRow(): void
+    public function test_hydrates_sqlite_pragma_column_row(): void
     {
-        $column = (new SqliteMetadataFactory())->createColumnMeta([
+        $column = (new SqliteMetadataFactory)->createColumnMeta([
             'name' => 'created_at',
             'type' => 'TEXT',
             'notnull' => 1,
@@ -27,9 +27,9 @@ final class SqliteMetadataFactoryTest extends TestCase
         self::assertSame(DefaultValueKind::EXPRESSION, $column->default->kind);
     }
 
-    public function testHydratesSqliteTableIndexAndTriggerRows(): void
+    public function test_hydrates_sqlite_table_index_and_trigger_rows(): void
     {
-        $factory = new SqliteMetadataFactory();
+        $factory = new SqliteMetadataFactory;
         $status = $factory->createTableStatus([
             'name' => 'users',
             'type' => 'table',
@@ -55,10 +55,10 @@ final class SqliteMetadataFactoryTest extends TestCase
         self::assertSame('users', $trigger->table);
     }
 
-    public function testMissingRequiredMetadataFieldIsRejected(): void
+    public function test_missing_required_metadata_field_is_rejected(): void
     {
         self::expectException(\InvalidArgumentException::class);
 
-        (new SqliteMetadataFactory())->createTableStatus([]);
+        (new SqliteMetadataFactory)->createTableStatus([]);
     }
 }

@@ -15,9 +15,9 @@ use SQLCraft\ValueObjects\QualifiedName;
 
 final class SecurityUtilitiesTest extends TestCase
 {
-    public function testIdentifierQuoterDelegatesSingleAndQualifiedNames(): void
+    public function test_identifier_quoter_delegates_single_and_qualified_names(): void
     {
-        $quoter = new IdentifierQuoter(new MySQLPlatform());
+        $quoter = new IdentifierQuoter(new MySQLPlatform);
         $name = new QualifiedName(new Identifier('table'), new Identifier('schema'), new Identifier('database'));
 
         self::assertSame('`column`', $quoter->quote(new Identifier('column')));
@@ -25,14 +25,14 @@ final class SecurityUtilitiesTest extends TestCase
         self::assertSame('`table`', $quoter->quoteQualified(new QualifiedName(new Identifier('table'))));
     }
 
-    public function testOperatorValidatorNormalizesAllowedOperators(): void
+    public function test_operator_validator_normalizes_allowed_operators(): void
     {
-        $validator = new OperatorValidator(new MySQLPlatform());
+        $validator = new OperatorValidator(new MySQLPlatform);
 
         self::assertSame('NOT LIKE', $validator->validate(' not like '));
     }
 
-    public function testOperatorValidatorRejectsStructuralInjection(): void
+    public function test_operator_validator_rejects_structural_injection(): void
     {
         $platform = self::createMock(PlatformInterface::class);
         $platform->method('getName')->willReturn('test');

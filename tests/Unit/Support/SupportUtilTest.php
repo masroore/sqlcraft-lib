@@ -11,7 +11,7 @@ use SQLCraft\Support\TypeUtil;
 
 final class SupportUtilTest extends TestCase
 {
-    public function testStringUtilDetectsBlankValuesAndNullBytes(): void
+    public function test_string_util_detects_blank_values_and_null_bytes(): void
     {
         self::assertTrue(StringUtil::isBlank(null));
         self::assertTrue(StringUtil::isBlank(" \t\n"));
@@ -20,14 +20,14 @@ final class SupportUtilTest extends TestCase
         self::assertFalse(StringUtil::containsNullByte('safe'));
     }
 
-    public function testStringUtilTrimsNonBlankValuesToNull(): void
+    public function test_string_util_trims_non_blank_values_to_null(): void
     {
         self::assertNull(StringUtil::trimToNull(null));
         self::assertNull(StringUtil::trimToNull('   '));
         self::assertSame('sqlcraft', StringUtil::trimToNull(' sqlcraft '));
     }
 
-    public function testTypeUtilConvertsIntegerValuesConservatively(): void
+    public function test_type_util_converts_integer_values_conservatively(): void
     {
         self::assertNull(TypeUtil::toInt(null));
         self::assertSame(7, TypeUtil::toInt(7));
@@ -37,7 +37,7 @@ final class SupportUtilTest extends TestCase
         self::assertNull(TypeUtil::toInt('not an integer'));
     }
 
-    public function testTypeUtilConvertsCommonBooleanRepresentations(): void
+    public function test_type_util_converts_common_boolean_representations(): void
     {
         self::assertNull(TypeUtil::toBool(null));
         self::assertTrue(TypeUtil::toBool(true));
@@ -54,7 +54,7 @@ final class SupportUtilTest extends TestCase
         self::assertNull(TypeUtil::toBool('unknown'));
     }
 
-    public function testArrayUtilRecognizesLists(): void
+    public function test_array_util_recognizes_lists(): void
     {
         self::assertTrue(ArrayUtil::isList([]));
         self::assertTrue(ArrayUtil::isList(['a', 'b']));
@@ -62,7 +62,7 @@ final class SupportUtilTest extends TestCase
         self::assertFalse(ArrayUtil::isList(['name' => 'sqlcraft']));
     }
 
-    public function testArrayUtilRemovesNullValuesAndPreservesKeys(): void
+    public function test_array_util_removes_null_values_and_preserves_keys(): void
     {
         self::assertSame(
             ['name' => 'sqlcraft', 'enabled' => true, 'count' => 0],

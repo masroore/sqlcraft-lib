@@ -10,8 +10,8 @@ use SQLCraft\Connection\PdoConnection;
 use SQLCraft\Connection\PdoExceptionTranslator;
 use SQLCraft\Contracts\Platform\PlatformInterface;
 use SQLCraft\Exceptions\QueryException;
-use SQLCraft\Exceptions\UniqueConstraintException;
 use SQLCraft\Exceptions\SyntaxErrorException;
+use SQLCraft\Exceptions\UniqueConstraintException;
 use SQLCraft\ValueObjects\Identifier;
 
 final class PdoConnectionIntegrationTest extends TestCase
@@ -27,7 +27,7 @@ final class PdoConnectionIntegrationTest extends TestCase
         }
     }
 
-    public function testInMemorySqliteSupportsBufferedAndStreamingReads(): void
+    public function test_in_memory_sqlite_supports_buffered_and_streaming_reads(): void
     {
         $connection = $this->connection('sqlite::memory:');
         $connection->execute('CREATE TABLE records (id INTEGER PRIMARY KEY, value TEXT NOT NULL)');
@@ -45,7 +45,7 @@ final class PdoConnectionIntegrationTest extends TestCase
         self::assertNull($streaming->fetchAssoc());
     }
 
-    public function testFileSqlitePersistsRowsAcrossConnections(): void
+    public function test_file_sqlite_persists_rows_across_connections(): void
     {
         $databasePath = tempnam(sys_get_temp_dir(), 'sqlcraft_');
         if ($databasePath === false) {
@@ -53,16 +53,16 @@ final class PdoConnectionIntegrationTest extends TestCase
         }
 
         $this->databasePath = $databasePath;
-        $first = $this->connection('sqlite:' . $databasePath);
+        $first = $this->connection('sqlite:'.$databasePath);
         $first->execute('CREATE TABLE records (value TEXT NOT NULL)');
         $first->execute('INSERT INTO records (value) VALUES (?)', ['persisted']);
         $first->close();
 
-        $second = $this->connection('sqlite:' . $this->databasePath);
+        $second = $this->connection('sqlite:'.$this->databasePath);
         self::assertSame([['value' => 'persisted']], $second->query('SELECT value FROM records')->fetchAll());
     }
 
-    public function testSqliteFailuresSurfaceAsTypedExceptions(): void
+    public function test_sqlite_failures_surface_as_typed_exceptions(): void
     {
         $connection = $this->connection('sqlite::memory:');
         $connection->execute('CREATE TABLE users (email TEXT UNIQUE NOT NULL)');
@@ -94,10 +94,10 @@ final class PdoConnectionIntegrationTest extends TestCase
         $platform = $this->createMock(PlatformInterface::class);
         $platform->method('getName')->willReturn('sqlite');
         $platform->method('quoteIdentifier')->willReturnCallback(
-            static fn (Identifier $identifier): string => '"' . $identifier->name . '"',
+            static fn (Identifier $identifier): string => '"'.$identifier->name.'"',
         );
         $platform->method('quoteValue')->willReturn('quoted');
 
-        return new PdoConnection($pdo, $platform, new PdoExceptionTranslator());
+        return new PdoConnection($pdo, $platform, new PdoExceptionTranslator);
     }
 }

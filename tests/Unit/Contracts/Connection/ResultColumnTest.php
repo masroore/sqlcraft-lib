@@ -9,7 +9,7 @@ use SQLCraft\Contracts\Connection\ResultColumn;
 
 final class ResultColumnTest extends TestCase
 {
-    public function testStoresColumnMetadataAsAnImmutableSnapshot(): void
+    public function test_stores_column_metadata_as_an_immutable_snapshot(): void
     {
         $column = new ResultColumn('id', 'INTEGER', 'users', 8, false);
 

@@ -9,7 +9,7 @@ use SQLCraft\Contracts\Import\ImporterInterface;
 
 final class ImporterInterfaceTest extends TestCase
 {
-    public function testImporterPortExposesTheImportOperation(): void
+    public function test_importer_port_exposes_the_import_operation(): void
     {
         $reflection = new \ReflectionClass(ImporterInterface::class);
 

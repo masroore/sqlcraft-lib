@@ -9,9 +9,9 @@ use PHPUnit\Framework\TestCase;
 use SQLCraft\Connection\PdoConnection;
 use SQLCraft\Connection\PdoExceptionTranslator;
 use SQLCraft\Connection\TransactionManager;
-use SQLCraft\Contracts\Execution\QueryExecutorInterface;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\DDL\TableRecreationMetadataProviderInterface;
+use SQLCraft\Contracts\Execution\QueryExecutorInterface;
 use SQLCraft\DDL\AlterTableBuilder;
 use SQLCraft\DDL\DdlManager;
 use SQLCraft\DDL\Definition\ColumnDefinition;
@@ -25,11 +25,11 @@ use SQLCraft\ValueObjects\QualifiedName;
 
 final class SqliteTableRecreationIntegrationTest extends TestCase
 {
-    public function testDropColumnRecreatesTableAndPreservesRows(): void
+    public function test_drop_column_recreates_table_and_preserves_rows(): void
     {
         $pdo = new PDO('sqlite::memory:');
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $connection = new PdoConnection($pdo, new SqlitePlatform(), new PdoExceptionTranslator(), databaseName: 'main');
+        $connection = new PdoConnection($pdo, new SqlitePlatform, new PdoExceptionTranslator, databaseName: 'main');
         $connection->execute('PRAGMA foreign_keys = ON');
         $connection->execute('CREATE TABLE users (id INTEGER PRIMARY KEY, obsolete TEXT, name TEXT NOT NULL)');
         $connection->execute('INSERT INTO users (obsolete, name) VALUES (?, ?)', ['remove', 'Ada']);
@@ -39,10 +39,9 @@ final class SqliteTableRecreationIntegrationTest extends TestCase
             new ColumnDefinition('obsolete', new DataType('TEXT'), true, false, false, false, DefaultValue::nullValue(), null, null, null, [], null, null),
             new ColumnDefinition('name', new DataType('TEXT'), false, false, false, false, DefaultValue::nullValue(), null, null, null, [], null, null),
         ]);
-        $provider = new class ($definition) implements TableRecreationMetadataProviderInterface {
-            public function __construct(private readonly TableRecreationDefinition $definition)
-            {
-            }
+        $provider = new class($definition) implements TableRecreationMetadataProviderInterface
+        {
+            public function __construct(private readonly TableRecreationDefinition $definition) {}
 
             #[\Override]
             public function getDefinition(ConnectionInterface $connection, QualifiedName $table): TableRecreationDefinition
@@ -53,7 +52,7 @@ final class SqliteTableRecreationIntegrationTest extends TestCase
 
         $executor = self::createMock(QueryExecutorInterface::class);
         $executor->expects(self::never())->method('executeDdl');
-        (new DdlManager($executor, new TableRecreationStrategy(new TransactionManager(), $provider)))->execute(
+        (new DdlManager($executor, new TableRecreationStrategy(new TransactionManager, $provider)))->execute(
             $connection,
             (new AlterTableBuilder(new QualifiedName(new Identifier('users'))))->dropColumn(new Identifier('obsolete')),
         );
@@ -62,15 +61,15 @@ final class SqliteTableRecreationIntegrationTest extends TestCase
         self::assertSame([['id' => 1, 'name' => 'Ada']], $connection->query('SELECT id, name FROM users')->fetchAll());
     }
 
-    public function testAddAndRenameColumnOperationsWorkAgainstSqliteFile(): void
+    public function test_add_and_rename_column_operations_work_against_sqlite_file(): void
     {
         $path = tempnam(sys_get_temp_dir(), 'sqlcraft-');
         self::assertNotFalse($path);
 
         try {
-            $pdo = new PDO('sqlite:' . $path);
+            $pdo = new PDO('sqlite:'.$path);
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $connection = new PdoConnection($pdo, new SqlitePlatform(), new PdoExceptionTranslator(), databaseName: 'main');
+            $connection = new PdoConnection($pdo, new SqlitePlatform, new PdoExceptionTranslator, databaseName: 'main');
             $connection->execute('CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT NOT NULL)');
 
             (new AlterTableBuilder(new QualifiedName(new Identifier('users'))))->withColumn(

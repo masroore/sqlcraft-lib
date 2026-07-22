@@ -6,6 +6,7 @@ namespace SQLCraft\Tests\Unit\Events;
 
 use PHPUnit\Framework\TestCase;
 use Psr\EventDispatcher\EventDispatcherInterface;
+use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Events\BeforeDdlExecuted;
 use SQLCraft\Events\CapabilityNotSupportedEvent;
 use SQLCraft\Events\SchemaChangedEvent;
@@ -13,7 +14,7 @@ use SQLCraft\Events\SchemaEventDispatcher;
 
 final class SchemaEventDispatcherTest extends TestCase
 {
-    public function testItMapsSchemaLifecycleCallsToTypedEvents(): void
+    public function test_it_maps_schema_lifecycle_calls_to_typed_events(): void
     {
         $received = [];
         $dispatcher = self::createMock(EventDispatcherInterface::class);
@@ -24,7 +25,7 @@ final class SchemaEventDispatcherTest extends TestCase
                 return $event;
             },
         );
-        $connection = self::createMock(\SQLCraft\Contracts\Connection\ConnectionInterface::class);
+        $connection = self::createMock(ConnectionInterface::class);
         $events = new SchemaEventDispatcher($dispatcher);
 
         $events->beforeDdlExecuted($connection, 'CREATE TABLE users (id INT)', 'CreateTableBuilder');

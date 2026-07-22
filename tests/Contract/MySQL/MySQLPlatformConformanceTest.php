@@ -22,8 +22,8 @@ final class MySQLPlatformConformanceTest extends PlatformConformanceTestCase
     #[\Override]
     protected function createConnection(): ConnectionInterface
     {
-        $this->mysqlPlatform = new MySQLPlatform();
-        $driver = new MySQLDriver(new PdoConnectionFactory(new PdoExceptionTranslator()), $this->mysqlPlatform);
+        $this->mysqlPlatform = new MySQLPlatform;
+        $driver = new MySQLDriver(new PdoConnectionFactory(new PdoExceptionTranslator), $this->mysqlPlatform);
 
         return $driver->connect(new ConnectionParameters(
             host: $this->environment('SQLCRAFT_MYSQL_HOST', 'mysql'),
@@ -44,7 +44,7 @@ final class MySQLPlatformConformanceTest extends PlatformConformanceTestCase
     #[\Override]
     protected function platform(): PlatformInterface
     {
-        if (!$this->mysqlPlatform instanceof \SQLCraft\Platform\MySQLPlatform) {
+        if (! $this->mysqlPlatform instanceof MySQLPlatform) {
             throw new \LogicException('Platform is not initialized.');
         }
 

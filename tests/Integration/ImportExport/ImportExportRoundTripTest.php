@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SQLCraft\Tests\Integration\ImportExport;
 
 use PDO;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use SQLCraft\Connection\PdoConnection;
 use SQLCraft\Connection\PdoConnectionFactory;
@@ -13,15 +14,17 @@ use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Import\ImportSourceInterface;
 use SQLCraft\Driver\MySQLDriver;
 use SQLCraft\Driver\PostgreSQLDriver;
+use SQLCraft\Execution\BatchExecutor;
+use SQLCraft\Execution\QueryExecutor;
 use SQLCraft\Export\CsvFormatWriter;
-use SQLCraft\Export\DataStyle;
 use SQLCraft\Export\DumpOptions;
 use SQLCraft\Export\DumpScope;
 use SQLCraft\Export\Exporter;
 use SQLCraft\Export\SqlFormatWriter;
 use SQLCraft\Export\StringBufferSink;
-use SQLCraft\Import\CsvImportOptions;
+use SQLCraft\Export\TableSectionStyle;
 use SQLCraft\Import\CsvImporter;
+use SQLCraft\Import\CsvImportOptions;
 use SQLCraft\Import\Importer;
 use SQLCraft\Import\ImportOptions;
 use SQLCraft\Metadata\ColumnInspector;
@@ -35,8 +38,6 @@ use SQLCraft\Platform\MySQLPlatform;
 use SQLCraft\Platform\PostgreSQLPlatform;
 use SQLCraft\Platform\SqlitePlatform;
 use SQLCraft\Query\StatementSplitter;
-use SQLCraft\Execution\BatchExecutor;
-use SQLCraft\Execution\QueryExecutor;
 use SQLCraft\ValueObjects\ConnectionParameters;
 use SQLCraft\ValueObjects\Identifier;
 use SQLCraft\ValueObjects\QualifiedName;
@@ -52,8 +53,8 @@ final class ImportExportRoundTripTest extends TestCase
         yield 'pgsql' => ['pgsql'];
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('engineProvider')]
-    public function testSqlExportAndImportRoundTripsTableData(string $engine): void
+    #[DataProvider('engineProvider')]
+    public function test_sql_export_and_import_round_trips_table_data(string $engine): void
     {
         if ($engine !== 'sqlite' && getenv('SQLCRAFT_RUN_ENGINE_INTEGRATION') !== '1') {
             self::markTestSkipped('Set SQLCRAFT_RUN_ENGINE_INTEGRATION=1 with engine services running.');
@@ -62,38 +63,38 @@ final class ImportExportRoundTripTest extends TestCase
         $connection = $this->connection($engine);
         $table = 'sqlcraft_m7_roundtrip';
         $quoted = $connection->quoteIdentifier($table);
-        $connection->execute('DROP TABLE IF EXISTS ' . $quoted);
-        $connection->execute('CREATE TABLE ' . $quoted . ' (id INTEGER PRIMARY KEY, label TEXT NOT NULL, note TEXT)');
-        $connection->execute('INSERT INTO ' . $quoted . ' (id, label, note) VALUES (?, ?, ?)', [1, 'a, "quoted"', null]);
-        $connection->execute('INSERT INTO ' . $quoted . ' (id, label, note) VALUES (?, ?, ?)', [2, 'plain', 'value']);
+        $connection->execute('DROP TABLE IF EXISTS '.$quoted);
+        $connection->execute('CREATE TABLE '.$quoted.' (id INTEGER PRIMARY KEY, label TEXT NOT NULL, note TEXT)');
+        $connection->execute('INSERT INTO '.$quoted.' (id, label, note) VALUES (?, ?, ?)', [1, 'a, "quoted"', null]);
+        $connection->execute('INSERT INTO '.$quoted.' (id, label, note) VALUES (?, ?, ?)', [2, 'plain', 'value']);
 
         try {
             $source = $this->source($connection);
-            $sink = new StringBufferSink();
+            $sink = new StringBufferSink;
             $options = new DumpOptions('sql', DumpScope::table($connection->getDatabaseName() ?? 'main', $table));
-            (new Exporter($source, new QueryExecutor(), new SqlFormatWriter($connection)))->export($connection, $sink, $options);
+            (new Exporter($source, new QueryExecutor, new SqlFormatWriter($connection)))->export($connection, $sink, $options);
             $dump = $sink->contents();
 
-            $connection->execute('DROP TABLE ' . $quoted);
+            $connection->execute('DROP TABLE '.$quoted);
             $importSource = $this->sourceFromString($dump);
-            $result = (new Importer(new StatementSplitter(), new BatchExecutor(new QueryExecutor())))->import(
+            $result = (new Importer(new StatementSplitter, new BatchExecutor(new QueryExecutor)))->import(
                 $connection,
                 $importSource,
-                new ImportOptions(),
+                new ImportOptions,
             );
 
             self::assertSame(3, $result->statementsExecuted);
             self::assertSame([
                 ['id' => 1, 'label' => 'a, "quoted"', 'note' => null],
                 ['id' => 2, 'label' => 'plain', 'note' => 'value'],
-            ], $connection->query('SELECT id, label, note FROM ' . $quoted . ' ORDER BY id')->fetchAll());
+            ], $connection->query('SELECT id, label, note FROM '.$quoted.' ORDER BY id')->fetchAll());
         } finally {
-            $connection->execute('DROP TABLE IF EXISTS ' . $quoted);
+            $connection->execute('DROP TABLE IF EXISTS '.$quoted);
             $connection->close();
         }
     }
 
-    public function testLargeSqlImportUsesBoundedMemory(): void
+    public function test_large_sql_import_uses_bounded_memory(): void
     {
         $connection = $this->connection('sqlite');
         $connection->execute('CREATE TABLE sqlcraft_m7_large (id INTEGER PRIMARY KEY)');
@@ -102,15 +103,14 @@ final class ImportExportRoundTripTest extends TestCase
         $handle = fopen($path, 'wb');
         self::assertIsResource($handle);
         for ($id = 1; $id <= 20000; $id++) {
-            fwrite($handle, 'INSERT INTO sqlcraft_m7_large (id) VALUES (' . $id . ");\n");
+            fwrite($handle, 'INSERT INTO sqlcraft_m7_large (id) VALUES ('.$id.");\n");
         }
         fclose($handle);
 
         try {
-            $source = new class ($path) implements ImportSourceInterface {
-                public function __construct(private readonly string $path)
-                {
-                }
+            $source = new class($path) implements ImportSourceInterface
+            {
+                public function __construct(private readonly string $path) {}
 
                 #[\Override]
                 public function openStream(): mixed
@@ -133,10 +133,10 @@ final class ImportExportRoundTripTest extends TestCase
             };
             memory_reset_peak_usage();
             $before = memory_get_usage(true);
-            $result = (new Importer(new StatementSplitter(), new BatchExecutor(new QueryExecutor())))->import(
+            $result = (new Importer(new StatementSplitter, new BatchExecutor(new QueryExecutor)))->import(
                 $connection,
                 $source,
-                new ImportOptions(),
+                new ImportOptions,
             );
             $peakDelta = memory_get_peak_usage(true) - $before;
 
@@ -151,26 +151,26 @@ final class ImportExportRoundTripTest extends TestCase
         }
     }
 
-    public function testCsvRoundTripPreservesDelimitedNullAndBinaryValuesOnSqlite(): void
+    public function test_csv_round_trip_preserves_delimited_null_and_binary_values_on_sqlite(): void
     {
         $connection = $this->connection('sqlite');
         $table = 'sqlcraft_m7_csv';
         $quoted = $connection->quoteIdentifier($table);
-        $connection->execute('CREATE TABLE ' . $quoted . ' (id INTEGER PRIMARY KEY, label TEXT, payload BLOB, note TEXT)');
-        $connection->execute('INSERT INTO ' . $quoted . ' (id, label, payload, note) VALUES (?, ?, ?, ?)', [1, 'a, "quoted"', "\x00\x01\xFF", null]);
+        $connection->execute('CREATE TABLE '.$quoted.' (id INTEGER PRIMARY KEY, label TEXT, payload BLOB, note TEXT)');
+        $connection->execute('INSERT INTO '.$quoted.' (id, label, payload, note) VALUES (?, ?, ?, ?)', [1, 'a, "quoted"', "\x00\x01\xFF", null]);
 
         try {
             $source = $this->source($connection);
-            $sink = new StringBufferSink();
-            (new Exporter($source, new QueryExecutor(), new CsvFormatWriter()))->export(
+            $sink = new StringBufferSink;
+            (new Exporter($source, new QueryExecutor, new CsvFormatWriter))->export(
                 $connection,
                 $sink,
-                new DumpOptions('csv', DumpScope::table('main', $table), tableStyle: \SQLCraft\Export\TableSectionStyle::None),
+                new DumpOptions('csv', DumpScope::table('main', $table), tableStyle: TableSectionStyle::None),
             );
             $csv = $sink->contents();
-            $connection->execute('DELETE FROM ' . $quoted);
+            $connection->execute('DELETE FROM '.$quoted);
 
-            $result = (new CsvImporter(new ColumnInspector(new SqliteMetadataFactory())))->importCsv(
+            $result = (new CsvImporter(new ColumnInspector(new SqliteMetadataFactory)))->importCsv(
                 $connection,
                 new QualifiedName(new Identifier($table)),
                 $this->sourceFromString($csv),
@@ -180,9 +180,9 @@ final class ImportExportRoundTripTest extends TestCase
             self::assertSame(1, $result->statementsExecuted);
             self::assertSame([
                 ['id' => 1, 'label' => 'a, "quoted"', 'payload' => "\x00\x01\xFF", 'note' => null],
-            ], $connection->query('SELECT id, label, payload, note FROM ' . $quoted)->fetchAll());
+            ], $connection->query('SELECT id, label, payload, note FROM '.$quoted)->fetchAll());
         } finally {
-            $connection->execute('DROP TABLE IF EXISTS ' . $quoted);
+            $connection->execute('DROP TABLE IF EXISTS '.$quoted);
             $connection->close();
         }
     }
@@ -193,24 +193,25 @@ final class ImportExportRoundTripTest extends TestCase
             $pdo = new PDO('sqlite::memory:');
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-            return new PdoConnection($pdo, new SqlitePlatform(), new PdoExceptionTranslator(), databaseName: 'main');
+            return new PdoConnection($pdo, new SqlitePlatform, new PdoExceptionTranslator, databaseName: 'main');
         }
 
-        $factory = new PdoConnectionFactory(new PdoExceptionTranslator());
+        $factory = new PdoConnectionFactory(new PdoExceptionTranslator);
+
         return match ($engine) {
-            'mysql' => (new MySQLDriver($factory, new MySQLPlatform()))->connect(new ConnectionParameters(host: 'mysql', port: 3306, database: 'sqlcraft_test', username: 'sqlcraft', password: 'secret')),
-            'mariadb' => (new MySQLDriver($factory, new MariaDbPlatform()))->connect(new ConnectionParameters(host: 'mariadb', port: 3306, database: 'sqlcraft_test', username: 'sqlcraft', password: 'secret')),
-            'pgsql' => (new PostgreSQLDriver($factory, new PostgreSQLPlatform()))->connect(new ConnectionParameters(host: 'postgres', port: 5432, database: 'sqlcraft_test', username: 'sqlcraft', password: 'secret')),
-            default => throw new \InvalidArgumentException('Unknown engine: ' . $engine),
+            'mysql' => (new MySQLDriver($factory, new MySQLPlatform))->connect(new ConnectionParameters(host: 'mysql', port: 3306, database: 'sqlcraft_test', username: 'sqlcraft', password: 'secret')),
+            'mariadb' => (new MySQLDriver($factory, new MariaDbPlatform))->connect(new ConnectionParameters(host: 'mariadb', port: 3306, database: 'sqlcraft_test', username: 'sqlcraft', password: 'secret')),
+            'pgsql' => (new PostgreSQLDriver($factory, new PostgreSQLPlatform))->connect(new ConnectionParameters(host: 'postgres', port: 5432, database: 'sqlcraft_test', username: 'sqlcraft', password: 'secret')),
+            default => throw new \InvalidArgumentException('Unknown engine: '.$engine),
         };
     }
 
     private function source(ConnectionInterface $connection): ExportSource
     {
         $factory = match ($connection->getPlatformName()) {
-            'mysql', 'mariadb' => new MySQLMetadataFactory(),
-            'pgsql' => new PostgreSQLMetadataFactory(),
-            'sqlite' => new SqliteMetadataFactory(),
+            'mysql', 'mariadb' => new MySQLMetadataFactory,
+            'pgsql' => new PostgreSQLMetadataFactory,
+            'sqlite' => new SqliteMetadataFactory,
             default => throw new \InvalidArgumentException('Unknown platform.'),
         };
 
@@ -219,10 +220,9 @@ final class ImportExportRoundTripTest extends TestCase
 
     private function sourceFromString(string $contents): ImportSourceInterface
     {
-        return new class ($contents) implements ImportSourceInterface {
-            public function __construct(private readonly string $contents)
-            {
-            }
+        return new class($contents) implements ImportSourceInterface
+        {
+            public function __construct(private readonly string $contents) {}
 
             #[\Override]
             public function openStream(): mixed

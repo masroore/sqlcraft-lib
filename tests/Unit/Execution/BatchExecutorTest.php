@@ -8,13 +8,13 @@ use PHPUnit\Framework\TestCase;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Connection\ResultInterface;
 use SQLCraft\Contracts\Execution\QueryExecutorInterface;
+use SQLCraft\Contracts\Execution\StatementBatch;
 use SQLCraft\DTO\ExecutionResult;
 use SQLCraft\Execution\BatchExecutor;
-use SQLCraft\Contracts\Execution\StatementBatch;
 
 final class BatchExecutorTest extends TestCase
 {
-    public function testExecutesQueriesAndCommandsInOrder(): void
+    public function test_executes_queries_and_commands_in_order(): void
     {
         $connection = self::createMock(ConnectionInterface::class);
         $rows = self::createMock(ResultInterface::class);
@@ -33,7 +33,7 @@ final class BatchExecutorTest extends TestCase
         self::assertNull($results[1]->error);
     }
 
-    public function testCanCollectErrorsAndContinue(): void
+    public function test_can_collect_errors_and_continue(): void
     {
         $connection = self::createMock(ConnectionInterface::class);
         $executor = self::createMock(QueryExecutorInterface::class);
@@ -51,7 +51,7 @@ final class BatchExecutorTest extends TestCase
         self::assertSame('good', $results[1]->result?->sql);
     }
 
-    public function testStopsOnFirstErrorByDefault(): void
+    public function test_stops_on_first_error_by_default(): void
     {
         $connection = self::createMock(ConnectionInterface::class);
         $executor = self::createMock(QueryExecutorInterface::class);
@@ -60,7 +60,8 @@ final class BatchExecutorTest extends TestCase
         $this->expectException(\RuntimeException::class);
         iterator_to_array((new BatchExecutor($executor))->executeBatch($connection, new StatementBatch(['bad', 'never'])));
     }
-    public function testRejectsBatchesAboveConfiguredMaximum(): void
+
+    public function test_rejects_batches_above_configured_maximum(): void
     {
         $executor = self::createMock(QueryExecutorInterface::class);
         $batchExecutor = new BatchExecutor($executor, maximumStatements: 1);
@@ -71,5 +72,4 @@ final class BatchExecutorTest extends TestCase
             new StatementBatch(['one', 'two']),
         ));
     }
-
 }

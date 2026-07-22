@@ -11,7 +11,7 @@ use SQLCraft\ValueObjects\DefaultValueKind;
 
 final class DefaultValueTest extends TestCase
 {
-    public function testFactoriesRepresentAllDefaultKinds(): void
+    public function test_factories_represent_all_default_kinds(): void
     {
         self::assertSame(DefaultValueKind::NULL_VALUE, DefaultValue::nullValue()->kind);
         self::assertNull(DefaultValue::nullValue()->value);
@@ -21,21 +21,21 @@ final class DefaultValueTest extends TestCase
         self::assertSame('order_id_seq', DefaultValue::sequenceNext('order_id_seq')->value);
     }
 
-    public function testConstructorRejectsInconsistentDiscriminators(): void
+    public function test_constructor_rejects_inconsistent_discriminators(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
         new DefaultValue(DefaultValueKind::NULL_VALUE, 'unexpected');
     }
 
-    public function testInvalidEmptyStringDefaultsAreRejected(): void
+    public function test_invalid_empty_string_defaults_are_rejected(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
         new DefaultValue(DefaultValueKind::EMPTY_STRING, 'unexpected');
     }
 
-    public function testNonNullKindsRequireValues(): void
+    public function test_non_null_kinds_require_values(): void
     {
         $this->expectException(InvalidArgumentException::class);
 

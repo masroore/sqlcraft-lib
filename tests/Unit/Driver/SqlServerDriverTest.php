@@ -13,9 +13,9 @@ use SQLCraft\ValueObjects\ConnectionParameters;
 
 final class SqlServerDriverTest extends TestCase
 {
-    public function testItBuildsHostAndSocketDsns(): void
+    public function test_it_builds_host_and_socket_dsns(): void
     {
-        $driver = new SqlServerDriver(self::createMock(PdoConnectionFactoryInterface::class), new SqlServerPlatform());
+        $driver = new SqlServerDriver(self::createMock(PdoConnectionFactoryInterface::class), new SqlServerPlatform);
 
         self::assertSame(
             'sqlsrv:Server=db.example,11433;Database=shop;TrustServerCertificate=Yes',
@@ -29,10 +29,10 @@ final class SqlServerDriverTest extends TestCase
         self::assertSame(['sqlsrv'], $driver->getPdoDriverNames());
     }
 
-    public function testItUsesThePdoFactorySeam(): void
+    public function test_it_uses_the_pdo_factory_seam(): void
     {
         $factory = self::createMock(PdoConnectionFactoryInterface::class);
-        $platform = new SqlServerPlatform();
+        $platform = new SqlServerPlatform;
         $connection = self::createMock(ConnectionInterface::class);
         $parameters = new ConnectionParameters(database: 'shop');
         $factory->expects(self::once())

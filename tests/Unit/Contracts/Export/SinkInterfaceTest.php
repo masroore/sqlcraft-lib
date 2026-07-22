@@ -9,7 +9,7 @@ use SQLCraft\Contracts\Export\SinkInterface;
 
 final class SinkInterfaceTest extends TestCase
 {
-    public function testSinkPortExposesStreamingLifecycle(): void
+    public function test_sink_port_exposes_streaming_lifecycle(): void
     {
         self::assertSame(
             ['write', 'flush', 'close'],
@@ -18,7 +18,7 @@ final class SinkInterfaceTest extends TestCase
     }
 
     /**
-     * @param class-string $interface
+     * @param  class-string  $interface
      * @return list<string>
      */
     private function methodNames(string $interface): array

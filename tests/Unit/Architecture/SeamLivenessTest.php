@@ -11,13 +11,13 @@ use SQLCraft\Export\DumpOptions;
 
 final class SeamLivenessTest extends TestCase
 {
-    public function testMetadataCacheInvalidationMethodsHaveExportedConsumers(): void
+    public function test_metadata_cache_invalidation_methods_have_exported_consumers(): void
     {
         $source = $this->source('src/Schema');
 
         foreach (['invalidateTable', 'invalidateDatabase', 'clear'] as $method) {
             self::assertStringContainsString(
-                '->' . $method . '(',
+                '->'.$method.'(',
                 $source,
                 sprintf('Metadata cache method %s has no caller.', $method),
             );
@@ -26,52 +26,52 @@ final class SeamLivenessTest extends TestCase
         self::assertNotEmpty((new \ReflectionClass(MetadataCacheInterface::class))->getMethods());
     }
 
-    public function testEveryDumpOptionFlagIsReadByExportCode(): void
+    public function test_every_dump_option_flag_is_read_by_export_code(): void
     {
         $options = new \ReflectionClass(DumpOptions::class);
         $exportSource = $this->source('src/Export', except: ['DumpOptions.php']);
 
         foreach ($options->getProperties() as $property) {
-            if (!$property->isPromoted() || in_array($property->getName(), ['format', 'scope'], true)) {
+            if (! $property->isPromoted() || in_array($property->getName(), ['format', 'scope'], true)) {
                 continue;
             }
 
             self::assertStringContainsString(
-                '->' . $property->getName(),
+                '->'.$property->getName(),
                 $exportSource,
                 sprintf('DumpOptions flag %s has no export consumer.', $property->getName()),
             );
         }
     }
 
-    public function testEveryConcreteEventIsConstructedByAnApplicationPath(): void
+    public function test_every_concrete_event_is_constructed_by_an_application_path(): void
     {
-        $eventDirectory = dirname(__DIR__, 3) . '/src/Events';
+        $eventDirectory = dirname(__DIR__, 3).'/src/Events';
         $source = $this->source('src', except: []);
 
-        $eventFiles = glob($eventDirectory . '/*.php');
+        $eventFiles = glob($eventDirectory.'/*.php');
         foreach ($eventFiles === false ? [] : $eventFiles as $file) {
             $class = basename($file, '.php');
             /** @var class-string $eventClass */
-            $eventClass = 'SQLCraft\\Events\\' . $class;
+            $eventClass = 'SQLCraft\\Events\\'.$class;
             $reflection = new \ReflectionClass($eventClass);
             if ($reflection->isAbstract() || $reflection->isInterface() || str_ends_with($class, 'Dispatcher')) {
                 continue;
             }
 
             self::assertStringContainsString(
-                'new ' . $class . '(',
+                'new '.$class.'(',
                 $source,
                 sprintf('Event %s has no construction/dispatch path.', $class),
             );
         }
     }
 
-    public function testAdvertisedCapabilitiesBelongToTheClosedCapabilityEnum(): void
+    public function test_advertised_capabilities_belong_to_the_closed_capability_enum(): void
     {
         $enumCases = array_fill_keys(array_map(static fn (Capability $case): string => $case->name, Capability::cases()), true);
 
-        $platformFiles = glob(dirname(__DIR__, 3) . '/src/Platform/*Platform.php');
+        $platformFiles = glob(dirname(__DIR__, 3).'/src/Platform/*Platform.php');
         foreach ($platformFiles === false ? [] : $platformFiles as $file) {
             $platformSource = file_get_contents($file);
             self::assertIsString($platformSource);
@@ -90,13 +90,13 @@ final class SeamLivenessTest extends TestCase
     /** @param list<string> $except */
     private function source(string $relativeDirectory, array $except = []): string
     {
-        $root = dirname(__DIR__, 3) . '/' . $relativeDirectory;
+        $root = dirname(__DIR__, 3).'/'.$relativeDirectory;
         $contents = [];
         $iterator = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator($root, \FilesystemIterator::SKIP_DOTS),
         );
         foreach ($iterator as $file) {
-            if (!$file instanceof \SplFileInfo || $file->getExtension() !== 'php') {
+            if (! $file instanceof \SplFileInfo || $file->getExtension() !== 'php') {
                 continue;
             }
             $file = $file->getPathname();

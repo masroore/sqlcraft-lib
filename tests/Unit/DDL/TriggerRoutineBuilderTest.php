@@ -22,7 +22,7 @@ use SQLCraft\ValueObjects\TriggerTiming;
 
 final class TriggerRoutineBuilderTest extends TestCase
 {
-    public function testTriggerAndRoutineBuildersDelegateTypedIntent(): void
+    public function test_trigger_and_routine_builders_delegate_typed_intent(): void
     {
         $name = new QualifiedName(new Identifier('audit_trigger'));
         $table = new QualifiedName(new Identifier('users'));
@@ -40,10 +40,10 @@ final class TriggerRoutineBuilderTest extends TestCase
         self::assertSame(['DROP FUNCTION'], (new DropRoutineBuilder($routine, 'FUNCTION', true))->toSql($dialect));
     }
 
-    public function testSqliteRejectsRoutineRendering(): void
+    public function test_sqlite_rejects_routine_rendering(): void
     {
         $this->expectException(CapabilityNotSupportedException::class);
 
-        (new CreateRoutineBuilder(new QualifiedName(new Identifier('refresh_users')), 'FUNCTION'))->toSql(new SqlitePlatform());
+        (new CreateRoutineBuilder(new QualifiedName(new Identifier('refresh_users')), 'FUNCTION'))->toSql(new SqlitePlatform);
     }
 }

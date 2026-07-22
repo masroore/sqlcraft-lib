@@ -21,7 +21,7 @@ abstract class PlatformConformanceTestCase extends TestCase
         $this->connection->execute('DROP TABLE IF EXISTS contract_fixture_rows');
         $this->connection->execute('CREATE TABLE contract_fixture_rows (id INTEGER PRIMARY KEY, value TEXT NOT NULL)');
         for ($id = 1; $id <= 10; $id++) {
-            $this->connection->execute('INSERT INTO contract_fixture_rows (id, value) VALUES (?, ?)', [$id, 'row-' . $id]);
+            $this->connection->execute('INSERT INTO contract_fixture_rows (id, value) VALUES (?, ?)', [$id, 'row-'.$id]);
         }
     }
 
@@ -31,15 +31,15 @@ abstract class PlatformConformanceTestCase extends TestCase
         $this->connection->close();
     }
 
-    public function testQuotedIdentifierIsAcceptedByTheLiveEngine(): void
+    public function test_quoted_identifier_is_accepted_by_the_live_engine(): void
     {
         $identifier = new Identifier('weird`alias');
-        $row = $this->connection->query('SELECT 1 AS ' . $this->platform()->quoteIdentifier($identifier))->fetchAssoc();
+        $row = $this->connection->query('SELECT 1 AS '.$this->platform()->quoteIdentifier($identifier))->fetchAssoc();
 
         self::assertSame(1, $row['weird`alias'] ?? null);
     }
 
-    public function testPaginationNeverExceedsTheRequestedLimit(): void
+    public function test_pagination_never_exceeds_the_requested_limit(): void
     {
         $sql = $this->platform()->applyPagination(
             'SELECT id FROM contract_fixture_rows ORDER BY id',
@@ -50,7 +50,7 @@ abstract class PlatformConformanceTestCase extends TestCase
         self::assertCount(5, $this->connection->query($sql)->fetchAll());
     }
 
-    public function testOffsetPaginationStartsAtTheRequestedRow(): void
+    public function test_offset_pagination_starts_at_the_requested_row(): void
     {
         $sql = $this->platform()->applyPagination(
             'SELECT id FROM contract_fixture_rows ORDER BY id',
@@ -64,16 +64,16 @@ abstract class PlatformConformanceTestCase extends TestCase
         );
     }
 
-    public function testQuotedStringIsAcceptedAsAValue(): void
+    public function test_quoted_string_is_accepted_as_a_value(): void
     {
         $row = $this->connection->query(
-            'SELECT ' . $this->platform()->quoteValue("O'Reilly") . ' AS value',
+            'SELECT '.$this->platform()->quoteValue("O'Reilly").' AS value',
         )->fetchAssoc();
 
         self::assertSame("O'Reilly", $row['value'] ?? null);
     }
 
-    public function testLiveServerExposesTheDeclaredPlatformCapabilities(): void
+    public function test_live_server_exposes_the_declared_platform_capabilities(): void
     {
         $platform = $this->platform();
         $capabilities = $platform->getCapabilitySet($this->connection->getServerVersion());

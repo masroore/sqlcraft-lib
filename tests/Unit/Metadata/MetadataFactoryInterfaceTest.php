@@ -12,19 +12,19 @@ use SQLCraft\DTO\ForeignKeyMeta;
 use SQLCraft\DTO\IndexMeta;
 use SQLCraft\DTO\PartitionInfo;
 use SQLCraft\DTO\ProcessMeta;
+use SQLCraft\DTO\RoutineMeta;
 use SQLCraft\DTO\SchemaMeta;
 use SQLCraft\DTO\SequenceMeta;
-use SQLCraft\ValueObjects\DataType;
-use SQLCraft\DTO\RoutineMeta;
 use SQLCraft\DTO\TableStatus;
 use SQLCraft\DTO\TriggerMeta;
 use SQLCraft\DTO\UserMeta;
 use SQLCraft\DTO\ViewMeta;
 use SQLCraft\Metadata\MetadataFactoryInterface;
+use SQLCraft\ValueObjects\DataType;
 
 final class MetadataFactoryInterfaceTest extends TestCase
 {
-    public function testFactoryExposesThePlannedTypedHydrationMethods(): void
+    public function test_factory_exposes_the_planned_typed_hydration_methods(): void
     {
         $reflection = new \ReflectionClass(MetadataFactoryInterface::class);
 

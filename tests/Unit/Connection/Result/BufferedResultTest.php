@@ -11,7 +11,7 @@ use SQLCraft\Contracts\Connection\ResultColumn;
 
 final class BufferedResultTest extends TestCase
 {
-    public function testBufferedResultSupportsCursorOperationsAndMetadata(): void
+    public function test_buffered_result_supports_cursor_operations_and_metadata(): void
     {
         $columns = [new ResultColumn('id', 'INTEGER', 'users', 11, false)];
         $result = new BufferedResult([
@@ -27,7 +27,7 @@ final class BufferedResultTest extends TestCase
         self::assertNull($result->fetchAssoc());
     }
 
-    public function testBufferedResultCanSeekAndFetchColumns(): void
+    public function test_buffered_result_can_seek_and_fetch_columns(): void
     {
         $result = new BufferedResult([
             ['id' => 1, 'name' => 'Ada'],
@@ -46,7 +46,7 @@ final class BufferedResultTest extends TestCase
         self::assertSame([], iterator_to_array($result));
     }
 
-    public function testBufferedResultRejectsInvalidSeekOffsets(): void
+    public function test_buffered_result_rejects_invalid_seek_offsets(): void
     {
         $result = new BufferedResult([['id' => 1]]);
 

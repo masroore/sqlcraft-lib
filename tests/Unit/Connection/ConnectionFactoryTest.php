@@ -12,7 +12,7 @@ use SQLCraft\ValueObjects\ConnectionParameters;
 
 final class ConnectionFactoryTest extends TestCase
 {
-    public function testItCreatesAConnectionThroughTheInjectedDriver(): void
+    public function test_it_creates_a_connection_through_the_injected_driver(): void
     {
         $connection = $this->createMock(ConnectionInterface::class);
         $driver = $this->createMock(DriverInterface::class);

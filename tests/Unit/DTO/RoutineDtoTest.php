@@ -12,7 +12,7 @@ use SQLCraft\ValueObjects\RoutineDirection;
 
 final class RoutineDtoTest extends TestCase
 {
-    public function testRoutineMetaStoresFunctionDetailsAndTypedParameters(): void
+    public function test_routine_meta_stores_function_details_and_typed_parameters(): void
     {
         $parameter = new RoutineParameter(
             name: 'user_id',
@@ -47,7 +47,7 @@ final class RoutineDtoTest extends TestCase
         self::assertSame('READS SQL DATA', $routine->sqlDataAccess);
     }
 
-    public function testRoutineMetaSupportsProceduresWithoutReturnTypes(): void
+    public function test_routine_meta_supports_procedures_without_return_types(): void
     {
         $routine = new RoutineMeta(
             name: 'reset_user',

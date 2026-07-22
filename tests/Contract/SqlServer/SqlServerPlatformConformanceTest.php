@@ -23,8 +23,8 @@ final class SqlServerPlatformConformanceTest extends PlatformConformanceTestCase
     #[\Override]
     protected function createConnection(): ConnectionInterface
     {
-        $this->sqlServerPlatform = new SqlServerPlatform();
-        $driver = new SqlServerDriver(new PdoConnectionFactory(new PdoExceptionTranslator()), $this->sqlServerPlatform);
+        $this->sqlServerPlatform = new SqlServerPlatform;
+        $driver = new SqlServerDriver(new PdoConnectionFactory(new PdoExceptionTranslator), $this->sqlServerPlatform);
 
         return $driver->connect(new ConnectionParameters(
             host: $this->environment('SQLCRAFT_MSSQL_HOST', 'mssql'),
@@ -38,7 +38,7 @@ final class SqlServerPlatformConformanceTest extends PlatformConformanceTestCase
     #[\Override]
     protected function platform(): PlatformInterface
     {
-        if (!$this->sqlServerPlatform instanceof SqlServerPlatform) {
+        if (! $this->sqlServerPlatform instanceof SqlServerPlatform) {
             throw new \LogicException('Platform is not initialized.');
         }
 

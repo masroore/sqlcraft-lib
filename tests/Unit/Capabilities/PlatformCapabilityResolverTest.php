@@ -11,7 +11,7 @@ use SQLCraft\ValueObjects\ServerVersion;
 
 final class PlatformCapabilityResolverTest extends TestCase
 {
-    public function testItResolvesAlwaysOnAndVersionedCapabilities(): void
+    public function test_it_resolves_always_on_and_versioned_capabilities(): void
     {
         $resolver = new PlatformCapabilityResolver([
             'always' => [Capability::Table],
@@ -23,7 +23,7 @@ final class PlatformCapabilityResolverTest extends TestCase
         self::assertFalse($resolver->resolve('sqlite', new ServerVersion('3.34.0'))->has(Capability::DropColumn));
     }
 
-    public function testItDeduplicatesCapabilities(): void
+    public function test_it_deduplicates_capabilities(): void
     {
         $set = (new PlatformCapabilityResolver([
             'always' => [Capability::Table, Capability::Table],

@@ -10,7 +10,7 @@ use SQLCraft\Import\ImportResult;
 
 final class ImportResultTest extends TestCase
 {
-    public function testResultStoresExecutionSummaryAndTypedErrors(): void
+    public function test_result_stores_execution_summary_and_typed_errors(): void
     {
         $error = new ImportError(3, 'BAD SQL', 'syntax error', 42601);
         $result = new ImportResult(2, 1, [$error], 12.5);
@@ -21,7 +21,7 @@ final class ImportResultTest extends TestCase
         self::assertSame(12.5, $result->elapsedMs);
     }
 
-    public function testImportErrorStoresStatementFailureContext(): void
+    public function test_import_error_stores_statement_failure_context(): void
     {
         $error = new ImportError(7, 'DROP TABLE missing', 'not found', 42);
 

@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace SQLCraft\Tests\Unit\Export;
 
 use PHPUnit\Framework\TestCase;
-use SQLCraft\Export\DataStyle;
 use SQLCraft\Export\DatabaseSectionStyle;
+use SQLCraft\Export\DataStyle;
 use SQLCraft\Export\ScopeKind;
 use SQLCraft\Export\TableSectionStyle;
 
 final class ExportEnumsTest extends TestCase
 {
-    public function testDatabaseSectionStyles(): void
+    public function test_database_section_styles(): void
     {
         self::assertSame(
             ['None', 'Use', 'DropCreate', 'Create'],
@@ -20,7 +20,7 @@ final class ExportEnumsTest extends TestCase
         );
     }
 
-    public function testTableAndDataStyles(): void
+    public function test_table_and_data_styles(): void
     {
         self::assertSame(
             ['None', 'DropCreate', 'Create'],
@@ -32,7 +32,7 @@ final class ExportEnumsTest extends TestCase
         );
     }
 
-    public function testScopeKinds(): void
+    public function test_scope_kinds(): void
     {
         self::assertSame(
             ['AllDatabases', 'Database', 'Tables', 'FilteredResult'],

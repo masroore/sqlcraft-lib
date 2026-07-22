@@ -10,8 +10,8 @@ use SQLCraft\Connection\PdoConnection;
 use SQLCraft\Connection\PdoExceptionTranslator;
 use SQLCraft\Contracts\Platform\PlatformInterface;
 use SQLCraft\Exceptions\ConnectionClosedException;
-use SQLCraft\Exceptions\SyntaxErrorException;
 use SQLCraft\Exceptions\StreamingResultException;
+use SQLCraft\Exceptions\SyntaxErrorException;
 use SQLCraft\ValueObjects\Identifier;
 
 final class PdoConnectionTest extends TestCase
@@ -27,20 +27,20 @@ final class PdoConnectionTest extends TestCase
         $platform = $this->createMock(PlatformInterface::class);
         $platform->method('getName')->willReturn('sqlite');
         $platform->method('quoteIdentifier')->willReturnCallback(
-            static fn (Identifier $identifier): string => '"' . $identifier->name . '"',
+            static fn (Identifier $identifier): string => '"'.$identifier->name.'"',
         );
         $platform->method('quoteValue')->willReturn('quoted');
 
         $this->connection = new PdoConnection(
             $pdo,
             $platform,
-            new PdoExceptionTranslator(),
+            new PdoExceptionTranslator,
             'test',
             'app',
         );
     }
 
-    public function testItExecutesQueriesInBufferedAndStreamingModes(): void
+    public function test_it_executes_queries_in_buffered_and_streaming_modes(): void
     {
         $this->connection()->execute('CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT NOT NULL)');
         $result = $this->connection()->execute('INSERT INTO users (name) VALUES (?)', ['Ada']);
@@ -60,13 +60,13 @@ final class PdoConnectionTest extends TestCase
         self::assertNull($streaming->fetchAssoc());
     }
 
-    public function testItTranslatesSyntaxErrorsAndRejectsUseAfterClose(): void
+    public function test_it_translates_syntax_errors_and_rejects_use_after_close(): void
     {
         $this->expectException(SyntaxErrorException::class);
         $this->connection()->query('SELEC invalid');
     }
 
-    public function testItRejectsOperationsAfterClose(): void
+    public function test_it_rejects_operations_after_close(): void
     {
         $this->connection()->close();
 
@@ -77,7 +77,7 @@ final class PdoConnectionTest extends TestCase
         $this->connection()->execute('SELECT 1');
     }
 
-    public function testItUsesSavepointsForNestedTransactions(): void
+    public function test_it_uses_savepoints_for_nested_transactions(): void
     {
         $this->connection()->execute('CREATE TABLE values_table (value TEXT NOT NULL)');
 
@@ -91,7 +91,7 @@ final class PdoConnectionTest extends TestCase
         self::assertSame([['value' => 'outer']], $this->connection()->query('SELECT value FROM values_table')->fetchAll());
     }
 
-    public function testItExecutesPreparedStatementsAndClosesThem(): void
+    public function test_it_executes_prepared_statements_and_closes_them(): void
     {
         $this->connection()->execute('CREATE TABLE users (name TEXT NOT NULL)');
         $statement = $this->connection()->prepare('INSERT INTO users (name) VALUES (?)');
@@ -109,7 +109,7 @@ final class PdoConnectionTest extends TestCase
         return $this->connection;
     }
 
-    public function testStreamingResultsCannotBeCounted(): void
+    public function test_streaming_results_cannot_be_counted(): void
     {
         $streaming = $this->connection()->query('SELECT 1 AS value', streaming: true);
 

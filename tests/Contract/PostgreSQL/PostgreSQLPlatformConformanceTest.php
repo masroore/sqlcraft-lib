@@ -22,8 +22,8 @@ final class PostgreSQLPlatformConformanceTest extends PlatformConformanceTestCas
     #[\Override]
     protected function createConnection(): ConnectionInterface
     {
-        $this->postgresqlPlatform = new PostgreSQLPlatform();
-        $driver = new PostgreSQLDriver(new PdoConnectionFactory(new PdoExceptionTranslator()), $this->postgresqlPlatform);
+        $this->postgresqlPlatform = new PostgreSQLPlatform;
+        $driver = new PostgreSQLDriver(new PdoConnectionFactory(new PdoExceptionTranslator), $this->postgresqlPlatform);
 
         return $driver->connect(new ConnectionParameters(
             host: $this->environment('SQLCRAFT_PGSQL_HOST', 'postgres'),
@@ -44,7 +44,7 @@ final class PostgreSQLPlatformConformanceTest extends PlatformConformanceTestCas
     #[\Override]
     protected function platform(): PlatformInterface
     {
-        if (!$this->postgresqlPlatform instanceof \SQLCraft\Platform\PostgreSQLPlatform) {
+        if (! $this->postgresqlPlatform instanceof PostgreSQLPlatform) {
             throw new \LogicException('Platform is not initialized.');
         }
 

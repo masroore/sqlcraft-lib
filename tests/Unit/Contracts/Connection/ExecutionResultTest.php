@@ -9,7 +9,7 @@ use SQLCraft\DTO\ExecutionResult;
 
 final class ExecutionResultTest extends TestCase
 {
-    public function testStoresExecutionMetadataAsAnImmutableSnapshot(): void
+    public function test_stores_execution_metadata_as_an_immutable_snapshot(): void
     {
         $result = new ExecutionResult(3, 42, 1.25, 'INSERT INTO users');
 

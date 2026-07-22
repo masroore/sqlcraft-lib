@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SQLCraft\Tests\Unit\Metadata;
 
 use PHPUnit\Framework\TestCase;
+use SQLCraft\Capabilities\Capability;
 use SQLCraft\Capabilities\CapabilityNotSupportedException;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Connection\ResultInterface;
@@ -16,7 +17,7 @@ use SQLCraft\ValueObjects\QualifiedName;
 
 final class ViewInspectorTest extends TestCase
 {
-    public function testItHydratesViewsAndReadsDefinitions(): void
+    public function test_it_hydrates_views_and_reads_definitions(): void
     {
         $view = new QualifiedName(new Identifier('active_users'));
         $platform = self::createMock(PlatformInterface::class);
@@ -54,7 +55,7 @@ final class ViewInspectorTest extends TestCase
             },
         );
 
-        $inspector = new ViewInspector(new MySQLMetadataFactory());
+        $inspector = new ViewInspector(new MySQLMetadataFactory);
         $viewCollection = $inspector->getViews($connection, 'app');
         $definitionSql = $inspector->getViewDefinition($connection, $view);
         $materializedCollection = $inspector->getMaterializedViews($connection, 'app');
@@ -64,17 +65,17 @@ final class ViewInspectorTest extends TestCase
         self::assertTrue($materializedCollection->get('daily_users')->materialized);
     }
 
-    public function testMaterializedViewCapabilityErrorsAreNotHidden(): void
+    public function test_materialized_view_capability_errors_are_not_hidden(): void
     {
         $platform = self::createMock(PlatformInterface::class);
         $platform->method('getMaterializedViewsSql')->willThrowException(
-            CapabilityNotSupportedException::for(\SQLCraft\Capabilities\Capability::MaterializedView, 'mysql'),
+            CapabilityNotSupportedException::for(Capability::MaterializedView, 'mysql'),
         );
         $connection = self::createMock(ConnectionInterface::class);
         $connection->method('getPlatform')->willReturn($platform);
 
         $this->expectException(CapabilityNotSupportedException::class);
 
-        (new ViewInspector(new MySQLMetadataFactory()))->getMaterializedViews($connection);
+        (new ViewInspector(new MySQLMetadataFactory))->getMaterializedViews($connection);
     }
 }

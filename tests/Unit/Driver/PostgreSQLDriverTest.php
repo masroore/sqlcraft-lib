@@ -13,9 +13,9 @@ use SQLCraft\ValueObjects\ConnectionParameters;
 
 final class PostgreSQLDriverTest extends TestCase
 {
-    public function testItBuildsHostAndSocketDsns(): void
+    public function test_it_builds_host_and_socket_dsns(): void
     {
-        $driver = new PostgreSQLDriver(self::createMock(PdoConnectionFactoryInterface::class), new PostgreSQLPlatform());
+        $driver = new PostgreSQLDriver(self::createMock(PdoConnectionFactoryInterface::class), new PostgreSQLPlatform);
 
         self::assertSame(
             'pgsql:host=db.example;port=5433;dbname=shop',
@@ -29,10 +29,10 @@ final class PostgreSQLDriverTest extends TestCase
         self::assertSame(['pgsql'], $driver->getPdoDriverNames());
     }
 
-    public function testItUsesThePdoFactorySeam(): void
+    public function test_it_uses_the_pdo_factory_seam(): void
     {
         $factory = self::createMock(PdoConnectionFactoryInterface::class);
-        $platform = new PostgreSQLPlatform();
+        $platform = new PostgreSQLPlatform;
         $connection = self::createMock(ConnectionInterface::class);
         $parameters = new ConnectionParameters(database: 'shop');
         $factory->expects(self::once())->method('connect')->with('pgsql:host=127.0.0.1;port=5432;dbname=shop', $parameters, $platform)->willReturn($connection);

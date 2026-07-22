@@ -9,7 +9,7 @@ use SQLCraft\Contracts\DDL\DdlBuilderInterface;
 
 final class DdlBuilderInterfaceTest extends TestCase
 {
-    public function testDdlBuilderPortExposesRenderingAndExecution(): void
+    public function test_ddl_builder_port_exposes_rendering_and_execution(): void
     {
         $methods = array_map(
             static fn (\ReflectionMethod $method): string => $method->getName(),

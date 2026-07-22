@@ -12,7 +12,6 @@ use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Driver\SqlServerDriver;
 use SQLCraft\Platform\SqlServerPlatform;
 use SQLCraft\ValueObjects\ConnectionParameters;
-use SQLCraft\ValueObjects\Identifier;
 
 #[Group('mssql')]
 final class SqlServerIntegrationTest extends TestCase
@@ -26,7 +25,7 @@ final class SqlServerIntegrationTest extends TestCase
             self::markTestSkipped('Set SQLCRAFT_RUN_ENGINE_INTEGRATION=1 with the SQL Server service running.');
         }
 
-        $factory = new PdoConnectionFactory(new PdoExceptionTranslator());
+        $factory = new PdoConnectionFactory(new PdoExceptionTranslator);
         $parameters = new ConnectionParameters(
             host: $this->environment('SQLCRAFT_MSSQL_HOST', 'mssql'),
             port: (int) $this->environment('SQLCRAFT_MSSQL_PORT', '1433'),
@@ -34,7 +33,7 @@ final class SqlServerIntegrationTest extends TestCase
             username: $this->environment('SQLCRAFT_MSSQL_USER', 'sa'),
             password: $this->environment('SQLCRAFT_MSSQL_PASS', 'SQLcraft_Test1!'),
         );
-        $this->connection = (new SqlServerDriver($factory, new SqlServerPlatform()))->connect($parameters);
+        $this->connection = (new SqlServerDriver($factory, new SqlServerPlatform))->connect($parameters);
     }
 
     #[\Override]
@@ -44,7 +43,7 @@ final class SqlServerIntegrationTest extends TestCase
         $this->connection = null;
     }
 
-    public function testConnectionReportsSqlServerAndExecutesQueries(): void
+    public function test_connection_reports_sql_server_and_executes_queries(): void
     {
         $connection = $this->connection();
 
@@ -53,25 +52,25 @@ final class SqlServerIntegrationTest extends TestCase
         self::assertSame([['value' => 1]], $connection->query('SELECT 1 AS value')->fetchAll());
     }
 
-    public function testSqlServerDdlAndPaginationUseThePlatformDialect(): void
+    public function test_sql_server_ddl_and_pagination_use_the_platform_dialect(): void
     {
         $connection = $this->connection();
         $quoted = '[dbo].[sqlcraft_platform_fixture]';
-        $connection->execute('IF OBJECT_ID(N\'dbo.sqlcraft_platform_fixture\', N\'U\') IS NOT NULL DROP TABLE ' . $quoted);
-        $connection->execute('CREATE TABLE ' . $quoted . ' ([id] INT IDENTITY(1,1) NOT NULL PRIMARY KEY, [value] NVARCHAR(100) NOT NULL)');
+        $connection->execute('IF OBJECT_ID(N\'dbo.sqlcraft_platform_fixture\', N\'U\') IS NOT NULL DROP TABLE '.$quoted);
+        $connection->execute('CREATE TABLE '.$quoted.' ([id] INT IDENTITY(1,1) NOT NULL PRIMARY KEY, [value] NVARCHAR(100) NOT NULL)');
 
         try {
             for ($id = 1; $id <= 5; $id++) {
-                $connection->execute('INSERT INTO ' . $quoted . ' ([value]) VALUES (?)', ['row-' . $id]);
+                $connection->execute('INSERT INTO '.$quoted.' ([value]) VALUES (?)', ['row-'.$id]);
             }
 
-            $sql = $connection->getPlatform()->applyPagination('SELECT [id], [value] FROM ' . $quoted . ' ORDER BY [id]', 2, 2);
+            $sql = $connection->getPlatform()->applyPagination('SELECT [id], [value] FROM '.$quoted.' ORDER BY [id]', 2, 2);
             self::assertSame(
                 [['id' => 3, 'value' => 'row-3'], ['id' => 4, 'value' => 'row-4']],
                 $connection->query($sql)->fetchAll(),
             );
         } finally {
-            $connection->execute('DROP TABLE ' . $quoted);
+            $connection->execute('DROP TABLE '.$quoted);
         }
     }
 
@@ -84,7 +83,7 @@ final class SqlServerIntegrationTest extends TestCase
 
     private function connection(): ConnectionInterface
     {
-        if (!$this->connection instanceof \SQLCraft\Contracts\Connection\ConnectionInterface) {
+        if (! $this->connection instanceof ConnectionInterface) {
             self::fail('SQL Server connection was not initialized.');
         }
 

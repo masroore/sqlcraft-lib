@@ -22,8 +22,8 @@ final class MariaDbPlatformConformanceTest extends PlatformConformanceTestCase
     #[\Override]
     protected function createConnection(): ConnectionInterface
     {
-        $this->mariaDbPlatform = new MariaDbPlatform();
-        $driver = new MySQLDriver(new PdoConnectionFactory(new PdoExceptionTranslator()), $this->mariaDbPlatform);
+        $this->mariaDbPlatform = new MariaDbPlatform;
+        $driver = new MySQLDriver(new PdoConnectionFactory(new PdoExceptionTranslator), $this->mariaDbPlatform);
 
         return $driver->connect(new ConnectionParameters(
             host: $this->environment('SQLCRAFT_MARIADB_HOST', 'mariadb'),
@@ -44,7 +44,7 @@ final class MariaDbPlatformConformanceTest extends PlatformConformanceTestCase
     #[\Override]
     protected function platform(): PlatformInterface
     {
-        if (!$this->mariaDbPlatform instanceof \SQLCraft\Platform\MariaDbPlatform) {
+        if (! $this->mariaDbPlatform instanceof MariaDbPlatform) {
             throw new \LogicException('Platform is not initialized.');
         }
 

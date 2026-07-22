@@ -10,7 +10,7 @@ use SQLCraft\Contracts\Export\FormatWriterInterface;
 
 final class ExportContractsTest extends TestCase
 {
-    public function testFormatWriterPortExposesTheExportLifecycle(): void
+    public function test_format_writer_port_exposes_the_export_lifecycle(): void
     {
         self::assertSame(
             [
@@ -26,13 +26,13 @@ final class ExportContractsTest extends TestCase
         );
     }
 
-    public function testExporterPortExposesTheTopLevelExportOperation(): void
+    public function test_exporter_port_exposes_the_top_level_export_operation(): void
     {
         self::assertSame(['export'], $this->methodNames(ExporterInterface::class));
     }
 
     /**
-     * @param class-string $interface
+     * @param  class-string  $interface
      * @return list<string>
      */
     private function methodNames(string $interface): array

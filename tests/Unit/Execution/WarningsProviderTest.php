@@ -12,7 +12,7 @@ use SQLCraft\Execution\WarningsProvider;
 
 final class WarningsProviderTest extends TestCase
 {
-    public function testReturnsTypedMysqlWarnings(): void
+    public function test_returns_typed_mysql_warnings(): void
     {
         $result = self::createMock(ResultInterface::class);
         $result->expects(self::once())->method('fetchAll')->willReturn([
@@ -23,7 +23,7 @@ final class WarningsProviderTest extends TestCase
         $connection->expects(self::once())->method('getPlatformName')->willReturn('mysql');
         $connection->expects(self::once())->method('query')->with('SHOW WARNINGS', [], false)->willReturn($result);
 
-        $warnings = (new WarningsProvider())->getWarnings($connection);
+        $warnings = (new WarningsProvider)->getWarnings($connection);
 
         self::assertInstanceOf(WarningCollection::class, $warnings);
         self::assertCount(2, $warnings);
@@ -31,12 +31,12 @@ final class WarningsProviderTest extends TestCase
         self::assertSame(1265, $warnings->get(0)->code);
     }
 
-    public function testReturnsEmptyCollectionForUnsupportedPlatforms(): void
+    public function test_returns_empty_collection_for_unsupported_platforms(): void
     {
         $connection = self::createMock(ConnectionInterface::class);
         $connection->expects(self::once())->method('getPlatformName')->willReturn('sqlite');
         $connection->expects(self::never())->method('query');
 
-        self::assertCount(0, (new WarningsProvider())->getWarnings($connection));
+        self::assertCount(0, (new WarningsProvider)->getWarnings($connection));
     }
 }

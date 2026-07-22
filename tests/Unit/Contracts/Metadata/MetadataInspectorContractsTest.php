@@ -6,8 +6,8 @@ namespace SQLCraft\Tests\Unit\Contracts\Metadata;
 
 use PHPUnit\Framework\TestCase;
 use SQLCraft\Contracts\Metadata\CheckConstraintInspectorInterface;
-use SQLCraft\Contracts\Metadata\DatabaseInspectorInterface;
 use SQLCraft\Contracts\Metadata\ColumnInspectorInterface;
+use SQLCraft\Contracts\Metadata\DatabaseInspectorInterface;
 use SQLCraft\Contracts\Metadata\ForeignKeyInspectorInterface;
 use SQLCraft\Contracts\Metadata\IndexInspectorInterface;
 use SQLCraft\Contracts\Metadata\PrivilegeInspectorInterface;
@@ -21,7 +21,7 @@ use SQLCraft\Contracts\Metadata\ViewInspectorInterface;
 
 final class MetadataInspectorContractsTest extends TestCase
 {
-    public function testInspectorPortsExposeThePlannedMethods(): void
+    public function test_inspector_ports_expose_the_planned_methods(): void
     {
         $inspectors = [
             DatabaseInspectorInterface::class => ['getSchemas', 'getSequences', 'getTypes'],

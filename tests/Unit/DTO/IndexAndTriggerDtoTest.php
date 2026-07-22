@@ -14,7 +14,7 @@ use SQLCraft\ValueObjects\TriggerTiming;
 
 final class IndexAndTriggerDtoTest extends TestCase
 {
-    public function testIndexMetaStoresOrderedColumnMetadata(): void
+    public function test_index_meta_stores_ordered_column_metadata(): void
     {
         $index = new IndexMeta(
             name: 'users_email_unique',
@@ -41,7 +41,7 @@ final class IndexAndTriggerDtoTest extends TestCase
         self::assertNull($index->filterExpression);
     }
 
-    public function testIndexColumnMetaSupportsPrefixAndExpressionColumns(): void
+    public function test_index_column_meta_supports_prefix_and_expression_columns(): void
     {
         $column = new IndexColumnMeta(
             columnName: 'name',
@@ -56,7 +56,7 @@ final class IndexAndTriggerDtoTest extends TestCase
         self::assertSame('lower(name)', $column->expression);
     }
 
-    public function testTriggerMetaStoresTimingEventAndBody(): void
+    public function test_trigger_meta_stores_timing_event_and_body(): void
     {
         $trigger = new TriggerMeta(
             name: 'users_updated_at',

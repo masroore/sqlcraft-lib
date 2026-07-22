@@ -14,7 +14,7 @@ use SQLCraft\DTO\ViewMeta;
 
 final class RemainingDtoTest extends TestCase
 {
-    public function testViewMetaStoresViewDefinitionAndMaterializationState(): void
+    public function test_view_meta_stores_view_definition_and_materialization_state(): void
     {
         $view = new ViewMeta(
             name: 'active_users',
@@ -29,7 +29,7 @@ final class RemainingDtoTest extends TestCase
         self::assertFalse($view->materialized);
     }
 
-    public function testViewMetaSupportsMaterializedViewsWithoutLoadedDefinition(): void
+    public function test_view_meta_supports_materialized_views_without_loaded_definition(): void
     {
         $view = new ViewMeta(
             name: 'daily_totals',
@@ -43,7 +43,7 @@ final class RemainingDtoTest extends TestCase
         self::assertNull($view->definition);
     }
 
-    public function testCheckConstraintMetaStoresRawExpressionAndEnforcement(): void
+    public function test_check_constraint_meta_stores_raw_expression_and_enforcement(): void
     {
         $constraint = new CheckConstraintMeta(
             name: 'users_age_check',
@@ -56,7 +56,7 @@ final class RemainingDtoTest extends TestCase
         self::assertTrue($constraint->enforced);
     }
 
-    public function testUserMetaStoresLoginAndAuthenticationMetadata(): void
+    public function test_user_meta_stores_login_and_authentication_metadata(): void
     {
         $user = new UserMeta(
             name: 'app',
@@ -73,7 +73,7 @@ final class RemainingDtoTest extends TestCase
         self::assertTrue($user->canLogin);
     }
 
-    public function testPartitionInfoStoresPortablePartitionConfiguration(): void
+    public function test_partition_info_stores_portable_partition_configuration(): void
     {
         $partition = new PartitionInfo(
             name: 'orders_2026',
@@ -92,7 +92,7 @@ final class RemainingDtoTest extends TestCase
         self::assertSame('FOR VALUES FROM (2026-01-01) TO (2027-01-01)', $partition->bound);
     }
 
-    public function testBackwardKeyMetaStoresReverseForeignKeyMappings(): void
+    public function test_backward_key_meta_stores_reverse_foreign_key_mappings(): void
     {
         $key = new BackwardKeyMeta(
             constraintName: 'orders_user_id_foreign',
@@ -107,7 +107,7 @@ final class RemainingDtoTest extends TestCase
         self::assertSame(['id'], $key->targetColumns);
     }
 
-    public function testProcessMetaStoresProcessListSnapshot(): void
+    public function test_process_meta_stores_process_list_snapshot(): void
     {
         $process = new ProcessMeta(
             id: 42,

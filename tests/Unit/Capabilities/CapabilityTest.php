@@ -13,7 +13,7 @@ use SQLCraft\Contracts\Events\SchemaEventDispatcherInterface;
 
 final class CapabilityTest extends TestCase
 {
-    public function testCapabilityEnumUsesStableSerializedValues(): void
+    public function test_capability_enum_uses_stable_serialized_values(): void
     {
         self::assertSame('table', Capability::Table->value);
         self::assertSame('check', Capability::CheckConstraints->value);
@@ -21,7 +21,7 @@ final class CapabilityTest extends TestCase
         self::assertSame(Capability::Trigger, Capability::from('trigger'));
     }
 
-    public function testExtendedCapabilityComparesByName(): void
+    public function test_extended_capability_compares_by_name(): void
     {
         $parquet = new ExtendedCapability('duckdb.parquet');
 
@@ -30,7 +30,7 @@ final class CapabilityTest extends TestCase
         self::assertFalse($parquet->equals(new ExtendedCapability('duckdb.json')));
     }
 
-    public function testCapabilityExceptionFormatsExtendedCapabilityNames(): void
+    public function test_capability_exception_formats_extended_capability_names(): void
     {
         $exception = new CapabilityNotSupportedException(
             new ExtendedCapability('duckdb.parquet'),
@@ -41,7 +41,7 @@ final class CapabilityTest extends TestCase
         self::assertSame('Capability not supported: duckdb.parquet on duckdb 1.2.', $exception->getMessage());
     }
 
-    public function testCapabilitySetQueriesAndIteratesCoreAndExtendedCapabilities(): void
+    public function test_capability_set_queries_and_iterates_core_and_extended_capabilities(): void
     {
         $parquet = new ExtendedCapability('duckdb.parquet');
         $capabilities = new CapabilitySet([
@@ -65,7 +65,7 @@ final class CapabilityTest extends TestCase
         );
     }
 
-    public function testCapabilitySetRequiresSupportedCapabilities(): void
+    public function test_capability_set_requires_supported_capabilities(): void
     {
         $capabilities = new CapabilitySet([Capability::Table]);
 
@@ -74,7 +74,7 @@ final class CapabilityTest extends TestCase
         $capabilities->require(Capability::Sequence);
     }
 
-    public function testCapabilitySetIntersectsWithoutMutatingEitherSet(): void
+    public function test_capability_set_intersects_without_mutating_either_set(): void
     {
         $parquet = new ExtendedCapability('duckdb.parquet');
         $capabilities = new CapabilitySet([Capability::Table, Capability::Trigger, $parquet]);
@@ -86,7 +86,8 @@ final class CapabilityTest extends TestCase
         self::assertSame(3, $capabilities->count());
         self::assertSame(3, $other->count());
     }
-    public function testMissingCapabilityEmitsScalarContextBeforeThrowing(): void
+
+    public function test_missing_capability_emits_scalar_context_before_throwing(): void
     {
         $events = self::createMock(SchemaEventDispatcherInterface::class);
         $events->expects(self::once())->method('capabilityNotSupported')->with('sequence', 'sqlite', '3.0.0');
@@ -95,5 +96,4 @@ final class CapabilityTest extends TestCase
         $this->expectException(CapabilityNotSupportedException::class);
         $capabilities->require(Capability::Sequence);
     }
-
 }

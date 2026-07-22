@@ -11,7 +11,7 @@ use SQLCraft\DTO\ExecutionResult;
 
 final class TransactionTest extends TestCase
 {
-    public function testCommitExecutesTheCommitStatement(): void
+    public function test_commit_executes_the_commit_statement(): void
     {
         $connection = $this->createMock(ConnectionInterface::class);
         $connection->expects(self::once())
@@ -26,7 +26,7 @@ final class TransactionTest extends TestCase
         self::assertFalse($transaction->isActive());
     }
 
-    public function testNestedRollbackUsesItsSavepoint(): void
+    public function test_nested_rollback_uses_its_savepoint(): void
     {
         $connection = $this->createMock(ConnectionInterface::class);
         $connection->expects(self::once())

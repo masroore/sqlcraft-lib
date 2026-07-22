@@ -9,12 +9,12 @@ use SQLCraft\ValueObjects\DataType;
 
 final class DataTypeTest extends TestCase
 {
-    public function testUnsignedDefaultsToFalse(): void
+    public function test_unsigned_defaults_to_false(): void
     {
         self::assertFalse((new DataType('INT'))->unsigned);
     }
 
-    public function testItStoresTypeShape(): void
+    public function test_it_stores_type_shape(): void
     {
         $type = new DataType(
             'VARCHAR',
@@ -30,16 +30,16 @@ final class DataTypeTest extends TestCase
         self::assertSame('utf8mb4_unicode_ci', $type->collation);
         self::assertSame('utf8mb4', $type->charset);
     }
-    public function testItRejectsUnsafeTypeSyntax(): void
+
+    public function test_it_rejects_unsafe_type_syntax(): void
     {
         $this->expectException(\InvalidArgumentException::class);
 
         new DataType('TEXT); DROP TABLE audit_log; --');
     }
 
-    public function testItAllowsCommonParameterizedTypes(): void
+    public function test_it_allows_common_parameterized_types(): void
     {
         self::assertSame("ENUM('open','closed')", (new DataType("ENUM('open','closed')"))->name);
     }
-
 }

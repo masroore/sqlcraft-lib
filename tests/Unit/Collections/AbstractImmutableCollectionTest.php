@@ -23,7 +23,7 @@ final class IdentifierCollection extends AbstractImmutableCollection
 
 final class AbstractImmutableCollectionTest extends TestCase
 {
-    public function testItCountsIteratesAndLooksUpItems(): void
+    public function test_it_counts_iterates_and_looks_up_items(): void
     {
         $users = new IdentifierCollection([
             'first' => new Identifier('users'),
@@ -41,7 +41,7 @@ final class AbstractImmutableCollectionTest extends TestCase
         ));
     }
 
-    public function testItRejectsMissingAndInvalidKeys(): void
+    public function test_it_rejects_missing_and_invalid_keys(): void
     {
         $users = new IdentifierCollection([new Identifier('users')]);
 
@@ -49,7 +49,7 @@ final class AbstractImmutableCollectionTest extends TestCase
         $users->get(5);
     }
 
-    public function testItFiltersWithoutMutatingTheOriginalCollection(): void
+    public function test_it_filters_without_mutating_the_original_collection(): void
     {
         $users = new IdentifierCollection([
             new Identifier('users'),
@@ -65,7 +65,7 @@ final class AbstractImmutableCollectionTest extends TestCase
         self::assertSame('accounts', $filtered->get(1)->name);
     }
 
-    public function testItMapsItemsToAList(): void
+    public function test_it_maps_items_to_a_list(): void
     {
         $users = new IdentifierCollection([
             'users' => new Identifier('users'),
@@ -78,7 +78,7 @@ final class AbstractImmutableCollectionTest extends TestCase
         );
     }
 
-    public function testItRejectsArrayMutation(): void
+    public function test_it_rejects_array_mutation(): void
     {
         $users = new IdentifierCollection([new Identifier('users')]);
 

@@ -47,6 +47,7 @@
         "deptrac/deptrac": "^4.7",
         "friendsofphp/php-cs-fixer": "^3.68",
         "infection/infection": "^0.29",
+        "laravel/pint": "^1.29",
         "phpstan/phpstan": "^2.1",
         "phpstan/phpstan-strict-rules": "^2.0",
         "phpunit/phpunit": "^11.5",

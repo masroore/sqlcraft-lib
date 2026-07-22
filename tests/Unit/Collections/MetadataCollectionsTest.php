@@ -29,7 +29,7 @@ use SQLCraft\ValueObjects\QualifiedName;
 
 final class MetadataCollectionsTest extends TestCase
 {
-    public function testMetadataCollectionWrappersPreserveTheirItemTypes(): void
+    public function test_metadata_collection_wrappers_preserve_their_item_types(): void
     {
         $schema = new SchemaMeta('public', null, 'postgres');
         $sequence = new SequenceMeta('orders_id_seq', 'public', 1, 1, 999, 1, false, 'orders', 'id');
@@ -54,7 +54,7 @@ final class MetadataCollectionsTest extends TestCase
         self::assertSame($collation, (new CollationCollection(['utf8mb4_unicode_ci' => $collation]))->get('utf8mb4_unicode_ci'));
     }
 
-    public function testFilteringKeepsConcreteMetadataCollectionType(): void
+    public function test_filtering_keeps_concrete_metadata_collection_type(): void
     {
         $schemas = new SchemaCollection([
             'public' => new SchemaMeta('public', null, 'postgres'),

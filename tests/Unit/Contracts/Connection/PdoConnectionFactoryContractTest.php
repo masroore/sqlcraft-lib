@@ -9,7 +9,7 @@ use SQLCraft\Contracts\Connection\PdoConnectionFactoryInterface;
 
 final class PdoConnectionFactoryContractTest extends TestCase
 {
-    public function testFactoryPortExposesOnlyConnectionCreation(): void
+    public function test_factory_port_exposes_only_connection_creation(): void
     {
         $methods = (new \ReflectionClass(PdoConnectionFactoryInterface::class))->getMethods();
 

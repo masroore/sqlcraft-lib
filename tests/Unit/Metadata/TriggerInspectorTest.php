@@ -16,7 +16,7 @@ use SQLCraft\ValueObjects\TriggerEvent;
 
 final class TriggerInspectorTest extends TestCase
 {
-    public function testItHydratesTriggersUsingThePlatformDialect(): void
+    public function test_it_hydrates_triggers_using_the_platform_dialect(): void
     {
         $table = new QualifiedName(new Identifier('users'));
         $sql = "SELECT name, sql FROM sqlite_master WHERE type = 'trigger' ORDER BY name";
@@ -34,7 +34,7 @@ final class TriggerInspectorTest extends TestCase
         $connection->method('getPlatform')->willReturn($platform);
         $connection->expects(self::once())->method('query')->with($sql)->willReturn($result);
 
-        $triggers = (new TriggerInspector(new SqliteMetadataFactory()))->getTriggers($connection, $table);
+        $triggers = (new TriggerInspector(new SqliteMetadataFactory))->getTriggers($connection, $table);
 
         self::assertSame(TriggerEvent::INSERT, $triggers->get('users_inserted')->event);
         self::assertSame('users', $triggers->get('users_inserted')->table);

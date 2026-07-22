@@ -21,12 +21,11 @@ use SQLCraft\Contracts\Metadata\TriggerInspectorInterface;
 use SQLCraft\Contracts\Metadata\UserInspectorInterface;
 use SQLCraft\Contracts\Metadata\ViewInspectorInterface;
 use SQLCraft\DTO\TableStatus;
-use SQLCraft\Schema\NullMetadataCache;
 use SQLCraft\Schema\SchemaManager;
 
 final class SchemaManagerTest extends TestCase
 {
-    public function testFacadeDelegatesAndCachesTableListing(): void
+    public function test_facade_delegates_and_caches_table_listing(): void
     {
         $status = new TableStatus('users');
         $tableCollection = new TableCollection(['users' => $status]);

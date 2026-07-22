@@ -9,7 +9,7 @@ use SQLCraft\Contracts\Import\ImportSourceInterface;
 
 final class ImportSourceInterfaceTest extends TestCase
 {
-    public function testImportSourcePortExposesStreamAndSizeHint(): void
+    public function test_import_source_port_exposes_stream_and_size_hint(): void
     {
         self::assertSame(
             ['openStream', 'getEstimatedSize'],
@@ -18,7 +18,7 @@ final class ImportSourceInterfaceTest extends TestCase
     }
 
     /**
-     * @param class-string $interface
+     * @param  class-string  $interface
      * @return list<string>
      */
     private function methodNames(string $interface): array

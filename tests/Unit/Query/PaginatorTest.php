@@ -10,17 +10,17 @@ use SQLCraft\Contracts\Connection\ResultInterface;
 use SQLCraft\Contracts\Execution\QueryExecutorInterface;
 use SQLCraft\Contracts\Query\TableStatusProviderInterface;
 use SQLCraft\Platform\SqlitePlatform;
-use SQLCraft\Query\Page;
-use SQLCraft\Query\Paginator;
 use SQLCraft\Query\PaginationParams;
+use SQLCraft\Query\Paginator;
 use SQLCraft\Query\SelectQuery;
 use SQLCraft\Query\SelectQueryRenderer;
+use SQLCraft\Query\WhereCondition;
 use SQLCraft\ValueObjects\Identifier;
 use SQLCraft\ValueObjects\QualifiedName;
 
 final class PaginatorTest extends TestCase
 {
-    public function testUsesApproximateTableStatusRowsWhenQueryIsUnfiltered(): void
+    public function test_uses_approximate_table_status_rows_when_query_is_unfiltered(): void
     {
         $connection = self::createMock(ConnectionInterface::class);
         $result = self::createMock(ResultInterface::class);
@@ -30,7 +30,7 @@ final class PaginatorTest extends TestCase
         $status = self::createMock(TableStatusProviderInterface::class);
         $status->expects(self::once())->method('getApproximateRowCount')->willReturn(10);
 
-        $page = (new Paginator($executor, new SelectQueryRenderer(new SqlitePlatform()), $status))
+        $page = (new Paginator($executor, new SelectQueryRenderer(new SqlitePlatform), $status))
             ->paginate($connection, new SelectQuery(new QualifiedName(new Identifier('users'))), new PaginationParams(1, 2));
 
         self::assertSame(10, $page->totalRows);
@@ -39,7 +39,7 @@ final class PaginatorTest extends TestCase
         self::assertSame(5, $page->totalPages());
     }
 
-    public function testRunsExactCountForFilteredQuery(): void
+    public function test_runs_exact_count_for_filtered_query(): void
     {
         $connection = self::createMock(ConnectionInterface::class);
         $pageRows = self::createMock(ResultInterface::class);
@@ -51,17 +51,19 @@ final class PaginatorTest extends TestCase
             self::assertTrue($buffered);
             if (str_starts_with($sql, 'SELECT COUNT(*)')) {
                 self::assertSame(['Ada'], $params);
+
                 return $countRows;
             }
             self::assertSame('SELECT * FROM "users" WHERE "name" = ? LIMIT 2 OFFSET 2', $sql);
             self::assertSame(['Ada'], $params);
+
             return $pageRows;
         });
 
         $query = new SelectQuery(new QualifiedName(new Identifier('users')), where: [
-            new \SQLCraft\Query\WhereCondition(new Identifier('name'), '=', 'Ada'),
+            new WhereCondition(new Identifier('name'), '=', 'Ada'),
         ]);
-        $page = (new Paginator($executor, new SelectQueryRenderer(new SqlitePlatform())))
+        $page = (new Paginator($executor, new SelectQueryRenderer(new SqlitePlatform)))
             ->paginate($connection, $query, new PaginationParams(2, 2));
 
         self::assertSame(5, $page->totalRows);
@@ -69,11 +71,11 @@ final class PaginatorTest extends TestCase
         self::assertTrue($page->hasMore);
     }
 
-    public function testRejectsLimitAboveConfiguredMaximum(): void
+    public function test_rejects_limit_above_configured_maximum(): void
     {
         $this->expectException(\InvalidArgumentException::class);
 
-        (new Paginator(self::createMock(QueryExecutorInterface::class), new SelectQueryRenderer(new SqlitePlatform()), maximumLimit: 10))
+        (new Paginator(self::createMock(QueryExecutorInterface::class), new SelectQueryRenderer(new SqlitePlatform), maximumLimit: 10))
             ->paginate(self::createMock(ConnectionInterface::class), new SelectQuery(new QualifiedName(new Identifier('users'))), new PaginationParams(1, 11));
     }
 }

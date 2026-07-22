@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SQLCraft\Tests\Golden;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use SQLCraft\Capabilities\CapabilityNotSupportedException;
 use SQLCraft\Contracts\Platform\IntrospectionDialectInterface;
@@ -20,15 +21,15 @@ final class IntrospectionSqlGoldenTest extends TestCase
     /** @return iterable<string, array{IntrospectionDialectInterface, string, string, ?string}> */
     public static function platformProvider(): iterable
     {
-        yield 'mysql' => [new MySQLPlatform(), 'app', 'public', 'mysql'];
-        yield 'mariadb' => [new MariaDbPlatform(), 'app', 'public', 'mariadb'];
-        yield 'pgsql' => [new PostgreSQLPlatform(), 'app', 'public', 'pgsql'];
-        yield 'sqlite' => [new SqlitePlatform(), 'main', 'main', 'sqlite'];
-        yield 'sqlserver' => [new SqlServerPlatform(), 'app', 'public', 'sqlserver'];
+        yield 'mysql' => [new MySQLPlatform, 'app', 'public', 'mysql'];
+        yield 'mariadb' => [new MariaDbPlatform, 'app', 'public', 'mariadb'];
+        yield 'pgsql' => [new PostgreSQLPlatform, 'app', 'public', 'pgsql'];
+        yield 'sqlite' => [new SqlitePlatform, 'main', 'main', 'sqlite'];
+        yield 'sqlserver' => [new SqlServerPlatform, 'app', 'public', 'sqlserver'];
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('platformProvider')]
-    public function testIntrospectionSqlMatchesGoldenFile(
+    #[DataProvider('platformProvider')]
+    public function test_introspection_sql_matches_golden_file(
         IntrospectionDialectInterface $platform,
         string $database,
         string $schema,
@@ -40,7 +41,7 @@ final class IntrospectionSqlGoldenTest extends TestCase
             catalog: new Identifier($database),
         );
         $snapshot = $this->snapshot($platform, $database, $schema, $table);
-        $expected = file_get_contents(__DIR__ . '/fixtures/' . $fixture . '-introspection.sql');
+        $expected = file_get_contents(__DIR__.'/fixtures/'.$fixture.'-introspection.sql');
 
         self::assertIsString($expected);
         self::assertSame($expected, $snapshot);
@@ -52,7 +53,7 @@ final class IntrospectionSqlGoldenTest extends TestCase
         try {
             return $operation();
         } catch (CapabilityNotSupportedException $exception) {
-            return 'UNSUPPORTED: ' . $exception->getMessage();
+            return 'UNSUPPORTED: '.$exception->getMessage();
         }
     }
 
@@ -79,7 +80,7 @@ final class IntrospectionSqlGoldenTest extends TestCase
         ];
 
         return implode('', array_map(
-            static fn (string $method, string $query): string => $method . ': ' . $query . "\n",
+            static fn (string $method, string $query): string => $method.': '.$query."\n",
             array_keys($sql),
             $sql,
         ));

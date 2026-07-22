@@ -18,7 +18,7 @@ use SQLCraft\ValueObjects\QualifiedName;
 
 final class ColumnInspectorTest extends TestCase
 {
-    public function testItHydratesColumnsUsingPlatformSqlAndKeysByName(): void
+    public function test_it_hydrates_columns_using_platform_sql_and_keys_by_name(): void
     {
         $table = new QualifiedName(new Identifier('users'));
         [$connection] = $this->connectionWithRows('PRAGMA table_info("users")', [[
@@ -29,14 +29,14 @@ final class ColumnInspectorTest extends TestCase
             'dflt_value' => null,
         ]]);
 
-        $columns = (new ColumnInspector(new SqliteMetadataFactory()))->getColumns($connection, $table);
+        $columns = (new ColumnInspector(new SqliteMetadataFactory))->getColumns($connection, $table);
 
         self::assertCount(1, $columns);
         self::assertInstanceOf(ColumnMeta::class, $columns->get('id'));
         self::assertSame('id', $columns->get('id')->name);
     }
 
-    public function testItHydratesAllColumnsWithOneBatchQueryGroupedByTable(): void
+    public function test_it_hydrates_all_columns_with_one_batch_query_grouped_by_table(): void
     {
         $platform = self::createMock(PlatformInterface::class);
         $platform->expects(self::once())->method('getAllColumnsSql')->with('app', 'public')->willReturn('all-columns');
@@ -50,7 +50,7 @@ final class ColumnInspectorTest extends TestCase
         $connection->method('getPlatform')->willReturn($platform);
         $connection->expects(self::once())->method('query')->with('all-columns')->willReturn($result);
 
-        $columns = (new ColumnInspector(new SqliteMetadataFactory()))->getAllColumns($connection, 'app', 'public');
+        $columns = (new ColumnInspector(new SqliteMetadataFactory))->getAllColumns($connection, 'app', 'public');
 
         self::assertArrayHasKey('users', $columns);
         self::assertArrayHasKey('orders', $columns);
@@ -59,17 +59,17 @@ final class ColumnInspectorTest extends TestCase
         self::assertSame('email', $columns['users']->get('email')->name);
     }
 
-    public function testItThrowsWhenTheRequestedColumnDoesNotExist(): void
+    public function test_it_throws_when_the_requested_column_does_not_exist(): void
     {
         $table = new QualifiedName(new Identifier('users'));
         [$connection] = $this->connectionWithRows('PRAGMA table_info("users")', []);
 
         $this->expectException(ObjectNotFoundException::class);
-        (new ColumnInspector(new SqliteMetadataFactory()))->getColumn($connection, $table, new Identifier('missing'));
+        (new ColumnInspector(new SqliteMetadataFactory))->getColumn($connection, $table, new Identifier('missing'));
     }
 
     /**
-     * @param list<array<string, bool|float|int|string|null>> $rows
+     * @param  list<array<string, bool|float|int|string|null>>  $rows
      * @return array{0: ConnectionInterface, 1: ResultInterface}
      */
     private function connectionWithRows(string $sql, array $rows): array

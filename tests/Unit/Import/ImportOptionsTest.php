@@ -9,9 +9,9 @@ use SQLCraft\Import\ImportOptions;
 
 final class ImportOptionsTest extends TestCase
 {
-    public function testDefaultsMatchThePlannedSafeImportPolicy(): void
+    public function test_defaults_match_the_planned_safe_import_policy(): void
     {
-        $options = new ImportOptions();
+        $options = new ImportOptions;
 
         self::assertTrue($options->stopOnError);
         self::assertFalse($options->wrapInTransaction);
@@ -20,7 +20,7 @@ final class ImportOptionsTest extends TestCase
         self::assertNull($options->maxStatements);
     }
 
-    public function testAllOptionsCanBeConfigured(): void
+    public function test_all_options_can_be_configured(): void
     {
         $options = new ImportOptions(
             stopOnError: false,

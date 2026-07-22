@@ -6,6 +6,7 @@ namespace SQLCraft\Tests\Unit\Metadata;
 
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+use SQLCraft\Capabilities\Capability;
 use SQLCraft\Capabilities\CapabilityNotSupportedException;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Connection\ResultInterface;
@@ -17,7 +18,7 @@ use SQLCraft\ValueObjects\QualifiedName;
 
 final class TableInspectorTest extends TestCase
 {
-    public function testItHydratesBufferedAndStreamingTableStatuses(): void
+    public function test_it_hydrates_buffered_and_streaming_table_statuses(): void
     {
         $platform = self::createMock(PlatformInterface::class);
         $platform->expects(self::exactly(2))->method('getTablesSql')->with('app', 'public')->willReturn('tables');
@@ -46,7 +47,7 @@ final class TableInspectorTest extends TestCase
             },
         );
 
-        $inspector = new TableInspector(new SqliteMetadataFactory());
+        $inspector = new TableInspector(new SqliteMetadataFactory);
         $tables = $inspector->getTables($connection, 'public');
         $streamed = iterator_to_array($inspector->streamTables($connection, 'public'));
 
@@ -55,7 +56,7 @@ final class TableInspectorTest extends TestCase
         self::assertSame(['events'], array_keys($streamed));
     }
 
-    public function testItPerformsSingleTableAndRelationshipQueries(): void
+    public function test_it_performs_single_table_and_relationship_queries(): void
     {
         $table = new QualifiedName(new Identifier('child'), new Identifier('public'), new Identifier('app'));
         $platform = self::createMock(PlatformInterface::class);
@@ -90,7 +91,7 @@ final class TableInspectorTest extends TestCase
             },
         );
 
-        $inspector = new TableInspector(new SqliteMetadataFactory());
+        $inspector = new TableInspector(new SqliteMetadataFactory);
         $status = $inspector->getTableStatus($connection, $table);
         $parents = $inspector->getParentTables($connection, $table);
         $partitions = $inspector->getPartitions($connection, $table);
@@ -100,14 +101,14 @@ final class TableInspectorTest extends TestCase
         self::assertSame('RANGE', $partitions->get('child_2026')->method);
     }
 
-    public function testItReturnsEmptyParentCollectionWhenDialectHasNoInheritance(): void
+    public function test_it_returns_empty_parent_collection_when_dialect_has_no_inheritance(): void
     {
         $platform = self::createMock(PlatformInterface::class);
         $platform->method('getParentTablesSql')->willReturn('');
         $connection = self::createMock(ConnectionInterface::class);
         $connection->method('getPlatform')->willReturn($platform);
 
-        $parents = (new TableInspector(new SqliteMetadataFactory()))->getParentTables(
+        $parents = (new TableInspector(new SqliteMetadataFactory))->getParentTables(
             $connection,
             new QualifiedName(new Identifier('users')),
         );
@@ -115,7 +116,7 @@ final class TableInspectorTest extends TestCase
         self::assertCount(0, $parents);
     }
 
-    public function testItRejectsTableListingWithoutConfiguredDatabase(): void
+    public function test_it_rejects_table_listing_without_configured_database(): void
     {
         $platform = self::createMock(PlatformInterface::class);
         $connection = self::createMock(ConnectionInterface::class);
@@ -125,21 +126,21 @@ final class TableInspectorTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('database name is required');
 
-        (new TableInspector(new SqliteMetadataFactory()))->getTables($connection);
+        (new TableInspector(new SqliteMetadataFactory))->getTables($connection);
     }
 
-    public function testUnsupportedPartitionDialectExceptionRemainsVisible(): void
+    public function test_unsupported_partition_dialect_exception_remains_visible(): void
     {
         $platform = self::createMock(PlatformInterface::class);
         $platform->method('getPartitionsSql')->willThrowException(
-            CapabilityNotSupportedException::for(\SQLCraft\Capabilities\Capability::Partitions, 'sqlite'),
+            CapabilityNotSupportedException::for(Capability::Partitions, 'sqlite'),
         );
         $connection = self::createMock(ConnectionInterface::class);
         $connection->method('getPlatform')->willReturn($platform);
 
         $this->expectException(CapabilityNotSupportedException::class);
 
-        (new TableInspector(new SqliteMetadataFactory()))->getPartitions(
+        (new TableInspector(new SqliteMetadataFactory))->getPartitions(
             $connection,
             new QualifiedName(new Identifier('users')),
         );

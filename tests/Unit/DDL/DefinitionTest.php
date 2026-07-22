@@ -14,11 +14,13 @@ use SQLCraft\Platform\SqlitePlatform;
 use SQLCraft\ValueObjects\DataType;
 use SQLCraft\ValueObjects\DefaultValue;
 use SQLCraft\ValueObjects\ForeignKeyAction;
+use SQLCraft\ValueObjects\Identifier;
 use SQLCraft\ValueObjects\IndexType;
+use SQLCraft\ValueObjects\QualifiedName;
 
 final class DefinitionTest extends TestCase
 {
-    public function testDefinitionsExposeImmutableTypedMetadata(): void
+    public function test_definitions_expose_immutable_typed_metadata(): void
     {
         $column = new ColumnDefinition(
             'id',
@@ -59,9 +61,9 @@ final class DefinitionTest extends TestCase
         self::assertSame('id > 0', $check->getExpression());
     }
 
-    public function testPlatformAdaptsProjectionToExistingDialectRendering(): void
+    public function test_platform_adapts_projection_to_existing_dialect_rendering(): void
     {
-        $platform = new SqlitePlatform();
+        $platform = new SqlitePlatform;
         $column = new ColumnDefinition(
             'id',
             new DataType('INTEGER'),
@@ -90,7 +92,7 @@ final class DefinitionTest extends TestCase
         self::assertSame('"id" INTEGER PRIMARY KEY NOT NULL AUTOINCREMENT', $platform->renderDdlColumnDefinition($column));
         self::assertSame('PRIMARY KEY ("id" ASC)', $platform->renderDdlPrimaryKeyClause($index));
         self::assertSame('CREATE UNIQUE INDEX "primary" ON "users" ("id" ASC)', $platform->renderDdlCreateIndexStatement(
-            new \SQLCraft\ValueObjects\QualifiedName(new \SQLCraft\ValueObjects\Identifier('users')),
+            new QualifiedName(new Identifier('users')),
             $index,
         ));
     }

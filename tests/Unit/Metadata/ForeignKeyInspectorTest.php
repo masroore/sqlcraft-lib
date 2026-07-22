@@ -16,7 +16,7 @@ use SQLCraft\ValueObjects\QualifiedName;
 
 final class ForeignKeyInspectorTest extends TestCase
 {
-    public function testItHydratesOutgoingAndReferencingKeysThroughSeparateDialectQueries(): void
+    public function test_it_hydrates_outgoing_and_referencing_keys_through_separate_dialect_queries(): void
     {
         $table = new QualifiedName(new Identifier('teams'));
         $outgoingSql = 'outgoing';
@@ -52,7 +52,7 @@ final class ForeignKeyInspectorTest extends TestCase
             },
         );
 
-        $inspector = new ForeignKeyInspector(new SqliteMetadataFactory());
+        $inspector = new ForeignKeyInspector(new SqliteMetadataFactory);
         $outgoing = $inspector->getForeignKeys($connection, $table);
         $referencing = $inspector->getReferencingKeys($connection, $table);
 

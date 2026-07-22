@@ -10,7 +10,7 @@ use SQLCraft\Exceptions\StreamingResultException;
 
 final class StreamingResultTest extends TestCase
 {
-    public function testStreamingResultConsumesRowsLazily(): void
+    public function test_streaming_result_consumes_rows_lazily(): void
     {
         $started = false;
         $result = new StreamingResult(static function () use (&$started): \Generator {
@@ -26,7 +26,7 @@ final class StreamingResultTest extends TestCase
         self::assertNull($result->fetchAssoc());
     }
 
-    public function testStreamingResultRejectsSeekAndCount(): void
+    public function test_streaming_result_rejects_seek_and_count(): void
     {
         $result = new StreamingResult(static function (): \Generator {
             yield ['id' => 1];
@@ -43,7 +43,7 @@ final class StreamingResultTest extends TestCase
         $result->count();
     }
 
-    public function testStreamingResultFetchesColumnsAndIteratesRemainingRows(): void
+    public function test_streaming_result_fetches_columns_and_iterates_remaining_rows(): void
     {
         $result = new StreamingResult(static function (): \Generator {
             yield ['id' => 1, 'name' => 'Ada'];

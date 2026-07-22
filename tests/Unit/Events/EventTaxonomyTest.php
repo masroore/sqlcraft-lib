@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace SQLCraft\Tests\Unit\Events;
 
 use PHPUnit\Framework\TestCase;
-use SQLCraft\Events\AfterQueryExecuted;
+use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Events\BeforeQueryExecuted;
 use SQLCraft\Events\ObservabilityEvent;
 use SQLCraft\Events\SQLCraftEventInterface;
@@ -13,17 +13,17 @@ use SQLCraft\Exceptions\OperationCancelledException;
 
 final class EventTaxonomyTest extends TestCase
 {
-    public function testObservabilityEventsUseTheCommonMarker(): void
+    public function test_observability_events_use_the_common_marker(): void
     {
         $event = $this->createMock(ObservabilityEvent::class);
 
         self::assertInstanceOf(SQLCraftEventInterface::class, $event);
     }
 
-    public function testInterceptionCancellationStopsPropagationAndStoresReason(): void
+    public function test_interception_cancellation_stops_propagation_and_stores_reason(): void
     {
         $event = new BeforeQueryExecuted(
-            $this->createMock(\SQLCraft\Contracts\Connection\ConnectionInterface::class),
+            $this->createMock(ConnectionInterface::class),
             'SELECT 1',
             [],
             'SELECT',
@@ -35,9 +35,9 @@ final class EventTaxonomyTest extends TestCase
         self::assertSame('maintenance window', $event->cancelReason);
     }
 
-    public function testBeforeQueryCanReplaceSqlAndParameters(): void
+    public function test_before_query_can_replace_sql_and_parameters(): void
     {
-        $connection = $this->createMock(\SQLCraft\Contracts\Connection\ConnectionInterface::class);
+        $connection = $this->createMock(ConnectionInterface::class);
         $event = new BeforeQueryExecuted($connection, 'SELECT 1', [], 'SELECT');
         $event->replaceSql('SELECT * FROM tenants WHERE tenant_id = ?', [42]);
 
@@ -45,8 +45,8 @@ final class EventTaxonomyTest extends TestCase
         self::assertSame([42], $event->getParams());
     }
 
-    public function testCancellationExceptionIsTyped(): void
+    public function test_cancellation_exception_is_typed(): void
     {
-        self::assertInstanceOf(\RuntimeException::class, new OperationCancelledException());
+        self::assertInstanceOf(\RuntimeException::class, new OperationCancelledException);
     }
 }

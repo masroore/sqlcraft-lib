@@ -6,9 +6,9 @@ namespace SQLCraft\Tests\Unit\ValueObjects;
 
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+use SQLCraft\Enums\DatabaseDriver;
 use SQLCraft\ValueObjects\Charset;
 use SQLCraft\ValueObjects\Collation;
-use SQLCraft\Enums\DatabaseDriver;
 use SQLCraft\ValueObjects\ConnectionParameters;
 use SQLCraft\ValueObjects\Engine;
 use SQLCraft\ValueObjects\Privilege;
@@ -16,7 +16,7 @@ use SQLCraft\ValueObjects\ServerVersion;
 
 final class NamedAndConnectionValueObjectsTest extends TestCase
 {
-    public function testNamedValuesCompareWithoutCaseAndRenderTheirNames(): void
+    public function test_named_values_compare_without_case_and_render_their_names(): void
     {
         $charset = new Charset('utf8mb4');
         $collation = new Collation('utf8mb4_unicode_ci');
@@ -34,55 +34,55 @@ final class NamedAndConnectionValueObjectsTest extends TestCase
         self::assertTrue($privilege->equals(new Privilege('SELECT')));
     }
 
-    public function testCharsetRejectsEmptyName(): void
+    public function test_charset_rejects_empty_name(): void
     {
         $this->expectException(InvalidArgumentException::class);
         new Charset('');
     }
 
-    public function testCharsetRejectsNullByte(): void
+    public function test_charset_rejects_null_byte(): void
     {
         $this->expectException(InvalidArgumentException::class);
         new Charset("safe\0unsafe");
     }
 
-    public function testCollationRejectsEmptyName(): void
+    public function test_collation_rejects_empty_name(): void
     {
         $this->expectException(InvalidArgumentException::class);
         new Collation('');
     }
 
-    public function testCollationRejectsNullByte(): void
+    public function test_collation_rejects_null_byte(): void
     {
         $this->expectException(InvalidArgumentException::class);
         new Collation("safe\0unsafe");
     }
 
-    public function testEngineRejectsEmptyName(): void
+    public function test_engine_rejects_empty_name(): void
     {
         $this->expectException(InvalidArgumentException::class);
         new Engine('');
     }
 
-    public function testEngineRejectsNullByte(): void
+    public function test_engine_rejects_null_byte(): void
     {
         $this->expectException(InvalidArgumentException::class);
         new Engine("safe\0unsafe");
     }
 
-    public function testPrivilegeRejectsEmptyName(): void
+    public function test_privilege_rejects_empty_name(): void
     {
         $this->expectException(InvalidArgumentException::class);
         new Privilege('');
     }
 
-    public function testPrivilegeRejectsNullByte(): void
+    public function test_privilege_rejects_null_byte(): void
     {
         $this->expectException(InvalidArgumentException::class);
         new Privilege("safe\0unsafe");
     }
 
-    public function testServerVersionParsesAndComparesVersions(): void
+    public function test_server_version_parses_and_compares_versions(): void
     {
         $version = new ServerVersion('MySQL 8.0.36-0ubuntu0');
 
@@ -97,7 +97,7 @@ final class NamedAndConnectionValueObjectsTest extends TestCase
         self::assertSame('MySQL 8.0.36-0ubuntu0', (string) $version);
     }
 
-    public function testServerVersionDefaultsMissingPatchToZero(): void
+    public function test_server_version_defaults_missing_patch_to_zero(): void
     {
         $version = new ServerVersion('PostgreSQL 16.2');
 
@@ -106,14 +106,14 @@ final class NamedAndConnectionValueObjectsTest extends TestCase
         self::assertSame(0, $version->patch);
     }
 
-    public function testServerVersionRejectsInvalidValues(): void
+    public function test_server_version_rejects_invalid_values(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
         new ServerVersion('not-a-version');
     }
 
-    public function testServerVersionComparesDefaultAndBoundaryComponents(): void
+    public function test_server_version_compares_default_and_boundary_components(): void
     {
         $version = new ServerVersion('8.0.36');
         $zero = new ServerVersion('8.0.0');
@@ -128,14 +128,14 @@ final class NamedAndConnectionValueObjectsTest extends TestCase
         self::assertFalse($version->equals(new ServerVersion('8.0.37')));
     }
 
-    public function testServerVersionTrimsInputBeforeParsing(): void
+    public function test_server_version_trims_input_before_parsing(): void
     {
         $version = new ServerVersion('  v1.2.3  ');
 
         self::assertSame('v1.2.3', $version->value);
     }
 
-    public function testConnectionParametersStoresConnectionOptions(): void
+    public function test_connection_parameters_stores_connection_options(): void
     {
         $parameters = new ConnectionParameters(
             host: 'db.internal',
@@ -160,14 +160,14 @@ final class NamedAndConnectionValueObjectsTest extends TestCase
         self::assertSame(DatabaseDriver::MySQL, $parameters->driver);
     }
 
-    public function testConnectionParametersDefaultsDriverToNull(): void
+    public function test_connection_parameters_defaults_driver_to_null(): void
     {
         $parameters = new ConnectionParameters(database: 'shop');
 
         self::assertNull($parameters->driver);
     }
 
-    public function testConnectionParametersAllowsSocketOnlyConnections(): void
+    public function test_connection_parameters_allows_socket_only_connections(): void
     {
         $parameters = new ConnectionParameters(socket: '/var/run/mysql.sock');
 
@@ -175,47 +175,47 @@ final class NamedAndConnectionValueObjectsTest extends TestCase
         self::assertNull($parameters->host);
     }
 
-    public function testConnectionParametersRejectsBlankHost(): void
+    public function test_connection_parameters_rejects_blank_host(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
         new ConnectionParameters(host: '   ');
     }
 
-    public function testConnectionParametersRejectsNullBytesInHost(): void
+    public function test_connection_parameters_rejects_null_bytes_in_host(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
         new ConnectionParameters(host: "db\0internal");
     }
 
-    public function testConnectionParametersRejectsBlankSocket(): void
+    public function test_connection_parameters_rejects_blank_socket(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
         new ConnectionParameters(socket: '   ');
     }
 
-    public function testConnectionParametersRejectsNullBytesInSocket(): void
+    public function test_connection_parameters_rejects_null_bytes_in_socket(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
         new ConnectionParameters(socket: "/tmp/db\0.sock");
     }
 
-    public function testConnectionParametersAcceptsPortBoundaries(): void
+    public function test_connection_parameters_accepts_port_boundaries(): void
     {
         self::assertSame(1, (new ConnectionParameters(port: 1))->port);
         self::assertSame(65535, (new ConnectionParameters(port: 65535))->port);
     }
 
-    public function testConnectionParametersRejectsPortZero(): void
+    public function test_connection_parameters_rejects_port_zero(): void
     {
         $this->expectException(InvalidArgumentException::class);
         new ConnectionParameters(port: 0);
     }
 
-    public function testConnectionParametersRejectsPortAboveMaximum(): void
+    public function test_connection_parameters_rejects_port_above_maximum(): void
     {
         $this->expectException(InvalidArgumentException::class);
         new ConnectionParameters(port: 65536);

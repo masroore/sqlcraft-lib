@@ -11,7 +11,7 @@ use SQLCraft\Contracts\Connection\ResultInterface;
 
 final class ConnectionContractsTest extends TestCase
 {
-    public function testConnectionInterfaceExposesThePlannedBoundary(): void
+    public function test_connection_interface_exposes_the_planned_boundary(): void
     {
         self::assertSame(
             [
@@ -37,7 +37,7 @@ final class ConnectionContractsTest extends TestCase
         );
     }
 
-    public function testResultAndPreparedStatementContractsArePublicPorts(): void
+    public function test_result_and_prepared_statement_contracts_are_public_ports(): void
     {
         self::assertTrue((new \ReflectionClass(ResultInterface::class))->isInterface());
         self::assertTrue((new \ReflectionClass(PreparedStatementInterface::class))->isInterface());
@@ -46,7 +46,7 @@ final class ConnectionContractsTest extends TestCase
     }
 
     /**
-     * @param class-string $interface
+     * @param  class-string  $interface
      * @return list<string>
      */
     private function methodNames(string $interface): array

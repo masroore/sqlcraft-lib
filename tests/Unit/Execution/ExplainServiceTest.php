@@ -12,7 +12,7 @@ use SQLCraft\Execution\ExplainService;
 
 final class ExplainServiceTest extends TestCase
 {
-    public function testBuildsPlatformExplainSqlAndReturnsRows(): void
+    public function test_builds_platform_explain_sql_and_returns_rows(): void
     {
         $platform = self::createMock(PlatformInterface::class);
         $platform->expects(self::once())->method('getExplainSql')->with('SELECT * FROM users WHERE id = ?', true)->willReturn('EXPLAIN ANALYZE SELECT * FROM users WHERE id = ?');
@@ -23,7 +23,7 @@ final class ExplainServiceTest extends TestCase
         $connection->expects(self::once())->method('getPlatformName')->willReturn('sqlite');
         $connection->expects(self::once())->method('query')->with('EXPLAIN ANALYZE SELECT * FROM users WHERE id = ?', [7], false)->willReturn($result);
 
-        $explain = (new ExplainService())->explain($connection, 'SELECT * FROM users WHERE id = ?', [7], true);
+        $explain = (new ExplainService)->explain($connection, 'SELECT * FROM users WHERE id = ?', [7], true);
 
         self::assertSame('sqlite', $explain->engine);
         self::assertSame([['plan' => 'scan']], $explain->rows);

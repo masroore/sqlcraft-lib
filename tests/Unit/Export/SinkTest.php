@@ -10,9 +10,9 @@ use SQLCraft\Export\StringBufferSink;
 
 final class SinkTest extends TestCase
 {
-    public function testStringBufferAccumulatesChunks(): void
+    public function test_string_buffer_accumulates_chunks(): void
     {
-        $sink = new StringBufferSink();
+        $sink = new StringBufferSink;
         $sink->write('one');
         $sink->write('two');
         $sink->flush();
@@ -21,7 +21,7 @@ final class SinkTest extends TestCase
         self::assertSame('onetwo', $sink->contents());
     }
 
-    public function testResourceSinkWritesFlushesAndClosesResource(): void
+    public function test_resource_sink_writes_flushes_and_closes_resource(): void
     {
         $resource = fopen('php://memory', 'w+');
         self::assertIsResource($resource);
@@ -36,7 +36,7 @@ final class SinkTest extends TestCase
         $sink->write('after-close');
     }
 
-    public function testResourceSinkRejectsNonResource(): void
+    public function test_resource_sink_rejects_non_resource(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         $resource = fopen('php://memory', 'w+');

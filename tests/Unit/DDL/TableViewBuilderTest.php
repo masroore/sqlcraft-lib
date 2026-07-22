@@ -15,7 +15,7 @@ use SQLCraft\ValueObjects\QualifiedName;
 
 final class TableViewBuilderTest extends TestCase
 {
-    public function testLifecycleBuildersDelegateImmutableIntent(): void
+    public function test_lifecycle_builders_delegate_immutable_intent(): void
     {
         $name = new QualifiedName(new Identifier('active_users'));
         $dialect = self::createMock(DdlDialectInterface::class);
@@ -28,18 +28,18 @@ final class TableViewBuilderTest extends TestCase
         self::assertSame(['DROP VIEW'], (new DropViewBuilder($name, true, true))->toSql($dialect));
     }
 
-    public function testSqliteUsesDeleteForTruncate(): void
+    public function test_sqlite_uses_delete_for_truncate(): void
     {
         $table = new QualifiedName(new Identifier('users'));
 
-        self::assertSame(['DELETE FROM "users"'], (new TruncateBuilder($table))->toSql(new SqlitePlatform()));
+        self::assertSame(['DELETE FROM "users"'], (new TruncateBuilder($table))->toSql(new SqlitePlatform));
         self::assertSame(['CREATE VIEW "active_users" AS SELECT 1'], (new CreateViewBuilder(
             new QualifiedName(new Identifier('active_users')),
             'SELECT 1',
-        ))->toSql(new SqlitePlatform()));
+        ))->toSql(new SqlitePlatform));
         self::assertSame(['DROP VIEW IF EXISTS "active_users"'], (new DropViewBuilder(
             new QualifiedName(new Identifier('active_users')),
             true,
-        ))->toSql(new SqlitePlatform()));
+        ))->toSql(new SqlitePlatform));
     }
 }

@@ -27,9 +27,9 @@ use SQLCraft\ValueObjects\ServerVersion;
 
 final class MySQLPlatformTest extends TestCase
 {
-    public function testItDescribesMySqlDefaultsAndCapabilities(): void
+    public function test_it_describes_my_sql_defaults_and_capabilities(): void
     {
-        $platform = new MySQLPlatform();
+        $platform = new MySQLPlatform;
 
         self::assertSame('mysql', $platform->getName());
         self::assertNull($platform->getFlavor());
@@ -42,9 +42,9 @@ final class MySQLPlatformTest extends TestCase
         self::assertTrue($platform->getCapabilitySet(new ServerVersion('8.0.16'))->has(Capability::DescendingIndexes));
     }
 
-    public function testMariaDbSpecializesFlavorAndVersionGates(): void
+    public function test_maria_db_specializes_flavor_and_version_gates(): void
     {
-        $platform = new MariaDbPlatform();
+        $platform = new MariaDbPlatform;
 
         self::assertSame('mariadb', $platform->getName());
         self::assertSame('maria', $platform->getFlavor());
@@ -56,19 +56,19 @@ final class MySQLPlatformTest extends TestCase
         self::assertStringContainsString("ENGINE = 'SEQUENCE'", $platform->getSequencesSql());
     }
 
-    public function testItDetectsServerVersionFromTheConnection(): void
+    public function test_it_detects_server_version_from_the_connection(): void
     {
         $result = self::createMock(ResultInterface::class);
         $result->method('fetchColumn')->willReturn(['8.0.36']);
         $connection = self::createMock(ConnectionInterface::class);
         $connection->expects(self::once())->method('query')->with('SELECT VERSION()')->willReturn($result);
 
-        self::assertSame('8.0.36', (string) (new MySQLPlatform())->getServerVersion($connection));
+        self::assertSame('8.0.36', (string) (new MySQLPlatform)->getServerVersion($connection));
     }
 
-    public function testItQuotesValuesIdentifiersAndPaginates(): void
+    public function test_it_quotes_values_identifiers_and_paginates(): void
     {
-        $platform = new MySQLPlatform();
+        $platform = new MySQLPlatform;
 
         self::assertSame('`a``b`', $platform->quoteIdentifier(new Identifier('a`b')));
         self::assertSame("'a\\\\b''c'", $platform->quoteValue("a\\b'c"));
@@ -80,9 +80,9 @@ final class MySQLPlatformTest extends TestCase
         $platform->applyPagination('SELECT *', -1, 0);
     }
 
-    public function testItRendersMySqlDdl(): void
+    public function test_it_renders_my_sql_ddl(): void
     {
-        $platform = new MySQLPlatform();
+        $platform = new MySQLPlatform;
         $table = new QualifiedName(new Identifier('users'), catalog: new Identifier('app'));
         $column = new ColumnMeta(
             name: 'id',
@@ -135,9 +135,9 @@ final class MySQLPlatformTest extends TestCase
         self::assertSame('CONSTRAINT `positive_id` CHECK (id > 0)', $platform->renderCheckConstraintClause(new CheckConstraintMeta('positive_id', 'id > 0', true)));
     }
 
-    public function testItReturnsMySqlIntrospectionSqlAndRejectsSequences(): void
+    public function test_it_returns_my_sql_introspection_sql_and_rejects_sequences(): void
     {
-        $platform = new MySQLPlatform();
+        $platform = new MySQLPlatform;
         $table = new QualifiedName(new Identifier('users'), catalog: new Identifier('app'));
 
         self::assertSame('SHOW DATABASES', $platform->getDatabasesSql());

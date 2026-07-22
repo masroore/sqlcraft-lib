@@ -11,7 +11,7 @@ use SQLCraft\ValueObjects\ServerVersion;
 
 final class ServerSequenceDtoTest extends TestCase
 {
-    public function testServerInfoStoresVersionAndNullableMetadata(): void
+    public function test_server_info_stores_version_and_nullable_metadata(): void
     {
         $server = new ServerInfo(
             version: new ServerVersion('PostgreSQL 18.0'),
@@ -32,7 +32,7 @@ final class ServerSequenceDtoTest extends TestCase
         self::assertNull($server->collation);
     }
 
-    public function testServerInfoCanBeConstructedWithNoOptionalMetadata(): void
+    public function test_server_info_can_be_constructed_with_no_optional_metadata(): void
     {
         $server = new ServerInfo(
             version: new ServerVersion('8.4.23'),
@@ -53,7 +53,7 @@ final class ServerSequenceDtoTest extends TestCase
         self::assertNull($server->collation);
     }
 
-    public function testSequenceMetaStoresIntegerValuesAndOwnership(): void
+    public function test_sequence_meta_stores_integer_values_and_ownership(): void
     {
         $sequence = new SequenceMeta(
             name: 'users_id_seq',
@@ -78,7 +78,7 @@ final class ServerSequenceDtoTest extends TestCase
         self::assertSame('id', $sequence->ownedByColumn);
     }
 
-    public function testSequenceMetaSupportsStringNumericValuesAndUnownedCycledSequences(): void
+    public function test_sequence_meta_supports_string_numeric_values_and_unowned_cycled_sequences(): void
     {
         $sequence = new SequenceMeta(
             name: 'event_number_seq',

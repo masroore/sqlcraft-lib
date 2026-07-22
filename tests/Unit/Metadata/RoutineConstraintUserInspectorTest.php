@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SQLCraft\Tests\Unit\Metadata;
 
 use PHPUnit\Framework\TestCase;
+use SQLCraft\Capabilities\Capability;
 use SQLCraft\Capabilities\CapabilityNotSupportedException;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Connection\ResultInterface;
@@ -18,7 +19,7 @@ use SQLCraft\ValueObjects\QualifiedName;
 
 final class RoutineConstraintUserInspectorTest extends TestCase
 {
-    public function testItFiltersRoutinesAndHydratesConstraintsAndUsers(): void
+    public function test_it_filters_routines_and_hydrates_constraints_and_users(): void
     {
         $routine = new QualifiedName(new Identifier('refresh_users'));
         $platform = self::createMock(PlatformInterface::class);
@@ -54,7 +55,7 @@ final class RoutineConstraintUserInspectorTest extends TestCase
             },
         );
 
-        $factory = new MySQLMetadataFactory();
+        $factory = new MySQLMetadataFactory;
         $routines = (new RoutineInspector($factory))->getFunctions($connection, 'app');
         $procedures = (new RoutineInspector($factory))->getProcedures($connection, 'app');
         $detail = (new RoutineInspector($factory))->getRoutineDetail($connection, $routine);
@@ -68,17 +69,17 @@ final class RoutineConstraintUserInspectorTest extends TestCase
         self::assertTrue($users->get('app')->canLogin);
     }
 
-    public function testUnsupportedUserInspectionRemainsCapabilityGated(): void
+    public function test_unsupported_user_inspection_remains_capability_gated(): void
     {
         $platform = self::createMock(PlatformInterface::class);
         $platform->method('getUsersSql')->willThrowException(
-            CapabilityNotSupportedException::for(\SQLCraft\Capabilities\Capability::Privileges, 'sqlite'),
+            CapabilityNotSupportedException::for(Capability::Privileges, 'sqlite'),
         );
         $connection = self::createMock(ConnectionInterface::class);
         $connection->method('getPlatform')->willReturn($platform);
 
         $this->expectException(CapabilityNotSupportedException::class);
 
-        (new UserInspector(new MySQLMetadataFactory()))->getUsers($connection);
+        (new UserInspector(new MySQLMetadataFactory))->getUsers($connection);
     }
 }

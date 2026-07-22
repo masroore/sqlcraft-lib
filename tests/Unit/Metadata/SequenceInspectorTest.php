@@ -13,7 +13,7 @@ use SQLCraft\Metadata\SequenceInspector;
 
 final class SequenceInspectorTest extends TestCase
 {
-    public function testItHydratesSequencesThroughTheDialect(): void
+    public function test_it_hydrates_sequences_through_the_dialect(): void
     {
         $platform = self::createMock(PlatformInterface::class);
         $platform->expects(self::once())->method('getSequencesSql')->with('public')->willReturn('sequences');
@@ -31,7 +31,7 @@ final class SequenceInspectorTest extends TestCase
         $connection->method('getPlatform')->willReturn($platform);
         $connection->expects(self::once())->method('query')->with('sequences')->willReturn($result);
 
-        $sequences = (new SequenceInspector(new PostgreSQLMetadataFactory()))->getSequences($connection, 'public');
+        $sequences = (new SequenceInspector(new PostgreSQLMetadataFactory))->getSequences($connection, 'public');
 
         self::assertTrue($sequences->get('users_id_seq')->cycle);
     }

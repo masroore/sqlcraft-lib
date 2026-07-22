@@ -14,9 +14,9 @@ use SQLCraft\ValueObjects\TriggerTiming;
 
 final class MySQLMetadataFactoryTest extends TestCase
 {
-    public function testHydratesMySqlColumnMetadata(): void
+    public function test_hydrates_my_sql_column_metadata(): void
     {
-        $column = (new MySQLMetadataFactory())->createColumnMeta([
+        $column = (new MySQLMetadataFactory)->createColumnMeta([
             'COLUMN_NAME' => 'id',
             'DATA_TYPE' => 'int',
             'COLUMN_TYPE' => 'int unsigned',
@@ -36,9 +36,9 @@ final class MySQLMetadataFactoryTest extends TestCase
         self::assertSame(DefaultValueKind::NULL_VALUE, $column->default->kind);
     }
 
-    public function testHydratesMySqlIndexForeignKeyTriggerAndRoutineRows(): void
+    public function test_hydrates_my_sql_index_foreign_key_trigger_and_routine_rows(): void
     {
-        $factory = new MySQLMetadataFactory();
+        $factory = new MySQLMetadataFactory;
 
         $index = $factory->createIndexMeta([
             'Key_name' => 'users_email',
@@ -81,9 +81,9 @@ final class MySQLMetadataFactoryTest extends TestCase
         self::assertTrue($routine->deterministic);
     }
 
-    public function testHydratesMySqlTableStatus(): void
+    public function test_hydrates_my_sql_table_status(): void
     {
-        $status = (new MySQLMetadataFactory())->createTableStatus([
+        $status = (new MySQLMetadataFactory)->createTableStatus([
             'Name' => 'users',
             'Engine' => 'InnoDB',
             'Rows' => '12',

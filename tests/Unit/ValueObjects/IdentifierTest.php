@@ -10,7 +10,7 @@ use SQLCraft\ValueObjects\Identifier;
 
 final class IdentifierTest extends TestCase
 {
-    public function testItStoresAndRendersAnIdentifier(): void
+    public function test_it_stores_and_renders_an_identifier(): void
     {
         $identifier = new Identifier('users');
 
@@ -20,14 +20,14 @@ final class IdentifierTest extends TestCase
         self::assertFalse($identifier->equals(new Identifier('Users')));
     }
 
-    public function testItRejectsEmptyNames(): void
+    public function test_it_rejects_empty_names(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
         new Identifier('');
     }
 
-    public function testItRejectsNullBytes(): void
+    public function test_it_rejects_null_bytes(): void
     {
         $this->expectException(InvalidArgumentException::class);
 

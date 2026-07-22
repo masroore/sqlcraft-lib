@@ -10,7 +10,6 @@ use SQLCraft\DTO\ColumnMeta;
 use SQLCraft\DTO\TableStatus;
 use SQLCraft\Export\CsvFormatWriter;
 use SQLCraft\Export\CsvSemicolonFormatWriter;
-use SQLCraft\Export\DataStyle;
 use SQLCraft\Export\DumpOptions;
 use SQLCraft\Export\DumpScope;
 use SQLCraft\Export\SqlFormatWriter;
@@ -23,21 +22,21 @@ use SQLCraft\ValueObjects\DefaultValue;
 
 final class FormatWriterTest extends TestCase
 {
-    public function testSqlWriterRendersTableDdlAndQuotedInsertBatches(): void
+    public function test_sql_writer_renders_table_ddl_and_quoted_insert_batches(): void
     {
-        $sink = new StringBufferSink();
+        $sink = new StringBufferSink;
         $table = new TableStatus('orders', schema: 'shop');
         $columns = $this->columns();
         $options = new DumpOptions('sql', DumpScope::table('shop', 'orders'), tableStyle: TableSectionStyle::DropCreate);
         $connection = self::createMock(ConnectionInterface::class);
-        $connection->method('quoteIdentifier')->willReturnCallback(static fn (string $name): string => '"' . $name . '"');
+        $connection->method('quoteIdentifier')->willReturnCallback(static fn (string $name): string => '"'.$name.'"');
         $connection->method('quoteValue')->willReturnCallback(static fn (mixed $value): string => match (true) {
             $value === null => 'NULL',
             is_int($value), is_float($value) => (string) $value,
-            is_string($value) => "'" . str_replace("'", "''", $value) . "'",
-            default => throw new \InvalidArgumentException(),
+            is_string($value) => "'".str_replace("'", "''", $value)."'",
+            default => throw new \InvalidArgumentException,
         });
-        $connection->method('getPlatform')->willReturn(new SqlitePlatform());
+        $connection->method('getPlatform')->willReturn(new SqlitePlatform);
         $writer = new SqlFormatWriter($connection);
 
         $writer->writeHeader($sink, $options);
@@ -52,22 +51,22 @@ final class FormatWriterTest extends TestCase
 
         self::assertSame(
             "-- SQLCraft dump\n\n"
-            . "-- Table: orders\n"
-            . "DROP TABLE IF EXISTS \"shop\".\"orders\";\n"
-            . "CREATE TABLE \"orders\" (\"id\" INTEGER);\n"
-            . "INSERT INTO \"shop\".\"orders\" (\"id\", \"name\", \"payload\") VALUES "
-            . "(1, 'O''Reilly', X'0001'), (2, '', NULL);\n\n"
-            . "-- End SQLCraft dump\n",
+            ."-- Table: orders\n"
+            ."DROP TABLE IF EXISTS \"shop\".\"orders\";\n"
+            ."CREATE TABLE \"orders\" (\"id\" INTEGER);\n"
+            .'INSERT INTO "shop"."orders" ("id", "name", "payload") VALUES '
+            ."(1, 'O''Reilly', X'0001'), (2, '', NULL);\n\n"
+            ."-- End SQLCraft dump\n",
             $sink->contents(),
         );
     }
 
-    public function testCsvWriterUsesRfc4180EscapingAndNullToken(): void
+    public function test_csv_writer_uses_rfc4180_escaping_and_null_token(): void
     {
-        $sink = new StringBufferSink();
+        $sink = new StringBufferSink;
         $table = new TableStatus('orders');
         $options = new DumpOptions('csv', DumpScope::table('shop', 'orders'));
-        $writer = new CsvFormatWriter();
+        $writer = new CsvFormatWriter;
         $columns = $this->columns();
 
         $writer->writeTableHeader($sink, $table, $options);
@@ -80,25 +79,25 @@ final class FormatWriterTest extends TestCase
 
         self::assertSame(
             "id,name,payload\r\n"
-            . "1,\"A, \"\"quoted\"\"\nname\",AQI=\r\n"
-            . "2,\\N,\\N\r\n",
+            ."1,\"A, \"\"quoted\"\"\nname\",AQI=\r\n"
+            ."2,\\N,\\N\r\n",
             $sink->contents(),
         );
     }
 
-    public function testSemicolonAndTsvWritersExposeTheirFormatAndDefaultSeparators(): void
+    public function test_semicolon_and_tsv_writers_expose_their_format_and_default_separators(): void
     {
         $table = new TableStatus('items');
         $columns = [$this->column('value', 'TEXT')];
         $options = new DumpOptions('csv-semicolon', DumpScope::table('shop', 'items'));
 
-        $semicolonSink = new StringBufferSink();
-        $semicolonWriter = new CsvSemicolonFormatWriter();
+        $semicolonSink = new StringBufferSink;
+        $semicolonWriter = new CsvSemicolonFormatWriter;
         $semicolonWriter->writeTableHeader($semicolonSink, $table, $options);
         $semicolonWriter->writeRows($semicolonSink, $table, [['value' => 'a;b']], $columns, $options);
 
-        $tsvSink = new StringBufferSink();
-        $tsvWriter = new TsvFormatWriter();
+        $tsvSink = new StringBufferSink;
+        $tsvWriter = new TsvFormatWriter;
         $tsvWriter->writeTableHeader($tsvSink, $table, $options);
         $tsvWriter->writeRows($tsvSink, $table, [['value' => "a\tb"]], $columns, $options);
 

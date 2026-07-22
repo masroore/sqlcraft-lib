@@ -12,12 +12,12 @@ use SQLCraft\Execution\QueryExecutor;
 
 final class QueryExecutorHistoryTest extends TestCase
 {
-    public function testSuccessfulExecutionIsRecordedWithoutParameters(): void
+    public function test_successful_execution_is_recorded_without_parameters(): void
     {
         $connection = self::createMock(ConnectionInterface::class);
         $connection->method('getDatabaseName')->willReturn('app');
         $connection->expects(self::once())->method('execute')->with('UPDATE users SET active = ?', [true])->willReturn(new ExecutionResult(1, '', 1.0, 'UPDATE users SET active = ?'));
-        $history = new InMemoryQueryHistory();
+        $history = new InMemoryQueryHistory;
 
         (new QueryExecutor($history))->execute($connection, 'UPDATE users SET active = ?', [true]);
         $entry = $history->getRecent('app')[0];
@@ -27,12 +27,12 @@ final class QueryExecutorHistoryTest extends TestCase
         self::assertNull($entry->errorMessage);
     }
 
-    public function testFailedExecutionIsRecordedAndRethrown(): void
+    public function test_failed_execution_is_recorded_and_rethrown(): void
     {
         $connection = self::createMock(ConnectionInterface::class);
         $connection->method('getDatabaseName')->willReturn('app');
         $connection->expects(self::once())->method('execute')->willThrowException(new \RuntimeException('boom'));
-        $history = new InMemoryQueryHistory();
+        $history = new InMemoryQueryHistory;
 
         try {
             (new QueryExecutor($history))->execute($connection, 'DELETE FROM users');

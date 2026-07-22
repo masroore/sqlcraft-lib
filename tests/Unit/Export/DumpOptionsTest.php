@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace SQLCraft\Tests\Unit\Export;
 
 use PHPUnit\Framework\TestCase;
-use SQLCraft\Export\DataStyle;
 use SQLCraft\Export\DatabaseSectionStyle;
+use SQLCraft\Export\DataStyle;
 use SQLCraft\Export\DumpOptions;
 use SQLCraft\Export\DumpScope;
 use SQLCraft\Export\ScopeKind;
@@ -14,7 +14,7 @@ use SQLCraft\Export\TableSectionStyle;
 
 final class DumpOptionsTest extends TestCase
 {
-    public function testDefaultsMatchThePlannedStreamingExportPolicy(): void
+    public function test_defaults_match_the_planned_streaming_export_policy(): void
     {
         $options = new DumpOptions('sql', DumpScope::database('shop'));
 
@@ -33,19 +33,19 @@ final class DumpOptionsTest extends TestCase
         self::assertSame('\N', $options->nullRepresentation);
     }
 
-    public function testRejectsInvalidBatchAndFormatOptions(): void
+    public function test_rejects_invalid_batch_and_format_options(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         new DumpOptions('', DumpScope::database('shop'));
     }
 
-    public function testRejectsNonPositiveBatchSize(): void
+    public function test_rejects_non_positive_batch_size(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         new DumpOptions('sql', DumpScope::database('shop'), batchSize: 0);
     }
 
-    public function testAllOptionsCanBeConfigured(): void
+    public function test_all_options_can_be_configured(): void
     {
         $scope = DumpScope::table('shop', 'orders');
         $options = new DumpOptions(

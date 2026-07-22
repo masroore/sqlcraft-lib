@@ -9,7 +9,7 @@ use SQLCraft\Contracts\Driver\DriverInterface;
 
 final class DriverInterfaceTest extends TestCase
 {
-    public function testDriverPortExposesConnectionFactoryResponsibilities(): void
+    public function test_driver_port_exposes_connection_factory_responsibilities(): void
     {
         self::assertSame(
             ['buildDsn', 'connect', 'getPlatform', 'getName', 'getPdoDriverNames'],

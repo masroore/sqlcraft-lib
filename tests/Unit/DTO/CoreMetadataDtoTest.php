@@ -15,7 +15,7 @@ use SQLCraft\ValueObjects\ForeignKeyAction;
 
 final class CoreMetadataDtoTest extends TestCase
 {
-    public function testColumnMetaStoresItsSchemaSnapshot(): void
+    public function test_column_meta_stores_its_schema_snapshot(): void
     {
         $column = new ColumnMeta(
             name: 'created_at',
@@ -48,7 +48,7 @@ final class CoreMetadataDtoTest extends TestCase
         self::assertNull($column->defaultConstraintName);
     }
 
-    public function testTableStatusProvidesPortableDefaultsForMissingMetadata(): void
+    public function test_table_status_provides_portable_defaults_for_missing_metadata(): void
     {
         $table = new TableStatus('users');
 
@@ -60,7 +60,7 @@ final class CoreMetadataDtoTest extends TestCase
         self::assertNull($table->schema);
     }
 
-    public function testTableStatusStoresEngineSpecificMetadata(): void
+    public function test_table_status_stores_engine_specific_metadata(): void
     {
         $table = new TableStatus(
             name: 'orders',
@@ -88,7 +88,7 @@ final class CoreMetadataDtoTest extends TestCase
         self::assertSame('public', $table->schema);
     }
 
-    public function testForeignKeyMetaIsNotDeferrableByDefault(): void
+    public function test_foreign_key_meta_is_not_deferrable_by_default(): void
     {
         $foreignKey = new ForeignKeyMeta(
             constraintName: 'orders_user_id_foreign',
@@ -105,7 +105,7 @@ final class CoreMetadataDtoTest extends TestCase
         self::assertFalse($foreignKey->deferrable);
     }
 
-    public function testForeignKeyMetaStoresOrderedColumnMappingsAndActions(): void
+    public function test_foreign_key_meta_stores_ordered_column_mappings_and_actions(): void
     {
         $foreignKey = new ForeignKeyMeta(
             constraintName: 'orders_user_id_foreign',

@@ -9,7 +9,7 @@ use SQLCraft\Enums\DatabaseDriver;
 
 final class DatabaseDriverTest extends TestCase
 {
-    public function testAllCasesHaveExpectedBackingValues(): void
+    public function test_all_cases_have_expected_backing_values(): void
     {
         self::assertSame('mysql', DatabaseDriver::MySQL->value);
         self::assertSame('mariadb', DatabaseDriver::MariaDB->value);
@@ -18,7 +18,7 @@ final class DatabaseDriverTest extends TestCase
         self::assertSame('sqlserver', DatabaseDriver::SqlServer->value);
     }
 
-    public function testFromProducesCorrectCase(): void
+    public function test_from_produces_correct_case(): void
     {
         self::assertSame(DatabaseDriver::MySQL, DatabaseDriver::from('mysql'));
         self::assertSame(DatabaseDriver::MariaDB, DatabaseDriver::from('mariadb'));
@@ -27,14 +27,14 @@ final class DatabaseDriverTest extends TestCase
         self::assertSame(DatabaseDriver::SqlServer, DatabaseDriver::from('sqlserver'));
     }
 
-    public function testTryFromReturnsNullForUnknownValue(): void
+    public function test_try_from_returns_null_for_unknown_value(): void
     {
         self::assertNull($this->tryFromValue('oracle'));
         self::assertNull($this->tryFromValue(''));
         self::assertNull($this->tryFromValue('MySQL')); // case-sensitive
     }
 
-    public function testCasesMethodReturnsFiveEntries(): void
+    public function test_cases_method_returns_five_entries(): void
     {
         self::assertCount(5, DatabaseDriver::cases());
     }

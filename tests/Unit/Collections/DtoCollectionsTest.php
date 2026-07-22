@@ -31,7 +31,7 @@ use SQLCraft\ValueObjects\TriggerTiming;
 
 final class DtoCollectionsTest extends TestCase
 {
-    public function testMetadataCollectionsExposeTheirDeclaredItemTypes(): void
+    public function test_metadata_collections_expose_their_declared_item_types(): void
     {
         $column = new ColumnMeta(
             name: 'id',
@@ -108,7 +108,7 @@ final class DtoCollectionsTest extends TestCase
         self::assertSame('shop', $databases->get('shop')->name);
     }
 
-    public function testFilteringPreservesConcreteCollectionAndKeys(): void
+    public function test_filtering_preserves_concrete_collection_and_keys(): void
     {
         $tables = new TableCollection([
             'users' => new TableStatus('users'),
@@ -127,7 +127,7 @@ final class DtoCollectionsTest extends TestCase
         self::assertFalse(isset($filtered['users']));
     }
 
-    public function testMappingProducesAListWithoutChangingTheCollection(): void
+    public function test_mapping_produces_a_list_without_changing_the_collection(): void
     {
         $databases = new DatabaseCollection([
             'shop' => new DatabaseMeta('shop', null, null),

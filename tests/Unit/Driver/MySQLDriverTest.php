@@ -13,10 +13,10 @@ use SQLCraft\ValueObjects\ConnectionParameters;
 
 final class MySQLDriverTest extends TestCase
 {
-    public function testItBuildsHostAndSocketDsns(): void
+    public function test_it_builds_host_and_socket_dsns(): void
     {
         $factory = self::createMock(PdoConnectionFactoryInterface::class);
-        $driver = new MySQLDriver($factory, new MySQLPlatform());
+        $driver = new MySQLDriver($factory, new MySQLPlatform);
 
         self::assertSame(
             'mysql:host=db.example;port=3307;dbname=shop;charset=utf8mb4',
@@ -30,10 +30,10 @@ final class MySQLDriverTest extends TestCase
         self::assertSame(['mysql'], $driver->getPdoDriverNames());
     }
 
-    public function testItUsesThePdoFactorySeam(): void
+    public function test_it_uses_the_pdo_factory_seam(): void
     {
         $factory = self::createMock(PdoConnectionFactoryInterface::class);
-        $platform = new MySQLPlatform();
+        $platform = new MySQLPlatform;
         $connection = self::createMock(ConnectionInterface::class);
         $parameters = new ConnectionParameters(database: 'shop');
         $factory->expects(self::once())->method('connect')->with('mysql:host=127.0.0.1;port=3306;dbname=shop', $parameters, $platform)->willReturn($connection);

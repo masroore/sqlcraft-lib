@@ -10,7 +10,7 @@ use SQLCraft\DTO\SchemaMeta;
 
 final class DatabaseSchemaDtoTest extends TestCase
 {
-    public function testDatabaseMetaStoresDatabaseIdentityAndDefaults(): void
+    public function test_database_meta_stores_database_identity_and_defaults(): void
     {
         $database = new DatabaseMeta(
             name: 'shop',
@@ -23,7 +23,7 @@ final class DatabaseSchemaDtoTest extends TestCase
         self::assertSame('utf8mb4_unicode_ci', $database->collation);
     }
 
-    public function testDatabaseMetaSupportsEnginesWithoutDatabaseCharsetMetadata(): void
+    public function test_database_meta_supports_engines_without_database_charset_metadata(): void
     {
         $database = new DatabaseMeta(
             name: 'main',
@@ -36,7 +36,7 @@ final class DatabaseSchemaDtoTest extends TestCase
         self::assertNull($database->collation);
     }
 
-    public function testSchemaMetaStoresCatalogAndOwner(): void
+    public function test_schema_meta_stores_catalog_and_owner(): void
     {
         $schema = new SchemaMeta(
             name: 'public',
@@ -49,7 +49,7 @@ final class DatabaseSchemaDtoTest extends TestCase
         self::assertSame('app_user', $schema->owner);
     }
 
-    public function testSchemaMetaSupportsSchemasWithoutCatalogOrOwner(): void
+    public function test_schema_meta_supports_schemas_without_catalog_or_owner(): void
     {
         $schema = new SchemaMeta(
             name: 'dbo',

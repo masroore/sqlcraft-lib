@@ -8,10 +8,10 @@ use PHPUnit\Framework\TestCase;
 use SQLCraft\Contracts\Platform\DdlDialectInterface;
 use SQLCraft\DDL\CreateIndexBuilder;
 use SQLCraft\DDL\CreateTableBuilder;
-use SQLCraft\DDL\DropIndexBuilder;
-use SQLCraft\DDL\DropTableBuilder;
 use SQLCraft\DDL\Definition\ColumnDefinition;
 use SQLCraft\DDL\Definition\IndexDefinition;
+use SQLCraft\DDL\DropIndexBuilder;
+use SQLCraft\DDL\DropTableBuilder;
 use SQLCraft\ValueObjects\DataType;
 use SQLCraft\ValueObjects\DefaultValue;
 use SQLCraft\ValueObjects\Identifier;
@@ -20,7 +20,7 @@ use SQLCraft\ValueObjects\QualifiedName;
 
 final class TableAndIndexBuilderTest extends TestCase
 {
-    public function testCreateTableDelegatesImmutableIntentToDialect(): void
+    public function test_create_table_delegates_immutable_intent_to_dialect(): void
     {
         $table = new QualifiedName(new Identifier('users'));
         $column = new ColumnDefinition('id', new DataType('INTEGER'), false, false, true, false, DefaultValue::nullValue(), null, null, null, [], null, null);
@@ -36,7 +36,7 @@ final class TableAndIndexBuilderTest extends TestCase
         self::assertSame([], (new CreateTableBuilder($table))->columns);
     }
 
-    public function testDropTableDelegatesFlags(): void
+    public function test_drop_table_delegates_flags(): void
     {
         $table = new QualifiedName(new Identifier('users'));
         $dialect = self::createMock(DdlDialectInterface::class);
@@ -45,7 +45,7 @@ final class TableAndIndexBuilderTest extends TestCase
         self::assertSame(['DROP TABLE'], (new DropTableBuilder($table, true, true))->toSql($dialect));
     }
 
-    public function testIndexBuildersDelegateToDialect(): void
+    public function test_index_builders_delegate_to_dialect(): void
     {
         $table = new QualifiedName(new Identifier('users'));
         $index = new IndexDefinition('email_idx', IndexType::UNIQUE, [], true, null, null, null);

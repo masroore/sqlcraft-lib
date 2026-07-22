@@ -11,7 +11,7 @@ use SQLCraft\ValueObjects\QualifiedName;
 
 final class QualifiedNameTest extends TestCase
 {
-    public function testItStoresObjectSchemaAndCatalog(): void
+    public function test_it_stores_object_schema_and_catalog(): void
     {
         $name = new QualifiedName(
             new Identifier('users'),
@@ -24,7 +24,7 @@ final class QualifiedNameTest extends TestCase
         self::assertSame('app', $name->catalog?->name);
     }
 
-    public function testQualifyReturnsAValueWithRequestedDepth(): void
+    public function test_qualify_returns_a_value_with_requested_depth(): void
     {
         $name = new QualifiedName(
             new Identifier('users'),
@@ -43,7 +43,7 @@ final class QualifiedNameTest extends TestCase
         self::assertSame('app', $name->catalog?->name);
     }
 
-    public function testQualifyDefaultsToAndSupportsFullDepth(): void
+    public function test_qualify_defaults_to_and_supports_full_depth(): void
     {
         $name = new QualifiedName(
             new Identifier('users'),
@@ -58,7 +58,7 @@ final class QualifiedNameTest extends TestCase
         self::assertSame('app', $qualified->catalog?->name);
     }
 
-    public function testQualifyRejectsInvalidDepth(): void
+    public function test_qualify_rejects_invalid_depth(): void
     {
         $this->expectException(InvalidArgumentException::class);
 

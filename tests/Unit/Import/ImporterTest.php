@@ -6,18 +6,18 @@ namespace SQLCraft\Tests\Unit\Import;
 
 use PHPUnit\Framework\TestCase;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
+use SQLCraft\Contracts\Events\ImportExportEventDispatcherInterface;
 use SQLCraft\Contracts\Execution\BatchExecutorInterface;
 use SQLCraft\Contracts\Execution\BatchStatementResult;
 use SQLCraft\Contracts\Execution\StatementBatch;
-use SQLCraft\Contracts\Events\ImportExportEventDispatcherInterface;
 use SQLCraft\Contracts\Import\ImportSourceInterface;
-use SQLCraft\Import\ImportOptions;
 use SQLCraft\Import\Importer;
+use SQLCraft\Import\ImportOptions;
 use SQLCraft\Query\StatementSplitter;
 
 final class ImporterTest extends TestCase
 {
-    public function testStreamsSourceSplitsStatementsAndExecutesBatch(): void
+    public function test_streams_source_splits_statements_and_executes_batch(): void
     {
         $connection = self::createMock(ConnectionInterface::class);
         $source = self::createMock(ImportSourceInterface::class);
@@ -35,25 +35,25 @@ final class ImporterTest extends TestCase
             new BatchStatementResult(1, 'INSERT INTO orders VALUES (1)', null, null, 0.1, null),
         ]));
 
-        $result = (new Importer(new StatementSplitter(), $batchExecutor))->import($connection, $source, new ImportOptions());
+        $result = (new Importer(new StatementSplitter, $batchExecutor))->import($connection, $source, new ImportOptions);
 
         self::assertSame(2, $result->statementsExecuted);
         self::assertSame(0, $result->statementsSkipped);
         self::assertSame([], $result->errors);
     }
 
-    public function testContinuesAfterErrorsWhenStopOnErrorIsDisabled(): void
+    public function test_continues_after_errors_when_stop_on_error_is_disabled(): void
     {
         $connection = self::createMock(ConnectionInterface::class);
         $source = self::createMock(ImportSourceInterface::class);
-        $source->method('openStream')->willReturn($this->stream("bad;good;"));
+        $source->method('openStream')->willReturn($this->stream('bad;good;'));
         $batchExecutor = self::createMock(BatchExecutorInterface::class);
         $batchExecutor->method('executeBatch')->willReturn($this->results([
             new BatchStatementResult(0, 'bad', null, null, 0.1, new \RuntimeException('syntax error', 1064)),
             new BatchStatementResult(1, 'good', null, null, 0.1, null),
         ]));
 
-        $result = (new Importer(new StatementSplitter(), $batchExecutor))->import(
+        $result = (new Importer(new StatementSplitter, $batchExecutor))->import(
             $connection,
             $source,
             new ImportOptions(stopOnError: false),
@@ -65,11 +65,11 @@ final class ImporterTest extends TestCase
         self::assertSame(1064, $result->errors[0]->errorCode);
     }
 
-    public function testMaximumStatementLimitSkipsRemainingInput(): void
+    public function test_maximum_statement_limit_skips_remaining_input(): void
     {
         $connection = self::createMock(ConnectionInterface::class);
         $source = self::createMock(ImportSourceInterface::class);
-        $source->method('openStream')->willReturn($this->stream("one;two;three;"));
+        $source->method('openStream')->willReturn($this->stream('one;two;three;'));
         $batchExecutor = self::createMock(BatchExecutorInterface::class);
         $batchExecutor->expects(self::once())->method('executeBatch')->with(
             $connection,
@@ -80,7 +80,7 @@ final class ImporterTest extends TestCase
             new BatchStatementResult(1, 'two', null, null, 0.1, null),
         ]));
 
-        $result = (new Importer(new StatementSplitter(), $batchExecutor))->import(
+        $result = (new Importer(new StatementSplitter, $batchExecutor))->import(
             $connection,
             $source,
             new ImportOptions(maxStatements: 2),
@@ -90,7 +90,7 @@ final class ImporterTest extends TestCase
         self::assertSame(1, $result->statementsSkipped);
     }
 
-    public function testLargeSourceIsProcessedAcrossMultipleBoundedChunks(): void
+    public function test_large_source_is_processed_across_multiple_bounded_chunks(): void
     {
         $connection = self::createMock(ConnectionInterface::class);
         $source = self::createMock(ImportSourceInterface::class);
@@ -108,18 +108,18 @@ final class ImporterTest extends TestCase
             },
         );
 
-        $result = (new Importer(new StatementSplitter(), $batchExecutor))->import($connection, $source, new ImportOptions());
+        $result = (new Importer(new StatementSplitter, $batchExecutor))->import($connection, $source, new ImportOptions);
 
         self::assertSame(5000, $result->statementsExecuted);
         self::assertGreaterThan(1, $batchCalls);
         self::assertLessThanOrEqual(1000, $maximumBatchSize);
     }
 
-    public function testEmitsProgressAtConfiguredStatementInterval(): void
+    public function test_emits_progress_at_configured_statement_interval(): void
     {
         $connection = self::createMock(ConnectionInterface::class);
         $source = self::createMock(ImportSourceInterface::class);
-        $source->method('openStream')->willReturn($this->stream("one;two;three;four;"));
+        $source->method('openStream')->willReturn($this->stream('one;two;three;four;'));
         $events = self::createMock(ImportExportEventDispatcherInterface::class);
         $events->expects(self::exactly(2))->method('importProgress')->with($connection, self::callback(static fn (int $value): bool => $value >= 0), self::callback(static fn (int|float $value): bool => $value >= 0), self::callback(static fn (float $value): bool => $value >= 0));
         $batchExecutor = self::createMock(BatchExecutorInterface::class);
@@ -131,7 +131,7 @@ final class ImporterTest extends TestCase
             },
         );
 
-        $result = (new Importer(new StatementSplitter(), $batchExecutor, $events))->import(
+        $result = (new Importer(new StatementSplitter, $batchExecutor, $events))->import(
             $connection,
             $source,
             new ImportOptions(progressInterval: 2),
@@ -140,7 +140,7 @@ final class ImporterTest extends TestCase
         self::assertSame(4, $result->statementsExecuted);
     }
 
-    public function testRejectsInvalidImportOptions(): void
+    public function test_rejects_invalid_import_options(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         new ImportOptions(progressInterval: 0);

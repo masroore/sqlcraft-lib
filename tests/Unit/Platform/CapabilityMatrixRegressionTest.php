@@ -5,17 +5,17 @@ declare(strict_types=1);
 namespace SQLCraft\Tests\Unit\Platform;
 
 use PHPUnit\Framework\TestCase;
+use ReflectionMethod;
 use SQLCraft\Capabilities\Capability;
 use SQLCraft\Platform\MariaDbPlatform;
 use SQLCraft\Platform\MySQLPlatform;
 use SQLCraft\Platform\PostgreSQLPlatform;
 use SQLCraft\Platform\SqlitePlatform;
 use SQLCraft\ValueObjects\ServerVersion;
-use ReflectionMethod;
 
 final class CapabilityMatrixRegressionTest extends TestCase
 {
-    public function testMySqlMatrixMatchesTheAuthoritativeTable(): void
+    public function test_my_sql_matrix_matches_the_authoritative_table(): void
     {
         self::assertSame([
             'always' => [
@@ -33,10 +33,10 @@ final class CapabilityMatrixRegressionTest extends TestCase
                 [Capability::DescendingIndexes, [8, 0, 0]],
                 [Capability::CheckConstraints, [8, 0, 16]],
             ],
-        ], $this->matrix(new MySQLPlatform()));
+        ], $this->matrix(new MySQLPlatform));
     }
 
-    public function testMariaDbMatrixMatchesTheAuthoritativeTable(): void
+    public function test_maria_db_matrix_matches_the_authoritative_table(): void
     {
         self::assertSame([
             'always' => [
@@ -54,10 +54,10 @@ final class CapabilityMatrixRegressionTest extends TestCase
                 [Capability::CheckConstraints, [10, 2, 1]],
                 [Capability::Sequence, [10, 3, 0]],
             ],
-        ], $this->matrix(new MariaDbPlatform()));
+        ], $this->matrix(new MariaDbPlatform));
     }
 
-    public function testPostgreSqlMatrixMatchesTheAuthoritativeTable(): void
+    public function test_postgre_sql_matrix_matches_the_authoritative_table(): void
     {
         self::assertSame([
             'always' => [
@@ -74,10 +74,10 @@ final class CapabilityMatrixRegressionTest extends TestCase
                 [Capability::GeneratedColumns, [12, 0, 0]],
                 [Capability::Procedure, [11, 0, 0]],
             ],
-        ], $this->matrix(new PostgreSQLPlatform()));
+        ], $this->matrix(new PostgreSQLPlatform));
     }
 
-    public function testSqliteMatrixMatchesTheAuthoritativeTable(): void
+    public function test_sqlite_matrix_matches_the_authoritative_table(): void
     {
         self::assertSame([
             'always' => [
@@ -89,10 +89,10 @@ final class CapabilityMatrixRegressionTest extends TestCase
                 Capability::CrossTableSearch, Capability::BlobStreaming,
             ],
             'versioned' => [[Capability::GeneratedColumns, [3, 31, 0]]],
-        ], $this->matrix(new SqlitePlatform()));
+        ], $this->matrix(new SqlitePlatform));
     }
 
-    public function testFlavorBranchingIsNotScatteredThroughMySqlDialectMethods(): void
+    public function test_flavor_branching_is_not_scattered_through_my_sql_dialect_methods(): void
     {
         $filename = (new ReflectionMethod(MySQLPlatform::class, 'buildCapabilityMatrix'))->getFileName();
         if ($filename === false) {
@@ -101,7 +101,7 @@ final class CapabilityMatrixRegressionTest extends TestCase
         $source = file_get_contents($filename);
         self::assertIsString($source);
         self::assertStringNotContainsString('getFlavor() ===', $source);
-        self::assertTrue((new MariaDbPlatform())->getCapabilitySet(new ServerVersion('10.3.0'))->has(Capability::Sequence));
+        self::assertTrue((new MariaDbPlatform)->getCapabilitySet(new ServerVersion('10.3.0'))->has(Capability::Sequence));
     }
 
     /** @return array{always: list<Capability>, versioned: list<array{0: Capability, 1: array{0: int, 1: int, 2: int}}> } */

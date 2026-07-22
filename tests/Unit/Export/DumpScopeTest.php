@@ -10,7 +10,7 @@ use SQLCraft\Export\ScopeKind;
 
 final class DumpScopeTest extends TestCase
 {
-    public function testAllDatabasesScope(): void
+    public function test_all_databases_scope(): void
     {
         $scope = DumpScope::allDatabases();
 
@@ -20,7 +20,7 @@ final class DumpScopeTest extends TestCase
         self::assertNull($scope->resultSql);
     }
 
-    public function testDatabaseScope(): void
+    public function test_database_scope(): void
     {
         $scope = DumpScope::database('shop');
 
@@ -30,7 +30,7 @@ final class DumpScopeTest extends TestCase
         self::assertNull($scope->resultSql);
     }
 
-    public function testTablesAndSingleTableScopes(): void
+    public function test_tables_and_single_table_scopes(): void
     {
         $tables = DumpScope::tables('shop', ['orders', 'customers']);
         $table = DumpScope::table('shop', 'orders');
@@ -41,13 +41,13 @@ final class DumpScopeTest extends TestCase
         self::assertSame(['orders'], $table->tables);
     }
 
-    public function testRejectsEmptyScopeValues(): void
+    public function test_rejects_empty_scope_values(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         DumpScope::tables('shop', []);
     }
 
-    public function testFilteredResultScope(): void
+    public function test_filtered_result_scope(): void
     {
         $scope = DumpScope::filteredResult('shop', 'orders', 'SELECT * FROM orders WHERE id > 10');
 

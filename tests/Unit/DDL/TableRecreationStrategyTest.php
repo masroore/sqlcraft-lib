@@ -22,7 +22,7 @@ use SQLCraft\ValueObjects\QualifiedName;
 
 final class TableRecreationStrategyTest extends TestCase
 {
-    public function testRecreationRunsTransactionalCreateCopyDropRenameSequence(): void
+    public function test_recreation_runs_transactional_create_copy_drop_rename_sequence(): void
     {
         $table = new QualifiedName(new Identifier('users'));
         /** @var array<int, string> $executed */
@@ -54,14 +54,14 @@ final class TableRecreationStrategyTest extends TestCase
     }
 
     /**
-     * @param list<array<string, mixed>> $foreignKeyViolations
-     * @param array<int, string> $executed
+     * @param  list<array<string, mixed>>  $foreignKeyViolations
+     * @param  array<int, string>  $executed
      */
     private function connection(array $foreignKeyViolations, array &$executed): ConnectionInterface
     {
         $connection = self::createMock(ConnectionInterface::class);
-        $connection->method('getPlatform')->willReturn(new SqlitePlatform());
-        $connection->method('quoteIdentifier')->willReturnCallback(static fn (string $name): string => '"' . $name . '"');
+        $connection->method('getPlatform')->willReturn(new SqlitePlatform);
+        $connection->method('quoteIdentifier')->willReturnCallback(static fn (string $name): string => '"'.$name.'"');
         $connection->method('execute')->willReturnCallback(function (string $sql) use (&$executed): ExecutionResult {
             $executed[] = $sql;
 

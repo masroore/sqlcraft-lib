@@ -5,16 +5,18 @@ declare(strict_types=1);
 namespace SQLCraft\Tests\Unit\Metadata;
 
 use PHPUnit\Framework\TestCase;
+use SQLCraft\Capabilities\Capability;
 use SQLCraft\Capabilities\CapabilityNotSupportedException;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Connection\ResultInterface;
 use SQLCraft\Contracts\Platform\PlatformInterface;
 use SQLCraft\Metadata\MySQLMetadataFactory;
 use SQLCraft\Metadata\ServerInspector;
+use SQLCraft\ValueObjects\ServerVersion;
 
 final class ServerInspectorTest extends TestCase
 {
-    public function testItHydratesServerCollectionsAndKeyValueMaps(): void
+    public function test_it_hydrates_server_collections_and_key_value_maps(): void
     {
         $platform = self::createMock(PlatformInterface::class);
         $platform->method('getName')->willReturn('mysql');
@@ -44,14 +46,14 @@ final class ServerInspectorTest extends TestCase
 
         $connection = self::createMock(ConnectionInterface::class);
         $connection->method('getPlatform')->willReturn($platform);
-        $connection->method('getServerVersion')->willReturn(new \SQLCraft\ValueObjects\ServerVersion('8.4.0'));
+        $connection->method('getServerVersion')->willReturn(new ServerVersion('8.4.0'));
         $connection->expects(self::exactly(6))->method('query')->willReturnCallback(
             static function (string $sql) use ($results): ResultInterface {
                 return $results[$sql] ?? throw new \LogicException('Unexpected server SQL.');
             },
         );
 
-        $inspector = new ServerInspector(new MySQLMetadataFactory());
+        $inspector = new ServerInspector(new MySQLMetadataFactory);
         $info = $inspector->getServerInfo($connection);
         $databases = $inspector->getDatabases($connection);
         $variables = $inspector->getVariables($connection);
@@ -69,17 +71,17 @@ final class ServerInspectorTest extends TestCase
         self::assertSame('utf8mb4_general_ci', $collations->get('utf8mb4_general_ci')->name);
     }
 
-    public function testUnsupportedCharsetInspectionRemainsCapabilityGated(): void
+    public function test_unsupported_charset_inspection_remains_capability_gated(): void
     {
         $platform = self::createMock(PlatformInterface::class);
         $platform->method('getCharsetsSql')->willThrowException(
-            CapabilityNotSupportedException::for(\SQLCraft\Capabilities\Capability::Charset, 'sqlite'),
+            CapabilityNotSupportedException::for(Capability::Charset, 'sqlite'),
         );
         $connection = self::createMock(ConnectionInterface::class);
         $connection->method('getPlatform')->willReturn($platform);
 
         $this->expectException(CapabilityNotSupportedException::class);
 
-        (new ServerInspector(new MySQLMetadataFactory()))->getCharsets($connection);
+        (new ServerInspector(new MySQLMetadataFactory))->getCharsets($connection);
     }
 }
