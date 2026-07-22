@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ $title }}</title>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 2rem; color: #1a1a1a; }
+  h1 { font-size: 1.5rem; margin-bottom: .25rem; }
+  .meta { font-size: .85rem; color: #666; margin-bottom: 2rem; }
+  section { margin-bottom: 3rem; }
+  h2 { font-size: 1.1rem; border-bottom: 2px solid #e5e7eb; padding-bottom: .4rem; }
+  table { border-collapse: collapse; width: 100%; font-size: .875rem; }
+  th, td { border: 1px solid #e5e7eb; padding: .4rem .75rem; text-align: left; }
+  th { background: #f9fafb; font-weight: 600; }
+  tr:nth-child(even) { background: #f9fafb; }
+  .null { color: #aaa; font-style: italic; }
+</style>
+</head>
+<body>
+<h1>{{ $title }}</h1>
+<p class="meta">Database: <strong>{{ $databaseName }}</strong> &mdash; Exported: {{ $exportedAt->format('Y-m-d H:i:s') }}</p>
+@foreach($tables as $table)
+<section>
+  <h2>{{ $table['name'] }}</h2>
+  <table>
+    <thead>
+      <tr>
+        @foreach($table['columns'] as $column)
+        <th title="{{ $column->dataType->name }}">{{ $column->name }}</th>
+        @endforeach
+      </tr>
+    </thead>
+    <tbody>
+      @foreach($table['rows'] as $row)
+      <tr>
+        @foreach($table['columns'] as $column)
+        @if($row[$column->name] === null)
+        <td class="null">&mdash;</td>
+        @else
+        <td>{{ (string) $row[$column->name] }}</td>
+        @endif
+        @endforeach
+      </tr>
+      @endforeach
+    </tbody>
+  </table>
+</section>
+@endforeach
+</body>
+</html>
