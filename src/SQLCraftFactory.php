@@ -26,11 +26,15 @@ use SQLCraft\Events\SimpleListenerProvider;
 use SQLCraft\Execution\BatchExecutor;
 use SQLCraft\Execution\QueryExecutor;
 use SQLCraft\Export\CsvFormatWriter;
+use SQLCraft\Export\HtmlFormatWriter;
+use SQLCraft\Export\JsonFormatWriter;
 use SQLCraft\Export\CsvSemicolonFormatWriter;
 use SQLCraft\Export\Exporter;
 use SQLCraft\Export\FormatRegistry;
 use SQLCraft\Export\SqlFormatWriter;
 use SQLCraft\Export\TsvFormatWriter;
+use SQLCraft\Export\XlsxFormatWriter;
+use SQLCraft\Export\XmlFormatWriter;
 use SQLCraft\Import\CsvFormatReader;
 use SQLCraft\Import\Importer;
 use SQLCraft\Metadata\PrivilegeInspector;
@@ -129,6 +133,10 @@ final class SQLCraftFactory
             new CsvFormatWriter,
             new TsvFormatWriter,
             new CsvSemicolonFormatWriter,
+            new JsonFormatWriter,
+            new XmlFormatWriter,
+            new XlsxFormatWriter,
+            new HtmlFormatWriter,
         ], [new CsvFormatReader]);
         $exporter = new Exporter($source, $queryExecutor, $registry);
         $importer = new Importer(new StatementSplitter, new BatchExecutor($queryExecutor));

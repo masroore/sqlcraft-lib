@@ -1,0 +1,118 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SQLCraft\Export;
+
+use LogicException;
+use SQLCraft\Contracts\Export\FormatWriterInterface;
+use SQLCraft\Contracts\Export\SinkInterface;
+use SQLCraft\DTO\ColumnMeta;
+use SQLCraft\DTO\TableStatus;
+use XMLWriter;
+
+final class XmlFormatWriter implements FormatWriterInterface
+{
+    private ?XMLWriter $writer = null;
+
+    #[\Override]
+    public function getFormatName(): string
+    {
+        return 'xml';
+    }
+
+    #[\Override]
+    public function writeHeader(SinkInterface $sink, DumpOptions $options): void
+    {
+        $opts = $options->xmlOptions ?? new XmlExportOptions;
+        $this->writer = new XMLWriter;
+        $this->writer->openMemory();
+        $this->writer->setIndent(true);
+        $this->writer->setIndentString('  ');
+        $this->writer->startDocument('1.0', 'UTF-8');
+        $this->writer->startElement($opts->rootElement);
+    }
+
+    #[\Override]
+    public function writeTableHeader(SinkInterface $sink, TableStatus $table, DumpOptions $options): void
+    {
+        $this->writer()->startElement('table');
+        $this->writer()->writeAttribute('name', $table->name);
+    }
+
+    /** @param list<string> $ddlStatements */
+    #[\Override]
+    public function writeTableDdl(SinkInterface $sink, TableStatus $table, array $ddlStatements): void {}
+
+    /**
+     * @param  list<array<string, mixed>>  $rows
+     * @param  list<ColumnMeta>  $columns
+     */
+    #[\Override]
+    public function writeRows(
+        SinkInterface $sink,
+        TableStatus $table,
+        array $rows,
+        array $columns,
+        DumpOptions $options,
+    ): void {
+        $opts = $options->xmlOptions ?? new XmlExportOptions;
+        $w = $this->writer();
+        foreach ($rows as $row) {
+            $w->startElement($opts->rowElement);
+            foreach ($columns as $column) {
+                $value = $row[$column->name] ?? null;
+                $elem = $this->sanitiseElementName($column->name);
+                if ($value === null) {
+                    $w->writeElement($elem);
+                } elseif ($this->isBinary($column)) {
+                    $w->startElement($elem);
+                    $w->writeAttribute('encoding', 'base64');
+                    $w->text(base64_encode((string) $value));
+                    $w->endElement();
+                } else {
+                    $w->writeElement($elem, (string) $value);
+                }
+            }
+            $w->endElement();
+            $sink->write($w->flush(true));
+        }
+    }
+
+    #[\Override]
+    public function writeTableFooter(SinkInterface $sink, TableStatus $table): void
+    {
+        $this->writer()->endElement();
+        $sink->write($this->writer()->flush(true));
+    }
+
+    #[\Override]
+    public function writeFooter(SinkInterface $sink, DumpOptions $options): void
+    {
+        $w = $this->writer();
+        $w->endElement();
+        $w->endDocument();
+        $sink->write($w->flush(true));
+        $this->writer = null;
+    }
+
+    private function writer(): XMLWriter
+    {
+        return $this->writer ?? throw new LogicException('XmlFormatWriter: writeHeader() not called.');
+    }
+
+    private function sanitiseElementName(string $name): string
+    {
+        $name = preg_replace('/[^a-zA-Z0-9_.\-]/', '_', $name) ?? $name;
+        if (preg_match('/^[0-9\-.]/', $name) === 1) {
+            $name = '_'.$name;
+        }
+
+        return $name !== '' ? $name : '_col';
+    }
+
+    private function isBinary(ColumnMeta $column): bool
+    {
+        return in_array(strtolower($column->dataType->name), ['binary', 'varbinary', 'blob', 'bytea', 'raw', 'longblob'], true);
+    }
+}
