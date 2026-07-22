@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace SQLCraft\Exceptions;
 
+use SQLCraft\Enums\DatabaseDriver;
+
 final class DriverNotFoundException extends DriverException
 {
     public function __construct(
         string $message,
-        public readonly string $driver = '',
+        public readonly string|DatabaseDriver $driver = '',
         int $code = 0,
         ?\Throwable $previous = null,
     ) {

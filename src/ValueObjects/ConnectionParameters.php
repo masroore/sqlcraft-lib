@@ -6,6 +6,7 @@ namespace SQLCraft\ValueObjects;
 
 use InvalidArgumentException;
 use SensitiveParameter;
+use SQLCraft\Enums\DatabaseDriver;
 use SQLCraft\Support\StringUtil;
 
 final readonly class ConnectionParameters
@@ -25,6 +26,7 @@ final readonly class ConnectionParameters
         public ?string $charset = null,
         public array $ssl = [],
         public array $extras = [],
+        public ?DatabaseDriver $driver = null,
     ) {
         if ($host !== null && (StringUtil::isBlank($host) || StringUtil::containsNullByte($host))) {
             throw new InvalidArgumentException('Connection host must not be blank or contain null bytes.');

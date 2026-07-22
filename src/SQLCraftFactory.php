@@ -19,6 +19,7 @@ use SQLCraft\Driver\MySQLDriver;
 use SQLCraft\Driver\PostgreSQLDriver;
 use SQLCraft\Driver\SqlServerDriver;
 use SQLCraft\Driver\SqliteDriver;
+use SQLCraft\Enums\DatabaseDriver;
 use SQLCraft\Events\AfterDdlExecuted;
 use SQLCraft\Events\ConnectionEventDispatcher;
 use SQLCraft\Events\ImportExportEventDispatcher;
@@ -106,12 +107,18 @@ final class SQLCraftFactory
                 charset: $parameters->charset,
                 ssl: $parameters->ssl,
                 extras: $parameters->extras,
+                driver: $parameters->driver,
             );
         }
 
-        $driverName = (string) ($parameters->extras['driver'] ?? 'sqlite');
-        $connection = $this->drivers->get($driverName)->connect($parameters);
-        $connectionName = $name ?? $connection->getName() ?? $driverName;
+        if ($parameters->driver === null) {
+            throw new \InvalidArgumentException(
+                'ConnectionParameters::$driver must be set when using SQLCraftFactory::session(). '
+                . 'Pass a DatabaseDriver enum case, e.g. driver: DatabaseDriver::SQLite.'
+            );
+        }
+        $connection = $this->drivers->getByDriver($parameters->driver)->connect($parameters);
+        $connectionName = $name ?? $connection->getName() ?? $parameters->driver->value;
         $this->connections->add($connectionName, $connection);
 
         $queryExecutor = new QueryExecutor(events: $this->events);

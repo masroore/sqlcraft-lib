@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SQLCraft\Driver;
 
 use SQLCraft\Contracts\Driver\DriverInterface;
+use SQLCraft\Enums\DatabaseDriver;
 use SQLCraft\Exceptions\DriverNotFoundException;
 
 final class DriverRegistry
@@ -34,6 +35,11 @@ final class DriverRegistry
     {
         return $this->drivers[$name]
             ?? throw new DriverNotFoundException(sprintf('Driver not found: %s.', $name), $name);
+    }
+
+    public function getByDriver(DatabaseDriver $driver): DriverInterface
+    {
+        return $this->get($driver->value);
     }
 
     /** @return list<string> */
