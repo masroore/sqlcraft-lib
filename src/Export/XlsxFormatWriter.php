@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SQLCraft\Export;
 
+use DateTimeInterface;
+use InvalidArgumentException;
 use LogicException;
 use OpenSpout\Common\Entity\Cell;
 use OpenSpout\Common\Entity\Row;
@@ -15,6 +17,7 @@ use SQLCraft\Contracts\Export\FormatWriterInterface;
 use SQLCraft\Contracts\Export\SinkInterface;
 use SQLCraft\DTO\ColumnMeta;
 use SQLCraft\DTO\TableStatus;
+use Stringable;
 
 final class XlsxFormatWriter implements FormatWriterInterface
 {
@@ -40,8 +43,7 @@ final class XlsxFormatWriter implements FormatWriterInterface
             throw new RuntimeException('Failed to create temporary file for XLSX export.');
         }
 
-        // OpenSpout requires a path with an .xlsx extension for correct content type handling.
-        $path = $tmp.'.xlsx';
+        $path = $tmp . '.xlsx';
         if (! @rename($tmp, $path)) {
             @unlink($tmp);
             throw new RuntimeException('Failed to prepare temporary XLSX path.');
@@ -146,7 +148,7 @@ final class XlsxFormatWriter implements FormatWriterInterface
     private function sheetName(TableStatus $table, DumpOptions $options): string
     {
         $prefix = ($options->xlsxOptions ?? new XlsxExportOptions)->sheetPrefix ?? '';
-        $name = $prefix.$table->name;
+        $name = $prefix . $table->name;
         $name = preg_replace('/[\\\\\/\?\*\[\]]/', '_', $name) ?? $name;
 
         return mb_substr($name, 0, 31);
@@ -159,14 +161,22 @@ final class XlsxFormatWriter implements FormatWriterInterface
         }
 
         if ($this->isBinary($column)) {
-            return Cell::fromValue(base64_encode((string) $value));
+            if (! is_string($value)) {
+                throw new InvalidArgumentException('Binary column values must be strings.');
+            }
+
+            return Cell::fromValue(base64_encode($value));
         }
 
-        if (is_bool($value) || is_int($value) || is_float($value) || is_string($value) || $value instanceof \DateTimeInterface) {
+        if (is_bool($value) || is_int($value) || is_float($value) || is_string($value) || $value instanceof DateTimeInterface) {
             return Cell::fromValue($value);
         }
 
-        return Cell::fromValue((string) $value);
+        if ($value instanceof Stringable) {
+            return Cell::fromValue((string) $value);
+        }
+
+        throw new InvalidArgumentException('XLSX export values must be scalar, DateTimeInterface, Stringable, or null.');
     }
 
     private function isBinary(ColumnMeta $column): bool

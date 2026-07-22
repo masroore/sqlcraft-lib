@@ -5,12 +5,11 @@ declare(strict_types=1);
 namespace SQLCraft\Tests\Unit\Export\Html;
 
 use PHPUnit\Framework\TestCase;
-use RuntimeException;
 use SQLCraft\Export\Html\BladeTemplateEngine;
 
 final class BladeTemplateEngineTest extends TestCase
 {
-    public function testEscapedOutput(): void
+    public function test_escaped_output(): void
     {
         $engine = new BladeTemplateEngine;
         $out = $engine->render('{{ $var }}', ['var' => '<script>']);
@@ -18,7 +17,7 @@ final class BladeTemplateEngineTest extends TestCase
         self::assertSame('&lt;script&gt;', $out);
     }
 
-    public function testRawOutput(): void
+    public function test_raw_output(): void
     {
         $engine = new BladeTemplateEngine;
         $out = $engine->render('{!! $var !!}', ['var' => '<b>ok</b>']);
@@ -26,7 +25,7 @@ final class BladeTemplateEngineTest extends TestCase
         self::assertSame('<b>ok</b>', $out);
     }
 
-    public function testForeach(): void
+    public function test_foreach(): void
     {
         $engine = new BladeTemplateEngine;
         $out = $engine->render(
@@ -37,7 +36,7 @@ final class BladeTemplateEngineTest extends TestCase
         self::assertSame('[a][b][c]', $out);
     }
 
-    public function testIfElseEndif(): void
+    public function test_if_else_endif(): void
     {
         $engine = new BladeTemplateEngine;
         $template = '@if($flag)yes@else no@endif';
@@ -46,7 +45,7 @@ final class BladeTemplateEngineTest extends TestCase
         self::assertSame(' no', $engine->render($template, ['flag' => false]));
     }
 
-    public function testNestedForeachIf(): void
+    public function test_nested_foreach_if(): void
     {
         $engine = new BladeTemplateEngine;
         $template = <<<'BLADE'
@@ -72,14 +71,14 @@ BLADE;
         self::assertStringContainsString('-', $out);
     }
 
-    public function testTempFileCleanedUpOnSuccess(): void
+    public function test_temp_file_cleaned_up_on_success(): void
     {
         $before = $this->tempHtmlFiles();
         (new BladeTemplateEngine)->render('ok {{ $x }}', ['x' => 1]);
         self::assertSame($before, $this->tempHtmlFiles());
     }
 
-    public function testTempFileCleanedUpOnError(): void
+    public function test_temp_file_cleaned_up_on_error(): void
     {
         $before = $this->tempHtmlFiles();
 
@@ -96,7 +95,8 @@ BLADE;
     /** @return list<string> */
     private function tempHtmlFiles(): array
     {
-        $matches = glob(sys_get_temp_dir().'/sqlcraft_html_*') ?: [];
+        $matches = glob(sys_get_temp_dir() . '/sqlcraft_html_*');
+        $matches = $matches === false ? [] : $matches;
         sort($matches);
 
         return $matches;

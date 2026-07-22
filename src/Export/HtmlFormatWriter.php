@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace SQLCraft\Export;
 
 use DateTimeImmutable;
+use InvalidArgumentException;
 use SQLCraft\Contracts\Export\FormatWriterInterface;
 use SQLCraft\Contracts\Export\SinkInterface;
 use SQLCraft\DTO\ColumnMeta;
 use SQLCraft\DTO\TableStatus;
 use SQLCraft\Export\Html\TemplateEngineFactory;
+use Stringable;
 
 /**
  * Renders a multi-table HTML document via Blade-like or Twig templates.
@@ -108,7 +110,7 @@ final class HtmlFormatWriter implements FormatWriterInterface
     }
 
     /**
-     * @return array{title: string, databaseName: string, exportedAt: DateTimeImmutable, tables: list<array{name: string, columns: list<ColumnMeta>, rows: list<array<string, mixed>>>}}
+     * @return array<string, mixed>
      */
     private function buildData(DumpOptions $options, HtmlExportOptions $htmlOptions): array
     {
@@ -127,14 +129,18 @@ final class HtmlFormatWriter implements FormatWriterInterface
         }
 
         if ($this->isBinary($column)) {
-            return base64_encode((string) $value);
+            if (! is_string($value)) {
+                throw new InvalidArgumentException('Binary column values must be strings.');
+            }
+
+            return base64_encode($value);
         }
 
         return match (true) {
             is_bool($value) => $value ? '1' : '0',
-            is_int($value), is_float($value) => $value,
-            is_string($value) => $value,
-            default => (string) $value,
+            is_int($value), is_float($value), is_string($value) => $value,
+            $value instanceof Stringable => (string) $value,
+            default => throw new InvalidArgumentException('HTML export values must be scalar, Stringable, or null.'),
         };
     }
 

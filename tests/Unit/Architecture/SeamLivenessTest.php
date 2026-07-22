@@ -59,8 +59,9 @@ final class SeamLivenessTest extends TestCase
                 continue;
             }
 
-            self::assertStringContainsString(
-                'new ' . $class . '(',
+            // PHP 8.4 allows `new Foo` without parentheses; accept both forms.
+            self::assertMatchesRegularExpression(
+                '/new\s+' . preg_quote($class, '/') . '\s*[;(]/',
                 $source,
                 sprintf('Event %s has no construction/dispatch path.', $class),
             );

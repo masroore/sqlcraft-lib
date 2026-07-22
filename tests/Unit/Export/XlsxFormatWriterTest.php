@@ -18,7 +18,7 @@ use SQLCraft\ValueObjects\DefaultValue;
 
 final class XlsxFormatWriterTest extends TestCase
 {
-    public function testSingleTableOneSheet(): void
+    public function test_single_table_one_sheet(): void
     {
         $sheets = $this->readSheets($this->export([
             'users' => [
@@ -32,7 +32,7 @@ final class XlsxFormatWriterTest extends TestCase
         self::assertSame([1, 'Ada'], $sheets['users'][1]);
     }
 
-    public function testMultipleTablesMultipleSheets(): void
+    public function test_multiple_tables_multiple_sheets(): void
     {
         $sheets = $this->readSheets($this->export([
             'users' => [
@@ -48,7 +48,7 @@ final class XlsxFormatWriterTest extends TestCase
         self::assertSame(['users', 'orders'], array_keys($sheets));
     }
 
-    public function testSheetPrefix(): void
+    public function test_sheet_prefix(): void
     {
         $sheets = $this->readSheets($this->export(
             [
@@ -63,7 +63,7 @@ final class XlsxFormatWriterTest extends TestCase
         self::assertSame(['db_users'], array_keys($sheets));
     }
 
-    public function testHeaderRowPresent(): void
+    public function test_header_row_present(): void
     {
         $sheets = $this->readSheets($this->export([
             'users' => [
@@ -75,7 +75,7 @@ final class XlsxFormatWriterTest extends TestCase
         self::assertSame(['email', 'active'], $sheets['users'][0]);
     }
 
-    public function testNullBecomesEmptyCell(): void
+    public function test_null_becomes_empty_cell(): void
     {
         $sheets = $this->readSheets($this->export([
             'users' => [
@@ -91,7 +91,7 @@ final class XlsxFormatWriterTest extends TestCase
         self::assertTrue($sheets['users'][1][1] === null || $sheets['users'][1][1] === '');
     }
 
-    public function testBinaryBase64(): void
+    public function test_binary_base64(): void
     {
         $bytes = "\x01\x02";
         $sheets = $this->readSheets($this->export([
@@ -104,7 +104,7 @@ final class XlsxFormatWriterTest extends TestCase
         self::assertSame(base64_encode($bytes), $sheets['files'][1][0]);
     }
 
-    public function testTempFileCleanedUp(): void
+    public function test_temp_file_cleaned_up(): void
     {
         $before = $this->tempXlsxFiles();
         $this->export([
@@ -150,7 +150,7 @@ final class XlsxFormatWriterTest extends TestCase
     {
         $path = tempnam(sys_get_temp_dir(), 'sqlcraft_xlsx_test_');
         self::assertNotFalse($path);
-        $xlsx = $path.'.xlsx';
+        $xlsx = $path . '.xlsx';
         rename($path, $xlsx);
         file_put_contents($xlsx, $binary);
 
@@ -180,7 +180,8 @@ final class XlsxFormatWriterTest extends TestCase
     /** @return list<string> */
     private function tempXlsxFiles(): array
     {
-        $matches = glob(sys_get_temp_dir().'/sqlcraft_xlsx_*') ?: [];
+        $matches = glob(sys_get_temp_dir() . '/sqlcraft_xlsx_*');
+        $matches = $matches === false ? [] : $matches;
         sort($matches);
 
         return $matches;

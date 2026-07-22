@@ -17,7 +17,7 @@ use SQLCraft\ValueObjects\DefaultValue;
 
 final class JsonFormatWriterTest extends TestCase
 {
-    public function testEmptyExport(): void
+    public function test_empty_export(): void
     {
         $sink = new StringBufferSink;
         $writer = new JsonFormatWriter;
@@ -29,7 +29,7 @@ final class JsonFormatWriterTest extends TestCase
         self::assertSame("[\n]\n", $sink->contents());
     }
 
-    public function testSingleTableNoRows(): void
+    public function test_single_table_no_rows(): void
     {
         $sink = new StringBufferSink;
         $writer = new JsonFormatWriter;
@@ -45,7 +45,7 @@ final class JsonFormatWriterTest extends TestCase
         self::assertSame([['table' => 'users', 'rows' => []]], $decoded);
     }
 
-    public function testSingleTableWithRows(): void
+    public function test_single_table_with_rows(): void
     {
         $sink = new StringBufferSink;
         $writer = new JsonFormatWriter;
@@ -74,7 +74,7 @@ final class JsonFormatWriterTest extends TestCase
         ], $decoded);
     }
 
-    public function testMultipleTablesOrderPreserved(): void
+    public function test_multiple_tables_order_preserved(): void
     {
         $sink = new StringBufferSink;
         $writer = new JsonFormatWriter;
@@ -91,10 +91,11 @@ final class JsonFormatWriterTest extends TestCase
         $writer->writeFooter($sink, $options);
 
         $decoded = json_decode($sink->contents(), true, 512, JSON_THROW_ON_ERROR);
+        self::assertIsArray($decoded);
         self::assertSame(['alpha', 'beta'], array_column($decoded, 'table'));
     }
 
-    public function testNullBecomesJsonNull(): void
+    public function test_null_becomes_json_null(): void
     {
         $sink = new StringBufferSink;
         $writer = new JsonFormatWriter;
@@ -110,10 +111,14 @@ final class JsonFormatWriterTest extends TestCase
 
         self::assertStringContainsString('"name":null', str_replace([' ', "\n"], '', $sink->contents()));
         $decoded = json_decode($sink->contents(), true, 512, JSON_THROW_ON_ERROR);
+        self::assertIsArray($decoded);
+        self::assertIsArray($decoded[0]);
+        self::assertIsArray($decoded[0]['rows']);
+        self::assertIsArray($decoded[0]['rows'][0]);
         self::assertNull($decoded[0]['rows'][0]['name']);
     }
 
-    public function testBinaryColumnIsBase64Encoded(): void
+    public function test_binary_column_is_base64_encoded(): void
     {
         $sink = new StringBufferSink;
         $writer = new JsonFormatWriter;
@@ -129,10 +134,14 @@ final class JsonFormatWriterTest extends TestCase
         $writer->writeFooter($sink, $options);
 
         $decoded = json_decode($sink->contents(), true, 512, JSON_THROW_ON_ERROR);
+        self::assertIsArray($decoded);
+        self::assertIsArray($decoded[0]);
+        self::assertIsArray($decoded[0]['rows']);
+        self::assertIsArray($decoded[0]['rows'][0]);
         self::assertSame(base64_encode($bytes), $decoded[0]['rows'][0]['payload']);
     }
 
-    public function testCompactJson(): void
+    public function test_compact_json(): void
     {
         $sink = new StringBufferSink;
         $writer = new JsonFormatWriter;
@@ -153,7 +162,7 @@ final class JsonFormatWriterTest extends TestCase
         self::assertStringNotContainsString("{\n", preg_replace('/^\s*\[|\s*\]\s*$/s', '', $sink->contents()) ?? '');
     }
 
-    public function testPrettyJsonDefault(): void
+    public function test_pretty_json_default(): void
     {
         $sink = new StringBufferSink;
         $writer = new JsonFormatWriter;

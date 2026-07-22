@@ -58,6 +58,7 @@
         "psr/simple-cache": "^3.0",
         "rector/rector": "^2.0",
         "testcontainers/testcontainers": "^1.0.10",
+        "twig/twig": "^3.0",
         "vimeo/psalm": "^6.5"
     },
     "autoload": {

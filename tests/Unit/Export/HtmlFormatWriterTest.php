@@ -16,10 +16,11 @@ use SQLCraft\Export\HtmlFormatWriter;
 use SQLCraft\Export\StringBufferSink;
 use SQLCraft\ValueObjects\DataType;
 use SQLCraft\ValueObjects\DefaultValue;
+use Twig\Environment;
 
 final class HtmlFormatWriterTest extends TestCase
 {
-    public function testDefaultTemplateRendersValidHtml(): void
+    public function test_default_template_renders_valid_html(): void
     {
         $html = $this->export([
             'users' => [
@@ -44,7 +45,7 @@ final class HtmlFormatWriterTest extends TestCase
         self::assertStringContainsString('<section>', $html);
     }
 
-    public function testTitleAppearsInOutput(): void
+    public function test_title_appears_in_output(): void
     {
         $html = $this->export(
             [
@@ -60,7 +61,7 @@ final class HtmlFormatWriterTest extends TestCase
         self::assertStringContainsString('<title>My Export</title>', $html);
     }
 
-    public function testTablesAndRowsPresent(): void
+    public function test_tables_and_rows_present(): void
     {
         $html = $this->export([
             'users' => [
@@ -79,7 +80,7 @@ final class HtmlFormatWriterTest extends TestCase
         self::assertStringContainsString('<td>42</td>', $html);
     }
 
-    public function testNullRendersAsDash(): void
+    public function test_null_renders_as_dash(): void
     {
         $html = $this->export([
             'users' => [
@@ -91,7 +92,7 @@ final class HtmlFormatWriterTest extends TestCase
         self::assertStringContainsString('class="null">&mdash;</td>', $html);
     }
 
-    public function testCustomTemplatePath(): void
+    public function test_custom_template_path(): void
     {
         $path = tempnam(sys_get_temp_dir(), 'sqlcraft_html_tpl_');
         self::assertNotFalse($path);
@@ -113,7 +114,7 @@ final class HtmlFormatWriterTest extends TestCase
         }
     }
 
-    public function testCustomTemplateString(): void
+    public function test_custom_template_string(): void
     {
         $html = $this->export(
             [
@@ -128,9 +129,9 @@ final class HtmlFormatWriterTest extends TestCase
         self::assertSame('<p>Inline</p>', $html);
     }
 
-    public function testUseTwigThrowsWhenNotInstalled(): void
+    public function test_use_twig_throws_when_not_installed(): void
     {
-        if (class_exists(\Twig\Environment::class)) {
+        if (class_exists(Environment::class)) {
             self::markTestSkipped('twig/twig is installed in this environment.');
         }
 

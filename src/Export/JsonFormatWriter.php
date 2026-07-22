@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SQLCraft\Export;
 
+use InvalidArgumentException;
 use SQLCraft\Contracts\Export\FormatWriterInterface;
 use SQLCraft\Contracts\Export\SinkInterface;
 use SQLCraft\DTO\ColumnMeta;
@@ -33,7 +34,7 @@ final class JsonFormatWriter implements FormatWriterInterface
         $prefix = $this->firstTable ? "\n  " : ",\n  ";
         $this->firstTable = false;
         $this->firstRow = true;
-        $sink->write($prefix.'{"table":'.json_encode($table->name, JSON_THROW_ON_ERROR).',"rows":[');
+        $sink->write($prefix . '{"table":' . json_encode($table->name, JSON_THROW_ON_ERROR) . ',"rows":[');
     }
 
     /** @param list<string> $ddlStatements */
@@ -60,7 +61,7 @@ final class JsonFormatWriter implements FormatWriterInterface
             }
             $prefix = $this->firstRow ? "\n    " : ",\n    ";
             $this->firstRow = false;
-            $sink->write($prefix.json_encode($record, $flags));
+            $sink->write($prefix . json_encode($record, $flags));
         }
     }
 
@@ -94,14 +95,33 @@ final class JsonFormatWriter implements FormatWriterInterface
         }
 
         if ($this->isBinary($column)) {
-            return base64_encode((string) $value);
+            return base64_encode($this->requireString($value, 'Binary column values must be strings.'));
         }
 
         return match (true) {
-            is_bool($value) => $value,
-            is_int($value) => $value,
-            is_float($value) => $value,
-            default => (string) $value,
+            is_bool($value), is_int($value), is_float($value) => $value,
+            is_string($value) => $value,
+            default => $this->stringify($value),
+        };
+    }
+
+    private function requireString(mixed $value, string $message): string
+    {
+        if (! is_string($value)) {
+            throw new InvalidArgumentException($message);
+        }
+
+        return $value;
+    }
+
+    private function stringify(mixed $value): string
+    {
+        return match (true) {
+            is_string($value) => $value,
+            is_int($value), is_float($value) => (string) $value,
+            is_bool($value) => $value ? '1' : '0',
+            $value instanceof \Stringable => (string) $value,
+            default => throw new InvalidArgumentException('JSON export values must be scalar, Stringable, or null.'),
         };
     }
 

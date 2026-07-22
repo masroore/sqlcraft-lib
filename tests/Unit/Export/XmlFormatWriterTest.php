@@ -18,7 +18,7 @@ use SQLCraft\ValueObjects\DefaultValue;
 
 final class XmlFormatWriterTest extends TestCase
 {
-    public function testDocumentStructure(): void
+    public function test_document_structure(): void
     {
         $xml = $this->export(
             columns: [$this->column('id', 'INTEGER'), $this->column('name', 'TEXT')],
@@ -32,7 +32,7 @@ final class XmlFormatWriterTest extends TestCase
         self::assertSame('Ada', (string) $xml->table->row->name);
     }
 
-    public function testCustomRootAndRowElements(): void
+    public function test_custom_root_and_row_elements(): void
     {
         $xml = $this->export(
             columns: [$this->column('id', 'INTEGER')],
@@ -45,7 +45,7 @@ final class XmlFormatWriterTest extends TestCase
         self::assertSame('7', (string) $xml->table->record->id);
     }
 
-    public function testNullBecomesEmptyElement(): void
+    public function test_null_becomes_empty_element(): void
     {
         $output = $this->exportRaw(
             columns: [$this->column('name', 'TEXT')],
@@ -55,7 +55,7 @@ final class XmlFormatWriterTest extends TestCase
         self::assertMatchesRegularExpression('/<name\s*\/>/', $output);
     }
 
-    public function testBinaryColumnBase64Attribute(): void
+    public function test_binary_column_base64_attribute(): void
     {
         $bytes = "\x00\x01";
         $xml = $this->export(
@@ -69,7 +69,7 @@ final class XmlFormatWriterTest extends TestCase
         self::assertSame(base64_encode($bytes), (string) $payload);
     }
 
-    public function testColumnNameSanitisation(): void
+    public function test_column_name_sanitisation(): void
     {
         $output = $this->exportRaw(
             columns: [$this->column('1bad-col', 'TEXT')],
@@ -80,7 +80,7 @@ final class XmlFormatWriterTest extends TestCase
         self::assertStringNotContainsString('<1bad-col>', $output);
     }
 
-    public function testValidXmlOutput(): void
+    public function test_valid_xml_output(): void
     {
         $output = $this->exportRaw(
             columns: [$this->column('id', 'INTEGER'), $this->column('label', 'TEXT')],

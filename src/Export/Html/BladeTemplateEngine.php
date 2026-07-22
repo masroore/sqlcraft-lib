@@ -36,7 +36,7 @@ final class BladeTemplateEngine implements TemplateEngineInterface
                     throw $e;
                 }
 
-                return (string) ob_get_clean();
+                return ob_get_clean();
             })($tmp, $data);
         } finally {
             @unlink($tmp);
@@ -69,7 +69,7 @@ final class BladeTemplateEngine implements TemplateEngineInterface
      */
     private function replaceDirective(string $template, string $directive, string $format): string
     {
-        $needle = $directive.'(';
+        $needle = $directive . '(';
         $result = '';
         $offset = 0;
         $length = strlen($template);
@@ -93,6 +93,7 @@ final class BladeTemplateEngine implements TemplateEngineInterface
             if ($depth !== 0) {
                 // Unbalanced — leave remainder unchanged.
                 $result .= substr($template, $pos);
+
                 return $result;
             }
 
@@ -101,6 +102,6 @@ final class BladeTemplateEngine implements TemplateEngineInterface
             $offset = $i;
         }
 
-        return $result.substr($template, $offset);
+        return $result . substr($template, $offset);
     }
 }

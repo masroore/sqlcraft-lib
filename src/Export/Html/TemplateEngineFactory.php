@@ -44,6 +44,6 @@ final class TemplateEngineFactory
             return $options->templateString;
         }
 
-        return (string) file_get_contents(__DIR__.'/default-template.html');
+        return (string) file_get_contents(__DIR__ . '/default-template.html');
     }
 }
