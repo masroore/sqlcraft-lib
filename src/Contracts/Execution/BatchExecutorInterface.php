@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace SQLCraft\Contracts\Execution;
 
 use SQLCraft\Contracts\Connection\ConnectionInterface;
-use SQLCraft\Contracts\Execution\BatchStatementResult;
-use SQLCraft\Contracts\Execution\StatementBatch;
 
 interface BatchExecutorInterface
 {

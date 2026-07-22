@@ -11,6 +11,5 @@ final readonly class ImportError
         public string $sql,
         public string $errorMessage,
         public int $errorCode,
-    ) {
-    }
+    ) {}
 }

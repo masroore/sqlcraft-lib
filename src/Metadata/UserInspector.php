@@ -12,9 +12,7 @@ use SQLCraft\Contracts\Metadata\UserInspectorInterface;
 /** @internal */
 final class UserInspector implements UserInspectorInterface
 {
-    public function __construct(private readonly MetadataFactoryInterface $factory)
-    {
-    }
+    public function __construct(private readonly MetadataFactoryInterface $factory) {}
 
     #[\Override]
     public function getUsers(ConnectionInterface $conn): UserCollection
@@ -42,5 +40,4 @@ final class UserInspector implements UserInspectorInterface
 
         $connection->getPlatform()->getCapabilitySet($version)->require($capability);
     }
-
 }

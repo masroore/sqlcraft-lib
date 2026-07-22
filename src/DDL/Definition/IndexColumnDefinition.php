@@ -13,24 +13,26 @@ final readonly class IndexColumnDefinition implements IndexColumnDefinitionInter
         private bool $descending,
         private ?int $length,
         private ?string $expression,
-    ) {
-    }
+    ) {}
 
     #[\Override]
     public function getColumnName(): string
     {
         return $this->columnName;
     }
+
     #[\Override]
     public function isDescending(): bool
     {
         return $this->descending;
     }
+
     #[\Override]
     public function getLength(): ?int
     {
         return $this->length;
     }
+
     #[\Override]
     public function getExpression(): ?string
     {

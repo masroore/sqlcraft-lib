@@ -4,6 +4,4 @@ declare(strict_types=1);
 
 namespace SQLCraft\Exceptions;
 
-final class ConnectionClosedException extends ConnectionException
-{
-}
+final class ConnectionClosedException extends ConnectionException {}

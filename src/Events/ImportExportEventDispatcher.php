@@ -10,9 +10,7 @@ use SQLCraft\Contracts\Events\ImportExportEventDispatcherInterface;
 
 final readonly class ImportExportEventDispatcher implements ImportExportEventDispatcherInterface
 {
-    public function __construct(private EventDispatcherInterface $dispatcher)
-    {
-    }
+    public function __construct(private EventDispatcherInterface $dispatcher) {}
 
     #[\Override]
     public function importStarted(ConnectionInterface $connection, object $source, ?int $estimatedBytes, string $format = 'sql'): void

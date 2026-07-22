@@ -13,6 +13,5 @@ final readonly class AfterDdlExecuted extends ObservabilityEvent
         public string $sql,
         public string $objectName,
         public float $elapsedMs,
-    ) {
-    }
+    ) {}
 }

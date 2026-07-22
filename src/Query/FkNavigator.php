@@ -18,6 +18,7 @@ final readonly class FkNavigator
         foreach ($foreignKey->sourceColumns as $index => $source) {
             $conditions[] = new WhereCondition(new Identifier($foreignKey->targetColumns[$index]), '=', $row[$source] ?? null);
         }
+
         return new SelectQuery(new QualifiedName(new Identifier($foreignKey->targetTable), $foreignKey->targetSchema === null ? null : new Identifier($foreignKey->targetSchema)), where: $conditions);
     }
 
@@ -28,6 +29,7 @@ final readonly class FkNavigator
         foreach ($foreignKey->sourceColumns as $index => $source) {
             $conditions[] = new WhereCondition(new Identifier($source), '=', $row[$foreignKey->targetColumns[$index]] ?? null);
         }
+
         return new SelectQuery(new QualifiedName(new Identifier($foreignKey->sourceTable)), where: $conditions);
     }
 }

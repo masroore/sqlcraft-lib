@@ -4,31 +4,31 @@ declare(strict_types=1);
 
 namespace SQLCraft\DDL;
 
-use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\DDL\AlterTableDefinitionInterface;
 use SQLCraft\Contracts\DDL\CheckConstraintDefinitionInterface;
 use SQLCraft\Contracts\DDL\ColumnDefinitionInterface;
 use SQLCraft\Contracts\DDL\DdlBuilderInterface;
 use SQLCraft\Contracts\DDL\ForeignKeyDefinitionInterface;
 use SQLCraft\Contracts\DDL\IndexDefinitionInterface;
+use SQLCraft\Contracts\DDL\ObjectNameAwareDdlBuilderInterface;
 use SQLCraft\Contracts\Platform\DdlDialectInterface;
 use SQLCraft\ValueObjects\Identifier;
 use SQLCraft\ValueObjects\QualifiedName;
 
-final readonly class AlterTableBuilder implements AlterTableDefinitionInterface, DdlBuilderInterface, \SQLCraft\Contracts\DDL\ObjectNameAwareDdlBuilderInterface
+final readonly class AlterTableBuilder implements AlterTableDefinitionInterface, DdlBuilderInterface, ObjectNameAwareDdlBuilderInterface
 {
     use LegacyDdlExecution;
 
     /**
-     * @param list<array{0: ColumnDefinitionInterface, 1: ?Identifier}> $addColumns
-     * @param list<array{0: ColumnDefinitionInterface, 1: ColumnDefinitionInterface}> $modifyColumns
-     * @param list<Identifier> $dropColumns
-     * @param list<IndexDefinitionInterface> $addIndexes
-     * @param list<Identifier> $dropIndexes
-     * @param list<ForeignKeyDefinitionInterface> $addForeignKeys
-     * @param list<Identifier> $dropForeignKeys
-     * @param list<CheckConstraintDefinitionInterface> $addCheckConstraints
-     * @param list<Identifier> $dropCheckConstraints
+     * @param  list<array{0: ColumnDefinitionInterface, 1: ?Identifier}>  $addColumns
+     * @param  list<array{0: ColumnDefinitionInterface, 1: ColumnDefinitionInterface}>  $modifyColumns
+     * @param  list<Identifier>  $dropColumns
+     * @param  list<IndexDefinitionInterface>  $addIndexes
+     * @param  list<Identifier>  $dropIndexes
+     * @param  list<ForeignKeyDefinitionInterface>  $addForeignKeys
+     * @param  list<Identifier>  $dropForeignKeys
+     * @param  list<CheckConstraintDefinitionInterface>  $addCheckConstraints
+     * @param  list<Identifier>  $dropCheckConstraints
      */
     public function __construct(
         private QualifiedName $table,
@@ -42,8 +42,7 @@ final readonly class AlterTableBuilder implements AlterTableDefinitionInterface,
         private array $addCheckConstraints = [],
         private array $dropCheckConstraints = [],
         private ?Identifier $rename = null,
-    ) {
-    }
+    ) {}
 
     public function withColumn(ColumnDefinitionInterface $column, ?Identifier $after = null): self
     {
@@ -101,7 +100,6 @@ final readonly class AlterTableBuilder implements AlterTableDefinitionInterface,
     {
         return $dialect->renderDdlAlterTable($this);
     }
-
 
     #[\Override]
     public function getTable(): QualifiedName
@@ -179,15 +177,15 @@ final readonly class AlterTableBuilder implements AlterTableDefinitionInterface,
     }
 
     /**
-     * @param list<array{0: ColumnDefinitionInterface, 1: ?Identifier}>|null $addColumns
-     * @param list<array{0: ColumnDefinitionInterface, 1: ColumnDefinitionInterface}>|null $modifyColumns
-     * @param list<Identifier>|null $dropColumns
-     * @param list<IndexDefinitionInterface>|null $addIndexes
-     * @param list<Identifier>|null $dropIndexes
-     * @param list<ForeignKeyDefinitionInterface>|null $addForeignKeys
-     * @param list<Identifier>|null $dropForeignKeys
-     * @param list<CheckConstraintDefinitionInterface>|null $addCheckConstraints
-     * @param list<Identifier>|null $dropCheckConstraints
+     * @param  list<array{0: ColumnDefinitionInterface, 1: ?Identifier}>|null  $addColumns
+     * @param  list<array{0: ColumnDefinitionInterface, 1: ColumnDefinitionInterface}>|null  $modifyColumns
+     * @param  list<Identifier>|null  $dropColumns
+     * @param  list<IndexDefinitionInterface>|null  $addIndexes
+     * @param  list<Identifier>|null  $dropIndexes
+     * @param  list<ForeignKeyDefinitionInterface>|null  $addForeignKeys
+     * @param  list<Identifier>|null  $dropForeignKeys
+     * @param  list<CheckConstraintDefinitionInterface>|null  $addCheckConstraints
+     * @param  list<Identifier>|null  $dropCheckConstraints
      */
     private function copy(
         ?array $addColumns = null,
@@ -222,5 +220,4 @@ final readonly class AlterTableBuilder implements AlterTableDefinitionInterface,
     {
         return $this->table->object->name;
     }
-
 }

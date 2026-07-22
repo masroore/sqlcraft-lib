@@ -11,42 +11,40 @@ use SQLCraft\Contracts\Security\UserManagerInterface;
 
 final readonly class UserManager implements UserManagerInterface
 {
-    public function __construct(private ConnectionInterface $connection, private QueryExecutorInterface $executor)
-    {
-    }
+    public function __construct(private ConnectionInterface $connection, private QueryExecutorInterface $executor) {}
 
     #[\Override]
     public function createUser(string $username, #[\SensitiveParameter] string $password): void
     {
         $this->execute($this->connection->getPlatformName() === 'sqlserver'
-            ? 'CREATE LOGIN ' . $this->id($username) . ' WITH PASSWORD = ?'
-            : 'CREATE USER ' . $this->literal($username) . ' IDENTIFIED BY ?');
+            ? 'CREATE LOGIN '.$this->id($username).' WITH PASSWORD = ?'
+            : 'CREATE USER '.$this->literal($username).' IDENTIFIED BY ?');
     }
 
     #[\Override]
     public function alterUser(string $username, #[\SensitiveParameter] string $password): void
     {
         $this->execute($this->connection->getPlatformName() === 'sqlserver'
-            ? 'ALTER LOGIN ' . $this->id($username) . ' WITH PASSWORD = ?'
-            : 'ALTER USER ' . $this->literal($username) . ' IDENTIFIED BY ?');
+            ? 'ALTER LOGIN '.$this->id($username).' WITH PASSWORD = ?'
+            : 'ALTER USER '.$this->literal($username).' IDENTIFIED BY ?');
     }
 
     #[\Override]
     public function dropUser(string $username): void
     {
-        $this->execute('DROP USER ' . $this->literal($username));
+        $this->execute('DROP USER '.$this->literal($username));
     }
 
     #[\Override]
     public function createRole(string $role): void
     {
-        $this->execute('CREATE ROLE ' . $this->id($role));
+        $this->execute('CREATE ROLE '.$this->id($role));
     }
 
     #[\Override]
     public function dropRole(string $role): void
     {
-        $this->execute('DROP ROLE ' . $this->id($role));
+        $this->execute('DROP ROLE '.$this->id($role));
     }
 
     private function execute(string $sql): void

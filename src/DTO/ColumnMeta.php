@@ -11,7 +11,7 @@ use SQLCraft\ValueObjects\DefaultValue;
 final readonly class ColumnMeta
 {
     /**
-     * @param list<int> $privileges
+     * @param  list<int>  $privileges
      */
     public function __construct(
         public string $name,
@@ -27,6 +27,5 @@ final readonly class ColumnMeta
         public array $privileges,
         public ?string $origName,
         public ?string $defaultConstraintName,
-    ) {
-    }
+    ) {}
 }

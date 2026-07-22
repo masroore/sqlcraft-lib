@@ -9,8 +9,11 @@ use InvalidArgumentException;
 final readonly class ServerVersion
 {
     public string $value;
+
     public int $major;
+
     public int $minor;
+
     public int $patch;
 
     public function __construct(string $value)

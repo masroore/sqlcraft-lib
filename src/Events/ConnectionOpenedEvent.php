@@ -12,6 +12,5 @@ final readonly class ConnectionOpenedEvent extends ObservabilityEvent
         public ?string $host,
         public ?string $database,
         public float $elapsedMs,
-    ) {
-    }
+    ) {}
 }

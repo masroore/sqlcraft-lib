@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace SQLCraft\DDL;
 
-use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\DDL\DdlBuilderInterface;
+use SQLCraft\Contracts\DDL\ObjectNameAwareDdlBuilderInterface;
 use SQLCraft\Contracts\DDL\RoutineParameterDefinitionInterface;
 use SQLCraft\Contracts\Platform\DdlDialectInterface;
 use SQLCraft\ValueObjects\DataType;
 use SQLCraft\ValueObjects\QualifiedName;
 
-final readonly class CreateRoutineBuilder implements DdlBuilderInterface, \SQLCraft\Contracts\DDL\ObjectNameAwareDdlBuilderInterface
+final readonly class CreateRoutineBuilder implements DdlBuilderInterface, ObjectNameAwareDdlBuilderInterface
 {
     use LegacyDdlExecution;
+
     /** @param list<RoutineParameterDefinitionInterface> $parameters */
     public function __construct(
         public QualifiedName $name,
@@ -24,8 +25,7 @@ final readonly class CreateRoutineBuilder implements DdlBuilderInterface, \SQLCr
         public ?string $language = null,
         public bool $deterministic = false,
         public bool $orReplace = false,
-    ) {
-    }
+    ) {}
 
     /** @return list<string> */
     #[\Override]
@@ -34,11 +34,9 @@ final readonly class CreateRoutineBuilder implements DdlBuilderInterface, \SQLCr
         return [$dialect->renderCreateRoutineStatement($this->name, $this->type, $this->parameters, $this->returnType, $this->body, $this->language, $this->deterministic, $this->orReplace)];
     }
 
-
     #[\Override]
     public function getObjectName(): string
     {
         return $this->name->object->name;
     }
-
 }

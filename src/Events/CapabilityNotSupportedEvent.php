@@ -10,6 +10,5 @@ final readonly class CapabilityNotSupportedEvent extends ObservabilityEvent
         public string $capability,
         public string $platformName,
         public string $version,
-    ) {
-    }
+    ) {}
 }

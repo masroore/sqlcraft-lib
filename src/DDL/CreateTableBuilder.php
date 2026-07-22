@@ -4,24 +4,25 @@ declare(strict_types=1);
 
 namespace SQLCraft\DDL;
 
-use SQLCraft\Contracts\Connection\ConnectionInterface;
-use SQLCraft\Contracts\DDL\DdlBuilderInterface;
-use SQLCraft\Contracts\Platform\DdlDialectInterface;
 use SQLCraft\Contracts\DDL\CheckConstraintDefinitionInterface;
 use SQLCraft\Contracts\DDL\ColumnDefinitionInterface;
+use SQLCraft\Contracts\DDL\DdlBuilderInterface;
 use SQLCraft\Contracts\DDL\ForeignKeyDefinitionInterface;
 use SQLCraft\Contracts\DDL\IndexDefinitionInterface;
+use SQLCraft\Contracts\DDL\ObjectNameAwareDdlBuilderInterface;
+use SQLCraft\Contracts\Platform\DdlDialectInterface;
 use SQLCraft\ValueObjects\IndexType;
 use SQLCraft\ValueObjects\QualifiedName;
 
-final readonly class CreateTableBuilder implements DdlBuilderInterface, \SQLCraft\Contracts\DDL\ObjectNameAwareDdlBuilderInterface
+final readonly class CreateTableBuilder implements DdlBuilderInterface, ObjectNameAwareDdlBuilderInterface
 {
     use LegacyDdlExecution;
+
     /**
-     * @param list<ColumnDefinitionInterface> $columns
-     * @param list<IndexDefinitionInterface> $indexes
-     * @param list<ForeignKeyDefinitionInterface> $foreignKeys
-     * @param list<CheckConstraintDefinitionInterface> $checkConstraints
+     * @param  list<ColumnDefinitionInterface>  $columns
+     * @param  list<IndexDefinitionInterface>  $indexes
+     * @param  list<ForeignKeyDefinitionInterface>  $foreignKeys
+     * @param  list<CheckConstraintDefinitionInterface>  $checkConstraints
      */
     public function __construct(
         public QualifiedName $table,
@@ -37,8 +38,7 @@ final readonly class CreateTableBuilder implements DdlBuilderInterface, \SQLCraf
         public bool $temporary = false,
         public bool $includeAutoIncrementValue = false,
         public ?int $autoIncrementValue = null,
-    ) {
-    }
+    ) {}
 
     public function withColumn(ColumnDefinitionInterface $column): self
     {
@@ -84,7 +84,6 @@ final readonly class CreateTableBuilder implements DdlBuilderInterface, \SQLCraf
         )];
     }
 
-
     /** @return array<string, scalar|null> */
     private function options(): array
     {
@@ -105,5 +104,4 @@ final readonly class CreateTableBuilder implements DdlBuilderInterface, \SQLCraf
     {
         return $this->table->object->name;
     }
-
 }

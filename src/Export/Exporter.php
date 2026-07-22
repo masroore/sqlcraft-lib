@@ -7,12 +7,12 @@ namespace SQLCraft\Export;
 use InvalidArgumentException;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Events\ImportExportEventDispatcherInterface;
+use SQLCraft\Contracts\Execution\QueryExecutorInterface;
 use SQLCraft\Contracts\Export\ExporterInterface;
 use SQLCraft\Contracts\Export\ExportSourceInterface;
 use SQLCraft\Contracts\Export\ForeignKeyExportSourceInterface;
 use SQLCraft\Contracts\Export\FormatWriterInterface;
 use SQLCraft\Contracts\Export\SinkInterface;
-use SQLCraft\Contracts\Execution\QueryExecutorInterface;
 use SQLCraft\DTO\TableStatus;
 
 final class Exporter implements ExporterInterface
@@ -85,7 +85,7 @@ final class Exporter implements ExporterInterface
         $tables = $this->orderedTables($conn, $this->source->getTables($conn));
         foreach ($tables as $table) {
             $rowsExported += $this->dumper->dump($conn, $table, $writer, $sink, $options);
-            ++$tablesExported;
+            $tablesExported++;
             $this->events?->exportProgress($conn, $tablesExported, $rowsExported, (hrtime(true) - $startedAt) / 1_000_000);
         }
 
@@ -142,7 +142,7 @@ final class Exporter implements ExporterInterface
         foreach ($options->scope->tables ?? [] as $tableName) {
             $table = $this->source->getTableStatus($conn, $tableName, $schema);
             $rowsExported += $this->dumper->dump($conn, $table, $writer, $sink, $options);
-            ++$tablesExported;
+            $tablesExported++;
             $this->events?->exportProgress($conn, $tablesExported, $rowsExported, (hrtime(true) - $startedAt) / 1_000_000);
         }
 
@@ -172,19 +172,19 @@ final class Exporter implements ExporterInterface
         return [1, $rowsExported];
     }
 
-
     /**
-     * @param iterable<TableStatus> $tables
+     * @param  iterable<TableStatus>  $tables
      * @return list<TableStatus>
      */
     private function orderedTables(ConnectionInterface $connection, iterable $tables): array
     {
         $source = $this->source;
-        if (!$source instanceof ForeignKeyExportSourceInterface) {
+        if (! $source instanceof ForeignKeyExportSourceInterface) {
             $result = [];
             foreach ($tables as $table) {
                 $result[] = $table;
             }
+
             return $result;
         }
         /** @return iterable<string> */
@@ -193,16 +193,17 @@ final class Exporter implements ExporterInterface
                 yield $foreignKey->targetTable;
             }
         };
-        $sort = (new TopologicalTableSorter())->sort($tables, $dependencies);
+        $sort = (new TopologicalTableSorter)->sort($tables, $dependencies);
         if ($sort['cycle']) {
             $this->events?->exportWarning($connection, 'Foreign-key cycle detected; preserving declaration order.', array_map(static fn (TableStatus $table): string => $table->name, $sort['tables']));
         }
+
         return $sort['tables'];
     }
 
     private function writer(string $format): FormatWriterInterface
     {
-        if (!isset($this->writers[$format])) {
+        if (! isset($this->writers[$format])) {
             throw new InvalidArgumentException(sprintf('Unsupported export format: %s', $format));
         }
 

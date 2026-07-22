@@ -10,15 +10,16 @@ use SQLCraft\Exceptions\ExtensionMissingException;
 final class GzipSink implements SinkInterface
 {
     private \DeflateContext $context;
+
     private bool $closed = false;
 
     public function __construct(private SinkInterface $inner, int $level = -1)
     {
-        if (!extension_loaded('zlib')) {
+        if (! extension_loaded('zlib')) {
             throw new ExtensionMissingException('zlib');
         }
         $context = deflate_init(ZLIB_ENCODING_GZIP, ['level' => $level]);
-        if (!$context instanceof \DeflateContext) {
+        if (! $context instanceof \DeflateContext) {
             throw new \RuntimeException('Unable to initialize gzip compression.');
         }
         $this->context = $context;

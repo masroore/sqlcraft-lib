@@ -16,6 +16,5 @@ final readonly class AfterQueryExecuted extends ObservabilityEvent
         public array $params,
         public ExecutionResult $result,
         public float $elapsedMs,
-    ) {
-    }
+    ) {}
 }

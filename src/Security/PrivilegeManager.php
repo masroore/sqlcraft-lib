@@ -8,25 +8,24 @@ use SQLCraft\Capabilities\Capability;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Execution\QueryExecutorInterface;
 use SQLCraft\Contracts\Security\PrivilegeManagerInterface;
+use SQLCraft\ValueObjects\Identifier;
 use SQLCraft\ValueObjects\Privilege;
 use SQLCraft\ValueObjects\QualifiedName;
 
 final readonly class PrivilegeManager implements PrivilegeManagerInterface
 {
-    public function __construct(private ConnectionInterface $connection, private QueryExecutorInterface $executor)
-    {
-    }
+    public function __construct(private ConnectionInterface $connection, private QueryExecutorInterface $executor) {}
 
     #[\Override]
     public function grant(Privilege $privilege, QualifiedName $object, string $grantee): void
     {
-        $this->execute('GRANT ' . $privilege->name . ' ON ' . $this->object($object) . ' TO ' . $this->connection->quoteValue($grantee));
+        $this->execute('GRANT '.$privilege->name.' ON '.$this->object($object).' TO '.$this->connection->quoteValue($grantee));
     }
 
     #[\Override]
     public function revoke(Privilege $privilege, QualifiedName $object, string $grantee): void
     {
-        $this->execute('REVOKE ' . $privilege->name . ' ON ' . $this->object($object) . ' FROM ' . $this->connection->quoteValue($grantee));
+        $this->execute('REVOKE '.$privilege->name.' ON '.$this->object($object).' FROM '.$this->connection->quoteValue($grantee));
     }
 
     private function execute(string $sql): void
@@ -38,7 +37,7 @@ final readonly class PrivilegeManager implements PrivilegeManagerInterface
     private function object(QualifiedName $name): string
     {
         $parts = [];
-        if ($name->schema instanceof \SQLCraft\ValueObjects\Identifier) {
+        if ($name->schema instanceof Identifier) {
             $parts[] = $this->connection->quoteIdentifier($name->schema->name);
         }
         $parts[] = $this->connection->quoteIdentifier($name->object->name);

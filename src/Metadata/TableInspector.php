@@ -18,9 +18,7 @@ use SQLCraft\ValueObjects\QualifiedName;
 /** @internal */
 final class TableInspector implements TableInspectorInterface
 {
-    public function __construct(private readonly MetadataFactoryInterface $factory)
-    {
-    }
+    public function __construct(private readonly MetadataFactoryInterface $factory) {}
 
     #[\Override]
     public function getTables(ConnectionInterface $conn, ?string $schema = null): TableCollection

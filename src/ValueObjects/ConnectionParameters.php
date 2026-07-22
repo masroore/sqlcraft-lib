@@ -12,8 +12,8 @@ use SQLCraft\Support\StringUtil;
 final readonly class ConnectionParameters
 {
     /**
-     * @param array<string, scalar|null> $ssl
-     * @param array<string, scalar|null> $extras
+     * @param  array<string, scalar|null>  $ssl
+     * @param  array<string, scalar|null>  $extras
      */
     public function __construct(
         public ?string $host = null,

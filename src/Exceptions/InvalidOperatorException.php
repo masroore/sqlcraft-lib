@@ -4,6 +4,4 @@ declare(strict_types=1);
 
 namespace SQLCraft\Exceptions;
 
-final class InvalidOperatorException extends SecurityException
-{
-}
+final class InvalidOperatorException extends SecurityException {}

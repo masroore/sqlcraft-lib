@@ -12,6 +12,5 @@ final readonly class UserMeta
         public ?string $plugin,
         public bool $superuser,
         public bool $canLogin,
-    ) {
-    }
+    ) {}
 }

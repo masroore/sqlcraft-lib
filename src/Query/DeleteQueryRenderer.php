@@ -5,23 +5,22 @@ declare(strict_types=1);
 namespace SQLCraft\Query;
 
 use SQLCraft\Contracts\Platform\PlatformInterface;
+use SQLCraft\ValueObjects\Identifier;
 
 final readonly class DeleteQueryRenderer
 {
-    public function __construct(private PlatformInterface $platform)
-    {
-    }
+    public function __construct(private PlatformInterface $platform) {}
 
     /** @return array{sql: string, params: list<mixed>} */
     public function render(DeleteQuery $query): array
     {
         $parts = [];
-        if ($query->table->schema instanceof \SQLCraft\ValueObjects\Identifier) {
+        if ($query->table->schema instanceof Identifier) {
             $parts[] = $this->platform->quoteIdentifier($query->table->schema);
         }
         $parts[] = $this->platform->quoteIdentifier($query->table->object);
 
-        $sql = 'DELETE FROM ' . implode('.', $parts);
+        $sql = 'DELETE FROM '.implode('.', $parts);
         $params = [];
         $where = [];
         $renderer = new WhereConditionRenderer($this->platform);
@@ -34,10 +33,10 @@ final readonly class DeleteQueryRenderer
             }
         }
         if ($where !== []) {
-            $sql .= ' WHERE ' . implode(' AND ', $where);
+            $sql .= ' WHERE '.implode(' AND ', $where);
         }
         if ($query->limit !== null) {
-            $sql .= ' LIMIT ' . $query->limit;
+            $sql .= ' LIMIT '.$query->limit;
         }
 
         return ['sql' => $sql, 'params' => $params];

@@ -6,12 +6,10 @@ namespace SQLCraft\Support;
 
 final class ArrayUtil
 {
-    private function __construct()
-    {
-    }
+    private function __construct() {}
 
     /**
-     * @param array<array-key, scalar|null> $values
+     * @param  array<array-key, scalar|null>  $values
      */
     public static function isList(array $values): bool
     {
@@ -19,7 +17,7 @@ final class ArrayUtil
     }
 
     /**
-     * @param array<string, scalar|null> $values
+     * @param  array<string, scalar|null>  $values
      * @return array<string, scalar>
      */
     public static function withoutNulls(array $values): array

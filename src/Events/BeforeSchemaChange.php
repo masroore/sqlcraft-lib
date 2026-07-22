@@ -14,6 +14,5 @@ final class BeforeSchemaChange extends InterceptionEvent
         public readonly string $objectName,
         public readonly string $operation,
         public readonly string $sql,
-    ) {
-    }
+    ) {}
 }

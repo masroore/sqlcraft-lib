@@ -9,10 +9,10 @@ use SQLCraft\ValueObjects\QualifiedName;
 final readonly class SelectQuery
 {
     /**
-     * @param list<ColumnSelection> $columns
-     * @param list<WhereCondition> $where
-     * @param list<OrderByClause> $orderBy
-     * @param list<string> $groupBy
+     * @param  list<ColumnSelection>  $columns
+     * @param  list<WhereCondition>  $where
+     * @param  list<OrderByClause>  $orderBy
+     * @param  list<string>  $groupBy
      */
     public function __construct(
         public QualifiedName $table,

@@ -4,17 +4,16 @@ declare(strict_types=1);
 
 namespace SQLCraft\DDL;
 
-use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\DDL\DdlBuilderInterface;
+use SQLCraft\Contracts\DDL\ObjectNameAwareDdlBuilderInterface;
 use SQLCraft\Contracts\Platform\DdlDialectInterface;
 use SQLCraft\ValueObjects\Identifier;
 
-final readonly class DropSequenceBuilder implements DdlBuilderInterface, \SQLCraft\Contracts\DDL\ObjectNameAwareDdlBuilderInterface
+final readonly class DropSequenceBuilder implements DdlBuilderInterface, ObjectNameAwareDdlBuilderInterface
 {
     use LegacyDdlExecution;
-    public function __construct(public Identifier $name, public bool $ifExists = false)
-    {
-    }
+
+    public function __construct(public Identifier $name, public bool $ifExists = false) {}
 
     /** @return list<string> */
     #[\Override]
@@ -23,11 +22,9 @@ final readonly class DropSequenceBuilder implements DdlBuilderInterface, \SQLCra
         return [$dialect->renderDropSequenceStatement($this->name, $this->ifExists)];
     }
 
-
     #[\Override]
     public function getObjectName(): string
     {
         return $this->name->name;
     }
-
 }

@@ -19,40 +19,45 @@ final readonly class IndexDefinition implements IndexDefinitionInterface
         private ?string $comment,
         private ?string $algorithm,
         private ?string $filterExpression,
-    ) {
-    }
+    ) {}
 
     #[\Override]
     public function getName(): string
     {
         return $this->name;
     }
+
     #[\Override]
     public function getType(): IndexType
     {
         return $this->type;
     }
+
     /** @return list<IndexColumnDefinitionInterface> */
     #[\Override]
     public function getColumns(): array
     {
         return $this->columns;
     }
+
     #[\Override]
     public function isUnique(): bool
     {
         return $this->unique;
     }
+
     #[\Override]
     public function getComment(): ?string
     {
         return $this->comment;
     }
+
     #[\Override]
     public function getAlgorithm(): ?string
     {
         return $this->algorithm;
     }
+
     #[\Override]
     public function getFilterExpression(): ?string
     {

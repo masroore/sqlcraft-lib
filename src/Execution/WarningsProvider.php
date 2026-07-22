@@ -14,7 +14,7 @@ final readonly class WarningsProvider implements WarningsProviderInterface
     #[\Override]
     public function getWarnings(ConnectionInterface $connection): WarningCollection
     {
-        if (!in_array(strtolower($connection->getPlatformName()), ['mysql', 'mariadb'], true)) {
+        if (! in_array(strtolower($connection->getPlatformName()), ['mysql', 'mariadb'], true)) {
             return new WarningCollection([]);
         }
 

@@ -9,7 +9,9 @@ use Psr\EventDispatcher\StoppableEventInterface;
 abstract class InterceptionEvent implements SQLCraftEventInterface, StoppableEventInterface
 {
     private bool $propagationStopped = false;
+
     private bool $cancelled = false;
+
     public string $cancelReason = '';
 
     public function stopPropagation(): void

@@ -6,12 +6,12 @@ namespace SQLCraft\Schema;
 
 use InvalidArgumentException;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
-use SQLCraft\Contracts\Metadata\MetadataCacheInterface;
 use SQLCraft\Contracts\Events\SchemaEventDispatcherInterface;
-use SQLCraft\Metadata\ExportSource;
+use SQLCraft\Contracts\Metadata\MetadataCacheInterface;
 use SQLCraft\Metadata\CheckConstraintInspector;
 use SQLCraft\Metadata\ColumnInspector;
 use SQLCraft\Metadata\DatabaseInspector;
+use SQLCraft\Metadata\ExportSource;
 use SQLCraft\Metadata\ForeignKeyInspector;
 use SQLCraft\Metadata\IndexInspector;
 use SQLCraft\Metadata\MetadataFactoryInterface;
@@ -52,7 +52,7 @@ final class SchemaManagerFactory
             userInspector: new UserInspector($factory),
             cache: $cache,
             events: $events,
-            privilegeInspector: new PrivilegeInspector(),
+            privilegeInspector: new PrivilegeInspector,
         );
     }
 
@@ -73,10 +73,10 @@ final class SchemaManagerFactory
     public static function metadataFactory(ConnectionInterface $connection): MetadataFactoryInterface
     {
         return match ($connection->getPlatformName()) {
-            'mysql', 'mariadb' => new MySQLMetadataFactory(),
-            'pgsql' => new PostgreSQLMetadataFactory(),
-            'sqlite' => new SqliteMetadataFactory(),
-            'sqlserver' => new SqlServerMetadataFactory(),
+            'mysql', 'mariadb' => new MySQLMetadataFactory,
+            'pgsql' => new PostgreSQLMetadataFactory,
+            'sqlite' => new SqliteMetadataFactory,
+            'sqlserver' => new SqlServerMetadataFactory,
             default => throw new InvalidArgumentException(sprintf(
                 'No metadata factory is registered for platform %s.',
                 $connection->getPlatformName(),

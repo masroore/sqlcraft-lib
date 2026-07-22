@@ -11,7 +11,7 @@ final readonly class StreamImportSource implements ImportSourceInterface
 {
     public function __construct(private mixed $stream)
     {
-        if (!is_resource($stream)) {
+        if (! is_resource($stream)) {
             throw new InvalidArgumentException('StreamImportSource requires an open stream resource.');
         }
     }
@@ -25,10 +25,11 @@ final readonly class StreamImportSource implements ImportSourceInterface
     #[\Override]
     public function getEstimatedSize(): ?int
     {
-        if (!is_resource($this->stream)) {
+        if (! is_resource($this->stream)) {
             return null;
         }
         $stat = fstat($this->stream);
+
         return is_array($stat) ? $stat['size'] : null;
     }
 }

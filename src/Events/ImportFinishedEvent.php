@@ -14,6 +14,5 @@ final readonly class ImportFinishedEvent extends ObservabilityEvent
         public int $statementsExecuted,
         public array $errors,
         public float $elapsedMs,
-    ) {
-    }
+    ) {}
 }

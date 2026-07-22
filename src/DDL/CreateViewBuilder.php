@@ -4,15 +4,16 @@ declare(strict_types=1);
 
 namespace SQLCraft\DDL;
 
-use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\DDL\DdlBuilderInterface;
+use SQLCraft\Contracts\DDL\ObjectNameAwareDdlBuilderInterface;
 use SQLCraft\Contracts\Platform\DdlDialectInterface;
 use SQLCraft\ValueObjects\Identifier;
 use SQLCraft\ValueObjects\QualifiedName;
 
-final readonly class CreateViewBuilder implements DdlBuilderInterface, \SQLCraft\Contracts\DDL\ObjectNameAwareDdlBuilderInterface
+final readonly class CreateViewBuilder implements DdlBuilderInterface, ObjectNameAwareDdlBuilderInterface
 {
     use LegacyDdlExecution;
+
     /** @param list<Identifier> $columns */
     public function __construct(
         public QualifiedName $name,
@@ -20,8 +21,7 @@ final readonly class CreateViewBuilder implements DdlBuilderInterface, \SQLCraft
         public bool $orReplace = false,
         public array $columns = [],
         public ?string $checkOption = null,
-    ) {
-    }
+    ) {}
 
     /** @return list<string> */
     #[\Override]
@@ -30,11 +30,9 @@ final readonly class CreateViewBuilder implements DdlBuilderInterface, \SQLCraft
         return [$dialect->renderCreateViewStatement($this->name, $this->selectSql, $this->orReplace, $this->columns, $this->checkOption)];
     }
 
-
     #[\Override]
     public function getObjectName(): string
     {
         return $this->name->object->name;
     }
-
 }

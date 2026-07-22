@@ -8,12 +8,7 @@ use SQLCraft\Capabilities\CapabilitySet;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\ValueObjects\ServerVersion;
 
-interface PlatformInterface extends
-    QuotingInterface,
-    PaginationInterface,
-    TypeMapperInterface,
-    DdlDialectInterface,
-    IntrospectionDialectInterface
+interface PlatformInterface extends DdlDialectInterface, IntrospectionDialectInterface, PaginationInterface, QuotingInterface, TypeMapperInterface
 {
     public function getName(): string;
 

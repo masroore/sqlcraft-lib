@@ -10,6 +10,5 @@ final readonly class ConnectionFailedEvent extends ObservabilityEvent
         public string $name,
         public string $driver,
         public \Throwable $error,
-    ) {
-    }
+    ) {}
 }

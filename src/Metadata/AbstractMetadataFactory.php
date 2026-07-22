@@ -8,15 +8,15 @@ use InvalidArgumentException;
 use SQLCraft\DTO\CheckConstraintMeta;
 use SQLCraft\DTO\ColumnMeta;
 use SQLCraft\DTO\DatabaseMeta;
-use SQLCraft\DTO\ProcessMeta;
 use SQLCraft\DTO\ForeignKeyMeta;
 use SQLCraft\DTO\IndexColumnMeta;
-use SQLCraft\DTO\PartitionInfo;
 use SQLCraft\DTO\IndexMeta;
+use SQLCraft\DTO\PartitionInfo;
+use SQLCraft\DTO\ProcessMeta;
 use SQLCraft\DTO\RoutineMeta;
+use SQLCraft\DTO\RoutineParameter;
 use SQLCraft\DTO\SchemaMeta;
 use SQLCraft\DTO\SequenceMeta;
-use SQLCraft\DTO\RoutineParameter;
 use SQLCraft\DTO\TableStatus;
 use SQLCraft\DTO\TriggerMeta;
 use SQLCraft\DTO\UserMeta;
@@ -72,7 +72,7 @@ abstract class AbstractMetadataFactory implements MetadataFactoryInterface
         return new CheckConstraintMeta(
             name: $this->requiredString($row, 'constraint_name', 'name'),
             expression: $this->requiredString($row, 'check_clause', 'expression', 'definition'),
-            enforced: !$this->toBool($this->value($row, 'not_enforced', 'is_not_enforced')),
+            enforced: ! $this->toBool($this->value($row, 'not_enforced', 'is_not_enforced')),
         );
     }
 
@@ -199,7 +199,7 @@ abstract class AbstractMetadataFactory implements MetadataFactoryInterface
             name: $this->requiredString($row, 'index_name', 'key_name', 'name'),
             type: $this->indexType($this->value($row, 'index_type', 'type', 'index_kind')),
             columns: $columns,
-            unique: !$this->toBool($this->value($row, 'non_unique')) && ($this->toBool($this->value($row, 'unique', 'is_unique', 'indisunique')) || strtoupper($this->stringValue($this->value($row, 'index_name', 'key_name')) ?? '') === 'PRIMARY'),
+            unique: ! $this->toBool($this->value($row, 'non_unique')) && ($this->toBool($this->value($row, 'unique', 'is_unique', 'indisunique')) || strtoupper($this->stringValue($this->value($row, 'index_name', 'key_name')) ?? '') === 'PRIMARY'),
             comment: $this->stringValue($this->value($row, 'comment', 'index_comment')),
             algorithm: $this->stringValue($this->value($row, 'algorithm')),
             filterExpression: $this->stringValue($this->value($row, 'filter_expression', 'predicate')),
@@ -255,7 +255,7 @@ abstract class AbstractMetadataFactory implements MetadataFactoryInterface
             superuser: $this->toBool($this->value($row, 'super_priv', 'rolsuper', 'superuser')),
             canLogin: array_key_exists('rolcanlogin', $row)
                 ? $this->toBool($row['rolcanlogin'])
-                : !$this->toBool($this->value($row, 'account_locked')),
+                : ! $this->toBool($this->value($row, 'account_locked')),
         );
     }
 
@@ -343,7 +343,7 @@ abstract class AbstractMetadataFactory implements MetadataFactoryInterface
     }
 
     /**
-     * @param array<string, bool|float|int|string|null> $row
+     * @param  array<string, bool|float|int|string|null>  $row
      * @return list<IndexColumnMeta>
      */
     private function indexColumns(bool|float|int|string|null $raw, ?string $columnName, ?string $expression, array $row): array
@@ -440,17 +440,17 @@ abstract class AbstractMetadataFactory implements MetadataFactoryInterface
             return true;
         }
         if ($notNullKeyPresent) {
-            return !$this->toBool($value);
+            return ! $this->toBool($value);
         }
         if (is_string($value)) {
-            return !in_array(strtoupper($value), ['NO', 'N', '0', 'FALSE'], true);
+            return ! in_array(strtoupper($value), ['NO', 'N', '0', 'FALSE'], true);
         }
 
         return $this->toBool($value);
     }
 
     /**
-     * @param array<string, bool|float|int|string|null> $row
+     * @param  array<string, bool|float|int|string|null>  $row
      * @return array<string, bool|float|int|string|null>
      */
     private function normalizeRow(array $row): array
@@ -523,7 +523,7 @@ abstract class AbstractMetadataFactory implements MetadataFactoryInterface
             return in_array(strtoupper($value), ['1', 'Y', 'YES', 'TRUE', 'ON'], true);
         }
 
-        return !in_array($value, [null, 0.0, 0], true);
+        return ! in_array($value, [null, 0.0, 0], true);
     }
 
     /** @return list<string> */

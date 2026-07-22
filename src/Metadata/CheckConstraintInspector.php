@@ -13,9 +13,7 @@ use SQLCraft\ValueObjects\QualifiedName;
 /** @internal */
 final class CheckConstraintInspector implements CheckConstraintInspectorInterface
 {
-    public function __construct(private readonly MetadataFactoryInterface $factory)
-    {
-    }
+    public function __construct(private readonly MetadataFactoryInterface $factory) {}
 
     #[\Override]
     public function getCheckConstraints(ConnectionInterface $conn, QualifiedName $table): CheckConstraintCollection
@@ -43,5 +41,4 @@ final class CheckConstraintInspector implements CheckConstraintInspectorInterfac
 
         $connection->getPlatform()->getCapabilitySet($version)->require($capability);
     }
-
 }

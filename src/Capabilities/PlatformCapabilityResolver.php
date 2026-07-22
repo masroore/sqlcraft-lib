@@ -20,8 +20,7 @@ final class PlatformCapabilityResolver implements CapabilityResolverInterface
     public function __construct(
         private readonly array $matrix,
         private readonly ?SchemaEventDispatcherInterface $events = null,
-    ) {
-    }
+    ) {}
 
     #[\Override]
     public function resolve(

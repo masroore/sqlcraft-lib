@@ -10,6 +10,5 @@ final readonly class SchemaMeta
         public string $name,
         public ?string $catalog,
         public ?string $owner,
-    ) {
-    }
+    ) {}
 }

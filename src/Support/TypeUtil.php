@@ -6,9 +6,7 @@ namespace SQLCraft\Support;
 
 final class TypeUtil
 {
-    private function __construct()
-    {
-    }
+    private function __construct() {}
 
     public static function toInt(int|float|string|null $value): ?int
     {

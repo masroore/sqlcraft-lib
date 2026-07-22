@@ -6,79 +6,78 @@ namespace SQLCraft\Platform;
 
 use SQLCraft\Capabilities\Capability;
 use SQLCraft\Capabilities\CapabilityNotSupportedException;
+use SQLCraft\Capabilities\CapabilitySet;
+use SQLCraft\Capabilities\ExtendedCapability;
+use SQLCraft\Capabilities\PlatformCapabilityResolver;
 use SQLCraft\Contracts\DDL\AlterTableDefinitionInterface;
 use SQLCraft\Contracts\DDL\CheckConstraintDefinitionInterface;
 use SQLCraft\Contracts\DDL\ColumnDefinitionInterface;
 use SQLCraft\Contracts\DDL\ForeignKeyDefinitionInterface;
+use SQLCraft\Contracts\DDL\IndexColumnDefinitionInterface;
 use SQLCraft\Contracts\DDL\IndexDefinitionInterface;
 use SQLCraft\Contracts\DDL\RoutineParameterDefinitionInterface;
+use SQLCraft\Contracts\Events\SchemaEventDispatcherInterface;
+use SQLCraft\Contracts\Platform\PlatformInterface;
 use SQLCraft\DTO\CheckConstraintMeta;
 use SQLCraft\DTO\ColumnMeta;
 use SQLCraft\DTO\ForeignKeyMeta;
 use SQLCraft\DTO\IndexColumnMeta;
 use SQLCraft\DTO\IndexMeta;
-use SQLCraft\Capabilities\CapabilitySet;
-use SQLCraft\Capabilities\ExtendedCapability;
-use SQLCraft\Capabilities\PlatformCapabilityResolver;
-use SQLCraft\Contracts\Platform\PlatformInterface;
-use SQLCraft\Contracts\Events\SchemaEventDispatcherInterface;
+use SQLCraft\ValueObjects\DataType;
 use SQLCraft\ValueObjects\Identifier;
 use SQLCraft\ValueObjects\QualifiedName;
 use SQLCraft\ValueObjects\ServerVersion;
-use SQLCraft\ValueObjects\DataType;
 use SQLCraft\ValueObjects\TriggerEvent;
 use SQLCraft\ValueObjects\TriggerTiming;
 
 abstract class AbstractPlatform implements PlatformInterface
 {
-    public function __construct(private readonly ?SchemaEventDispatcherInterface $events = null)
-    {
-    }
+    public function __construct(private readonly ?SchemaEventDispatcherInterface $events = null) {}
 
     #[\Override]
     public function quoteIdentifier(Identifier $identifier): string
     {
-        return '"' . str_replace('"', '""', $identifier->name) . '"';
+        return '"'.str_replace('"', '""', $identifier->name).'"';
     }
 
     #[\Override]
     public function renderDropTableStatement(QualifiedName $table, bool $ifExists, bool $cascade): string
     {
         $qualified = $this->quoteQualifiedName($table);
-        $sql = 'DROP TABLE' . ($ifExists ? ' IF EXISTS' : '') . ' ' . $qualified;
+        $sql = 'DROP TABLE'.($ifExists ? ' IF EXISTS' : '').' '.$qualified;
 
-        return $cascade ? $sql . ' CASCADE' : $sql;
+        return $cascade ? $sql.' CASCADE' : $sql;
     }
 
     /**
-     * @param list<Identifier> $columns
+     * @param  list<Identifier>  $columns
      */
     #[\Override]
     public function renderCreateViewStatement(QualifiedName $name, string $selectSql, bool $orReplace, array $columns, ?string $checkOption): string
     {
-        $columnList = $columns === [] ? '' : ' (' . implode(', ', array_map($this->quoteIdentifier(...), $columns)) . ')';
-        $sql = 'CREATE ' . ($orReplace ? 'OR REPLACE ' : '') . 'VIEW ' . $this->quoteQualifiedName($name) . $columnList . ' AS ' . $selectSql;
+        $columnList = $columns === [] ? '' : ' ('.implode(', ', array_map($this->quoteIdentifier(...), $columns)).')';
+        $sql = 'CREATE '.($orReplace ? 'OR REPLACE ' : '').'VIEW '.$this->quoteQualifiedName($name).$columnList.' AS '.$selectSql;
 
-        return $checkOption === null ? $sql : $sql . ' WITH ' . $checkOption . ' CHECK OPTION';
+        return $checkOption === null ? $sql : $sql.' WITH '.$checkOption.' CHECK OPTION';
     }
 
     #[\Override]
     public function renderDropViewStatement(QualifiedName $name, bool $ifExists, bool $cascade): string
     {
-        $sql = 'DROP VIEW' . ($ifExists ? ' IF EXISTS' : '') . ' ' . $this->quoteQualifiedName($name);
+        $sql = 'DROP VIEW'.($ifExists ? ' IF EXISTS' : '').' '.$this->quoteQualifiedName($name);
 
-        return $cascade ? $sql . ' CASCADE' : $sql;
+        return $cascade ? $sql.' CASCADE' : $sql;
     }
 
     #[\Override]
     public function renderTruncateStatement(QualifiedName $table, bool $cascade, bool $restartIdentity): string
     {
-        $sql = 'TRUNCATE TABLE ' . $this->quoteQualifiedName($table);
+        $sql = 'TRUNCATE TABLE '.$this->quoteQualifiedName($table);
         if ($restartIdentity) {
             $sql .= ' RESTART IDENTITY';
         }
 
-        return $cascade ? $sql . ' CASCADE' : $sql;
+        return $cascade ? $sql.' CASCADE' : $sql;
     }
 
     #[\Override]
@@ -91,19 +90,19 @@ abstract class AbstractPlatform implements PlatformInterface
         bool $cycle,
         ?int $cache,
     ): string {
-        $sql = 'CREATE SEQUENCE ' . $this->quoteIdentifier($name)
-            . ' START WITH ' . $start . ' INCREMENT BY ' . $increment;
+        $sql = 'CREATE SEQUENCE '.$this->quoteIdentifier($name)
+            .' START WITH '.$start.' INCREMENT BY '.$increment;
         if ($min !== null) {
-            $sql .= ' MINVALUE ' . $min;
+            $sql .= ' MINVALUE '.$min;
         }
         if ($max !== null) {
-            $sql .= ' MAXVALUE ' . $max;
+            $sql .= ' MAXVALUE '.$max;
         }
         if ($cycle) {
             $sql .= ' CYCLE';
         }
         if ($cache !== null) {
-            $sql .= ' CACHE ' . $cache;
+            $sql .= ' CACHE '.$cache;
         }
 
         return $sql;
@@ -112,18 +111,18 @@ abstract class AbstractPlatform implements PlatformInterface
     #[\Override]
     public function renderDropSequenceStatement(Identifier $name, bool $ifExists): string
     {
-        return 'DROP SEQUENCE' . ($ifExists ? ' IF EXISTS' : '') . ' ' . $this->quoteIdentifier($name);
+        return 'DROP SEQUENCE'.($ifExists ? ' IF EXISTS' : '').' '.$this->quoteIdentifier($name);
     }
 
     #[\Override]
     public function renderCreateDatabaseStatement(Identifier $name, ?string $charset, ?string $collation, bool $ifNotExists): string
     {
-        $sql = 'CREATE DATABASE' . ($ifNotExists ? ' IF NOT EXISTS' : '') . ' ' . $this->quoteIdentifier($name);
+        $sql = 'CREATE DATABASE'.($ifNotExists ? ' IF NOT EXISTS' : '').' '.$this->quoteIdentifier($name);
         if ($charset !== null) {
-            $sql .= ' CHARACTER SET ' . $charset;
+            $sql .= ' CHARACTER SET '.$charset;
         }
         if ($collation !== null) {
-            $sql .= ' COLLATE ' . $collation;
+            $sql .= ' COLLATE '.$collation;
         }
 
         return $sql;
@@ -132,21 +131,22 @@ abstract class AbstractPlatform implements PlatformInterface
     #[\Override]
     public function renderAlterDatabaseStatement(Identifier $name, ?string $charset, ?string $collation): string
     {
-        $sql = 'ALTER DATABASE ' . $this->quoteIdentifier($name);
+        $sql = 'ALTER DATABASE '.$this->quoteIdentifier($name);
         if ($charset !== null) {
-            $sql .= ' CHARACTER SET ' . $charset;
+            $sql .= ' CHARACTER SET '.$charset;
         }
         if ($collation !== null) {
-            $sql .= ' COLLATE ' . $collation;
+            $sql .= ' COLLATE '.$collation;
         }
+
         return $sql;
     }
 
     #[\Override]
     public function renderCopyTableStatement(QualifiedName $source, QualifiedName $target, bool $includeData): string
     {
-        return 'CREATE TABLE ' . $this->quoteQualifiedName($target) . ' AS SELECT * FROM ' . $this->quoteQualifiedName($source)
-            . ($includeData ? '' : ' WITH NO DATA');
+        return 'CREATE TABLE '.$this->quoteQualifiedName($target).' AS SELECT * FROM '.$this->quoteQualifiedName($source)
+            .($includeData ? '' : ' WITH NO DATA');
     }
 
     #[\Override]
@@ -171,29 +171,29 @@ abstract class AbstractPlatform implements PlatformInterface
     #[\Override]
     public function renderDropDatabaseStatement(Identifier $name, bool $ifExists): string
     {
-        return 'DROP DATABASE' . ($ifExists ? ' IF EXISTS' : '') . ' ' . $this->quoteIdentifier($name);
+        return 'DROP DATABASE'.($ifExists ? ' IF EXISTS' : '').' '.$this->quoteIdentifier($name);
     }
 
     #[\Override]
     public function renderCreateSchemaStatement(Identifier $name, ?string $authorization, bool $ifNotExists): string
     {
-        $sql = 'CREATE SCHEMA' . ($ifNotExists ? ' IF NOT EXISTS' : '') . ' ' . $this->quoteIdentifier($name);
+        $sql = 'CREATE SCHEMA'.($ifNotExists ? ' IF NOT EXISTS' : '').' '.$this->quoteIdentifier($name);
 
-        return $authorization === null ? $sql : $sql . ' AUTHORIZATION ' . $authorization;
+        return $authorization === null ? $sql : $sql.' AUTHORIZATION '.$authorization;
     }
 
     #[\Override]
     public function renderDropSchemaStatement(Identifier $name, bool $ifExists, bool $cascade): string
     {
-        $sql = 'DROP SCHEMA' . ($ifExists ? ' IF EXISTS' : '') . ' ' . $this->quoteIdentifier($name);
+        $sql = 'DROP SCHEMA'.($ifExists ? ' IF EXISTS' : '').' '.$this->quoteIdentifier($name);
 
-        return $cascade ? $sql . ' CASCADE' : $sql;
+        return $cascade ? $sql.' CASCADE' : $sql;
     }
 
     #[\Override]
     public function renderUseDatabaseStatement(Identifier $database): string
     {
-        return 'USE ' . $this->quoteIdentifier($database);
+        return 'USE '.$this->quoteIdentifier($database);
     }
 
     #[\Override]
@@ -206,17 +206,17 @@ abstract class AbstractPlatform implements PlatformInterface
         ?string $definer,
         string $forEach,
     ): string {
-        $definerSql = $definer === null ? '' : ' DEFINER = ' . $definer;
+        $definerSql = $definer === null ? '' : ' DEFINER = '.$definer;
 
-        return 'CREATE' . $definerSql . ' TRIGGER ' . $this->quoteQualifiedName($name)
-            . ' ' . $timing->value . ' ' . $event->value . ' ON ' . $this->quoteQualifiedName($table)
-            . ' FOR EACH ' . $forEach . ' ' . $body;
+        return 'CREATE'.$definerSql.' TRIGGER '.$this->quoteQualifiedName($name)
+            .' '.$timing->value.' '.$event->value.' ON '.$this->quoteQualifiedName($table)
+            .' FOR EACH '.$forEach.' '.$body;
     }
 
     #[\Override]
     public function renderDropTriggerStatement(QualifiedName $name, ?QualifiedName $table, bool $ifExists): string
     {
-        return 'DROP TRIGGER' . ($ifExists ? ' IF EXISTS' : '') . ' ' . $this->quoteQualifiedName($name);
+        return 'DROP TRIGGER'.($ifExists ? ' IF EXISTS' : '').' '.$this->quoteQualifiedName($name);
     }
 
     /** @param list<RoutineParameterDefinitionInterface> $parameters */
@@ -232,29 +232,29 @@ abstract class AbstractPlatform implements PlatformInterface
         bool $orReplace,
     ): string {
         $params = implode(', ', array_map(
-            fn (RoutineParameterDefinitionInterface $parameter): string => $parameter->getDirection()->value . ' '
-                . $this->quoteIdentifier(new Identifier($parameter->getName())) . ' ' . $parameter->getDataType()->name,
+            fn (RoutineParameterDefinitionInterface $parameter): string => $parameter->getDirection()->value.' '
+                .$this->quoteIdentifier(new Identifier($parameter->getName())).' '.$parameter->getDataType()->name,
             $parameters,
         ));
-        $sql = 'CREATE ' . ($orReplace ? 'OR REPLACE ' : '') . $type . ' ' . $this->quoteQualifiedName($name)
-            . '(' . $params . ')';
+        $sql = 'CREATE '.($orReplace ? 'OR REPLACE ' : '').$type.' '.$this->quoteQualifiedName($name)
+            .'('.$params.')';
         if ($returnType instanceof DataType) {
-            $sql .= ' RETURNS ' . $returnType->name;
+            $sql .= ' RETURNS '.$returnType->name;
         }
         if ($language !== null) {
-            $sql .= ' LANGUAGE ' . $language;
+            $sql .= ' LANGUAGE '.$language;
         }
         if ($deterministic) {
             $sql .= ' DETERMINISTIC';
         }
 
-        return $sql . ' AS ' . $body;
+        return $sql.' AS '.$body;
     }
 
     #[\Override]
     public function renderDropRoutineStatement(QualifiedName $name, string $type, bool $ifExists): string
     {
-        return 'DROP ' . $type . ($ifExists ? ' IF EXISTS' : '') . ' ' . $this->quoteQualifiedName($name);
+        return 'DROP '.$type.($ifExists ? ' IF EXISTS' : '').' '.$this->quoteQualifiedName($name);
     }
 
     /** @return list<string> */
@@ -272,13 +272,13 @@ abstract class AbstractPlatform implements PlatformInterface
         }
         foreach ($alterTable->getModifyColumns() as [$new, $original]) {
             $definition = $this->renderDdlColumnDefinition($new);
-            $columnPrefix = $this->quoteIdentifier(new Identifier($new->getName())) . ' ';
+            $columnPrefix = $this->quoteIdentifier(new Identifier($new->getName())).' ';
             $typeAndAttributes = str_starts_with($definition, $columnPrefix)
                 ? substr($definition, strlen($columnPrefix))
                 : $definition;
-            $statements[] = 'ALTER TABLE ' . $this->quoteQualifiedName($table)
-                . ' ALTER COLUMN ' . $this->quoteIdentifier(new Identifier($original->getName()))
-                . ' ' . $typeAndAttributes;
+            $statements[] = 'ALTER TABLE '.$this->quoteQualifiedName($table)
+                .' ALTER COLUMN '.$this->quoteIdentifier(new Identifier($original->getName()))
+                .' '.$typeAndAttributes;
         }
         foreach ($alterTable->getDropColumns() as $column) {
             $statements[] = $this->renderAlterTableDropColumn($table, $column);
@@ -290,25 +290,25 @@ abstract class AbstractPlatform implements PlatformInterface
             $statements[] = $this->renderDropIndexStatement($table, $index);
         }
         foreach ($alterTable->getAddForeignKeys() as $foreignKey) {
-            $statements[] = 'ALTER TABLE ' . $this->quoteQualifiedName($table)
-                . ' ADD ' . $this->renderDdlForeignKeyClause($foreignKey);
+            $statements[] = 'ALTER TABLE '.$this->quoteQualifiedName($table)
+                .' ADD '.$this->renderDdlForeignKeyClause($foreignKey);
         }
         foreach ($alterTable->getDropForeignKeys() as $constraint) {
-            $statements[] = 'ALTER TABLE ' . $this->quoteQualifiedName($table)
-                . ' DROP CONSTRAINT ' . $this->quoteIdentifier($constraint);
+            $statements[] = 'ALTER TABLE '.$this->quoteQualifiedName($table)
+                .' DROP CONSTRAINT '.$this->quoteIdentifier($constraint);
         }
         foreach ($alterTable->getAddCheckConstraints() as $check) {
-            $statements[] = 'ALTER TABLE ' . $this->quoteQualifiedName($table)
-                . ' ADD ' . $this->renderDdlCheckConstraintClause($check);
+            $statements[] = 'ALTER TABLE '.$this->quoteQualifiedName($table)
+                .' ADD '.$this->renderDdlCheckConstraintClause($check);
         }
         foreach ($alterTable->getDropCheckConstraints() as $constraint) {
-            $statements[] = 'ALTER TABLE ' . $this->quoteQualifiedName($table)
-                . ' DROP CONSTRAINT ' . $this->quoteIdentifier($constraint);
+            $statements[] = 'ALTER TABLE '.$this->quoteQualifiedName($table)
+                .' DROP CONSTRAINT '.$this->quoteIdentifier($constraint);
         }
         $rename = $alterTable->getRename();
         if ($rename instanceof Identifier) {
-            $statements[] = 'ALTER TABLE ' . $this->quoteQualifiedName($table)
-                . ' RENAME TO ' . $this->quoteIdentifier($rename);
+            $statements[] = 'ALTER TABLE '.$this->quoteQualifiedName($table)
+                .' RENAME TO '.$this->quoteIdentifier($rename);
         }
 
         return $statements;
@@ -339,7 +339,7 @@ abstract class AbstractPlatform implements PlatformInterface
     }
 
     #[\Override]
-    public function renderDdlCreateIndexStatement(\SQLCraft\ValueObjects\QualifiedName $table, IndexDefinitionInterface $index): string
+    public function renderDdlCreateIndexStatement(QualifiedName $table, IndexDefinitionInterface $index): string
     {
         return $this->renderCreateIndexStatement($table, $this->toIndexMeta($index));
     }
@@ -347,38 +347,38 @@ abstract class AbstractPlatform implements PlatformInterface
     #[\Override]
     public function renderColumnDefinition(ColumnMeta $column): string
     {
-        return $this->quoteIdentifier(new Identifier($column->name)) . ' ' . $column->dataType->name;
+        return $this->quoteIdentifier(new Identifier($column->name)).' '.$column->dataType->name;
     }
 
     /**
-     * @param list<string> $columnClauses
-     * @param list<string> $constraintClauses
-     * @param array<string, scalar|null> $tableOptions
+     * @param  list<string>  $columnClauses
+     * @param  list<string>  $constraintClauses
+     * @param  array<string, scalar|null>  $tableOptions
      */
     #[\Override]
     public function renderCreateTableStatement(QualifiedName $table, array $columnClauses, array $constraintClauses, array $tableOptions): string
     {
-        return 'CREATE TABLE ' . $this->quoteQualifiedName($table) . ' (' . implode(', ', [...$columnClauses, ...$constraintClauses]) . ')';
+        return 'CREATE TABLE '.$this->quoteQualifiedName($table).' ('.implode(', ', [...$columnClauses, ...$constraintClauses]).')';
     }
 
     #[\Override]
     public function renderPrimaryKeyClause(IndexMeta $index): string
     {
-        return 'PRIMARY KEY (' . implode(', ', array_map(fn (\SQLCraft\DTO\IndexColumnMeta $column): string => $this->quoteIdentifier(new Identifier($column->columnName)), $index->columns)) . ')';
+        return 'PRIMARY KEY ('.implode(', ', array_map(fn (IndexColumnMeta $column): string => $this->quoteIdentifier(new Identifier($column->columnName)), $index->columns)).')';
     }
 
     #[\Override]
     public function renderForeignKeyClause(ForeignKeyMeta $foreignKey): string
     {
-        return 'CONSTRAINT ' . $this->quoteIdentifier(new Identifier($foreignKey->constraintName))
-            . ' FOREIGN KEY (' . implode(', ', array_map(fn (string $column): string => $this->quoteIdentifier(new Identifier($column)), $foreignKey->sourceColumns)) . ')'
-            . ' REFERENCES ' . $this->quoteIdentifier(new Identifier($foreignKey->targetTable));
+        return 'CONSTRAINT '.$this->quoteIdentifier(new Identifier($foreignKey->constraintName))
+            .' FOREIGN KEY ('.implode(', ', array_map(fn (string $column): string => $this->quoteIdentifier(new Identifier($column)), $foreignKey->sourceColumns)).')'
+            .' REFERENCES '.$this->quoteIdentifier(new Identifier($foreignKey->targetTable));
     }
 
     #[\Override]
     public function renderCheckConstraintClause(CheckConstraintMeta $check): string
     {
-        return 'CONSTRAINT ' . $this->quoteIdentifier(new Identifier($check->name)) . ' CHECK (' . $check->expression . ')';
+        return 'CONSTRAINT '.$this->quoteIdentifier(new Identifier($check->name)).' CHECK ('.$check->expression.')';
     }
 
     private function toColumnMeta(ColumnDefinitionInterface $column): ColumnMeta
@@ -406,7 +406,7 @@ abstract class AbstractPlatform implements PlatformInterface
             name: $index->getName(),
             type: $index->getType(),
             columns: array_map(
-                static fn (\SQLCraft\Contracts\DDL\IndexColumnDefinitionInterface $column): IndexColumnMeta => new IndexColumnMeta(
+                static fn (IndexColumnDefinitionInterface $column): IndexColumnMeta => new IndexColumnMeta(
                     columnName: $column->getColumnName(),
                     descending: $column->isDescending(),
                     length: $column->getLength(),
@@ -463,7 +463,7 @@ abstract class AbstractPlatform implements PlatformInterface
     #[\Override]
     public function applySingleRowLimit(string $sql, string $whereClause): string
     {
-        return $sql . ' LIMIT 1';
+        return $sql.' LIMIT 1';
     }
 
     /** @return list<string> */
@@ -488,7 +488,7 @@ abstract class AbstractPlatform implements PlatformInterface
     #[\Override]
     public function getExplainSql(string $sql, bool $analyze = false): string
     {
-        return ($analyze ? 'EXPLAIN ANALYZE ' : 'EXPLAIN ') . $sql;
+        return ($analyze ? 'EXPLAIN ANALYZE ' : 'EXPLAIN ').$sql;
     }
 
     #[\Override]

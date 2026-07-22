@@ -15,9 +15,7 @@ abstract class AbstractDelimitedFormatWriter implements FormatWriterInterface
     private bool $headerWritten = false;
 
     #[\Override]
-    public function writeHeader(SinkInterface $sink, DumpOptions $options): void
-    {
-    }
+    public function writeHeader(SinkInterface $sink, DumpOptions $options): void {}
 
     #[\Override]
     public function writeTableHeader(SinkInterface $sink, TableStatus $table, DumpOptions $options): void
@@ -27,13 +25,11 @@ abstract class AbstractDelimitedFormatWriter implements FormatWriterInterface
 
     /** @param list<string> $ddlStatements */
     #[\Override]
-    public function writeTableDdl(SinkInterface $sink, TableStatus $table, array $ddlStatements): void
-    {
-    }
+    public function writeTableDdl(SinkInterface $sink, TableStatus $table, array $ddlStatements): void {}
 
     /**
-     * @param list<array<string, mixed>> $rows
-     * @param list<ColumnMeta> $columns
+     * @param  list<array<string, mixed>>  $rows
+     * @param  list<ColumnMeta>  $columns
      */
     #[\Override]
     public function writeRows(
@@ -52,7 +48,7 @@ abstract class AbstractDelimitedFormatWriter implements FormatWriterInterface
             throw new InvalidArgumentException('Delimited format separator cannot be empty.');
         }
 
-        if (!$this->headerWritten) {
+        if (! $this->headerWritten) {
             $sink->write($this->renderRecord(
                 array_map(static fn (ColumnMeta $column): string => $column->name, $columns),
                 $separator,
@@ -70,14 +66,10 @@ abstract class AbstractDelimitedFormatWriter implements FormatWriterInterface
     }
 
     #[\Override]
-    public function writeTableFooter(SinkInterface $sink, TableStatus $table): void
-    {
-    }
+    public function writeTableFooter(SinkInterface $sink, TableStatus $table): void {}
 
     #[\Override]
-    public function writeFooter(SinkInterface $sink, DumpOptions $options): void
-    {
-    }
+    public function writeFooter(SinkInterface $sink, DumpOptions $options): void {}
 
     abstract protected function defaultSeparator(): string;
 
@@ -87,16 +79,16 @@ abstract class AbstractDelimitedFormatWriter implements FormatWriterInterface
         return implode($separator, array_map(
             fn (string $value): string => $this->quoteField($value, $separator),
             $values,
-        )) . "\r\n";
+        ))."\r\n";
     }
 
     private function quoteField(string $value, string $separator): string
     {
-        if (strpbrk($value, $separator . "\"\r\n") === false) {
+        if (strpbrk($value, $separator."\"\r\n") === false) {
             return $value;
         }
 
-        return '"' . str_replace('"', '""', $value) . '"';
+        return '"'.str_replace('"', '""', $value).'"';
     }
 
     private function renderValue(mixed $value, ColumnMeta $column, string $nullRepresentation): string
@@ -106,7 +98,7 @@ abstract class AbstractDelimitedFormatWriter implements FormatWriterInterface
         }
 
         if ($this->isBinary($column)) {
-            if (!is_string($value)) {
+            if (! is_string($value)) {
                 throw new InvalidArgumentException('Binary column values must be strings.');
             }
 

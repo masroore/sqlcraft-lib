@@ -13,6 +13,5 @@ final readonly class ExportWarningEvent extends ObservabilityEvent
         public ConnectionInterface $connection,
         public string $message,
         public array $tables,
-    ) {
-    }
+    ) {}
 }

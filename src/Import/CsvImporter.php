@@ -5,16 +5,16 @@ declare(strict_types=1);
 namespace SQLCraft\Import;
 
 use InvalidArgumentException;
-use RuntimeException;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
+use SQLCraft\Contracts\Connection\ResultInterface;
+use SQLCraft\Contracts\Events\ImportExportEventDispatcherInterface;
 use SQLCraft\Contracts\Execution\QueryExecutorInterface;
 use SQLCraft\Contracts\Import\CsvImporterInterface;
-use SQLCraft\Contracts\Events\ImportExportEventDispatcherInterface;
 use SQLCraft\Contracts\Import\ImportSourceInterface;
 use SQLCraft\Contracts\Metadata\ColumnInspectorInterface;
 use SQLCraft\DTO\ColumnMeta;
-use SQLCraft\Query\UpsertSqlRenderer;
 use SQLCraft\Exceptions\QueryTimeoutException;
+use SQLCraft\Query\UpsertSqlRenderer;
 use SQLCraft\ValueObjects\Identifier;
 use SQLCraft\ValueObjects\QualifiedName;
 
@@ -24,8 +24,7 @@ final readonly class CsvImporter implements CsvImporterInterface
         private ColumnInspectorInterface $columns,
         private ?ImportExportEventDispatcherInterface $events = null,
         private ?QueryExecutorInterface $executor = null,
-    ) {
-    }
+    ) {}
 
     #[\Override]
     public function importCsv(
@@ -35,14 +34,14 @@ final readonly class CsvImporter implements CsvImporterInterface
         CsvImportOptions $options,
     ): ImportResult {
         $stream = $source->openStream();
-        if (!is_resource($stream)) {
+        if (! is_resource($stream)) {
             throw new InvalidArgumentException('CSV source must provide an open stream resource.');
         }
 
         $startedAt = hrtime(true);
         $this->events?->importStarted($conn, $source, $source->getEstimatedSize(), 'csv');
         $header = fgetcsv($stream, 0, $options->separator, '"', '');
-        if (!is_array($header)) {
+        if (! is_array($header)) {
             return new ImportResult(0, 0, [], $this->elapsedMs($startedAt));
         }
 
@@ -60,7 +59,7 @@ final readonly class CsvImporter implements CsvImporterInterface
         try {
             while (true) {
                 $row = fgetcsv($stream, 0, $options->separator, '"', '');
-                if (!is_array($row)) {
+                if (! is_array($row)) {
                     break;
                 }
                 if (count($row) < count($header)) {
@@ -97,8 +96,8 @@ final readonly class CsvImporter implements CsvImporterInterface
     }
 
     /**
-     * @param list<string> $header
-     * @param iterable<ColumnMeta> $metadata
+     * @param  list<string>  $header
+     * @param  iterable<ColumnMeta>  $metadata
      * @return list<array{0: int, 1: string, 2: bool}>
      */
     private function knownColumns(array $header, iterable $metadata): array
@@ -118,8 +117,8 @@ final readonly class CsvImporter implements CsvImporterInterface
     }
 
     /**
-     * @param list<string|null> $row
-     * @param list<array{0: int, 1: string, 2: bool}> $known
+     * @param  list<string|null>  $row
+     * @param  list<array{0: int, 1: string, 2: bool}>  $known
      * @return list<string|null>
      */
     private function mapRow(array $row, array $known, string $nullRepresentation): array
@@ -130,6 +129,7 @@ final readonly class CsvImporter implements CsvImporterInterface
             $value = $row[$index] ?? null;
             if ($value === $nullRepresentation || $value === null) {
                 $values[] = null;
+
                 continue;
             }
             if ($binary) {
@@ -138,6 +138,7 @@ final readonly class CsvImporter implements CsvImporterInterface
                     throw new InvalidArgumentException(sprintf('Invalid base64 value for column %s.', $name));
                 }
                 $values[] = $decoded;
+
                 continue;
             }
             $values[] = $value;
@@ -147,8 +148,8 @@ final readonly class CsvImporter implements CsvImporterInterface
     }
 
     /**
-     * @param list<array{0: int, 1: string, 2: bool}> $known
-     * @param list<list<string|null>> $rows
+     * @param  list<array{0: int, 1: string, 2: bool}>  $known
+     * @param  list<list<string|null>>  $rows
      */
     private function executeBatch(
         ConnectionInterface $conn,
@@ -159,28 +160,28 @@ final readonly class CsvImporter implements CsvImporterInterface
     ): void {
         $columns = array_map(static fn (array $column): string => $column[1], $known);
         $quotedColumns = array_map($conn->quoteIdentifier(...), $columns);
-        $row = '(' . implode(', ', array_fill(0, count($columns), '?')) . ')';
+        $row = '('.implode(', ', array_fill(0, count($columns), '?')).')';
         $clauses = UpsertSqlRenderer::clausesForName($conn->getPlatformName(), $options->upsertMode, $quotedColumns);
         $tableSql = $this->quoteTable($conn, $table);
         $values = [];
         foreach ($rows as $valuesRow) {
             $values = [...$values, ...$valuesRow];
         }
-        $sql = $clauses['prefix'] . ' INTO ' . $tableSql . ' (' . implode(', ', $quotedColumns) . ') VALUES '
-            . implode(', ', array_fill(0, count($rows), $row)) . $clauses['suffix'];
+        $sql = $clauses['prefix'].' INTO '.$tableSql.' ('.implode(', ', $quotedColumns).') VALUES '
+            .implode(', ', array_fill(0, count($rows), $row)).$clauses['suffix'];
         if ($options->statementTimeoutMs > 0) {
-            if (!$this->executor instanceof QueryExecutorInterface) {
+            if (! $this->executor instanceof QueryExecutorInterface) {
                 throw new InvalidArgumentException('A QueryExecutor is required for CSV statement timeouts.');
             }
-            if (!$this->executor->queryWithTimeout($conn, $sql, $values, $options->statementTimeoutMs) instanceof \SQLCraft\Contracts\Connection\ResultInterface) {
+            if (! $this->executor->queryWithTimeout($conn, $sql, $values, $options->statementTimeoutMs) instanceof ResultInterface) {
                 throw new QueryTimeoutException('Statement timeout is not supported by this platform.', $sql);
             }
+
             return;
         }
         $statement = $conn->prepare($sql);
         $statement->execute($values);
     }
-
 
     private function quoteTable(ConnectionInterface $conn, QualifiedName $table): string
     {
@@ -189,6 +190,7 @@ final readonly class CsvImporter implements CsvImporterInterface
             $parts[] = $conn->quoteIdentifier($table->schema->name);
         }
         $parts[] = $conn->quoteIdentifier($table->object->name);
+
         return implode('.', $parts);
     }
 

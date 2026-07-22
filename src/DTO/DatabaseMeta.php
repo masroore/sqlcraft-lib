@@ -10,6 +10,5 @@ final readonly class DatabaseMeta
         public string $name,
         public ?string $charset,
         public ?string $collation,
-    ) {
-    }
+    ) {}
 }

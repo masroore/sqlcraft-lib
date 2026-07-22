@@ -11,9 +11,7 @@ use SQLCraft\ValueObjects\ConnectionParameters;
 
 final readonly class ConnectionEventDispatcher implements ConnectionEventDispatcherInterface
 {
-    public function __construct(private EventDispatcherInterface $dispatcher)
-    {
-    }
+    public function __construct(private EventDispatcherInterface $dispatcher) {}
 
     #[\Override]
     public function beforeConnectionOpened(string $name, ConnectionParameters $parameters): ?string

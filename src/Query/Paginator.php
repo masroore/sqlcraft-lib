@@ -7,9 +7,10 @@ namespace SQLCraft\Query;
 use InvalidArgumentException;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Execution\QueryExecutorInterface;
+use SQLCraft\Contracts\Query\PaginatorInterface;
 use SQLCraft\Contracts\Query\TableStatusProviderInterface;
 
-final readonly class Paginator implements \SQLCraft\Contracts\Query\PaginatorInterface
+final readonly class Paginator implements PaginatorInterface
 {
     public function __construct(
         private QueryExecutorInterface $executor,

@@ -9,7 +9,7 @@ use InvalidArgumentException;
 final readonly class DumpScope
 {
     /**
-     * @param list<string>|null $tables
+     * @param  list<string>|null  $tables
      */
     private function __construct(
         public ScopeKind $kind,

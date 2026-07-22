@@ -9,8 +9,8 @@ use SQLCraft\ValueObjects\ForeignKeyAction;
 final readonly class ForeignKeyMeta
 {
     /**
-     * @param list<string> $sourceColumns
-     * @param list<string> $targetColumns
+     * @param  list<string>  $sourceColumns
+     * @param  list<string>  $targetColumns
      */
     public function __construct(
         public string $constraintName,
@@ -23,6 +23,5 @@ final readonly class ForeignKeyMeta
         public ForeignKeyAction $onUpdate,
         public ?string $definition,
         public bool $deferrable = false,
-    ) {
-    }
+    ) {}
 }

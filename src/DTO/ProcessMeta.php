@@ -15,6 +15,5 @@ final readonly class ProcessMeta
         public int $time,
         public ?string $state,
         public ?string $query,
-    ) {
-    }
+    ) {}
 }

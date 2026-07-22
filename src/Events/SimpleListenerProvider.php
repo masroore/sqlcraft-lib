@@ -29,7 +29,7 @@ final class SimpleListenerProvider implements ListenerProviderInterface
     {
         $matching = [];
         foreach ($this->listeners as $eventClass => $listeners) {
-            if (!$event instanceof $eventClass) {
+            if (! $event instanceof $eventClass) {
                 continue;
             }
             foreach ($listeners as $listener) {

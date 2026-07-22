@@ -11,7 +11,7 @@ final class Psr7StreamSink implements SinkInterface
 {
     public function __construct(private object $stream)
     {
-        if (!method_exists($stream, 'write')) {
+        if (! method_exists($stream, 'write')) {
             throw new InvalidArgumentException('PSR-7 stream must implement write().');
         }
     }
@@ -20,7 +20,7 @@ final class Psr7StreamSink implements SinkInterface
     public function write(string $bytes): void
     {
         $written = $this->call('write', $bytes);
-        if (!is_int($written) || $written !== strlen($bytes)) {
+        if (! is_int($written) || $written !== strlen($bytes)) {
             throw new \RuntimeException('Unable to write to the PSR-7 export stream.');
         }
     }
@@ -28,9 +28,10 @@ final class Psr7StreamSink implements SinkInterface
     private function call(string $method, mixed ...$arguments): mixed
     {
         $callable = [$this->stream, $method];
-        if (!is_callable($callable)) {
+        if (! is_callable($callable)) {
             throw new InvalidArgumentException('PSR-7 stream method is not callable.');
         }
+
         return $callable(...$arguments);
     }
 
@@ -43,7 +44,5 @@ final class Psr7StreamSink implements SinkInterface
     }
 
     #[\Override]
-    public function close(): void
-    {
-    }
+    public function close(): void {}
 }

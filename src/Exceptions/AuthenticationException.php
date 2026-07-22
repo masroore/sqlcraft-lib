@@ -4,6 +4,4 @@ declare(strict_types=1);
 
 namespace SQLCraft\Exceptions;
 
-final class AuthenticationException extends ConnectionException
-{
-}
+final class AuthenticationException extends ConnectionException {}

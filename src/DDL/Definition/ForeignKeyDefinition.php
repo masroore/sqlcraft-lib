@@ -10,8 +10,8 @@ use SQLCraft\ValueObjects\ForeignKeyAction;
 final readonly class ForeignKeyDefinition implements ForeignKeyDefinitionInterface
 {
     /**
-     * @param list<string> $sourceColumns
-     * @param list<string> $targetColumns
+     * @param  list<string>  $sourceColumns
+     * @param  list<string>  $targetColumns
      */
     public function __construct(
         private string $constraintName,
@@ -24,56 +24,64 @@ final readonly class ForeignKeyDefinition implements ForeignKeyDefinitionInterfa
         private ForeignKeyAction $onUpdate,
         private ?string $definition,
         private bool $deferrable = false,
-    ) {
-    }
+    ) {}
 
     #[\Override]
     public function getConstraintName(): string
     {
         return $this->constraintName;
     }
+
     #[\Override]
     public function getTargetDatabase(): ?string
     {
         return $this->targetDatabase;
     }
+
     #[\Override]
     public function getTargetSchema(): ?string
     {
         return $this->targetSchema;
     }
+
     #[\Override]
     public function getTargetTable(): string
     {
         return $this->targetTable;
     }
+
     /** @return list<string> */
     #[\Override]
     public function getSourceColumns(): array
     {
         return $this->sourceColumns;
     }
+
     /** @return list<string> */
     #[\Override]
     public function getTargetColumns(): array
     {
         return $this->targetColumns;
     }
+
     #[\Override]
     public function getOnDelete(): ForeignKeyAction
     {
         return $this->onDelete;
     }
+
     #[\Override]
     public function getOnUpdate(): ForeignKeyAction
     {
         return $this->onUpdate;
     }
+
     #[\Override]
     public function getDefinition(): ?string
     {
         return $this->definition;
     }
+
     #[\Override]
     public function isDeferrable(): bool
     {

@@ -8,9 +8,7 @@ use SQLCraft\Contracts\Import\ImportSourceInterface;
 
 final readonly class StringImportSource implements ImportSourceInterface
 {
-    public function __construct(private string $contents)
-    {
-    }
+    public function __construct(private string $contents) {}
 
     #[\Override]
     public function openStream(): mixed
@@ -21,6 +19,7 @@ final readonly class StringImportSource implements ImportSourceInterface
         }
         fwrite($stream, $this->contents);
         rewind($stream);
+
         return $stream;
     }
 

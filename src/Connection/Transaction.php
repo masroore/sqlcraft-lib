@@ -10,6 +10,7 @@ use SQLCraft\Contracts\Events\ConnectionEventDispatcherInterface;
 final class Transaction
 {
     private bool $committed = false;
+
     private bool $rolledBack = false;
 
     public function __construct(
@@ -17,8 +18,7 @@ final class Transaction
         public readonly string $isolationLevel = '',
         public readonly ?string $savepointName = null,
         private readonly ?ConnectionEventDispatcherInterface $events = null,
-    ) {
-    }
+    ) {}
 
     public function commit(): void
     {
@@ -55,12 +55,12 @@ final class Transaction
 
     public function isActive(): bool
     {
-        return !$this->committed && !$this->rolledBack;
+        return ! $this->committed && ! $this->rolledBack;
     }
 
     private function assertActive(): void
     {
-        if (!$this->isActive()) {
+        if (! $this->isActive()) {
             throw new \LogicException('The transaction is no longer active.');
         }
     }

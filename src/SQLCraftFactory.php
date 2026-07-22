@@ -5,24 +5,20 @@ declare(strict_types=1);
 namespace SQLCraft;
 
 use Psr\EventDispatcher\EventDispatcherInterface;
-use SQLCraft\Capabilities\CapabilityNotSupportedException;
 use SQLCraft\Connection\ConnectionManager;
 use SQLCraft\Connection\EnvCredentialProvider;
 use SQLCraft\Connection\PdoConnectionFactory;
 use SQLCraft\Connection\PdoExceptionTranslator;
 use SQLCraft\Contracts\Connection\CredentialProviderInterface;
-use SQLCraft\Contracts\Execution\QueryExecutorInterface;
 use SQLCraft\Contracts\Metadata\MetadataCacheInterface;
 use SQLCraft\DDL\DdlManager;
 use SQLCraft\Driver\DriverRegistry;
 use SQLCraft\Driver\MySQLDriver;
 use SQLCraft\Driver\PostgreSQLDriver;
-use SQLCraft\Driver\SqlServerDriver;
 use SQLCraft\Driver\SqliteDriver;
-use SQLCraft\Enums\DatabaseDriver;
+use SQLCraft\Driver\SqlServerDriver;
 use SQLCraft\Events\AfterDdlExecuted;
 use SQLCraft\Events\ConnectionEventDispatcher;
-use SQLCraft\Events\ImportExportEventDispatcher;
 use SQLCraft\Events\SchemaChangedEvent;
 use SQLCraft\Events\SchemaEventDispatcher;
 use SQLCraft\Events\SimpleEventDispatcher;
@@ -35,13 +31,13 @@ use SQLCraft\Export\Exporter;
 use SQLCraft\Export\FormatRegistry;
 use SQLCraft\Export\SqlFormatWriter;
 use SQLCraft\Export\TsvFormatWriter;
-use SQLCraft\Import\Importer;
 use SQLCraft\Import\CsvFormatReader;
-use SQLCraft\Metadata\ExportSource;
+use SQLCraft\Import\Importer;
+use SQLCraft\Metadata\PrivilegeInspector;
 use SQLCraft\Platform\MySQLPlatform;
 use SQLCraft\Platform\PostgreSQLPlatform;
-use SQLCraft\Platform\SqlServerPlatform;
 use SQLCraft\Platform\SqlitePlatform;
+use SQLCraft\Platform\SqlServerPlatform;
 use SQLCraft\Query\StatementSplitter;
 use SQLCraft\Schema\CacheInvalidationListener;
 use SQLCraft\Schema\NullMetadataCache;
@@ -49,15 +45,18 @@ use SQLCraft\Schema\SchemaManagerFactory;
 use SQLCraft\Security\PrivilegeGuard;
 use SQLCraft\Security\PrivilegeManager;
 use SQLCraft\Security\UserManager;
-use SQLCraft\Metadata\PrivilegeInspector;
 use SQLCraft\ValueObjects\ConnectionParameters;
 
 final class SQLCraftFactory
 {
     private readonly DriverRegistry $drivers;
+
     private readonly CredentialProviderInterface $credentials;
+
     private readonly EventDispatcherInterface $events;
+
     private readonly ConnectionManager $connections;
+
     private readonly ?MetadataCacheInterface $cache;
 
     public function __construct(
@@ -66,24 +65,24 @@ final class SQLCraftFactory
         ?EventDispatcherInterface $events = null,
         ?MetadataCacheInterface $cache = null,
     ) {
-        $pdo = new PdoConnectionFactory(new PdoExceptionTranslator(), $events instanceof \Psr\EventDispatcher\EventDispatcherInterface ? new ConnectionEventDispatcher($events) : null);
+        $pdo = new PdoConnectionFactory(new PdoExceptionTranslator, $events instanceof EventDispatcherInterface ? new ConnectionEventDispatcher($events) : null);
         $this->drivers = $drivers ?? new DriverRegistry([
-            new MySQLDriver($pdo, new MySQLPlatform()),
-            new PostgreSQLDriver($pdo, new PostgreSQLPlatform()),
-            new SqliteDriver($pdo, new SqlitePlatform()),
-            new SqlServerDriver($pdo, new SqlServerPlatform()),
+            new MySQLDriver($pdo, new MySQLPlatform),
+            new PostgreSQLDriver($pdo, new PostgreSQLPlatform),
+            new SqliteDriver($pdo, new SqlitePlatform),
+            new SqlServerDriver($pdo, new SqlServerPlatform),
         ]);
-        if (!$drivers instanceof \SQLCraft\Driver\DriverRegistry) {
+        if (! $drivers instanceof DriverRegistry) {
             $this->drivers->registerAlias('mariadb', $this->drivers->get('mysql'));
         }
-        $this->credentials = $credentials ?? new EnvCredentialProvider();
-        $this->connections = new ConnectionManager();
+        $this->credentials = $credentials ?? new EnvCredentialProvider;
+        $this->connections = new ConnectionManager;
         $this->cache = $cache;
 
-        if (!$events instanceof \Psr\EventDispatcher\EventDispatcherInterface) {
-            $provider = new SimpleListenerProvider();
+        if (! $events instanceof EventDispatcherInterface) {
+            $provider = new SimpleListenerProvider;
             $this->events = new SimpleEventDispatcher($provider);
-            if ($cache instanceof \SQLCraft\Contracts\Metadata\MetadataCacheInterface) {
+            if ($cache instanceof MetadataCacheInterface) {
                 $listener = new CacheInvalidationListener($cache);
                 $provider->listen(AfterDdlExecuted::class, $listener);
                 $provider->listen(SchemaChangedEvent::class, $listener);
@@ -114,7 +113,7 @@ final class SQLCraftFactory
         if ($parameters->driver === null) {
             throw new \InvalidArgumentException(
                 'ConnectionParameters::$driver must be set when using SQLCraftFactory::session(). '
-                . 'Pass a DatabaseDriver enum case, e.g. driver: DatabaseDriver::SQLite.'
+                .'Pass a DatabaseDriver enum case, e.g. driver: DatabaseDriver::SQLite.'
             );
         }
         $connection = $this->drivers->getByDriver($parameters->driver)->connect($parameters);
@@ -123,16 +122,16 @@ final class SQLCraftFactory
 
         $queryExecutor = new QueryExecutor(events: $this->events);
         $schemaEvents = new SchemaEventDispatcher($this->events);
-        $schema = SchemaManagerFactory::forConnection($connection, $this->cache ?? new NullMetadataCache(), $schemaEvents);
+        $schema = SchemaManagerFactory::forConnection($connection, $this->cache ?? new NullMetadataCache, $schemaEvents);
         $source = SchemaManagerFactory::exportSourceForConnection($connection);
         $registry = new FormatRegistry([
             new SqlFormatWriter($connection),
-            new CsvFormatWriter(),
-            new TsvFormatWriter(),
-            new CsvSemicolonFormatWriter(),
-        ], [new CsvFormatReader()]);
+            new CsvFormatWriter,
+            new TsvFormatWriter,
+            new CsvSemicolonFormatWriter,
+        ], [new CsvFormatReader]);
         $exporter = new Exporter($source, $queryExecutor, $registry);
-        $importer = new Importer(new StatementSplitter(), new BatchExecutor($queryExecutor));
+        $importer = new Importer(new StatementSplitter, new BatchExecutor($queryExecutor));
 
         return new DatabaseSession(
             $connection,
@@ -141,7 +140,7 @@ final class SQLCraftFactory
             $queryExecutor,
             $exporter,
             $importer,
-            new PrivilegeGuard($connection, new PrivilegeInspector()),
+            new PrivilegeGuard($connection, new PrivilegeInspector),
             new UserManager($connection, $queryExecutor),
             new PrivilegeManager($connection, $queryExecutor),
         );

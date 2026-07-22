@@ -11,7 +11,7 @@ final readonly class Psr6MetadataCache implements MetadataCacheInterface
 {
     public function __construct(private object $pool, private string $prefix = 'sqlcraft:')
     {
-        if (!method_exists($pool, 'getItem') || !method_exists($pool, 'save') || !method_exists($pool, 'clear')) {
+        if (! method_exists($pool, 'getItem') || ! method_exists($pool, 'save') || ! method_exists($pool, 'clear')) {
             throw new \InvalidArgumentException('Cache pool does not implement PSR-6 methods.');
         }
     }
@@ -21,13 +21,13 @@ final readonly class Psr6MetadataCache implements MetadataCacheInterface
     {
         /** @var callable(string): object $getItem */
         $getItem = [$this->pool, 'getItem'];
-        $item = $getItem($this->prefix . $key);
+        $item = $getItem($this->prefix.$key);
         if (method_exists($item, 'isHit') && $item->isHit() && method_exists($item, 'get')) {
             /** @psalm-suppress MixedReturnStatement */
             return $item->get();
         }
         $value = $loader();
-        if (!method_exists($item, 'set')) {
+        if (! method_exists($item, 'set')) {
             throw new \InvalidArgumentException('Cache item does not implement PSR-6 methods.');
         }
         $item->set($value);
@@ -42,14 +42,18 @@ final readonly class Psr6MetadataCache implements MetadataCacheInterface
         return $value;
     }
 
-    #[\Override] public function invalidateTable(string $database, string $table): void
+    #[\Override]
+    public function invalidateTable(string $database, string $table): void
     {
         $this->clear();
     }
-    #[\Override] public function invalidateDatabase(string $database): void
+
+    #[\Override]
+    public function invalidateDatabase(string $database): void
     {
         $this->clear();
     }
+
     #[\Override]
     public function clear(): void
     {

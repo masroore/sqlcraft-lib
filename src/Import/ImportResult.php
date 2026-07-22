@@ -12,6 +12,5 @@ final readonly class ImportResult
         public int $statementsSkipped,
         public array $errors,
         public float $elapsedMs,
-    ) {
-    }
+    ) {}
 }

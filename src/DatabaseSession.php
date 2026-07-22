@@ -5,24 +5,22 @@ declare(strict_types=1);
 namespace SQLCraft;
 
 use SQLCraft\Contracts\Connection\ConnectionInterface;
+use SQLCraft\Contracts\Connection\ResultInterface;
 use SQLCraft\Contracts\Execution\QueryExecutorInterface;
-use SQLCraft\Contracts\Query\PaginatorInterface;
 use SQLCraft\Contracts\Schema\SchemaManagerInterface;
+use SQLCraft\Contracts\Security\PrivilegeManagerInterface;
 use SQLCraft\Contracts\Security\SecurityGuardInterface;
 use SQLCraft\Contracts\Security\UserManagerInterface;
-use SQLCraft\Contracts\Security\PrivilegeManagerInterface;
 use SQLCraft\DDL\DdlManager;
+use SQLCraft\DTO\ExecutionResult;
 use SQLCraft\Export\Exporter;
 use SQLCraft\Import\Importer;
-use SQLCraft\Query\Page;
-use SQLCraft\Query\InsertQuery;
-use SQLCraft\Query\UpdateQuery;
 use SQLCraft\Query\DeleteQuery;
-use SQLCraft\Query\InsertQueryRenderer;
-use SQLCraft\Query\UpdateQueryRenderer;
 use SQLCraft\Query\DeleteQueryRenderer;
-use SQLCraft\Query\PaginationParams;
-use SQLCraft\Query\SelectQuery;
+use SQLCraft\Query\InsertQuery;
+use SQLCraft\Query\InsertQueryRenderer;
+use SQLCraft\Query\UpdateQuery;
+use SQLCraft\Query\UpdateQueryRenderer;
 
 final readonly class DatabaseSession
 {
@@ -36,8 +34,7 @@ final readonly class DatabaseSession
         private SecurityGuardInterface $security,
         private UserManagerInterface $users,
         private PrivilegeManagerInterface $privileges,
-    ) {
-    }
+    ) {}
 
     public function connection(): ConnectionInterface
     {
@@ -45,12 +42,12 @@ final readonly class DatabaseSession
     }
 
     /** @param array<string|int, mixed> $params */
-    public function query(string $sql, array $params = []): \SQLCraft\Contracts\Connection\ResultInterface
+    public function query(string $sql, array $params = []): ResultInterface
     {
         return $this->executor->query($this->connection, $sql, $params);
     }
 
-    public function executeBuilder(InsertQuery|UpdateQuery|DeleteQuery $query): \SQLCraft\DTO\ExecutionResult
+    public function executeBuilder(InsertQuery|UpdateQuery|DeleteQuery $query): ExecutionResult
     {
         $rendered = match (true) {
             $query instanceof InsertQuery => (new InsertQueryRenderer($this->connection->getPlatform()))->render($query),

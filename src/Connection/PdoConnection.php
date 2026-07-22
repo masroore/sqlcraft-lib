@@ -10,10 +10,12 @@ use PDOStatement;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Connection\ResultColumn;
 use SQLCraft\Contracts\Connection\ResultInterface;
+use SQLCraft\Contracts\Events\ConnectionEventDispatcherInterface;
 use SQLCraft\Contracts\Platform\PlatformInterface;
 use SQLCraft\DTO\ExecutionResult;
 use SQLCraft\Exceptions\ConnectionClosedException;
-use SQLCraft\Contracts\Events\ConnectionEventDispatcherInterface;
+use SQLCraft\Exceptions\ConnectionException;
+use SQLCraft\Exceptions\OperationCancelledException;
 use SQLCraft\Exceptions\QueryException;
 use SQLCraft\ValueObjects\Identifier;
 use SQLCraft\ValueObjects\ServerVersion;
@@ -34,8 +36,7 @@ final class PdoConnection implements ConnectionInterface
         private readonly ?string $name = null,
         private readonly ?string $databaseName = null,
         private readonly ?ConnectionEventDispatcherInterface $events = null,
-    ) {
-    }
+    ) {}
 
     #[\Override]
     public function getPlatformName(): string
@@ -184,10 +185,10 @@ final class PdoConnection implements ConnectionInterface
         $pdo = $this->assertOpen();
         $cancelReason = $this->events?->beforeTransactionBegan($this, $isolationLevel);
         if ($cancelReason !== null) {
-            throw new \SQLCraft\Exceptions\OperationCancelledException($cancelReason);
+            throw new OperationCancelledException($cancelReason);
         }
 
-        if (!$pdo->inTransaction()) {
+        if (! $pdo->inTransaction()) {
             try {
                 $pdo->beginTransaction();
             } catch (PDOException $exception) {
@@ -196,8 +197,8 @@ final class PdoConnection implements ConnectionInterface
 
             $transaction = new Transaction($this, $isolationLevel, events: $this->events);
         } else {
-            $savepoint = 'sqlcraft_sp_' . ++$this->savepointSequence;
-            $this->execute('SAVEPOINT ' . $savepoint);
+            $savepoint = 'sqlcraft_sp_'.++$this->savepointSequence;
+            $this->execute('SAVEPOINT '.$savepoint);
             $transaction = new Transaction($this, $isolationLevel, $savepoint, $this->events);
         }
 
@@ -209,7 +210,7 @@ final class PdoConnection implements ConnectionInterface
     #[\Override]
     public function inTransaction(): bool
     {
-        return !$this->closed && $this->pdo?->inTransaction() === true;
+        return ! $this->closed && $this->pdo?->inTransaction() === true;
     }
 
     #[\Override]
@@ -219,7 +220,7 @@ final class PdoConnection implements ConnectionInterface
             $this->execute('SELECT 1');
 
             return true;
-        } catch (\SQLCraft\Exceptions\ConnectionException) {
+        } catch (ConnectionException) {
             return false;
         }
     }
@@ -227,7 +228,7 @@ final class PdoConnection implements ConnectionInterface
     #[\Override]
     public function isConnected(): bool
     {
-        return !$this->closed && $this->pdo instanceof PDO;
+        return ! $this->closed && $this->pdo instanceof PDO;
     }
 
     #[\Override]
@@ -265,7 +266,7 @@ final class PdoConnection implements ConnectionInterface
 
     private function assertOpen(): PDO
     {
-        if ($this->closed || !$this->pdo instanceof PDO) {
+        if ($this->closed || ! $this->pdo instanceof PDO) {
             throw new ConnectionClosedException('The database connection is closed.');
         }
 
@@ -278,10 +279,11 @@ final class PdoConnection implements ConnectionInterface
         $columns = [];
         $count = $statement->columnCount();
 
-        for ($index = 0; $index < $count; ++$index) {
+        for ($index = 0; $index < $count; $index++) {
             $meta = $statement->getColumnMeta($index);
             if ($meta === false) {
-                $columns[] = new ResultColumn('column_' . $index, null, null, null, true);
+                $columns[] = new ResultColumn('column_'.$index, null, null, null, true);
+
                 continue;
             }
 
@@ -293,7 +295,7 @@ final class PdoConnection implements ConnectionInterface
                 nativeType: isset($meta['native_type']) ? $meta['native_type'] : null,
                 table: isset($meta['table']) ? $meta['table'] : null,
                 length: $meta['len'] ?? null,
-                nullable: !in_array('not_null', $flags, true),
+                nullable: ! in_array('not_null', $flags, true),
             );
         }
 
@@ -303,13 +305,13 @@ final class PdoConnection implements ConnectionInterface
     /** @return array<string, int|float|string|bool|null> */
     private function normalizeRow(mixed $row): array
     {
-        if (!is_array($row)) {
+        if (! is_array($row)) {
             throw new QueryException('The database returned an invalid result row.');
         }
 
         $normalized = [];
         foreach (array_keys($row) as $key) {
-            if (!is_string($key)) {
+            if (! is_string($key)) {
                 continue;
             }
 

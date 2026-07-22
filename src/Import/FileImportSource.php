@@ -12,7 +12,7 @@ final readonly class FileImportSource implements ImportSourceInterface
 {
     public function __construct(private string $path)
     {
-        if (!is_file($path) || !is_readable($path)) {
+        if (! is_file($path) || ! is_readable($path)) {
             throw new InvalidArgumentException(sprintf('Import file is not readable: %s.', $path));
         }
     }
@@ -48,12 +48,13 @@ final readonly class FileImportSource implements ImportSourceInterface
     public function getEstimatedSize(): ?int
     {
         $size = filesize($this->path);
+
         return $size === false ? null : $size;
     }
 
     private function requireExtension(string $extension): void
     {
-        if (!extension_loaded($extension)) {
+        if (! extension_loaded($extension)) {
             throw new ExtensionMissingException($extension);
         }
     }

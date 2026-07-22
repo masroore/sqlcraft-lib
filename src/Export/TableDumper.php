@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SQLCraft\Export;
 
+use SQLCraft\Capabilities\Capability;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Execution\QueryExecutorInterface;
 use SQLCraft\Contracts\Export\ExportSourceInterface;
@@ -17,8 +18,7 @@ final readonly class TableDumper
     public function __construct(
         private ExportSourceInterface $source,
         private QueryExecutorInterface $executor,
-    ) {
-    }
+    ) {}
 
     public function dump(
         ConnectionInterface $connection,
@@ -35,10 +35,10 @@ final readonly class TableDumper
             if ($autoIncrement !== null) {
                 $ddl[] = $autoIncrement;
             }
-            if ($options->includeTriggers && $this->supports($connection, \SQLCraft\Capabilities\Capability::Trigger)) {
+            if ($options->includeTriggers && $this->supports($connection, Capability::Trigger)) {
                 $ddl = [...$ddl, ...$this->source->getTriggerDdl($connection, $table->name, $table->schema)];
             }
-            if ($options->includeRoutines && $this->supports($connection, \SQLCraft\Capabilities\Capability::Routine)) {
+            if ($options->includeRoutines && $this->supports($connection, Capability::Routine)) {
                 $ddl = [...$ddl, ...$this->source->getRoutineDdl($connection, $table->schema)];
             }
             /** @var list<string> $ddl */
@@ -46,7 +46,7 @@ final readonly class TableDumper
         }
 
         $rows = 0;
-        if ($options->dataStyle !== DataStyle::None && !$table->isView) {
+        if ($options->dataStyle !== DataStyle::None && ! $table->isView) {
             $rows = $this->dumpRows($connection, $table, $writer, $sink, $options, $this->selectAllSql($connection, $table));
         }
 
@@ -84,7 +84,7 @@ final readonly class TableDumper
         $rowCount = 0;
 
         foreach ($result as $row) {
-            ++$rowCount;
+            $rowCount++;
             $batch[] = $row;
             if (count($batch) >= $options->batchSize) {
                 $writer->writeRows($sink, $table, $batch, $columns->map(static fn (ColumnMeta $column): ColumnMeta => $column), $options);
@@ -99,8 +99,7 @@ final readonly class TableDumper
         return $rowCount;
     }
 
-
-    private function supports(ConnectionInterface $connection, \SQLCraft\Capabilities\Capability $capability): bool
+    private function supports(ConnectionInterface $connection, Capability $capability): bool
     {
         try {
             return $connection->getPlatform()->getCapabilitySet($connection->getServerVersion())->has($capability);
@@ -117,7 +116,7 @@ final readonly class TableDumper
         }
         $parts[] = $connection->quoteIdentifier($table->name);
 
-        return 'SELECT * FROM ' . implode('.', $parts);
+        return 'SELECT * FROM '.implode('.', $parts);
     }
 
     private function autoIncrementDdl(
@@ -125,11 +124,11 @@ final readonly class TableDumper
         TableStatus $table,
         DumpOptions $options,
     ): ?string {
-        if (!$options->includeAutoIncrement || $table->autoIncrement === null) {
+        if (! $options->includeAutoIncrement || $table->autoIncrement === null) {
             return null;
         }
 
-        if (!in_array($connection->getPlatformName(), ['mysql', 'maria'], true)) {
+        if (! in_array($connection->getPlatformName(), ['mysql', 'maria'], true)) {
             return null;
         }
 
@@ -139,6 +138,6 @@ final readonly class TableDumper
         }
         $parts[] = $connection->quoteIdentifier($table->name);
 
-        return 'ALTER TABLE ' . implode('.', $parts) . ' AUTO_INCREMENT = ' . $table->autoIncrement;
+        return 'ALTER TABLE '.implode('.', $parts).' AUTO_INCREMENT = '.$table->autoIncrement;
     }
 }

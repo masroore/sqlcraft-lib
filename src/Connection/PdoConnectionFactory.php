@@ -8,12 +8,12 @@ use PDO;
 use PDOException;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Connection\PdoConnectionFactoryInterface;
+use SQLCraft\Contracts\Events\ConnectionEventDispatcherInterface;
 use SQLCraft\Contracts\Platform\PlatformInterface;
 use SQLCraft\Exceptions\ConnectionFailedException;
-use SQLCraft\Contracts\Events\ConnectionEventDispatcherInterface;
 use SQLCraft\Exceptions\OperationCancelledException;
-use SQLCraft\ValueObjects\ConnectionParameters;
 use SQLCraft\Support\SecretRedactor;
+use SQLCraft\ValueObjects\ConnectionParameters;
 
 /** @internal */
 final class PdoConnectionFactory implements PdoConnectionFactoryInterface
@@ -21,8 +21,7 @@ final class PdoConnectionFactory implements PdoConnectionFactoryInterface
     public function __construct(
         private readonly PdoExceptionTranslator $translator,
         private readonly ?ConnectionEventDispatcherInterface $events = null,
-    ) {
-    }
+    ) {}
 
     #[\Override]
     public function connect(

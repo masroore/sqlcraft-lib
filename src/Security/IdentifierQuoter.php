@@ -10,9 +10,7 @@ use SQLCraft\ValueObjects\QualifiedName;
 
 final readonly class IdentifierQuoter
 {
-    public function __construct(private QuotingInterface $platform)
-    {
-    }
+    public function __construct(private QuotingInterface $platform) {}
 
     public function quote(Identifier $identifier): string
     {

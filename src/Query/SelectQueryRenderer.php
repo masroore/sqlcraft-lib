@@ -11,15 +11,13 @@ use SQLCraft\ValueObjects\QualifiedName;
 
 final readonly class SelectQueryRenderer
 {
-    public function __construct(private PlatformInterface $platform)
-    {
-    }
+    public function __construct(private PlatformInterface $platform) {}
 
     /** @return array{sql: string, params: list<mixed>} */
     public function render(SelectQuery $query): array
     {
         $columns = $this->renderColumns($query->columns);
-        $sql = 'SELECT ' . ($query->distinct ? 'DISTINCT ' : '') . $columns . ' FROM ' . $this->quoteQualifiedName($query->table);
+        $sql = 'SELECT '.($query->distinct ? 'DISTINCT ' : '').$columns.' FROM '.$this->quoteQualifiedName($query->table);
         $params = [];
 
         if ($query->where !== []) {
@@ -33,14 +31,14 @@ final readonly class SelectQueryRenderer
                     $params[] = $value;
                 }
             }
-            $sql .= ' WHERE ' . implode(' AND ', $clauses);
+            $sql .= ' WHERE '.implode(' AND ', $clauses);
         }
 
         if ($query->groupBy !== []) {
-            $sql .= ' GROUP BY ' . implode(', ', array_map(fn (string $column): string => $this->platform->quoteIdentifier(new Identifier($column)), $query->groupBy));
+            $sql .= ' GROUP BY '.implode(', ', array_map(fn (string $column): string => $this->platform->quoteIdentifier(new Identifier($column)), $query->groupBy));
         }
         if ($query->orderBy !== []) {
-            $sql .= ' ORDER BY ' . implode(', ', array_map(fn (OrderByClause $clause): string => $this->platform->quoteIdentifier($clause->column) . ($clause->descending ? ' DESC' : ' ASC'), $query->orderBy));
+            $sql .= ' ORDER BY '.implode(', ', array_map(fn (OrderByClause $clause): string => $this->platform->quoteIdentifier($clause->column).($clause->descending ? ' DESC' : ' ASC'), $query->orderBy));
         }
         if ($query->limit !== null) {
             $sql = $this->platform->applyPagination($sql, $query->limit, $query->offset ?? 0);
@@ -61,19 +59,18 @@ final readonly class SelectQueryRenderer
             $column = $this->platform->quoteIdentifier($selection->column);
             if ($selection->aggregateFunction !== null) {
                 $aggregate = strtoupper($selection->aggregateFunction);
-                if (!in_array($aggregate, $allowedAggregates, true)) {
+                if (! in_array($aggregate, $allowedAggregates, true)) {
                     throw new InvalidArgumentException(sprintf('Unsupported aggregate function: %s', $aggregate));
                 }
-                $column = $aggregate . '(' . $column . ')';
+                $column = $aggregate.'('.$column.')';
             }
-            if ($selection->alias instanceof \SQLCraft\ValueObjects\Identifier) {
-                $column .= ' AS ' . $this->platform->quoteIdentifier($selection->alias);
+            if ($selection->alias instanceof Identifier) {
+                $column .= ' AS '.$this->platform->quoteIdentifier($selection->alias);
             }
 
             return $column;
         }, $columns));
     }
-
 
     private function quoteQualifiedName(QualifiedName $name): string
     {

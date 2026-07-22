@@ -16,8 +16,7 @@ final readonly class PrivilegeGuard implements SecurityGuardInterface
         private ConnectionInterface $connection,
         private PrivilegeInspectorInterface $inspector,
         private ?string $user = null,
-    ) {
-    }
+    ) {}
 
     #[\Override]
     public function can(string $action, QualifiedName $object): bool
@@ -34,7 +33,7 @@ final readonly class PrivilegeGuard implements SecurityGuardInterface
     #[\Override]
     public function require(string $action, QualifiedName $object): void
     {
-        if (!$this->can($action, $object)) {
+        if (! $this->can($action, $object)) {
             throw new InsufficientPrivilegesException(
                 sprintf('Privilege %s denied on %s.', $action, $object->object->name),
                 privilege: $action,

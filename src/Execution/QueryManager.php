@@ -8,6 +8,7 @@ use LogicException;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Connection\ResultInterface;
 use SQLCraft\Contracts\Execution\BatchExecutorInterface;
+use SQLCraft\Contracts\Execution\BatchStatementResult;
 use SQLCraft\Contracts\Execution\QueryExecutorInterface;
 use SQLCraft\Contracts\Execution\StatementBatch;
 use SQLCraft\Contracts\Execution\StatementSplitterInterface;
@@ -19,8 +20,7 @@ final readonly class QueryManager
         private QueryExecutorInterface $executor,
         private ?StatementSplitterInterface $splitter = null,
         private ?BatchExecutorInterface $batchExecutor = null,
-    ) {
-    }
+    ) {}
 
     /** @param array<string|int, mixed> $params */
     public function execute(ConnectionInterface $connection, string $sql, array $params = []): ExecutionResult
@@ -48,17 +48,17 @@ final readonly class QueryManager
 
     public function split(string $sql, string $delimiter = ';'): StatementBatch
     {
-        if (!$this->splitter instanceof StatementSplitterInterface) {
+        if (! $this->splitter instanceof StatementSplitterInterface) {
             throw new LogicException('No statement splitter configured.');
         }
 
         return $this->splitter->split($sql, $delimiter);
     }
 
-    /** @return \Generator<int, \SQLCraft\Contracts\Execution\BatchStatementResult> */
+    /** @return \Generator<int, BatchStatementResult> */
     public function executeBatch(ConnectionInterface $connection, StatementBatch $batch, bool $stopOnError = true): \Generator
     {
-        if (!$this->batchExecutor instanceof BatchExecutorInterface) {
+        if (! $this->batchExecutor instanceof BatchExecutorInterface) {
             throw new LogicException('No batch executor configured.');
         }
 

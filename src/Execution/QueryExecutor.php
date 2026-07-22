@@ -15,10 +15,10 @@ use SQLCraft\DTO\ExecutionResult;
 use SQLCraft\Events\AfterDdlExecuted;
 use SQLCraft\Events\AfterQueryExecuted;
 use SQLCraft\Events\BeforeDdlExecuted;
-use SQLCraft\Exceptions\OperationCancelledException;
 use SQLCraft\Events\BeforeQueryExecuted;
 use SQLCraft\Events\QueryFailedEvent;
 use SQLCraft\Events\SlowQueryDetectedEvent;
+use SQLCraft\Exceptions\OperationCancelledException;
 
 final readonly class QueryExecutor implements QueryExecutorInterface
 {
@@ -68,7 +68,7 @@ final readonly class QueryExecutor implements QueryExecutorInterface
         $startedAt = hrtime(true);
 
         try {
-            $result = $connection->query($sql, $params, streaming: !$buffered);
+            $result = $connection->query($sql, $params, streaming: ! $buffered);
             $this->record($connection, $sql, $startedAt, true);
             $execution = new ExecutionResult(
                 affectedRows: $connection->affectedRows(),
@@ -162,7 +162,7 @@ final readonly class QueryExecutor implements QueryExecutorInterface
 
     private function record(ConnectionInterface $connection, string $sql, int $startedAt, bool $success, ?string $errorMessage = null): void
     {
-        if (!$this->history instanceof QueryHistoryInterface) {
+        if (! $this->history instanceof QueryHistoryInterface) {
             return;
         }
 
@@ -170,7 +170,7 @@ final readonly class QueryExecutor implements QueryExecutorInterface
             database: $connection->getDatabaseName() ?? '',
             sql: $sql,
             elapsedMs: (hrtime(true) - $startedAt) / 1_000_000,
-            executedAt: new \DateTimeImmutable(),
+            executedAt: new \DateTimeImmutable,
             success: $success,
             errorMessage: $errorMessage,
         ));

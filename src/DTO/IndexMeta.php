@@ -9,7 +9,7 @@ use SQLCraft\ValueObjects\IndexType;
 final readonly class IndexMeta
 {
     /**
-     * @param list<IndexColumnMeta> $columns
+     * @param  list<IndexColumnMeta>  $columns
      */
     public function __construct(
         public string $name,
@@ -19,6 +19,5 @@ final readonly class IndexMeta
         public ?string $comment,
         public ?string $algorithm,
         public ?string $filterExpression,
-    ) {
-    }
+    ) {}
 }

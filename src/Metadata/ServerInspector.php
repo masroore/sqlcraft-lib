@@ -17,9 +17,7 @@ use SQLCraft\ValueObjects\Collation;
 /** @internal */
 final class ServerInspector implements ServerInspectorInterface
 {
-    public function __construct(private readonly MetadataFactoryInterface $factory)
-    {
-    }
+    public function __construct(private readonly MetadataFactoryInterface $factory) {}
 
     #[\Override]
     public function getServerInfo(ConnectionInterface $conn): ServerInfo
@@ -155,7 +153,7 @@ final class ServerInspector implements ServerInspectorInterface
     }
 
     /**
-     * @param array<string, bool|float|int|string|null> $row
+     * @param  array<string, bool|float|int|string|null>  $row
      * @return array<string, bool|float|int|string|null>
      */
     private function normalizeRow(array $row): array

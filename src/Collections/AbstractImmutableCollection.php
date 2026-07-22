@@ -13,25 +13,25 @@ use Traversable;
 
 /**
  * @template T of object
+ *
  * @psalm-consistent-constructor
+ *
  * @implements IteratorAggregate<int|string, T>
  * @implements ArrayAccess<int|string, T>
  */
-abstract class AbstractImmutableCollection implements IteratorAggregate, Countable, ArrayAccess
+abstract class AbstractImmutableCollection implements ArrayAccess, Countable, IteratorAggregate
 {
     /**
-     * @param array<int|string, T> $items
+     * @param  array<int|string, T>  $items
      */
-    final public function __construct(protected readonly array $items)
-    {
-    }
+    final public function __construct(protected readonly array $items) {}
 
     /**
      * @return T
      */
     public function get(int|string $key): object
     {
-        if (!array_key_exists($key, $this->items)) {
+        if (! array_key_exists($key, $this->items)) {
             throw new OutOfBoundsException(sprintf('Collection key not found: %s', (string) $key));
         }
 
@@ -39,11 +39,13 @@ abstract class AbstractImmutableCollection implements IteratorAggregate, Countab
     }
 
     /**
-     * @param \Closure(T): bool $predicate
+     * @param  \Closure(T): bool  $predicate
+     *
      * @psalm-return static
      */
     /**
-     * @param array<int|string, T> $items
+     * @param  array<int|string, T>  $items
+     *
      * @psalm-return static
      */
     abstract protected function create(array $items): static;
@@ -63,7 +65,8 @@ abstract class AbstractImmutableCollection implements IteratorAggregate, Countab
 
     /**
      * @template U
-     * @param \Closure(T): U $mapper
+     *
+     * @param  \Closure(T): U  $mapper
      * @return list<U>
      */
     public function map(\Closure $mapper): array
@@ -100,7 +103,7 @@ abstract class AbstractImmutableCollection implements IteratorAggregate, Countab
     }
 
     /**
-     * @param int|string $offset
+     * @param  int|string  $offset
      * @return T
      */
     #[\Override]
@@ -123,5 +126,4 @@ abstract class AbstractImmutableCollection implements IteratorAggregate, Countab
     {
         throw new LogicException('Immutable collections cannot be modified.');
     }
-
 }

@@ -12,9 +12,7 @@ use SQLCraft\ValueObjects\QualifiedName;
 /** @internal */
 final class IndexInspector implements IndexInspectorInterface
 {
-    public function __construct(private readonly MetadataFactoryInterface $factory)
-    {
-    }
+    public function __construct(private readonly MetadataFactoryInterface $factory) {}
 
     #[\Override]
     public function getIndexes(ConnectionInterface $conn, QualifiedName $table): IndexCollection

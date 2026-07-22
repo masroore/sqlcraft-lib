@@ -14,11 +14,11 @@ use SQLCraft\DTO\ProcessMeta;
 use SQLCraft\DTO\RoutineMeta;
 use SQLCraft\DTO\SchemaMeta;
 use SQLCraft\DTO\SequenceMeta;
-use SQLCraft\ValueObjects\DataType;
 use SQLCraft\DTO\TableStatus;
 use SQLCraft\DTO\TriggerMeta;
 use SQLCraft\DTO\UserMeta;
 use SQLCraft\DTO\ViewMeta;
+use SQLCraft\ValueObjects\DataType;
 
 /**
  * Converts one platform-specific metadata row into a typed snapshot.

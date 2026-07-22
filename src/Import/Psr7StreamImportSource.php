@@ -12,7 +12,7 @@ final readonly class Psr7StreamImportSource implements ImportSourceInterface
     public function __construct(private object $stream)
     {
         foreach (['rewind', 'read', 'eof'] as $method) {
-            if (!method_exists($stream, $method)) {
+            if (! method_exists($stream, $method)) {
                 throw new InvalidArgumentException('PSR-7 stream is missing '.$method.'().');
             }
         }
@@ -26,34 +26,37 @@ final readonly class Psr7StreamImportSource implements ImportSourceInterface
         if ($target === false) {
             throw new \RuntimeException('Unable to allocate import stream.');
         }
-        while (!(bool) $this->call('eof')) {
+        while (! (bool) $this->call('eof')) {
             $chunk = $this->call('read', 8192);
-            if (!is_string($chunk) || $chunk === '') {
+            if (! is_string($chunk) || $chunk === '') {
                 break;
             }
             fwrite($target, $chunk);
         }
         rewind($target);
+
         return $target;
     }
 
     private function call(string $method, mixed ...$arguments): mixed
     {
         $callable = [$this->stream, $method];
-        if (!is_callable($callable)) {
+        if (! is_callable($callable)) {
             throw new InvalidArgumentException('PSR-7 stream method is not callable.');
         }
+
         return $callable(...$arguments);
     }
 
     #[\Override]
     public function getEstimatedSize(): ?int
     {
-        if (!method_exists($this->stream, 'getSize')) {
+        if (! method_exists($this->stream, 'getSize')) {
             return null;
         }
         /** @psalm-suppress MixedAssignment */
         $size = $this->call('getSize');
+
         return is_int($size) ? $size : null;
     }
 }

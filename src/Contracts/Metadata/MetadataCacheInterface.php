@@ -8,7 +8,8 @@ interface MetadataCacheInterface
 {
     /**
      * @template T
-     * @param callable(): T $loader
+     *
+     * @param  callable(): T  $loader
      * @return T
      */
     public function remember(string $key, callable $loader, int $ttl = 0): mixed;

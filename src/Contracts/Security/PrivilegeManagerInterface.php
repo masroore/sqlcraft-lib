@@ -10,5 +10,6 @@ use SQLCraft\ValueObjects\QualifiedName;
 interface PrivilegeManagerInterface
 {
     public function grant(Privilege $privilege, QualifiedName $object, string $grantee): void;
+
     public function revoke(Privilege $privilege, QualifiedName $object, string $grantee): void;
 }

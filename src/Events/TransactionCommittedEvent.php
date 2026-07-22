@@ -12,6 +12,5 @@ final readonly class TransactionCommittedEvent extends ObservabilityEvent
         public ConnectionInterface $connection,
         public ?string $savepoint,
         public float $elapsedMs,
-    ) {
-    }
+    ) {}
 }

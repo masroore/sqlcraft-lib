@@ -4,18 +4,16 @@ declare(strict_types=1);
 
 namespace SQLCraft\DDL;
 
-use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\DDL\DdlBuilderInterface;
+use SQLCraft\Contracts\DDL\ObjectNameAwareDdlBuilderInterface;
 use SQLCraft\Contracts\Platform\DdlDialectInterface;
 use SQLCraft\ValueObjects\Identifier;
 
-final readonly class DropSchemaBuilder implements DdlBuilderInterface, \SQLCraft\Contracts\DDL\ObjectNameAwareDdlBuilderInterface
+final readonly class DropSchemaBuilder implements DdlBuilderInterface, ObjectNameAwareDdlBuilderInterface
 {
     use LegacyDdlExecution;
 
-    public function __construct(public Identifier $name, public bool $ifExists = false, public bool $cascade = false)
-    {
-    }
+    public function __construct(public Identifier $name, public bool $ifExists = false, public bool $cascade = false) {}
 
     /** @return list<string> */
     #[\Override]
@@ -24,15 +22,9 @@ final readonly class DropSchemaBuilder implements DdlBuilderInterface, \SQLCraft
         return [$dialect->renderDropSchemaStatement($this->name, $this->ifExists, $this->cascade)];
     }
 
-
     #[\Override]
     public function getObjectName(): string
     {
         return $this->name->name;
     }
-
-
-
-
-
 }

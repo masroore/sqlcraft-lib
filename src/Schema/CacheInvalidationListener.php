@@ -11,13 +11,11 @@ use SQLCraft\Events\SchemaChangedEvent;
 /** Invalidates metadata affected by schema mutations. */
 final readonly class CacheInvalidationListener
 {
-    public function __construct(private MetadataCacheInterface $cache)
-    {
-    }
+    public function __construct(private MetadataCacheInterface $cache) {}
 
     public function __invoke(object $event): void
     {
-        if (!$event instanceof AfterDdlExecuted && !$event instanceof SchemaChangedEvent) {
+        if (! $event instanceof AfterDdlExecuted && ! $event instanceof SchemaChangedEvent) {
             return;
         }
 
@@ -42,6 +40,6 @@ final readonly class CacheInvalidationListener
     {
         $parts = explode('.', $name);
 
-        return trim(end($parts), "`[]\"");
+        return trim(end($parts), '`[]"');
     }
 }

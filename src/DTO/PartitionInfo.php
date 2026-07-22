@@ -13,6 +13,5 @@ final readonly class PartitionInfo
         public ?string $expression,
         public ?string $parentTable,
         public ?string $bound,
-    ) {
-    }
+    ) {}
 }

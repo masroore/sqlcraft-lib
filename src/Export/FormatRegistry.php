@@ -11,12 +11,13 @@ final class FormatRegistry
 {
     /** @var array<string, FormatWriterInterface> */
     private array $writers = [];
+
     /** @var array<string, FormatReaderInterface> */
     private array $readers = [];
 
     /**
-     * @param iterable<FormatWriterInterface> $writers
-     * @param iterable<FormatReaderInterface> $readers
+     * @param  iterable<FormatWriterInterface>  $writers
+     * @param  iterable<FormatReaderInterface>  $readers
      */
     public function __construct(iterable $writers = [], iterable $readers = [])
     {

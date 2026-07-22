@@ -6,13 +6,13 @@ namespace SQLCraft\Import;
 
 use InvalidArgumentException;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
+use SQLCraft\Contracts\Events\ImportExportEventDispatcherInterface;
 use SQLCraft\Contracts\Execution\BatchExecutorInterface;
 use SQLCraft\Contracts\Execution\StatementBatch;
 use SQLCraft\Contracts\Execution\StatementSplitterInterface;
 use SQLCraft\Contracts\Execution\StreamingStatementSplitterInterface;
-use SQLCraft\Contracts\Events\ImportExportEventDispatcherInterface;
-use SQLCraft\Contracts\Import\ImportSourceInterface;
 use SQLCraft\Contracts\Import\ImporterInterface;
+use SQLCraft\Contracts\Import\ImportSourceInterface;
 
 final readonly class Importer implements ImporterInterface
 {
@@ -22,8 +22,7 @@ final readonly class Importer implements ImporterInterface
         private StatementSplitterInterface $splitter,
         private BatchExecutorInterface $batchExecutor,
         private ?ImportExportEventDispatcherInterface $events = null,
-    ) {
-    }
+    ) {}
 
     #[\Override]
     public function import(
@@ -32,7 +31,7 @@ final readonly class Importer implements ImporterInterface
         ImportOptions $options,
     ): ImportResult {
         $stream = $source->openStream();
-        if (!is_resource($stream)) {
+        if (! is_resource($stream)) {
             throw new InvalidArgumentException('Import source must provide an open stream resource.');
         }
 
@@ -78,7 +77,7 @@ final readonly class Importer implements ImporterInterface
                 $batch = [];
             }
 
-            if ($batch !== [] && !$this->reachedMaximum($executed, $skipped, $options)) {
+            if ($batch !== [] && ! $this->reachedMaximum($executed, $skipped, $options)) {
                 /** @var list<string> $batchForExecution */
                 $batchForExecution = $batch;
                 [$executed, $skipped, $errors] = $this->executeBatch(
@@ -114,8 +113,8 @@ final readonly class Importer implements ImporterInterface
     }
 
     /**
-     * @param list<string> $statements
-     * @param list<ImportError> $errors
+     * @param  list<string>  $statements
+     * @param  list<ImportError>  $errors
      * @return array{0: int, 1: int, 2: list<ImportError>}
      */
     private function executeBatch(
@@ -148,6 +147,7 @@ final readonly class Importer implements ImporterInterface
                     errorCode: (int) $result->error->getCode(),
                 );
                 $skipped++;
+
                 continue;
             }
 
@@ -161,7 +161,7 @@ final readonly class Importer implements ImporterInterface
     }
 
     /**
-     * @param resource $stream
+     * @param  resource  $stream
      * @return iterable<string>
      */
     private function statements($stream): iterable
@@ -170,6 +170,7 @@ final readonly class Importer implements ImporterInterface
             $statements = $this->splitter->splitStream($stream);
             /** @var \Generator<int, string> $statements */
             yield from $statements;
+
             return;
         }
 
@@ -183,5 +184,4 @@ final readonly class Importer implements ImporterInterface
     {
         return $options->maxStatements !== null && $executed + $skipped >= $options->maxStatements;
     }
-
 }

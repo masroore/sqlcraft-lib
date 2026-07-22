@@ -16,6 +16,5 @@ final readonly class TriggerMeta
         public string $body,
         public ?string $definer,
         public ?string $table,
-    ) {
-    }
+    ) {}
 }

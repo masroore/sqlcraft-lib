@@ -32,7 +32,7 @@ final readonly class StatementSplitter implements StatementSplitterInterface, St
     }
 
     /**
-     * @param resource $stream
+     * @param  resource  $stream
      * @return \Generator<int, string, void, void>
      */
     #[\Override]
@@ -46,7 +46,7 @@ final readonly class StatementSplitter implements StatementSplitterInterface, St
     }
 
     /**
-     * @param resource $stream
+     * @param  resource  $stream
      * @return \Generator<int, string, void, void>
      */
     private function stream($stream, string $initialDelimiter): \Generator
@@ -58,12 +58,13 @@ final readonly class StatementSplitter implements StatementSplitterInterface, St
         $blockComment = false;
 
         while (($line = fgets($stream)) !== false) {
-            if (!$lineComment && !$blockComment && $quote === null
+            if (! $lineComment && ! $blockComment && $quote === null
                 && preg_match('/^\s*DELIMITER\s+(\S+)\s*(?:\r?\n)?$/i', $line, $matches) === 1
             ) {
                 yield from $this->flush($buffer);
                 $buffer = '';
                 $delimiter = $matches[1];
+
                 continue;
             }
 
@@ -77,6 +78,7 @@ final readonly class StatementSplitter implements StatementSplitterInterface, St
                     if ($character === "\n") {
                         $lineComment = false;
                     }
+
                     continue;
                 }
 
@@ -87,6 +89,7 @@ final readonly class StatementSplitter implements StatementSplitterInterface, St
                         $index++;
                         $blockComment = false;
                     }
+
                     continue;
                 }
 
@@ -95,16 +98,19 @@ final readonly class StatementSplitter implements StatementSplitterInterface, St
                     if ($character === '\\' && $next !== null) {
                         $buffer .= $next;
                         $index++;
+
                         continue;
                     }
                     if ($character === $quote) {
                         if ($next === $quote) {
                             $buffer .= $next;
                             $index++;
+
                             continue;
                         }
                         $quote = null;
                     }
+
                     continue;
                 }
 
@@ -115,6 +121,7 @@ final readonly class StatementSplitter implements StatementSplitterInterface, St
                         $index++;
                     }
                     $lineComment = true;
+
                     continue;
                 }
 
@@ -122,12 +129,14 @@ final readonly class StatementSplitter implements StatementSplitterInterface, St
                     $buffer .= '/*';
                     $index++;
                     $blockComment = true;
+
                     continue;
                 }
 
                 if (in_array($character, ["'", '"', '`'], true)) {
                     $quote = $character;
                     $buffer .= $character;
+
                     continue;
                 }
 
@@ -135,6 +144,7 @@ final readonly class StatementSplitter implements StatementSplitterInterface, St
                     yield from $this->flush($buffer);
                     $buffer = '';
                     $index += strlen($delimiter) - 1;
+
                     continue;
                 }
 

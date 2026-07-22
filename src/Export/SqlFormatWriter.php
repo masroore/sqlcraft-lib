@@ -13,9 +13,7 @@ use SQLCraft\DTO\TableStatus;
 
 final class SqlFormatWriter implements FormatWriterInterface
 {
-    public function __construct(private readonly ConnectionInterface $connection)
-    {
-    }
+    public function __construct(private readonly ConnectionInterface $connection) {}
 
     #[\Override]
     public function getFormatName(): string
@@ -33,7 +31,7 @@ final class SqlFormatWriter implements FormatWriterInterface
     public function writeTableHeader(SinkInterface $sink, TableStatus $table, DumpOptions $options): void
     {
         $kind = $table->isView ? 'View' : 'Table';
-        $sink->write('-- ' . $kind . ': ' . $table->name . "\n");
+        $sink->write('-- '.$kind.': '.$table->name."\n");
 
         if ($options->tableStyle !== TableSectionStyle::DropCreate) {
             return;
@@ -41,7 +39,7 @@ final class SqlFormatWriter implements FormatWriterInterface
 
         $object = $this->quoteTable($table);
         $type = $table->isView ? 'VIEW' : 'TABLE';
-        $sink->write('DROP ' . $type . ' IF EXISTS ' . $object . ";\n");
+        $sink->write('DROP '.$type.' IF EXISTS '.$object.";\n");
     }
 
     /** @param list<string> $ddlStatements */
@@ -54,13 +52,13 @@ final class SqlFormatWriter implements FormatWriterInterface
                 continue;
             }
 
-            $sink->write(rtrim($statement, ';') . ";\n");
+            $sink->write(rtrim($statement, ';').";\n");
         }
     }
 
     /**
-     * @param list<array<string, mixed>> $rows
-     * @param list<ColumnMeta> $columns
+     * @param  list<array<string, mixed>>  $rows
+     * @param  list<ColumnMeta>  $columns
      */
     #[\Override]
     public function writeRows(
@@ -80,13 +78,13 @@ final class SqlFormatWriter implements FormatWriterInterface
         }
         $values = [];
         foreach ($rows as $row) {
-            $values[] = '(' . implode(', ', $this->renderRow($row, $columns)) . ')';
+            $values[] = '('.implode(', ', $this->renderRow($row, $columns)).')';
         }
 
         $sink->write(
-            'INSERT INTO ' . $this->quoteTable($table)
-            . ' (' . implode(', ', $columnNames) . ') VALUES '
-            . implode(', ', $values) . ";\n",
+            'INSERT INTO '.$this->quoteTable($table)
+            .' ('.implode(', ', $columnNames).') VALUES '
+            .implode(', ', $values).";\n",
         );
     }
 
@@ -103,8 +101,8 @@ final class SqlFormatWriter implements FormatWriterInterface
     }
 
     /**
-     * @param array<string, mixed> $row
-     * @param list<ColumnMeta> $columns
+     * @param  array<string, mixed>  $row
+     * @param  list<ColumnMeta>  $columns
      * @return list<string>
      */
     private function renderRow(array $row, array $columns): array
@@ -124,7 +122,7 @@ final class SqlFormatWriter implements FormatWriterInterface
         }
 
         if ($this->isBinary($column)) {
-            if (!is_string($value)) {
+            if (! is_string($value)) {
                 throw new InvalidArgumentException('Binary column values must be strings.');
             }
 

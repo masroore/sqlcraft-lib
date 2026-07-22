@@ -10,9 +10,7 @@ use SQLCraft\ValueObjects\Credential;
 final readonly class ArrayCredentialProvider implements CredentialProviderInterface
 {
     /** @param array<string, Credential> $credentials */
-    public function __construct(private array $credentials)
-    {
-    }
+    public function __construct(private array $credentials) {}
 
     #[\Override]
     public function resolve(string $key): Credential

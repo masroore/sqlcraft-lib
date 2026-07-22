@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SQLCraft\Query;
 
+use SQLCraft\Contracts\Platform\PlatformInterface;
 use SQLCraft\Contracts\Query\QueryBuilderInterface;
 use SQLCraft\Import\UpsertMode;
 use SQLCraft\ValueObjects\QualifiedName;
@@ -18,8 +19,7 @@ final readonly class InsertQuery implements QueryBuilderInterface
         public array $rows = [],
         public ?string $selectSql = null,
         public UpsertMode $upsertMode = UpsertMode::Insert,
-    ) {
-    }
+    ) {}
 
     /** @param array<string, mixed> $row */
     public static function fromRow(QualifiedName $table, array $row, UpsertMode $mode = UpsertMode::Insert): self
@@ -33,23 +33,32 @@ final readonly class InsertQuery implements QueryBuilderInterface
         return new self($this->table, $this->columns, [...$this->rows, $row], $this->selectSql, $this->upsertMode);
     }
 
-    #[\Override] public function from(QualifiedName $table): static
+    #[\Override]
+    public function from(QualifiedName $table): static
     {
         return new self($table, $this->columns, $this->rows, $this->selectSql, $this->upsertMode);
     }
-    #[\Override] public function where(WhereCondition ...$conditions): static
+
+    #[\Override]
+    public function where(WhereCondition ...$conditions): static
     {
         return $this;
     }
-    #[\Override] public function orderBy(OrderByClause ...$clauses): static
+
+    #[\Override]
+    public function orderBy(OrderByClause ...$clauses): static
     {
         return $this;
     }
-    #[\Override] public function paginate(PaginationParams $params): static
+
+    #[\Override]
+    public function paginate(PaginationParams $params): static
     {
         return $this;
     }
-    #[\Override] public function toSql(\SQLCraft\Contracts\Platform\PlatformInterface $platform): array
+
+    #[\Override]
+    public function toSql(PlatformInterface $platform): array
     {
         return (new InsertQueryRenderer($platform))->render($this);
     }

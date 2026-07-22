@@ -20,8 +20,8 @@ interface FormatWriterInterface
     public function writeTableDdl(SinkInterface $sink, TableStatus $table, array $ddlStatements): void;
 
     /**
-     * @param list<array<string, mixed>> $rows
-     * @param list<ColumnMeta> $columns
+     * @param  list<array<string, mixed>>  $rows
+     * @param  list<ColumnMeta>  $columns
      */
     public function writeRows(
         SinkInterface $sink,

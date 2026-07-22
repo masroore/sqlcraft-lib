@@ -7,7 +7,7 @@ namespace SQLCraft\Contracts\Connection;
 /**
  * @extends \IteratorAggregate<int, array<string, mixed>>
  */
-interface ResultInterface extends \IteratorAggregate, \Countable
+interface ResultInterface extends \Countable, \IteratorAggregate
 {
     /** @return array<string, mixed>|null */
     public function fetchAssoc(): ?array;

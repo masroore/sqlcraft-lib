@@ -9,7 +9,7 @@ use IteratorAggregate;
 use Traversable;
 
 /** @implements IteratorAggregate<int|string, object> */
-final class LazyCollection implements IteratorAggregate, Countable
+final class LazyCollection implements Countable, IteratorAggregate
 {
     /** @var \Closure(): iterable<int|string, object> */
     private readonly \Closure $producer;

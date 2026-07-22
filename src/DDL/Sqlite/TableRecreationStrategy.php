@@ -5,12 +5,16 @@ declare(strict_types=1);
 namespace SQLCraft\DDL\Sqlite;
 
 use SQLCraft\Contracts\Connection\ConnectionInterface;
+use SQLCraft\Contracts\DDL\CheckConstraintDefinitionInterface;
+use SQLCraft\Contracts\DDL\ColumnDefinitionInterface;
 use SQLCraft\Contracts\DDL\DdlBuilderInterface;
+use SQLCraft\Contracts\DDL\ForeignKeyDefinitionInterface;
+use SQLCraft\Contracts\DDL\IndexDefinitionInterface;
 use SQLCraft\Contracts\DDL\ObjectNameAwareDdlBuilderInterface;
 use SQLCraft\Contracts\DDL\TableRecreationDefinitionInterface;
 use SQLCraft\Contracts\DDL\TableRecreationMetadataProviderInterface;
-use SQLCraft\Contracts\Execution\TransactionManagerInterface;
 use SQLCraft\Contracts\Execution\QueryExecutorInterface;
+use SQLCraft\Contracts\Execution\TransactionManagerInterface;
 use SQLCraft\DDL\AlterTableBuilder;
 use SQLCraft\DDL\CreateIndexBuilder;
 use SQLCraft\DDL\CreateTableBuilder;
@@ -29,8 +33,7 @@ final readonly class TableRecreationStrategy
         private TransactionManagerInterface $transactions,
         private TableRecreationMetadataProviderInterface $metadata,
         private ?QueryExecutorInterface $executor = null,
-    ) {
-    }
+    ) {}
 
     public function execute(ConnectionInterface $connection, AlterTableBuilder $builder): void
     {
@@ -49,23 +52,23 @@ final readonly class TableRecreationStrategy
             ));
 
             $columns = array_map(
-                static fn (\SQLCraft\Contracts\DDL\ColumnDefinitionInterface $column): string => $connection->quoteIdentifier($column->getName()),
+                static fn (ColumnDefinitionInterface $column): string => $connection->quoteIdentifier($column->getName()),
                 $final->getColumns(),
             );
             $columnList = implode(', ', $columns);
             $this->executeSql(
                 $connection,
-                'INSERT INTO ' . $connection->quoteIdentifier($temporary->object->name)
-                . ' (' . $columnList . ') SELECT ' . $columnList
-                . ' FROM ' . $connection->quoteIdentifier($original->object->name),
+                'INSERT INTO '.$connection->quoteIdentifier($temporary->object->name)
+                .' ('.$columnList.') SELECT '.$columnList
+                .' FROM '.$connection->quoteIdentifier($original->object->name),
                 $original->object->name,
             );
 
             $this->executeBuilder($connection, new DropTableBuilder($original));
             $this->executeSql(
                 $connection,
-                'ALTER TABLE ' . $connection->quoteIdentifier($temporary->object->name)
-                . ' RENAME TO ' . $connection->quoteIdentifier($original->object->name),
+                'ALTER TABLE '.$connection->quoteIdentifier($temporary->object->name)
+                .' RENAME TO '.$connection->quoteIdentifier($original->object->name),
                 $original->object->name,
             );
 
@@ -113,7 +116,7 @@ final readonly class TableRecreationStrategy
 
     private function temporaryName(QualifiedName $original): Identifier
     {
-        return new Identifier('_sqlcraft_recreate_' . $original->object->name . '_' . bin2hex(random_bytes(4)));
+        return new Identifier('_sqlcraft_recreate_'.$original->object->name.'_'.bin2hex(random_bytes(4)));
     }
 
     private function finalDefinition(TableRecreationDefinitionInterface $definition, AlterTableBuilder $builder): TableRecreationDefinition
@@ -126,7 +129,7 @@ final readonly class TableRecreationStrategy
         }
 
         $columns = array_values(array_filter(array_map(
-            static function (\SQLCraft\Contracts\DDL\ColumnDefinitionInterface $column) use ($dropColumns, $modifications) {
+            static function (ColumnDefinitionInterface $column) use ($dropColumns, $modifications) {
                 if (isset($dropColumns[$column->getName()])) {
                     return null;
                 }
@@ -142,7 +145,7 @@ final readonly class TableRecreationStrategy
         $dropIndexes = array_fill_keys(array_map(static fn (Identifier $index): string => $index->name, $builder->getDropIndexes()), true);
         $indexes = array_values(array_filter(
             $definition->getIndexes(),
-            static fn (\SQLCraft\Contracts\DDL\IndexDefinitionInterface $index): bool => !isset($dropIndexes[$index->getName()]),
+            static fn (IndexDefinitionInterface $index): bool => ! isset($dropIndexes[$index->getName()]),
         ));
         foreach ($builder->getAddIndexes() as $index) {
             $indexes[] = $index;
@@ -151,7 +154,7 @@ final readonly class TableRecreationStrategy
         $dropForeignKeys = array_fill_keys(array_map(static fn (Identifier $key): string => $key->name, $builder->getDropForeignKeys()), true);
         $foreignKeys = array_values(array_filter(
             $definition->getForeignKeys(),
-            static fn (\SQLCraft\Contracts\DDL\ForeignKeyDefinitionInterface $key): bool => !isset($dropForeignKeys[$key->getConstraintName()]),
+            static fn (ForeignKeyDefinitionInterface $key): bool => ! isset($dropForeignKeys[$key->getConstraintName()]),
         ));
         foreach ($builder->getAddForeignKeys() as $key) {
             $foreignKeys[] = $key;
@@ -160,7 +163,7 @@ final readonly class TableRecreationStrategy
         $dropChecks = array_fill_keys(array_map(static fn (Identifier $key): string => $key->name, $builder->getDropCheckConstraints()), true);
         $checks = array_values(array_filter(
             $definition->getCheckConstraints(),
-            static fn (\SQLCraft\Contracts\DDL\CheckConstraintDefinitionInterface $check): bool => !isset($dropChecks[$check->getName()]),
+            static fn (CheckConstraintDefinitionInterface $check): bool => ! isset($dropChecks[$check->getName()]),
         ));
         foreach ($builder->getAddCheckConstraints() as $check) {
             $checks[] = $check;
@@ -177,5 +180,4 @@ final readonly class TableRecreationStrategy
 
         return $builder::class;
     }
-
 }

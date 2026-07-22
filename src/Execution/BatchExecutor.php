@@ -6,10 +6,12 @@ namespace SQLCraft\Execution;
 
 use InvalidArgumentException;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
+use SQLCraft\Contracts\Connection\ResultInterface;
 use SQLCraft\Contracts\Execution\BatchExecutorInterface;
 use SQLCraft\Contracts\Execution\BatchStatementResult;
-use SQLCraft\Contracts\Execution\StatementBatch;
 use SQLCraft\Contracts\Execution\QueryExecutorInterface;
+use SQLCraft\Contracts\Execution\StatementBatch;
+use SQLCraft\Exceptions\QueryTimeoutException;
 
 final readonly class BatchExecutor implements BatchExecutorInterface
 {
@@ -38,15 +40,17 @@ final readonly class BatchExecutor implements BatchExecutorInterface
             try {
                 if ($timeoutMs > 0) {
                     $rows = $this->executor->queryWithTimeout($connection, $sql, timeoutMs: $timeoutMs);
-                    if (!$rows instanceof \SQLCraft\Contracts\Connection\ResultInterface) {
-                        throw new \SQLCraft\Exceptions\QueryTimeoutException('Statement timeout is not supported by this platform.', $sql);
+                    if (! $rows instanceof ResultInterface) {
+                        throw new QueryTimeoutException('Statement timeout is not supported by this platform.', $sql);
                     }
                     yield new BatchStatementResult($index, $sql, null, $rows, $this->elapsedMs($startedAt), null);
+
                     continue;
                 }
                 if ($this->isQuery($sql)) {
                     $rows = $this->executor->query($connection, $sql);
                     yield new BatchStatementResult($index, $sql, null, $rows, $this->elapsedMs($startedAt), null);
+
                     continue;
                 }
 

@@ -14,9 +14,9 @@ use SQLCraft\DTO\CheckConstraintMeta;
 use SQLCraft\DTO\ColumnMeta;
 use SQLCraft\DTO\ForeignKeyMeta;
 use SQLCraft\DTO\IndexMeta;
+use SQLCraft\ValueObjects\DataType;
 use SQLCraft\ValueObjects\Identifier;
 use SQLCraft\ValueObjects\QualifiedName;
-use SQLCraft\ValueObjects\DataType;
 use SQLCraft\ValueObjects\TriggerEvent;
 use SQLCraft\ValueObjects\TriggerTiming;
 
@@ -71,6 +71,7 @@ interface DdlDialectInterface
     public function renderDropSequenceStatement(Identifier $name, bool $ifExists): string;
 
     public function renderCreateDatabaseStatement(Identifier $name, ?string $charset, ?string $collation, bool $ifNotExists): string;
+
     public function renderAlterDatabaseStatement(Identifier $name, ?string $charset, ?string $collation): string;
 
     public function renderCopyTableStatement(QualifiedName $source, QualifiedName $target, bool $includeData): string;
@@ -89,7 +90,6 @@ interface DdlDialectInterface
         bool $deterministic,
     ): string;
 
-
     public function renderDropDatabaseStatement(Identifier $name, bool $ifExists): string;
 
     public function renderCreateSchemaStatement(Identifier $name, ?string $authorization, bool $ifNotExists): string;
@@ -97,7 +97,6 @@ interface DdlDialectInterface
     public function renderDropSchemaStatement(Identifier $name, bool $ifExists, bool $cascade): string;
 
     public function renderUseDatabaseStatement(Identifier $database): string;
-
 
     public function renderDdlColumnDefinition(ColumnDefinitionInterface $column): string;
 
@@ -116,9 +115,9 @@ interface DdlDialectInterface
     public function renderCheckConstraintClause(CheckConstraintMeta $check): string;
 
     /**
-     * @param list<string> $columnClauses
-     * @param list<string> $constraintClauses
-     * @param array<string, scalar|null> $tableOptions
+     * @param  list<string>  $columnClauses
+     * @param  list<string>  $constraintClauses
+     * @param  array<string, scalar|null>  $tableOptions
      */
     public function renderCreateTableStatement(
         QualifiedName $table,

@@ -6,13 +6,13 @@ namespace SQLCraft\Platform;
 
 use SQLCraft\Capabilities\Capability;
 use SQLCraft\Capabilities\CapabilityNotSupportedException;
-use SQLCraft\Capabilities\CapabilitySet;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
-use SQLCraft\Contracts\Platform\PlatformInterface;
 use SQLCraft\DTO\CheckConstraintMeta;
 use SQLCraft\DTO\ColumnMeta;
 use SQLCraft\DTO\ForeignKeyMeta;
+use SQLCraft\DTO\IndexColumnMeta;
 use SQLCraft\DTO\IndexMeta;
+use SQLCraft\ValueObjects\DataType;
 use SQLCraft\ValueObjects\Identifier;
 use SQLCraft\ValueObjects\QualifiedName;
 use SQLCraft\ValueObjects\ServerVersion;
@@ -23,7 +23,7 @@ final class SqlitePlatform extends AbstractPlatform
     #[\Override]
     public function getExplainSql(string $sql, bool $analyze = false): string
     {
-        return 'EXPLAIN QUERY PLAN ' . $sql;
+        return 'EXPLAIN QUERY PLAN '.$sql;
     }
 
     #[\Override]
@@ -50,7 +50,7 @@ final class SqlitePlatform extends AbstractPlatform
     }
 
     /**
-     * @return array{always: list<\SQLCraft\Capabilities\Capability>, versioned: list<array{0: \SQLCraft\Capabilities\Capability, 1: array{0: int, 1: int, 2: int}}>}
+     * @return array{always: list<Capability>, versioned: list<array{0: Capability, 1: array{0: int, 1: int, 2: int}}>}
      */
     #[\Override]
     protected function buildCapabilityMatrix(): array
@@ -109,7 +109,7 @@ final class SqlitePlatform extends AbstractPlatform
     #[\Override]
     public function quoteIdentifier(Identifier $identifier): string
     {
-        return '"' . str_replace('"', '""', $identifier->name) . '"';
+        return '"'.str_replace('"', '""', $identifier->name).'"';
     }
 
     #[\Override]
@@ -119,7 +119,7 @@ final class SqlitePlatform extends AbstractPlatform
             $value === null => 'NULL',
             is_bool($value) => $value ? '1' : '0',
             is_int($value), is_float($value) => (string) $value,
-            is_string($value) => "'" . str_replace("'", "''", $value) . "'",
+            is_string($value) => "'".str_replace("'", "''", $value)."'",
             default => throw new \InvalidArgumentException('SQLite values must be scalar or null.'),
         };
     }
@@ -127,7 +127,7 @@ final class SqlitePlatform extends AbstractPlatform
     #[\Override]
     public function quoteBinary(string $bytes): string
     {
-        return "X'" . bin2hex($bytes) . "'";
+        return "X'".bin2hex($bytes)."'";
     }
 
     #[\Override]
@@ -149,13 +149,13 @@ final class SqlitePlatform extends AbstractPlatform
             throw new \InvalidArgumentException('Pagination values must not be negative.');
         }
 
-        return $sql . ' LIMIT ' . $limit . ' OFFSET ' . $offset;
+        return $sql.' LIMIT '.$limit.' OFFSET '.$offset;
     }
 
     #[\Override]
     public function applySingleRowLimit(string $sql, string $whereClause): string
     {
-        return $sql . ($whereClause === '' ? '' : ' ' . $whereClause) . ' LIMIT 1';
+        return $sql.($whereClause === '' ? '' : ' '.$whereClause).' LIMIT 1';
     }
 
     #[\Override]
@@ -195,40 +195,41 @@ final class SqlitePlatform extends AbstractPlatform
     #[\Override]
     public function renderColumnDefinition(ColumnMeta $column): string
     {
-        $definition = $this->quoteIdentifier(new Identifier($column->name)) . ' ' . $column->dataType->name;
+        $definition = $this->quoteIdentifier(new Identifier($column->name)).' '.$column->dataType->name;
         if ($column->primary) {
             $definition .= ' PRIMARY KEY';
         }
-        if (!$column->nullable) {
+        if (! $column->nullable) {
             $definition .= ' NOT NULL';
         }
         if ($column->autoIncrement) {
             $definition .= ' AUTOINCREMENT';
         }
+
         return $definition;
     }
 
     #[\Override]
     public function renderPrimaryKeyClause(IndexMeta $index): string
     {
-        return 'PRIMARY KEY (' . $this->indexColumns($index) . ')';
+        return 'PRIMARY KEY ('.$this->indexColumns($index).')';
     }
 
     #[\Override]
     public function renderForeignKeyClause(ForeignKeyMeta $foreignKey): string
     {
-        return 'CONSTRAINT ' . $this->quoteIdentifier(new Identifier($foreignKey->constraintName))
-            . ' FOREIGN KEY (' . implode(', ', array_map(fn (string $column): string => $this->quoteIdentifier(new Identifier($column)), $foreignKey->sourceColumns)) . ')'
-            . ' REFERENCES ' . $this->quoteIdentifier(new Identifier($foreignKey->targetTable))
-            . ' (' . implode(', ', array_map(fn (string $column): string => $this->quoteIdentifier(new Identifier($column)), $foreignKey->targetColumns)) . ')'
-            . ' ON DELETE ' . $foreignKey->onDelete->value
-            . ' ON UPDATE ' . $foreignKey->onUpdate->value;
+        return 'CONSTRAINT '.$this->quoteIdentifier(new Identifier($foreignKey->constraintName))
+            .' FOREIGN KEY ('.implode(', ', array_map(fn (string $column): string => $this->quoteIdentifier(new Identifier($column)), $foreignKey->sourceColumns)).')'
+            .' REFERENCES '.$this->quoteIdentifier(new Identifier($foreignKey->targetTable))
+            .' ('.implode(', ', array_map(fn (string $column): string => $this->quoteIdentifier(new Identifier($column)), $foreignKey->targetColumns)).')'
+            .' ON DELETE '.$foreignKey->onDelete->value
+            .' ON UPDATE '.$foreignKey->onUpdate->value;
     }
 
     #[\Override]
     public function renderCheckConstraintClause(CheckConstraintMeta $check): string
     {
-        return 'CONSTRAINT ' . $this->quoteIdentifier(new Identifier($check->name)) . ' CHECK (' . $check->expression . ')';
+        return 'CONSTRAINT '.$this->quoteIdentifier(new Identifier($check->name)).' CHECK ('.$check->expression.')';
     }
 
     #[\Override]
@@ -248,7 +249,7 @@ final class SqlitePlatform extends AbstractPlatform
         QualifiedName $name,
         string $type,
         array $parameters,
-        ?\SQLCraft\ValueObjects\DataType $returnType,
+        ?DataType $returnType,
         string $body,
         ?string $language,
         bool $deterministic,
@@ -266,13 +267,13 @@ final class SqlitePlatform extends AbstractPlatform
     #[\Override]
     public function renderTruncateStatement(QualifiedName $table, bool $cascade, bool $restartIdentity): string
     {
-        return 'DELETE FROM ' . $this->quoteQualifiedName($table);
+        return 'DELETE FROM '.$this->quoteQualifiedName($table);
     }
 
     /**
-     * @param list<string> $columnClauses
-     * @param list<string> $constraintClauses
-     * @param array<string, scalar|null> $tableOptions
+     * @param  list<string>  $columnClauses
+     * @param  list<string>  $constraintClauses
+     * @param  array<string, scalar|null>  $tableOptions
      */
     #[\Override]
     public function renderCreateTableStatement(QualifiedName $table, array $columnClauses, array $constraintClauses, array $tableOptions): string
@@ -280,32 +281,33 @@ final class SqlitePlatform extends AbstractPlatform
         /** @var list<string> $clauses */
         $clauses = [...$columnClauses, ...$constraintClauses];
 
-        return 'CREATE TABLE ' . $this->quoteQualifiedName($table) . ' (' . implode(', ', $clauses) . ')';
+        return 'CREATE TABLE '.$this->quoteQualifiedName($table).' ('.implode(', ', $clauses).')';
     }
 
     #[\Override]
     public function renderAlterTableAddColumn(QualifiedName $table, ColumnMeta $column): string
     {
-        return 'ALTER TABLE ' . $this->quoteQualifiedName($table) . ' ADD COLUMN ' . $this->renderColumnDefinition($column);
+        return 'ALTER TABLE '.$this->quoteQualifiedName($table).' ADD COLUMN '.$this->renderColumnDefinition($column);
     }
 
     #[\Override]
     public function renderAlterTableDropColumn(QualifiedName $table, Identifier $column): string
     {
-        return 'ALTER TABLE ' . $this->quoteQualifiedName($table) . ' DROP COLUMN ' . $this->quoteIdentifier($column);
+        return 'ALTER TABLE '.$this->quoteQualifiedName($table).' DROP COLUMN '.$this->quoteIdentifier($column);
     }
 
     #[\Override]
     public function renderCreateIndexStatement(QualifiedName $table, IndexMeta $index): string
     {
         $unique = $index->unique ? 'UNIQUE ' : '';
-        return 'CREATE ' . $unique . 'INDEX ' . $this->quoteIdentifier(new Identifier($index->name)) . ' ON ' . $this->quoteQualifiedName($table) . ' (' . $this->indexColumns($index) . ')';
+
+        return 'CREATE '.$unique.'INDEX '.$this->quoteIdentifier(new Identifier($index->name)).' ON '.$this->quoteQualifiedName($table).' ('.$this->indexColumns($index).')';
     }
 
     #[\Override]
     public function renderDropIndexStatement(QualifiedName $table, Identifier $indexName): string
     {
-        return 'DROP INDEX ' . $this->quoteIdentifier($indexName);
+        return 'DROP INDEX '.$this->quoteIdentifier($indexName);
     }
 
     #[\Override]
@@ -313,6 +315,7 @@ final class SqlitePlatform extends AbstractPlatform
     {
         return "SELECT 'main' AS name UNION ALL SELECT 'temp' AS name";
     }
+
     #[\Override]
     public function getSchemasSql(): string
     {
@@ -358,7 +361,7 @@ final class SqlitePlatform extends AbstractPlatform
     #[\Override]
     public function getViewDefinitionSql(QualifiedName $view): string
     {
-        return "SELECT sql AS definition FROM main.sqlite_master WHERE type = 'view' AND name = " . $this->quoteValue($view->object->name);
+        return "SELECT sql AS definition FROM main.sqlite_master WHERE type = 'view' AND name = ".$this->quoteValue($view->object->name);
     }
 
     #[\Override]
@@ -370,7 +373,7 @@ final class SqlitePlatform extends AbstractPlatform
     #[\Override]
     public function getColumnsSql(QualifiedName $table): string
     {
-        return 'PRAGMA table_info(' . $this->quoteIdentifier($table->object) . ')';
+        return 'PRAGMA table_info('.$this->quoteIdentifier($table->object).')';
     }
 
     #[\Override]
@@ -379,12 +382,12 @@ final class SqlitePlatform extends AbstractPlatform
         $catalog = $this->catalog($database);
 
         return 'SELECT schema_object.name AS table_name, table_column.name AS column_name, '
-            . "table_column.type AS data_type, CASE WHEN table_column.\"notnull\" = 0 THEN 'YES' ELSE 'NO' END AS is_nullable, "
-            . 'table_column.dflt_value AS column_default, table_column.pk AS pk '
-            . 'FROM ' . $this->quoteIdentifier(new Identifier($catalog)) . '.sqlite_master schema_object '
-            . 'JOIN pragma_table_info(schema_object.name) table_column '
-            . "WHERE schema_object.type = 'table' AND schema_object.name NOT LIKE 'sqlite_%' "
-            . 'ORDER BY schema_object.name, table_column.cid';
+            ."table_column.type AS data_type, CASE WHEN table_column.\"notnull\" = 0 THEN 'YES' ELSE 'NO' END AS is_nullable, "
+            .'table_column.dflt_value AS column_default, table_column.pk AS pk '
+            .'FROM '.$this->quoteIdentifier(new Identifier($catalog)).'.sqlite_master schema_object '
+            .'JOIN pragma_table_info(schema_object.name) table_column '
+            ."WHERE schema_object.type = 'table' AND schema_object.name NOT LIKE 'sqlite_%' "
+            .'ORDER BY schema_object.name, table_column.cid';
     }
 
     #[\Override]
@@ -393,12 +396,12 @@ final class SqlitePlatform extends AbstractPlatform
         $catalog = $this->catalog($database);
 
         return 'SELECT schema_object.name AS table_name, table_index.name AS index_name, '
-            . 'table_index.[unique] AS is_unique, table_index.partial, index_column.name AS column_name '
-            . 'FROM ' . $this->quoteIdentifier(new Identifier($catalog)) . '.sqlite_master schema_object '
-            . 'JOIN pragma_index_list(schema_object.name) table_index '
-            . 'LEFT JOIN pragma_index_info(table_index.name) index_column '
-            . "WHERE schema_object.type = 'table' AND schema_object.name NOT LIKE 'sqlite_%' "
-            . 'ORDER BY schema_object.name, table_index.name, index_column.seqno';
+            .'table_index.[unique] AS is_unique, table_index.partial, index_column.name AS column_name '
+            .'FROM '.$this->quoteIdentifier(new Identifier($catalog)).'.sqlite_master schema_object '
+            .'JOIN pragma_index_list(schema_object.name) table_index '
+            .'LEFT JOIN pragma_index_info(table_index.name) index_column '
+            ."WHERE schema_object.type = 'table' AND schema_object.name NOT LIKE 'sqlite_%' "
+            .'ORDER BY schema_object.name, table_index.name, index_column.seqno';
     }
 
     #[\Override]
@@ -407,23 +410,26 @@ final class SqlitePlatform extends AbstractPlatform
         $catalog = $this->catalog($database);
 
         return "SELECT schema_object.name AS table_name, 'fk_' || schema_object.name || '_' || foreign_key.id AS constraint_name, "
-            . 'foreign_key."from" AS source_column, foreign_key."table" AS target_table, '
-            . 'foreign_key."to" AS target_column '
-            . 'FROM ' . $this->quoteIdentifier(new Identifier($catalog)) . '.sqlite_master schema_object '
-            . 'JOIN pragma_foreign_key_list(schema_object.name) foreign_key '
-            . "WHERE schema_object.type = 'table' AND schema_object.name NOT LIKE 'sqlite_%' "
-            . 'ORDER BY schema_object.name, foreign_key.id, foreign_key.seq';
+            .'foreign_key."from" AS source_column, foreign_key."table" AS target_table, '
+            .'foreign_key."to" AS target_column '
+            .'FROM '.$this->quoteIdentifier(new Identifier($catalog)).'.sqlite_master schema_object '
+            .'JOIN pragma_foreign_key_list(schema_object.name) foreign_key '
+            ."WHERE schema_object.type = 'table' AND schema_object.name NOT LIKE 'sqlite_%' "
+            .'ORDER BY schema_object.name, foreign_key.id, foreign_key.seq';
     }
+
     #[\Override]
     public function getIndexesSql(QualifiedName $table): string
     {
-        return 'PRAGMA index_list(' . $this->quoteIdentifier($table->object) . ')';
+        return 'PRAGMA index_list('.$this->quoteIdentifier($table->object).')';
     }
+
     #[\Override]
     public function getForeignKeysSql(QualifiedName $table): string
     {
-        return 'PRAGMA foreign_key_list(' . $this->quoteIdentifier($table->object) . ')';
+        return 'PRAGMA foreign_key_list('.$this->quoteIdentifier($table->object).')';
     }
+
     #[\Override]
     public function getReferencingForeignKeysSql(QualifiedName $table): string
     {
@@ -433,8 +439,9 @@ final class SqlitePlatform extends AbstractPlatform
     #[\Override]
     public function getTriggersSql(QualifiedName $table): string
     {
-        return "SELECT name, sql FROM sqlite_master WHERE type = 'trigger' AND tbl_name = " . $this->quoteValue($table->object->name) . ' ORDER BY name';
+        return "SELECT name, sql FROM sqlite_master WHERE type = 'trigger' AND tbl_name = ".$this->quoteValue($table->object->name).' ORDER BY name';
     }
+
     #[\Override]
     public function getRoutineDetailSql(QualifiedName $routine): string
     {
@@ -458,16 +465,19 @@ final class SqlitePlatform extends AbstractPlatform
     {
         return "SELECT name, sql FROM sqlite_master WHERE type IN ('trigger', 'view') ORDER BY name";
     }
+
     #[\Override]
     public function getSequencesSql(?string $schema = null): string
     {
         throw $this->unsupported(Capability::Sequence);
     }
+
     #[\Override]
     public function getVariablesSql(): string
     {
         return 'PRAGMA compile_options';
     }
+
     #[\Override]
     public function getStatusSql(): string
     {
@@ -495,15 +505,15 @@ final class SqlitePlatform extends AbstractPlatform
     private function tableStatusSql(string $database, ?string $table): string
     {
         $quotedDatabase = $this->quoteIdentifier(new Identifier($database));
-        $sql = "SELECT name AS table_name, type AS table_type, "
-            . "CASE WHEN type = 'view' THEN 1 ELSE 0 END AS is_view "
-            . "FROM {$quotedDatabase}.sqlite_master WHERE type IN ('table', 'view') AND name NOT LIKE 'sqlite_%'";
+        $sql = 'SELECT name AS table_name, type AS table_type, '
+            ."CASE WHEN type = 'view' THEN 1 ELSE 0 END AS is_view "
+            ."FROM {$quotedDatabase}.sqlite_master WHERE type IN ('table', 'view') AND name NOT LIKE 'sqlite_%'";
 
         if ($table !== null) {
-            $sql .= ' AND name = ' . $this->quoteValue($table);
+            $sql .= ' AND name = '.$this->quoteValue($table);
         }
 
-        return $sql . ' ORDER BY name';
+        return $sql.' ORDER BY name';
     }
 
     private function catalog(?string $database): string
@@ -521,13 +531,14 @@ final class SqlitePlatform extends AbstractPlatform
             $parts[] = $this->quoteIdentifier($name->schema);
         }
         $parts[] = $this->quoteIdentifier($name->object);
+
         return implode('.', $parts);
     }
 
     private function indexColumns(IndexMeta $index): string
     {
         return implode(', ', array_map(
-            fn (\SQLCraft\DTO\IndexColumnMeta $column): string => $column->expression ?? $this->quoteIdentifier(new Identifier($column->columnName)) . ($column->descending ? ' DESC' : ' ASC'),
+            fn (IndexColumnMeta $column): string => $column->expression ?? $this->quoteIdentifier(new Identifier($column->columnName)).($column->descending ? ' DESC' : ' ASC'),
             $index->columns,
         ));
     }

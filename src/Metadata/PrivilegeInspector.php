@@ -21,9 +21,9 @@ final class PrivilegeInspector implements PrivilegeInspectorInterface
         $platform = $conn->getPlatformName();
         $sql = match ($platform) {
             'mysql', 'mariadb' => 'SELECT PRIVILEGE_TYPE AS privilege_name FROM INFORMATION_SCHEMA.TABLE_PRIVILEGES'
-                . $this->whereMysql($user, $object),
+                .$this->whereMysql($user, $object),
             'pgsql' => 'SELECT privilege_type AS privilege_name FROM information_schema.role_table_grants'
-                . $this->wherePgsql($user, $object),
+                .$this->wherePgsql($user, $object),
             'sqlserver' => 'SELECT permission_name AS privilege_name FROM sys.database_permissions',
             default => throw CapabilityNotSupportedException::for(Capability::Privileges, $platform),
         };
@@ -44,25 +44,25 @@ final class PrivilegeInspector implements PrivilegeInspectorInterface
     {
         $conditions = [];
         if ($user !== null) {
-            $conditions[] = " GRANTEE = '" . str_replace("'", "''", $user) . "'";
+            $conditions[] = " GRANTEE = '".str_replace("'", "''", $user)."'";
         }
-        if ($object instanceof \SQLCraft\ValueObjects\QualifiedName) {
-            $conditions[] = " TABLE_NAME = '" . str_replace("'", "''", $object->object->name) . "'";
+        if ($object instanceof QualifiedName) {
+            $conditions[] = " TABLE_NAME = '".str_replace("'", "''", $object->object->name)."'";
         }
 
-        return $conditions === [] ? '' : ' WHERE' . implode(' AND', $conditions);
+        return $conditions === [] ? '' : ' WHERE'.implode(' AND', $conditions);
     }
 
     private function wherePgsql(?string $user, ?QualifiedName $object): string
     {
         $conditions = [];
         if ($user !== null) {
-            $conditions[] = " grantee = '" . str_replace("'", "''", $user) . "'";
+            $conditions[] = " grantee = '".str_replace("'", "''", $user)."'";
         }
-        if ($object instanceof \SQLCraft\ValueObjects\QualifiedName) {
-            $conditions[] = " table_name = '" . str_replace("'", "''", $object->object->name) . "'";
+        if ($object instanceof QualifiedName) {
+            $conditions[] = " table_name = '".str_replace("'", "''", $object->object->name)."'";
         }
 
-        return $conditions === [] ? '' : ' WHERE' . implode(' AND', $conditions);
+        return $conditions === [] ? '' : ' WHERE'.implode(' AND', $conditions);
     }
 }

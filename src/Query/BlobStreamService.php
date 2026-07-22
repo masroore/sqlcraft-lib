@@ -12,19 +12,17 @@ use SQLCraft\ValueObjects\QualifiedName;
 
 final readonly class BlobStreamService
 {
-    public function __construct(private QueryExecutorInterface $executor)
-    {
-    }
+    public function __construct(private QueryExecutorInterface $executor) {}
 
     /**
-     * @param array<string, scalar|null> $where
+     * @param  array<string, scalar|null>  $where
      * @return resource
      */
     public function download(ConnectionInterface $connection, QualifiedName $table, Identifier $column, array $where = [])
     {
         $connection->getPlatform()->getCapabilitySet($connection->getServerVersion())->require(Capability::BlobStreaming);
         $parts = [];
-        if ($table->schema instanceof \SQLCraft\ValueObjects\Identifier) {
+        if ($table->schema instanceof Identifier) {
             $parts[] = $connection->quoteIdentifier($table->schema->name);
         }$parts[] = $connection->quoteIdentifier($table->object->name);
         $conditions = [];
@@ -41,6 +39,7 @@ final readonly class BlobStreamService
         }
         fwrite($stream, $this->contents($values));
         rewind($stream);
+
         return $stream;
     }
 
@@ -60,5 +59,4 @@ final readonly class BlobStreamService
 
         return '';
     }
-
 }

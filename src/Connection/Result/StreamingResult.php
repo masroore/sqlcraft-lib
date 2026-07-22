@@ -25,8 +25,8 @@ final class StreamingResult implements ResultInterface
     private bool $started = false;
 
     /**
-     * @param Closure(): Iterator<int, array<string, int|float|string|bool|null>> $factory
-     * @param list<ResultColumn> $columns
+     * @param  Closure(): Iterator<int, array<string, int|float|string|bool|null>>  $factory
+     * @param  list<ResultColumn>  $columns
      */
     public function __construct(Closure $factory, array $columns = [])
     {
@@ -39,7 +39,7 @@ final class StreamingResult implements ResultInterface
     public function fetchAssoc(): ?array
     {
         $iterator = $this->getIteratorSource();
-        if (!$iterator->valid()) {
+        if (! $iterator->valid()) {
             return null;
         }
 
@@ -132,13 +132,13 @@ final class StreamingResult implements ResultInterface
     /** @return Iterator<int, array<string, int|float|string|bool|null>> */
     private function getIteratorSource(): Iterator
     {
-        if (!$this->iterator instanceof \Iterator) {
+        if (! $this->iterator instanceof Iterator) {
             /** @var Iterator<int, array<string, int|float|string|bool|null>> $iterator */
             $iterator = ($this->factory)();
             $this->iterator = $iterator;
         }
 
-        if (!$this->started) {
+        if (! $this->started) {
             $this->iterator->rewind();
             $this->started = true;
         }

@@ -4,6 +4,4 @@ declare(strict_types=1);
 
 namespace SQLCraft\Contracts\Schema;
 
-interface SchemaManagerInterface extends SchemaInspectorInterface
-{
-}
+interface SchemaManagerInterface extends SchemaInspectorInterface {}

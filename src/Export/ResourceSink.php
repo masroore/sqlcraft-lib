@@ -18,11 +18,11 @@ final class ResourceSink implements SinkInterface
     /**
      * PHP has no native resource parameter type; the boundary is validated here.
      *
-     * @param mixed $resource
+     * @param  mixed  $resource
      */
     public function __construct($resource)
     {
-        if (!is_resource($resource)) {
+        if (! is_resource($resource)) {
             throw new InvalidArgumentException('ResourceSink requires an open stream resource.');
         }
 

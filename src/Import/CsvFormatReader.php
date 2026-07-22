@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace SQLCraft\Import;
 
 use InvalidArgumentException;
-use SQLCraft\Contracts\Import\FormatReadOptions;
 use SQLCraft\Contracts\Import\FormatReaderInterface;
+use SQLCraft\Contracts\Import\FormatReadOptions;
 
 final readonly class CsvFormatReader implements FormatReaderInterface
 {
@@ -20,14 +20,14 @@ final readonly class CsvFormatReader implements FormatReaderInterface
     #[\Override]
     public function readRows(mixed $stream, FormatReadOptions $options): \Generator
     {
-        if (!is_resource($stream)) {
+        if (! is_resource($stream)) {
             throw new InvalidArgumentException('CSV reader requires a stream resource.');
         }
-        if (!$options->hasHeader) {
+        if (! $options->hasHeader) {
             throw new InvalidArgumentException('CSV reader requires a header row.');
         }
         $header = fgetcsv($stream, 0, $options->separator, '"', '');
-        if (!is_array($header)) {
+        if (! is_array($header)) {
             return;
         }
         /** @var list<string> $normalizedHeader */
@@ -42,8 +42,8 @@ final readonly class CsvFormatReader implements FormatReaderInterface
     }
 
     /**
-     * @param list<string> $header
-     * @param list<string|null> $values
+     * @param  list<string>  $header
+     * @param  list<string|null>  $values
      * @return array<string, mixed>
      */
     private function row(array $header, array $values, string $nullRepresentation): array
@@ -53,6 +53,7 @@ final readonly class CsvFormatReader implements FormatReaderInterface
             $value = $values[$index] ?? null;
             $row[$name] = $value === $nullRepresentation ? null : $value;
         }
+
         return $row;
     }
 }

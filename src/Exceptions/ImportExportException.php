@@ -4,6 +4,4 @@ declare(strict_types=1);
 
 namespace SQLCraft\Exceptions;
 
-abstract class ImportExportException extends SQLCraftException
-{
-}
+abstract class ImportExportException extends SQLCraftException {}

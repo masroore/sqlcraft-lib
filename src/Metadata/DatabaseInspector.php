@@ -13,9 +13,7 @@ use SQLCraft\Contracts\Metadata\DatabaseInspectorInterface;
 /** @internal */
 final class DatabaseInspector implements DatabaseInspectorInterface
 {
-    public function __construct(private readonly MetadataFactoryInterface $factory)
-    {
-    }
+    public function __construct(private readonly MetadataFactoryInterface $factory) {}
 
     #[\Override]
     public function getSchemas(ConnectionInterface $conn): SchemaCollection

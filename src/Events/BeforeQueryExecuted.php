@@ -14,8 +14,7 @@ final class BeforeQueryExecuted extends InterceptionEvent
         private string $sql,
         private array $params,
         public readonly string $queryType,
-    ) {
-    }
+    ) {}
 
     public function getSql(): string
     {
@@ -34,6 +33,4 @@ final class BeforeQueryExecuted extends InterceptionEvent
         $this->sql = $sql;
         $this->params = $params;
     }
-
-
 }

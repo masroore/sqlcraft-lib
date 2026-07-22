@@ -13,9 +13,7 @@ use SQLCraft\ValueObjects\QualifiedName;
 /** @internal */
 final class TriggerInspector implements TriggerInspectorInterface
 {
-    public function __construct(private readonly MetadataFactoryInterface $factory)
-    {
-    }
+    public function __construct(private readonly MetadataFactoryInterface $factory) {}
 
     #[\Override]
     public function getTriggers(ConnectionInterface $conn, QualifiedName $table): TriggerCollection
@@ -43,5 +41,4 @@ final class TriggerInspector implements TriggerInspectorInterface
 
         $connection->getPlatform()->getCapabilitySet($version)->require($capability);
     }
-
 }

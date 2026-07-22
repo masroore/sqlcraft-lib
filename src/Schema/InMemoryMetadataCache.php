@@ -27,22 +27,28 @@ final class InMemoryMetadataCache implements MetadataCacheInterface
         return $value;
     }
 
-    #[\Override] public function invalidateTable(string $database, string $table): void
+    #[\Override]
+    public function invalidateTable(string $database, string $table): void
     {
-        $this->remove($database . '/table:' . $table);
+        $this->remove($database.'/table:'.$table);
     }
-    #[\Override] public function invalidateDatabase(string $database): void
+
+    #[\Override]
+    public function invalidateDatabase(string $database): void
     {
         foreach (array_keys($this->entries) as $key) {
-            if (str_starts_with($key, $database . '/')) {
+            if (str_starts_with($key, $database.'/')) {
                 unset($this->entries[$key]);
             }
         }
     }
-    #[\Override] public function clear(): void
+
+    #[\Override]
+    public function clear(): void
     {
         $this->entries = [];
     }
+
     private function remove(string $needle): void
     {
         foreach (array_keys($this->entries) as $key) {

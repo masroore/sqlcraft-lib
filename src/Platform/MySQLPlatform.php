@@ -6,11 +6,11 @@ namespace SQLCraft\Platform;
 
 use InvalidArgumentException;
 use SQLCraft\Capabilities\Capability;
-use SQLCraft\Capabilities\CapabilityNotSupportedException;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\DTO\CheckConstraintMeta;
 use SQLCraft\DTO\ColumnMeta;
 use SQLCraft\DTO\ForeignKeyMeta;
+use SQLCraft\DTO\IndexColumnMeta;
 use SQLCraft\DTO\IndexMeta;
 use SQLCraft\ValueObjects\DataType;
 use SQLCraft\ValueObjects\DefaultValueKind;
@@ -24,7 +24,7 @@ class MySQLPlatform extends AbstractPlatform
     #[\Override]
     public function getExplainSql(string $sql, bool $analyze = false): string
     {
-        return ($analyze ? 'EXPLAIN ANALYZE ' : 'EXPLAIN FORMAT=JSON ') . $sql;
+        return ($analyze ? 'EXPLAIN ANALYZE ' : 'EXPLAIN FORMAT=JSON ').$sql;
     }
 
     #[\Override]
@@ -122,7 +122,7 @@ class MySQLPlatform extends AbstractPlatform
     #[\Override]
     public function quoteIdentifier(Identifier $identifier): string
     {
-        return '`' . str_replace('`', '``', $identifier->name) . '`';
+        return '`'.str_replace('`', '``', $identifier->name).'`';
     }
 
     #[\Override]
@@ -132,7 +132,7 @@ class MySQLPlatform extends AbstractPlatform
             $value === null => 'NULL',
             is_bool($value) => $value ? '1' : '0',
             is_int($value), is_float($value) => (string) $value,
-            is_string($value) => "'" . str_replace(['\\', "'"], ['\\\\', "''"], $value) . "'",
+            is_string($value) => "'".str_replace(['\\', "'"], ['\\\\', "''"], $value)."'",
             default => throw new InvalidArgumentException('MySQL values must be scalar or null.'),
         };
     }
@@ -140,7 +140,7 @@ class MySQLPlatform extends AbstractPlatform
     #[\Override]
     public function quoteBinary(string $bytes): string
     {
-        return "X'" . bin2hex($bytes) . "'";
+        return "X'".bin2hex($bytes)."'";
     }
 
     #[\Override]
@@ -162,13 +162,13 @@ class MySQLPlatform extends AbstractPlatform
             throw new InvalidArgumentException('Pagination values must not be negative.');
         }
 
-        return $sql . ' LIMIT ' . $limit . ' OFFSET ' . $offset;
+        return $sql.' LIMIT '.$limit.' OFFSET '.$offset;
     }
 
     #[\Override]
     public function applySingleRowLimit(string $sql, string $whereClause): string
     {
-        return $sql . ($whereClause === '' ? '' : ' ' . $whereClause) . ' LIMIT 1';
+        return $sql.($whereClause === '' ? '' : ' '.$whereClause).' LIMIT 1';
     }
 
     #[\Override]
@@ -213,7 +213,7 @@ class MySQLPlatform extends AbstractPlatform
 
     #[\Override]
     public function renderCreateSequenceStatement(
-        \SQLCraft\ValueObjects\Identifier $name,
+        Identifier $name,
         int $start,
         int $increment,
         ?int $min,
@@ -225,7 +225,7 @@ class MySQLPlatform extends AbstractPlatform
     }
 
     #[\Override]
-    public function renderDropSequenceStatement(\SQLCraft\ValueObjects\Identifier $name, bool $ifExists): string
+    public function renderDropSequenceStatement(Identifier $name, bool $ifExists): string
     {
         throw $this->unsupported(Capability::Sequence);
     }
@@ -234,8 +234,8 @@ class MySQLPlatform extends AbstractPlatform
     public function renderColumnDefinition(ColumnMeta $column): string
     {
         $dataType = $column->dataType;
-        $definition = $this->quoteIdentifier(new Identifier($column->name)) . ' ' . $this->renderDataType($dataType);
-        if (!$column->nullable) {
+        $definition = $this->quoteIdentifier(new Identifier($column->name)).' '.$this->renderDataType($dataType);
+        if (! $column->nullable) {
             $definition .= ' NOT NULL';
         }
         if ($column->default->kind !== DefaultValueKind::NULL_VALUE) {
@@ -243,7 +243,7 @@ class MySQLPlatform extends AbstractPlatform
             if ($defaultValue === null) {
                 throw new InvalidArgumentException('Non-NULL column defaults require a value.');
             }
-            $definition .= ' DEFAULT ' . ($column->default->kind === DefaultValueKind::EXPRESSION
+            $definition .= ' DEFAULT '.($column->default->kind === DefaultValueKind::EXPRESSION
                 ? $defaultValue
                 : $this->quoteValue($defaultValue));
         }
@@ -251,7 +251,7 @@ class MySQLPlatform extends AbstractPlatform
             $definition .= ' AUTO_INCREMENT';
         }
         if ($column->comment !== null) {
-            $definition .= ' COMMENT ' . $this->quoteValue($column->comment);
+            $definition .= ' COMMENT '.$this->quoteValue($column->comment);
         }
 
         return $definition;
@@ -260,44 +260,44 @@ class MySQLPlatform extends AbstractPlatform
     #[\Override]
     public function renderPrimaryKeyClause(IndexMeta $index): string
     {
-        return 'PRIMARY KEY (' . $this->indexColumns($index) . ')';
+        return 'PRIMARY KEY ('.$this->indexColumns($index).')';
     }
 
     #[\Override]
     public function renderForeignKeyClause(ForeignKeyMeta $foreignKey): string
     {
-        return 'CONSTRAINT ' . $this->quoteIdentifier(new Identifier($foreignKey->constraintName))
-            . ' FOREIGN KEY (' . $this->quoteList($foreignKey->sourceColumns) . ')'
-            . ' REFERENCES ' . $this->quoteQualifiedParts($foreignKey->targetDatabase, $foreignKey->targetSchema, $foreignKey->targetTable)
-            . ' (' . $this->quoteList($foreignKey->targetColumns) . ')'
-            . ' ON DELETE ' . $foreignKey->onDelete->value
-            . ' ON UPDATE ' . $foreignKey->onUpdate->value;
+        return 'CONSTRAINT '.$this->quoteIdentifier(new Identifier($foreignKey->constraintName))
+            .' FOREIGN KEY ('.$this->quoteList($foreignKey->sourceColumns).')'
+            .' REFERENCES '.$this->quoteQualifiedParts($foreignKey->targetDatabase, $foreignKey->targetSchema, $foreignKey->targetTable)
+            .' ('.$this->quoteList($foreignKey->targetColumns).')'
+            .' ON DELETE '.$foreignKey->onDelete->value
+            .' ON UPDATE '.$foreignKey->onUpdate->value;
     }
 
     #[\Override]
     public function renderCheckConstraintClause(CheckConstraintMeta $check): string
     {
-        return 'CONSTRAINT ' . $this->quoteIdentifier(new Identifier($check->name)) . ' CHECK (' . $check->expression . ')';
+        return 'CONSTRAINT '.$this->quoteIdentifier(new Identifier($check->name)).' CHECK ('.$check->expression.')';
     }
 
     /**
-     * @param list<string> $columnClauses
-     * @param list<string> $constraintClauses
-     * @param array<string, scalar|null> $tableOptions
+     * @param  list<string>  $columnClauses
+     * @param  list<string>  $constraintClauses
+     * @param  array<string, scalar|null>  $tableOptions
      */
     #[\Override]
     public function renderCreateTableStatement(QualifiedName $table, array $columnClauses, array $constraintClauses, array $tableOptions): string
     {
         $clauses = [...$columnClauses, ...$constraintClauses];
-        $sql = 'CREATE TABLE ' . $this->quoteQualifiedName($table) . ' (' . implode(', ', $clauses) . ')';
+        $sql = 'CREATE TABLE '.$this->quoteQualifiedName($table).' ('.implode(', ', $clauses).')';
         if (isset($tableOptions['engine']) && is_string($tableOptions['engine'])) {
-            $sql .= ' ENGINE=' . $tableOptions['engine'];
+            $sql .= ' ENGINE='.$tableOptions['engine'];
         }
         if (isset($tableOptions['charset']) && is_string($tableOptions['charset'])) {
-            $sql .= ' DEFAULT CHARSET=' . $tableOptions['charset'];
+            $sql .= ' DEFAULT CHARSET='.$tableOptions['charset'];
         }
         if (isset($tableOptions['collation']) && is_string($tableOptions['collation'])) {
-            $sql .= ' COLLATE=' . $tableOptions['collation'];
+            $sql .= ' COLLATE='.$tableOptions['collation'];
         }
 
         return $sql;
@@ -306,13 +306,13 @@ class MySQLPlatform extends AbstractPlatform
     #[\Override]
     public function renderAlterTableAddColumn(QualifiedName $table, ColumnMeta $column): string
     {
-        return 'ALTER TABLE ' . $this->quoteQualifiedName($table) . ' ADD COLUMN ' . $this->renderColumnDefinition($column);
+        return 'ALTER TABLE '.$this->quoteQualifiedName($table).' ADD COLUMN '.$this->renderColumnDefinition($column);
     }
 
     #[\Override]
     public function renderAlterTableDropColumn(QualifiedName $table, Identifier $column): string
     {
-        return 'ALTER TABLE ' . $this->quoteQualifiedName($table) . ' DROP COLUMN ' . $this->quoteIdentifier($column);
+        return 'ALTER TABLE '.$this->quoteQualifiedName($table).' DROP COLUMN '.$this->quoteIdentifier($column);
     }
 
     #[\Override]
@@ -324,14 +324,14 @@ class MySQLPlatform extends AbstractPlatform
             default => $index->unique ? 'UNIQUE ' : '',
         };
 
-        return 'CREATE ' . $prefix . 'INDEX ' . $this->quoteIdentifier(new Identifier($index->name))
-            . ' ON ' . $this->quoteQualifiedName($table) . ' (' . $this->indexColumns($index) . ')';
+        return 'CREATE '.$prefix.'INDEX '.$this->quoteIdentifier(new Identifier($index->name))
+            .' ON '.$this->quoteQualifiedName($table).' ('.$this->indexColumns($index).')';
     }
 
     #[\Override]
     public function renderDropIndexStatement(QualifiedName $table, Identifier $indexName): string
     {
-        return 'DROP INDEX ' . $this->quoteIdentifier($indexName) . ' ON ' . $this->quoteQualifiedName($table);
+        return 'DROP INDEX '.$this->quoteIdentifier($indexName).' ON '.$this->quoteQualifiedName($table);
     }
 
     #[\Override]
@@ -376,27 +376,27 @@ class MySQLPlatform extends AbstractPlatform
         $database = $this->databaseName($table);
 
         return 'SELECT PARTITION_NAME AS name, TABLE_SCHEMA AS schema, PARTITION_METHOD AS method, '
-            . 'PARTITION_EXPRESSION AS expression, TABLE_NAME AS parent_table, '
-            . 'PARTITION_DESCRIPTION AS bound FROM INFORMATION_SCHEMA.PARTITIONS WHERE TABLE_SCHEMA = '
-            . $this->quoteValue($database) . ' AND TABLE_NAME = ' . $this->quoteValue($table->object->name)
-            . ' AND PARTITION_NAME IS NOT NULL ORDER BY PARTITION_ORDINAL_POSITION';
+            .'PARTITION_EXPRESSION AS expression, TABLE_NAME AS parent_table, '
+            .'PARTITION_DESCRIPTION AS bound FROM INFORMATION_SCHEMA.PARTITIONS WHERE TABLE_SCHEMA = '
+            .$this->quoteValue($database).' AND TABLE_NAME = '.$this->quoteValue($table->object->name)
+            .' AND PARTITION_NAME IS NOT NULL ORDER BY PARTITION_ORDINAL_POSITION';
     }
 
     #[\Override]
     public function getViewsSql(?string $schema = null): string
     {
         return 'SELECT TABLE_NAME AS view_name, TABLE_SCHEMA AS table_schema, VIEW_DEFINITION AS view_definition, '
-            . '0 AS materialized FROM INFORMATION_SCHEMA.VIEWS'
-            . ($schema === null ? '' : ' WHERE TABLE_SCHEMA = ' . $this->quoteValue($schema))
-            . ' ORDER BY TABLE_SCHEMA, TABLE_NAME';
+            .'0 AS materialized FROM INFORMATION_SCHEMA.VIEWS'
+            .($schema === null ? '' : ' WHERE TABLE_SCHEMA = '.$this->quoteValue($schema))
+            .' ORDER BY TABLE_SCHEMA, TABLE_NAME';
     }
 
     #[\Override]
     public function getViewDefinitionSql(QualifiedName $view): string
     {
         return 'SELECT VIEW_DEFINITION AS definition FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_SCHEMA = '
-            . $this->quoteValue($this->databaseName($view)) . ' AND TABLE_NAME = '
-            . $this->quoteValue($view->object->name);
+            .$this->quoteValue($this->databaseName($view)).' AND TABLE_NAME = '
+            .$this->quoteValue($view->object->name);
     }
 
     #[\Override]
@@ -409,80 +409,80 @@ class MySQLPlatform extends AbstractPlatform
     public function getColumnsSql(QualifiedName $table): string
     {
         return 'SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '
-            . $this->quoteValue($this->databaseName($table))
-            . ' AND TABLE_NAME = ' . $this->quoteValue($table->object->name)
-            . ' ORDER BY ORDINAL_POSITION';
+            .$this->quoteValue($this->databaseName($table))
+            .' AND TABLE_NAME = '.$this->quoteValue($table->object->name)
+            .' ORDER BY ORDINAL_POSITION';
     }
 
     #[\Override]
     public function getAllColumnsSql(string $database, ?string $schema = null): string
     {
         return 'SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '
-            . $this->quoteValue($schema ?? $database)
-            . ' ORDER BY TABLE_NAME, ORDINAL_POSITION';
+            .$this->quoteValue($schema ?? $database)
+            .' ORDER BY TABLE_NAME, ORDINAL_POSITION';
     }
 
     #[\Override]
     public function getAllIndexesSql(string $database, ?string $schema = null): string
     {
         return 'SELECT * FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = '
-            . $this->quoteValue($schema ?? $database)
-            . ' ORDER BY TABLE_NAME, INDEX_NAME, SEQ_IN_INDEX';
+            .$this->quoteValue($schema ?? $database)
+            .' ORDER BY TABLE_NAME, INDEX_NAME, SEQ_IN_INDEX';
     }
 
     #[\Override]
     public function getAllForeignKeysSql(string $database, ?string $schema = null): string
     {
         return 'SELECT * FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA = '
-            . $this->quoteValue($schema ?? $database)
-            . ' AND REFERENCED_TABLE_NAME IS NOT NULL ORDER BY TABLE_NAME, CONSTRAINT_NAME, ORDINAL_POSITION';
+            .$this->quoteValue($schema ?? $database)
+            .' AND REFERENCED_TABLE_NAME IS NOT NULL ORDER BY TABLE_NAME, CONSTRAINT_NAME, ORDINAL_POSITION';
     }
 
     #[\Override]
     public function getIndexesSql(QualifiedName $table): string
     {
-        return 'SHOW INDEX FROM ' . $this->quoteQualifiedName($table);
+        return 'SHOW INDEX FROM '.$this->quoteQualifiedName($table);
     }
 
     #[\Override]
     public function getForeignKeysSql(QualifiedName $table): string
     {
         return 'SELECT * FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA = '
-            . $this->quoteValue($this->databaseName($table))
-            . ' AND TABLE_NAME = ' . $this->quoteValue($table->object->name)
-            . ' AND REFERENCED_TABLE_NAME IS NOT NULL';
+            .$this->quoteValue($this->databaseName($table))
+            .' AND TABLE_NAME = '.$this->quoteValue($table->object->name)
+            .' AND REFERENCED_TABLE_NAME IS NOT NULL';
     }
 
     #[\Override]
     public function getReferencingForeignKeysSql(QualifiedName $table): string
     {
         return 'SELECT * FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE REFERENCED_TABLE_SCHEMA = '
-            . $this->quoteValue($this->databaseName($table))
-            . ' AND REFERENCED_TABLE_NAME = ' . $this->quoteValue($table->object->name)
-            . ' AND REFERENCED_COLUMN_NAME IS NOT NULL';
+            .$this->quoteValue($this->databaseName($table))
+            .' AND REFERENCED_TABLE_NAME = '.$this->quoteValue($table->object->name)
+            .' AND REFERENCED_COLUMN_NAME IS NOT NULL';
     }
 
     #[\Override]
     public function getTriggersSql(QualifiedName $table): string
     {
-        return 'SHOW TRIGGERS FROM ' . $this->quoteIdentifier($table->catalog ?? $table->schema ?? $table->object);
+        return 'SHOW TRIGGERS FROM '.$this->quoteIdentifier($table->catalog ?? $table->schema ?? $table->object);
     }
 
     #[\Override]
     public function getRoutineDetailSql(QualifiedName $routine): string
     {
         return 'SELECT * FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_SCHEMA = '
-            . $this->quoteValue($this->databaseName($routine)) . ' AND ROUTINE_NAME = '
-            . $this->quoteValue($routine->object->name);
+            .$this->quoteValue($this->databaseName($routine)).' AND ROUTINE_NAME = '
+            .$this->quoteValue($routine->object->name);
     }
 
     #[\Override]
     public function getCheckConstraintsSql(QualifiedName $table): string
     {
         return 'SELECT CONSTRAINT_NAME AS constraint_name, CHECK_CLAUSE AS check_clause, 0 AS not_enforced '
-            . 'FROM INFORMATION_SCHEMA.CHECK_CONSTRAINTS WHERE CONSTRAINT_SCHEMA = '
-            . $this->quoteValue($this->databaseName($table)) . ' AND TABLE_NAME = '
-            . $this->quoteValue($table->object->name);
+            .'FROM INFORMATION_SCHEMA.CHECK_CONSTRAINTS WHERE CONSTRAINT_SCHEMA = '
+            .$this->quoteValue($this->databaseName($table)).' AND TABLE_NAME = '
+            .$this->quoteValue($table->object->name);
     }
 
     #[\Override]
@@ -495,7 +495,7 @@ class MySQLPlatform extends AbstractPlatform
     public function getRoutinesSql(?string $schema = null): string
     {
         return 'SELECT * FROM INFORMATION_SCHEMA.ROUTINES'
-            . ($schema === null ? '' : ' WHERE ROUTINE_SCHEMA = ' . $this->quoteValue($schema));
+            .($schema === null ? '' : ' WHERE ROUTINE_SCHEMA = '.$this->quoteValue($schema));
     }
 
     #[\Override]
@@ -525,7 +525,7 @@ class MySQLPlatform extends AbstractPlatform
     #[\Override]
     public function getCollationsSql(?string $charset = null): string
     {
-        return 'SHOW COLLATION' . ($charset === null ? '' : ' WHERE Charset = ' . $this->quoteValue($charset));
+        return 'SHOW COLLATION'.($charset === null ? '' : ' WHERE Charset = '.$this->quoteValue($charset));
     }
 
     #[\Override]
@@ -537,18 +537,18 @@ class MySQLPlatform extends AbstractPlatform
     private function tableStatusSql(string $database, ?string $table): string
     {
         $sql = 'SELECT TABLE_NAME AS table_name, TABLE_TYPE AS table_type, TABLE_SCHEMA AS table_schema, '
-            . 'ENGINE AS engine, TABLE_COMMENT AS table_comment, TABLE_ROWS AS table_rows, '
-            . 'TABLE_COLLATION AS table_collation, AUTO_INCREMENT AS auto_increment, '
-            . 'DATA_LENGTH AS data_length, INDEX_LENGTH AS index_length, DATA_FREE AS data_free, '
-            . 'CREATE_OPTIONS AS create_options, '
-            . "CASE WHEN CREATE_OPTIONS LIKE '%partitioned%' THEN 1 ELSE 0 END AS partitioned "
-            . 'FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ' . $this->quoteValue($database);
+            .'ENGINE AS engine, TABLE_COMMENT AS table_comment, TABLE_ROWS AS table_rows, '
+            .'TABLE_COLLATION AS table_collation, AUTO_INCREMENT AS auto_increment, '
+            .'DATA_LENGTH AS data_length, INDEX_LENGTH AS index_length, DATA_FREE AS data_free, '
+            .'CREATE_OPTIONS AS create_options, '
+            ."CASE WHEN CREATE_OPTIONS LIKE '%partitioned%' THEN 1 ELSE 0 END AS partitioned "
+            .'FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '.$this->quoteValue($database);
 
         if ($table !== null) {
-            $sql .= ' AND TABLE_NAME = ' . $this->quoteValue($table);
+            $sql .= ' AND TABLE_NAME = '.$this->quoteValue($table);
         }
 
-        return $sql . ' ORDER BY TABLE_NAME';
+        return $sql.' ORDER BY TABLE_NAME';
     }
 
     private function databaseName(QualifiedName $table): string
@@ -567,18 +567,18 @@ class MySQLPlatform extends AbstractPlatform
     {
         $type = strtoupper($dataType->name);
         if ($dataType->length !== null) {
-            $type .= '(' . $dataType->length . ')';
+            $type .= '('.$dataType->length.')';
         } elseif ($dataType->precision !== null) {
-            $type .= '(' . $dataType->precision . ($dataType->scale === null ? '' : ', ' . $dataType->scale) . ')';
+            $type .= '('.$dataType->precision.($dataType->scale === null ? '' : ', '.$dataType->scale).')';
         }
         if ($dataType->unsigned) {
             $type .= ' UNSIGNED';
         }
         if ($dataType->charset !== null) {
-            $type .= ' CHARACTER SET ' . $dataType->charset;
+            $type .= ' CHARACTER SET '.$dataType->charset;
         }
         if ($dataType->collation !== null) {
-            $type .= ' COLLATE ' . $dataType->collation;
+            $type .= ' COLLATE '.$dataType->collation;
         }
 
         return $type;
@@ -619,8 +619,8 @@ class MySQLPlatform extends AbstractPlatform
     private function indexColumns(IndexMeta $index): string
     {
         return implode(', ', array_map(
-            fn (\SQLCraft\DTO\IndexColumnMeta $column): string => $column->expression
-                ?? $this->quoteIdentifier(new Identifier($column->columnName)) . ($column->descending ? ' DESC' : ' ASC'),
+            fn (IndexColumnMeta $column): string => $column->expression
+                ?? $this->quoteIdentifier(new Identifier($column->columnName)).($column->descending ? ' DESC' : ' ASC'),
             $index->columns,
         ));
     }

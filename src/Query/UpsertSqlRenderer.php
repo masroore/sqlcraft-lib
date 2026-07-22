@@ -11,7 +11,7 @@ use SQLCraft\Import\UpsertMode;
 final class UpsertSqlRenderer
 {
     /**
-     * @param list<string> $quotedColumns
+     * @param  list<string>  $quotedColumns
      * @return array{prefix: string, suffix: string}
      */
     public static function clauses(PlatformInterface $platform, UpsertMode $mode, array $quotedColumns): array
@@ -20,7 +20,7 @@ final class UpsertSqlRenderer
     }
 
     /**
-     * @param list<string> $quotedColumns
+     * @param  list<string>  $quotedColumns
      * @return array{prefix: string, suffix: string}
      */
     public static function clausesForName(string $platform, UpsertMode $mode, array $quotedColumns): array
@@ -28,6 +28,7 @@ final class UpsertSqlRenderer
         if ($mode === UpsertMode::Insert) {
             return ['prefix' => 'INSERT', 'suffix' => ''];
         }
+
         return match ($platform) {
             'sqlite' => ['prefix' => $mode === UpsertMode::InsertOrIgnore ? 'INSERT OR IGNORE' : 'INSERT OR REPLACE', 'suffix' => ''],
             'mysql', 'mariadb' => ['prefix' => $mode === UpsertMode::InsertOrIgnore ? 'INSERT IGNORE' : 'REPLACE', 'suffix' => ''],
@@ -35,8 +36,8 @@ final class UpsertSqlRenderer
                 'prefix' => 'INSERT',
                 'suffix' => $mode === UpsertMode::InsertOrIgnore
                     ? ' ON CONFLICT DO NOTHING'
-                    : ' ON CONFLICT (' . ($quotedColumns[0] ?? throw new InvalidArgumentException('Upsert requires at least one column.')) . ') DO UPDATE SET '
-                        . implode(', ', array_map(static fn (string $column): string => $column . ' = EXCLUDED.' . $column, $quotedColumns)),
+                    : ' ON CONFLICT ('.($quotedColumns[0] ?? throw new InvalidArgumentException('Upsert requires at least one column.')).') DO UPDATE SET '
+                        .implode(', ', array_map(static fn (string $column): string => $column.' = EXCLUDED.'.$column, $quotedColumns)),
             ],
             'sqlserver' => ['prefix' => 'MERGE', 'suffix' => ''],
             default => throw new InvalidArgumentException(sprintf('Upsert mode %s is unsupported by %s.', $mode->name, $platform)),

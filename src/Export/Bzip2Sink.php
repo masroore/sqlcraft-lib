@@ -11,11 +11,12 @@ final class Bzip2Sink implements SinkInterface
 {
     /** @var resource */
     private mixed $buffer;
+
     private bool $closed = false;
 
     public function __construct(private SinkInterface $inner, int $blockSize = 9)
     {
-        if (!extension_loaded('bz2')) {
+        if (! extension_loaded('bz2')) {
             throw new ExtensionMissingException('bz2');
         }
         $buffer = fopen('php://temp', 'w+b');
@@ -59,7 +60,7 @@ final class Bzip2Sink implements SinkInterface
             throw new \RuntimeException('Unable to read bzip2 export buffer.');
         }
         $compressed = bzcompress($contents, $this->blockSize);
-        if (!is_string($compressed)) {
+        if (! is_string($compressed)) {
             throw new \RuntimeException('Unable to compress export output with bzip2.');
         }
         $this->inner->write($compressed);

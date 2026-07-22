@@ -7,10 +7,10 @@ namespace SQLCraft\DDL;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\DDL\DdlBuilderInterface;
 use SQLCraft\Contracts\DDL\ObjectNameAwareDdlBuilderInterface;
-use SQLCraft\Contracts\Execution\QueryExecutorInterface;
 use SQLCraft\Contracts\Events\SchemaEventDispatcherInterface;
-use SQLCraft\Exceptions\OperationCancelledException;
+use SQLCraft\Contracts\Execution\QueryExecutorInterface;
 use SQLCraft\DDL\Sqlite\TableRecreationStrategy;
+use SQLCraft\Exceptions\OperationCancelledException;
 
 final readonly class DdlManager
 {
@@ -18,8 +18,7 @@ final readonly class DdlManager
         private QueryExecutorInterface $executor,
         private ?TableRecreationStrategy $sqliteRecreation = null,
         private ?SchemaEventDispatcherInterface $events = null,
-    ) {
-    }
+    ) {}
 
     /** @return list<string> */
     public function preview(ConnectionInterface $connection, DdlBuilderInterface $builder): array
@@ -52,7 +51,6 @@ final readonly class DdlManager
         }
     }
 
-
     private function objectName(DdlBuilderInterface $builder): string
     {
         if ($builder instanceof ObjectNameAwareDdlBuilderInterface) {
@@ -61,5 +59,4 @@ final readonly class DdlManager
 
         return (new \ReflectionClass($builder))->getShortName();
     }
-
 }

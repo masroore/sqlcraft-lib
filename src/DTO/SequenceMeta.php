@@ -16,6 +16,5 @@ final readonly class SequenceMeta
         public bool $cycle,
         public ?string $ownedByTable,
         public ?string $ownedByColumn,
-    ) {
-    }
+    ) {}
 }

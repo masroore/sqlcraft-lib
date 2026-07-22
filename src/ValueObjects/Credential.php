@@ -12,6 +12,5 @@ final readonly class Credential
         public ?string $username = null,
         #[SensitiveParameter]
         public ?string $password = null,
-    ) {
-    }
+    ) {}
 }

@@ -14,9 +14,7 @@ use SQLCraft\ValueObjects\QualifiedName;
 /** @internal */
 final class ViewInspector implements ViewInspectorInterface
 {
-    public function __construct(private readonly MetadataFactoryInterface $factory)
-    {
-    }
+    public function __construct(private readonly MetadataFactoryInterface $factory) {}
 
     #[\Override]
     public function getViews(ConnectionInterface $conn, ?string $schema = null): ViewCollection

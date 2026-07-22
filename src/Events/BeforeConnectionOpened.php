@@ -11,6 +11,5 @@ final class BeforeConnectionOpened extends InterceptionEvent
     public function __construct(
         public readonly string $name,
         public readonly ConnectionParameters $parameters,
-    ) {
-    }
+    ) {}
 }

@@ -15,6 +15,5 @@ final readonly class QueryFailedEvent extends ObservabilityEvent
         public array $params,
         public \Throwable $exception,
         public float $elapsedMs,
-    ) {
-    }
+    ) {}
 }

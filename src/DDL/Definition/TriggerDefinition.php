@@ -19,39 +19,44 @@ final readonly class TriggerDefinition implements TriggerDefinitionInterface
         private string $body,
         private ?string $definer,
         private string $forEach = 'ROW',
-    ) {
-    }
+    ) {}
 
     #[\Override]
     public function getName(): QualifiedName
     {
         return $this->name;
     }
+
     #[\Override]
     public function getTable(): QualifiedName
     {
         return $this->table;
     }
+
     #[\Override]
     public function getTiming(): TriggerTiming
     {
         return $this->timing;
     }
+
     #[\Override]
     public function getEvent(): TriggerEvent
     {
         return $this->event;
     }
+
     #[\Override]
     public function getBody(): string
     {
         return $this->body;
     }
+
     #[\Override]
     public function getDefiner(): ?string
     {
         return $this->definer;
     }
+
     #[\Override]
     public function getForEach(): string
     {

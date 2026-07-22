@@ -11,6 +11,5 @@ final readonly class ViewMeta
         public ?string $schema,
         public ?string $definition,
         public bool $materialized,
-    ) {
-    }
+    ) {}
 }

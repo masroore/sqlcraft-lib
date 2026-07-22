@@ -9,7 +9,7 @@ use SQLCraft\ValueObjects\DataType;
 final readonly class RoutineMeta
 {
     /**
-     * @param list<RoutineParameter> $params
+     * @param  list<RoutineParameter>  $params
      */
     public function __construct(
         public string $name,
@@ -22,6 +22,5 @@ final readonly class RoutineMeta
         public string $definer,
         public bool $deterministic,
         public string $sqlDataAccess,
-    ) {
-    }
+    ) {}
 }

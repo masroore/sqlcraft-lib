@@ -18,7 +18,7 @@ final class CapabilityNotSupportedException extends CapabilityException
             : $capability->name;
         $context = $platform === ''
             ? $capabilityName
-            : sprintf('%s on %s%s', $capabilityName, $platform, $version === '' ? '' : ' ' . $version);
+            : sprintf('%s on %s%s', $capabilityName, $platform, $version === '' ? '' : ' '.$version);
 
         parent::__construct(sprintf('Capability not supported: %s.', $context));
     }

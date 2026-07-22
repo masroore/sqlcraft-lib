@@ -11,9 +11,7 @@ use SQLCraft\ValueObjects\ConnectionParameters;
 /** @internal */
 final class ConnectionFactory
 {
-    public function __construct(private readonly DriverInterface $driver)
-    {
-    }
+    public function __construct(private readonly DriverInterface $driver) {}
 
     public function connect(ConnectionParameters $parameters): ConnectionInterface
     {

@@ -20,8 +20,8 @@ final class BufferedResult implements ResultInterface
     private int $position = 0;
 
     /**
-     * @param list<array<string, int|float|string|bool|null>> $rows
-     * @param list<ResultColumn> $columns
+     * @param  list<array<string, int|float|string|bool|null>>  $rows
+     * @param  list<ResultColumn>  $columns
      */
     public function __construct(array $rows, array $columns = [])
     {
@@ -33,7 +33,7 @@ final class BufferedResult implements ResultInterface
     #[\Override]
     public function fetchAssoc(): ?array
     {
-        if (!isset($this->rows[$this->position])) {
+        if (! isset($this->rows[$this->position])) {
             return null;
         }
 

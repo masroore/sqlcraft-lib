@@ -7,8 +7,8 @@ namespace SQLCraft\DTO;
 final readonly class ExplainResult
 {
     /**
-     * @param list<array<string, int|float|string|bool|null>> $rows
-     * @param array<string, int|float|string|bool|null>|null $json
+     * @param  list<array<string, int|float|string|bool|null>>  $rows
+     * @param  array<string, int|float|string|bool|null>|null  $json
      */
     public function __construct(
         public string $engine,
@@ -16,6 +16,5 @@ final readonly class ExplainResult
         public ?string $tree = null,
         public ?array $json = null,
         public float $elapsedMs = 0.0,
-    ) {
-    }
+    ) {}
 }

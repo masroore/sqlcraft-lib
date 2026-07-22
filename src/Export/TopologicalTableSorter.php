@@ -9,8 +9,8 @@ use SQLCraft\DTO\TableStatus;
 final class TopologicalTableSorter
 {
     /**
-     * @param iterable<TableStatus> $tables
-     * @param callable(TableStatus): iterable<string> $dependencies
+     * @param  iterable<TableStatus>  $tables
+     * @param  callable(TableStatus): iterable<string>  $dependencies
      * @return array{tables: list<TableStatus>, cycle: bool}
      */
     public function sort(iterable $tables, callable $dependencies): array
@@ -26,7 +26,7 @@ final class TopologicalTableSorter
             $key = $this->key($table);
             foreach ($dependencies($table) as $dependency) {
                 $dependencyKey = $this->normalize($dependency, $table->schema);
-                if (!isset($byName[$dependencyKey]) || $dependencyKey === $key) {
+                if (! isset($byName[$dependencyKey]) || $dependencyKey === $key) {
                     continue;
                 }
                 $edges[$dependencyKey][] = $key;
@@ -52,6 +52,7 @@ final class TopologicalTableSorter
         if (count($result) !== count($ordered)) {
             return ['tables' => $ordered, 'cycle' => true];
         }
+
         return ['tables' => $result, 'cycle' => false];
     }
 
@@ -62,6 +63,6 @@ final class TopologicalTableSorter
 
     private function normalize(string $table, ?string $schema): string
     {
-        return strtolower(($schema === null ? '' : $schema . '.') . $table);
+        return strtolower(($schema === null ? '' : $schema.'.').$table);
     }
 }

@@ -10,6 +10,8 @@ use SQLCraft\ValueObjects\RoutineDirection;
 interface RoutineParameterDefinitionInterface
 {
     public function getName(): string;
+
     public function getDataType(): DataType;
+
     public function getDirection(): RoutineDirection;
 }
