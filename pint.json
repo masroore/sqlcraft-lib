@@ -210,9 +210,9 @@
         "whitespace_after_comma_in_array": true
     },
     "notPath": [
-        "docs",
-        ".git",
-        ".github",
-        "vendor"
+      "docs",
+      ".git",
+      ".github",
+      "vendor"
     ]
 }
