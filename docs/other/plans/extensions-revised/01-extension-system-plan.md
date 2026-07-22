@@ -1,11 +1,12 @@
-# SQLCraft Extension System — Revised Implementation Plan
+# SQLCraft Extension System — Revised Architecture Plan
 
-> **Status:** Plan only — do not implement from partial sections
+> **Status:** Architecture-level plan — execute only through `04-implementation-handoff.md`
 > **Date:** 2026-07-22
 > **Adminer baseline:** 5.5.0, local commit `190a70d`
 > **Architecture decision:** `00-plugin-system-adr.md`
 > **Parity matrix:** `02-adminer-5.5.0-hook-matrix.md`
 > **Acceptance gates:** `03-verification.md`
+> **Execution handoff:** `04-implementation-handoff.md`
 
 ## 1. Goal
 
@@ -43,11 +44,11 @@ The revised plan removes all work that merely recreates these classes.
 
 | Seam | Current problem |
 |---|---|
-| Formats | `SQLCraftFactory::session()` creates a hardcoded registry for every session. Consumers cannot add a format to a factory-created session. |
+| Formats | `SQLCraftFactory::session()` creates a hardcoded registry for every session. Consumers cannot add a format; registered readers are not consumed or exposed. |
 | Query history | Implementations exist, but `SQLCraftFactory` constructs `QueryExecutor` without one. |
 | Metadata inspectors | `SchemaManagerFactory` constructs concrete inspectors and selects metadata factories with a built-in platform-name switch. |
-| External drivers | Driver registration works, but metadata construction fails for unknown platform names. |
-| Events | A consumer can inject a dispatcher, but SQLCraft's default listener provider is local to the constructor and cannot be configured later. |
+| External drivers | Metadata construction fails for unknown platform names, and `ConnectionParameters::$driver` is closed over the built-in `DatabaseDriver` enum. |
+| Events | A consumer can inject a dispatcher, but SQLCraft's default listener provider is local to the constructor. In external mode core cache invalidation is not registered. |
 | Schema manager contract | `DatabaseSession::schema()` returns an interface exposing 2 methods while the concrete class exposes 34 public operations. |
 | Process control | `Capability::Kill` is advertised, but no live process-kill operation exists. |
 | Post-connect setup | `ConnectionOpenedEvent` carries metadata but no connection. |
@@ -89,8 +90,6 @@ final class SQLCraftBuilder
     public function initializeConnection(ConnectionInitializerInterface $initializer): self;
     public function interceptQueries(QueryInterceptorInterface $interceptor): self;
 
-    public function metadataInspectors(MetadataInspectorSetFactoryInterface $factory): self;
-
     /** @param \Closure(MetadataInspectorSet, ConnectionInterface): MetadataInspectorSet $decorator */
     public function decorateMetadataInspectors(\Closure $decorator): self;
 
@@ -101,8 +100,8 @@ final class SQLCraftBuilder
 }
 ```
 
-Exact names may change only if a repository-wide naming convention requires it;
-the capabilities and invariants above are fixed.
+These names, capabilities, and invariants are fixed by the implementation
+handoff.
 
 ### 3.2 Builder invariants
 
@@ -111,11 +110,14 @@ the capabilities and invariants above are fixed.
   non-empty.
 - `register*()` throws a typed duplicate-registration exception.
 - `replace*()` throws if the target does not already exist.
-- Aliases reference canonical driver identifiers, not driver objects.
-- Alias targets must exist at `build()` time.
+- Aliases reference canonical driver identifiers, not driver objects or aliases.
+- Alias targets must exist at `build()` time; alias chains are rejected.
+- `ConnectionParameters` accepts `string|DatabaseDriver|null` at construction,
+  normalizes it to a canonical lowercase string, and therefore does not close the
+  registry over the built-in enum.
 - Builder-level `listen()` and `eventDispatcher()` are mutually exclusive.
-- `build()` may be called repeatedly only if it produces independent immutable
-  factory snapshots; later builder mutation cannot affect an existing factory.
+- `build()` may be called repeatedly and produces independent immutable factory
+  snapshots; later builder mutation cannot affect an existing factory.
 - `SQLCraftFactory` and `DatabaseSession` expose no late registration methods.
 
 ### 3.3 Lifecycle
@@ -142,16 +144,21 @@ factory-created session in one definition:
 ```php
 final readonly class DriverDefinition
 {
+    /** @param \Closure(ConnectionEventDispatcherInterface): DriverInterface $driverFactory */
     public function __construct(
-        public DriverInterface $driver,
+        public string $name,
+        public \Closure $driverFactory,
         public MetadataInspectorSetFactoryInterface $metadata,
         public ?ProcessManagerFactoryInterface $processes = null,
     ) {}
 }
 ```
 
-The definition identifier comes from `DriverInterface::getName()`. A mismatch
-between the registered identifier and platform identity is a build-time error.
+The explicit name permits registration before the final event dispatcher exists.
+`build()` invokes the factory once per factory snapshot and verifies that the
+returned driver's `getName()` equals the canonical definition name. After a
+connection opens, its platform name must also equal that canonical name. An alias
+may resolve to the canonical definition without changing that invariant.
 
 This replaces `SchemaManagerFactory::metadataFactory()` platform-name switching.
 Adding an engine must not require a core `match` arm.
@@ -169,6 +176,7 @@ interface PlatformInterface
     public function getCapabilitySet(ServerVersion $version): CapabilitySet;
     public function getDefaultCharset(): ?string;
     public function getDefaultCollation(): ?string;
+    public function supportsSchemas(): bool;
 
     public function ddl(): DdlDialectInterface;
     public function introspection(): IntrospectionDialectInterface;
@@ -178,9 +186,10 @@ interface PlatformInterface
 }
 ```
 
-`QueryDialectInterface` owns operator allowlists, aggregate allowlists,
-keywords, and pagination behavior. Existing `PaginationInterface` may be
-retained as a parent role if that keeps it independently useful.
+`QueryDialectInterface` extends the existing `PaginationInterface` and owns
+operator allowlists, aggregate allowlists, keywords, `getExplainSql()`, and
+`wrapWithTimeout()`. Remove those last two methods from
+`IntrospectionDialectInterface`; they control execution rather than metadata.
 
 Provide:
 
@@ -234,26 +243,25 @@ inspectors.
 
 ### 5.2 Shared consumption
 
-The same decorated set constructs both:
+The same decorated set constructs:
 
 - The session's `SchemaManager`.
 - The session's export metadata source.
+- The session's CSV importer and process manager where they need column/server
+  inspection.
+- The session's `PrivilegeGuard` when a privilege inspector exists; otherwise the
+  session uses `DenySecurityGuard`.
 
 A metadata extension must not affect schema browsing while export silently uses
 an independent hardcoded inspector graph.
 
 ### 5.3 Public schema surface
 
-`DatabaseSession::schema()` must not return the current two-method interface.
-Choose one of these during implementation, in priority order:
-
-1. Return final `SchemaManager` and stabilize its caller methods while keeping
-   inspector customization behind `MetadataInspectorSet`.
-2. Split caller-facing schema operations into complete role interfaces and return
-   an aggregate implementing them.
-
-Do not make consumers implement a 34-method manager merely to replace one
-metadata source.
+`DatabaseSession::schema()` returns the final concrete `SchemaManager`.
+Stabilize its caller-facing methods while keeping inspector customization behind
+`MetadataInspectorSet`. Keep the existing two-method `SchemaManagerInterface`
+only for its comparison contract until a separate cleanup removes or renames it;
+do not use it as the session return type and do not expand it to 34 methods.
 
 ### 5.4 Visibility filtering
 
@@ -393,6 +401,9 @@ Rules:
 - Verify returned `getFormatName()` matches the registered canonical name.
 - State-bearing writers never leak state between exports or connections.
 - `SqlFormatWriter` receives the active connection from its factory.
+- Each session exposes its factory-backed `FormatRegistry` through
+  `DatabaseSession::formats()` so registered readers are reachable even though
+  the SQL statement importer is a separate service.
 
 ### 9.2 Caller-owned outputs
 
@@ -411,15 +422,18 @@ security, memory, dependency, and streaming requirements.
 
 ### SQLCraft-owned mode
 
-Calling builder `listen()` stores registrations. `build()` creates
+Calling builder `listen()` stores registrations. `build()` creates a user
 `SimpleListenerProvider` and `SimpleEventDispatcher`. Priority and registration
-sequence are deterministic inside this mode.
+sequence are deterministic inside this user dispatcher. A separate core
+dispatcher always runs first, so user priority or cancellation cannot suppress
+metadata cache invalidation or other invariants.
 
 ### Consumer-owned mode
 
 Calling `eventDispatcher()` supplies an external PSR-14 dispatcher. The host
 framework owns listener registration and ordering. SQLCraft does not mutate or
-inspect its listener provider.
+inspect its listener provider. SQLCraft dispatches its invariant-preserving core
+listeners first, then forwards the same event object to the external dispatcher.
 
 ### Mutual exclusion
 
@@ -436,7 +450,7 @@ unless a shipped source class directly type-hints it.
 ## 11. Process Control
 
 Adminer exposes `killProcess`; SQLCraft advertises `Capability::Kill` but has no
-live operation. Add a connection-scoped manager only if kill remains advertised:
+live operation. Keep the capability and add a connection-scoped manager:
 
 ```php
 interface ProcessManagerInterface
@@ -451,8 +465,11 @@ An engine definition supplies an optional `ProcessManagerFactoryInterface`.
 without the capability throw `CapabilityNotSupportedException` before rendering
 or executing SQL.
 
-If this manager is deferred, remove `Capability::Kill` from every capability set
-and mark `killProcess` as an explicit parity gap. Do not leave a dead capability.
+Provide managers for MySQL/MariaDB, PostgreSQL, and SQL Server. SQLite keeps no
+`Kill` capability and no process manager. Validate numeric process identifiers
+before rendering engine syntax; use bound parameters where the engine permits.
+A process manager executes kills through `QueryExecutor` as
+`QueryKind::Administrative`, so interception, history, and events remain live.
 
 ## 12. Stability Policy
 

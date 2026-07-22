@@ -3,7 +3,8 @@
 > **Status:** Normative acceptance plan
 > **Date:** 2026-07-22
 > **Architecture:** `00-plugin-system-adr.md`
-> **Implementation plan:** `01-extension-system-plan.md`
+> **Architecture detail:** `01-extension-system-plan.md`
+> **Implementation handoff:** `04-implementation-handoff.md`
 > **Parity inventory:** `02-adminer-5.5.0-hook-matrix.md`
 
 ## 1. Verification Principle
@@ -77,11 +78,10 @@ Test drivers, aliases, readers, and writers with:
 - empty names;
 - whitespace-only names;
 - invalid alias targets;
-- alias chains if supported;
-- alias cycles if chains are supported.
+- alias targets that name another alias.
 
-The implementation must either disallow alias chains or detect cycles at build
-time. It must not defer cycles or missing targets to connection time.
+Alias chains are not supported. Missing targets and alias-to-alias targets fail at
+`build()` time, never at connection time.
 
 ### Conflict policy
 
@@ -99,12 +99,15 @@ For each registry kind:
 `build()` fails before opening a connection when:
 
 - a driver definition is incomplete;
-- driver and platform identifiers disagree;
+- a materialized driver's name differs from its definition name;
 - a required metadata factory is absent;
 - an alias target is absent;
-- SQLCraft-owned listeners and an external dispatcher are both configured;
-- a registered format factory returns the wrong type or name when eagerly
-  verifiable.
+- SQLCraft-owned listeners and an external dispatcher are both configured.
+
+Format factory output is validated when resolved because writer factories require
+the active connection. A wrong type or name must fail before export/import work
+begins. A connected platform name differing from the canonical driver definition
+must fail during session creation before session services are exposed.
 
 ## 4. Driver and Platform Conformance
 
@@ -137,21 +140,22 @@ For every `Capability` enum case advertised by a built-in platform:
 - Locate a public factory/session operation consuming it, or
 - classify it as informational and prove why no operation is required.
 
-`Capability::Kill` specifically requires an end-to-end process-manager test. If
-that test is absent, no built-in platform may advertise `Kill`.
+`Capability::Kill` specifically requires end-to-end process-manager tests for
+MySQL/MariaDB, PostgreSQL, and SQL Server. SQLite must not advertise `Kill`.
 
 ### Third-party fixture
 
 The fake engine must demonstrate:
 
-1. Builder registration.
-2. Connection creation through its fake driver.
-3. Platform role resolution.
-4. Database/table metadata through its inspector set.
-5. A query through `DatabaseSession`.
-6. Export with a registered writer.
-7. Capability checks.
-8. No changes to built-in driver, schema-factory, or platform switch statements.
+1. Builder registration with a driver name absent from `DatabaseDriver`.
+2. String driver selection through `ConnectionParameters`.
+3. Connection creation through its fake driver.
+4. Platform role resolution.
+5. Database/table metadata through its inspector set.
+6. A query through `DatabaseSession`.
+7. Export with a registered writer.
+8. Capability checks.
+9. No changes to built-in driver, schema-factory, or platform switch statements.
 
 ## 5. Metadata Inspector-Set Tests
 
@@ -168,6 +172,8 @@ Create a server-inspector decorator that changes the database collection:
 
 - `session->schema()` observes the decorated collection.
 - Database-scope export observes the same decorated collection.
+- Process listing, CSV column lookup, and privilege security use their matching
+  inspectors from the same set.
 - The undecorated lower-level adapter remains unchanged.
 - A second connection receives its own inspector set.
 
@@ -321,17 +327,24 @@ documentation that depend on `BeforeQueryExecuted::replaceSql()`.
 
 ### SQLCraft-owned mode
 
-- Builder listeners fire through the simple dispatcher.
+- Core listeners run before SQLCraft-owned user listeners.
+- Builder listeners fire through their separate simple dispatcher.
 - Higher priority runs before lower priority.
 - Equal priority preserves registration sequence.
-- Stoppable events stop later SQLCraft-owned listeners.
-- Listener exceptions propagate.
+- Stoppable events stop later SQLCraft-owned listeners but cannot suppress core
+  invariant listeners.
+- Listener exceptions propagate for normal event dispatch. A listener error while
+  reporting connection-initialization failure is retained separately and does not
+  replace the initializer error as `previous`.
 
 ### Consumer-owned mode
 
+- SQLCraft core listeners run before the supplied external dispatcher.
 - The supplied external dispatcher receives all documented events.
 - SQLCraft never attempts to retrieve or mutate its listener provider.
-- No priority or registration guarantees are asserted by SQLCraft.
+- Core cache invalidation remains live in external mode.
+- No external listener priority or registration guarantees are asserted by
+  SQLCraft.
 
 ### Mutual exclusion
 

@@ -4,7 +4,9 @@
 > **Date:** 2026-07-22
 > **Adminer source:** `adminer/adminer/include/adminer.inc.php`
 > **Plugin composition source:** `adminer/adminer/include/plugins.inc.php`
-> **SQLCraft plan:** `01-extension-system-plan.md`
+> **Official overview:** `https://www.adminer.org/en/extension/`
+> **SQLCraft architecture:** `01-extension-system-plan.md`
+> **Implementation handoff:** `04-implementation-handoff.md`
 
 ## 1. Baseline and Rules
 
@@ -63,7 +65,7 @@ query interceptor is an independent SQLCraft-native seam.
 | `pluginsLinks(): void` | Print links after list of plugins | first non-null | Excluded: UI/HTTP/form/presentation | Consumer application/UI layer | Intentionally absent from SQLCraft. | Keep excluded; migration guide explains the ownership boundary. |
 | `operators(): array` | Operators used in select | first non-null | Extension seam/adapter | Composed platform `QueryDialectInterface` | Live core behavior; small overrides require the 85-method platform aggregate. | Move operator behavior into replaceable query-dialect role. |
 | `schemas(): array` | Get list of schemas | first non-null | Extension seam/adapter | `MetadataInspectorSet` / `DatabaseInspectorInterface` | Partial: inspector exists; factory hardcodes the inspector graph. | Create/decorate one per-connection metadata-inspector set. |
-| `queryTimeout(): float` | Specify limit for waiting on some slow queries like DB list | first non-null | Direct config/core operation | Execution options/policy and connection initializer | Partial: explicit timeout execution exists; no unified factory policy. | Define timeout policy and initializer use; do not map to slow-query detection. |
+| `queryTimeout(): float` | Specify limit for waiting on some slow queries like DB list | first non-null | Direct config/core operation | Per-operation timeout options and connection initializer | Partial: explicit timeout execution exists; ordered initializers are absent. | Keep timeout caller-owned; add initializer support for connection/session defaults; do not map to slow-query detection. |
 | `afterConnect(): void` | Called after connecting and selecting a database | first non-null | Extension seam/adapter | Ordered `ConnectionInitializerInterface` chain | Gap: opened event has no connection and no initializer lifecycle. | Add ordered initializers with cleanup and failure events. |
 | `headers(): void` | Headers to send before HTML output | first non-null | Excluded: UI/HTTP/form/presentation | Consumer application/UI layer | Intentionally absent from SQLCraft. | Keep excluded; migration guide explains the ownership boundary. |
 | `csp(array $csp): array` | Get Content Security Policy headers | first non-null | Excluded: UI/HTTP/form/presentation | Consumer application/UI layer | Intentionally absent from SQLCraft. | Keep excluded; migration guide explains the ownership boundary. |
@@ -130,7 +132,7 @@ query interceptor is an independent SQLCraft-native seam.
 | `showVariables(): array` | Get server variables | first non-null | Extension seam/adapter | `ServerInspectorInterface::getVariables()` | Concrete manager supports it; public schema interface does not expose it. | Expose live schema/server caller surface and inspector decoration. |
 | `showStatus(): array` | Get status variables | first non-null | Extension seam/adapter | `ServerInspectorInterface::getStatus()` | Concrete manager supports it; public schema interface does not expose it. | Expose live schema/server caller surface and inspector decoration. |
 | `processList(): array` | Get process list | first non-null | Extension seam/adapter | `ServerInspectorInterface::getProcessList()` | Concrete manager supports it; public schema interface does not expose it. | Expose live schema/server caller surface and inspector decoration. |
-| `killProcess(string $id)` | Kill a process | first non-null | Extension seam/adapter | Connection-scoped `ProcessManagerInterface` | Gap: capability exists without a reachable operation. | Add process manager or remove `Capability::Kill` until implemented. |
+| `killProcess(string $id)` | Kill a process | first non-null | Extension seam/adapter | Connection-scoped `ProcessManagerInterface` | Gap: capability exists without a reachable operation. | Add validated process managers for MySQL/MariaDB, PostgreSQL, and SQL Server; SQLite does not advertise `Kill`. |
 
 ## 4. Migration Notes for Representative Plugins
 

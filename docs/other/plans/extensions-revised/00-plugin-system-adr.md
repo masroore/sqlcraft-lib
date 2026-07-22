@@ -5,6 +5,7 @@
 > **Adminer baseline:** 5.5.0, local commit `190a70d`
 > **Scope:** Extension architecture and Adminer capability-parity policy
 > **Supersedes on adoption:** `docs/other/plans/17-plugin-system.md`
+> **Detailed implementation handoff:** `04-implementation-handoff.md`
 
 ## Context
 
