@@ -79,8 +79,7 @@ final class QueryEngineAcceptanceIntegrationTest extends TestCase
         $connection->execute('INSERT INTO users (name) VALUES (?)', ['Ada']);
         $connection->execute('INSERT INTO users (name) VALUES (?)', ['Grace']);
 
-        $status = new class implements TableStatusProviderInterface
-        {
+        $status = new class implements TableStatusProviderInterface {
             #[\Override]
             public function getApproximateRowCount(ConnectionInterface $connection, QualifiedName $table): int
             {

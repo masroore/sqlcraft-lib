@@ -39,8 +39,7 @@ final class SqliteTableRecreationIntegrationTest extends TestCase
             new ColumnDefinition('obsolete', new DataType('TEXT'), true, false, false, false, DefaultValue::nullValue(), null, null, null, [], null, null),
             new ColumnDefinition('name', new DataType('TEXT'), false, false, false, false, DefaultValue::nullValue(), null, null, null, [], null, null),
         ]);
-        $provider = new class($definition) implements TableRecreationMetadataProviderInterface
-        {
+        $provider = new class($definition) implements TableRecreationMetadataProviderInterface {
             public function __construct(private readonly TableRecreationDefinition $definition) {}
 
             #[\Override]

@@ -108,8 +108,7 @@ final class ImportExportRoundTripTest extends TestCase
         fclose($handle);
 
         try {
-            $source = new class($path) implements ImportSourceInterface
-            {
+            $source = new class($path) implements ImportSourceInterface {
                 public function __construct(private readonly string $path) {}
 
                 #[\Override]
@@ -220,8 +219,7 @@ final class ImportExportRoundTripTest extends TestCase
 
     private function sourceFromString(string $contents): ImportSourceInterface
     {
-        return new class($contents) implements ImportSourceInterface
-        {
+        return new class($contents) implements ImportSourceInterface {
             public function __construct(private readonly string $contents) {}
 
             #[\Override]

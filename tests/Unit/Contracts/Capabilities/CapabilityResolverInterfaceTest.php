@@ -16,8 +16,7 @@ final class CapabilityResolverInterfaceTest extends TestCase
     public function test_implementations_resolve_capabilities_without_a_connection(): void
     {
         $capabilities = new CapabilitySet([Capability::Table]);
-        $resolver = new class($capabilities) implements CapabilityResolverInterface
-        {
+        $resolver = new class($capabilities) implements CapabilityResolverInterface {
             public function __construct(private readonly CapabilitySet $capabilities) {}
 
             #[\Override]

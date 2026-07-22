@@ -19,9 +19,9 @@ function countRows(ConnectionInterface $connection): int
     return count($connection->query('SELECT id FROM orders')->fetchAll());
 }
 
-$factory = new PdoConnectionFactory(new PdoExceptionTranslator());
+$factory = new PdoConnectionFactory(new PdoExceptionTranslator);
 foreach (['sqlite-memory-a', 'sqlite-memory-b', 'sqlite-memory-c'] as $label) {
-    $driver = new SqliteDriver($factory, new SqlitePlatform());
+    $driver = new SqliteDriver($factory, new SqlitePlatform);
     $connection = $driver->connect(new ConnectionParameters(database: ':memory:'));
     printf("%s: %d row\n", $label, countRows($connection));
     $connection->close();

@@ -13,9 +13,8 @@ use SQLCraft\ValueObjects\ConnectionParameters;
 use SQLCraft\ValueObjects\Identifier;
 use SQLCraft\ValueObjects\QualifiedName;
 
-
-$connectionFactory = new PdoConnectionFactory(new PdoExceptionTranslator());
-$platform = new SqlitePlatform();
+$connectionFactory = new PdoConnectionFactory(new PdoExceptionTranslator);
+$platform = new SqlitePlatform;
 $driver = new SqliteDriver($connectionFactory, $platform);
 $connection = $driver->connect(new ConnectionParameters(database: ':memory:'));
 

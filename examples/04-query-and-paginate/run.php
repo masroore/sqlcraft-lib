@@ -20,9 +20,8 @@ use SQLCraft\ValueObjects\ConnectionParameters;
 use SQLCraft\ValueObjects\Identifier;
 use SQLCraft\ValueObjects\QualifiedName;
 
-
-$connectionFactory = new PdoConnectionFactory(new PdoExceptionTranslator());
-$platform = new SqlitePlatform();
+$connectionFactory = new PdoConnectionFactory(new PdoExceptionTranslator);
+$platform = new SqlitePlatform;
 $driver = new SqliteDriver($connectionFactory, $platform);
 $connection = $driver->connect(new ConnectionParameters(database: ':memory:'));
 
@@ -31,7 +30,7 @@ foreach (['Ada', 'Grace', 'Linus'] as $name) {
     $connection->execute('INSERT INTO users (name) VALUES (?)', [$name]);
 }
 
-$executor = new QueryExecutor();
+$executor = new QueryExecutor;
 $renderer = new SelectQueryRenderer($platform);
 $paginator = new Paginator($executor, $renderer);
 $query = (new SelectQuery(new QualifiedName(new Identifier('users'))))

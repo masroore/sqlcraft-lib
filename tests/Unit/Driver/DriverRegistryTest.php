@@ -17,8 +17,7 @@ final class DriverRegistryTest extends TestCase
 {
     public function test_it_registers_and_retrieves_drivers_by_name(): void
     {
-        $driver = new class implements DriverInterface
-        {
+        $driver = new class implements DriverInterface {
             #[\Override]
             public function buildDsn(ConnectionParameters $params): string
             {
@@ -85,8 +84,7 @@ final class DriverRegistryTest extends TestCase
 
     private function fakeDriver(): DriverInterface
     {
-        return new class implements DriverInterface
-        {
+        return new class implements DriverInterface {
             #[\Override]
             public function buildDsn(ConnectionParameters $params): string
             {

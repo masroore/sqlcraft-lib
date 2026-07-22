@@ -10,9 +10,8 @@ use SQLCraft\Driver\SqliteDriver;
 use SQLCraft\Platform\SqlitePlatform;
 use SQLCraft\ValueObjects\ConnectionParameters;
 
-
-$connectionFactory = new PdoConnectionFactory(new PdoExceptionTranslator());
-$platform = new SqlitePlatform();
+$connectionFactory = new PdoConnectionFactory(new PdoExceptionTranslator);
+$platform = new SqlitePlatform;
 $driver = new SqliteDriver($connectionFactory, $platform);
 $connection = $driver->connect(new ConnectionParameters(database: ':memory:'));
 
