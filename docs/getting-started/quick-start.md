@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 require __DIR__ . '/vendor/autoload.php';
 
+use SQLCraft\Enums\DatabaseDriver;
 use SQLCraft\SQLCraftFactory;
 use SQLCraft\ValueObjects\ConnectionParameters;
 
@@ -21,7 +22,10 @@ $factory = new SQLCraftFactory();
 
 // Connect to an in-memory SQLite database
 $db = $factory->session(
-    new ConnectionParameters(database: ':memory:')
+    new ConnectionParameters(
+        database: ':memory:',
+        driver: DatabaseDriver::SQLite,
+    )
 );
 
 // Create a table
@@ -54,6 +58,7 @@ User: Alice <alice@example.com>
 ### MySQL/MariaDB
 
 ```php
+use SQLCraft\Enums\DatabaseDriver;
 use SQLCraft\SQLCraftFactory;
 use SQLCraft\ValueObjects\ConnectionParameters;
 
@@ -66,7 +71,7 @@ $db = $factory->session(
         database: 'myapp',
         username: 'root',
         password: 'secret',
-        extras: ['driver' => 'mysql']
+        driver: DatabaseDriver::MySQL,
     )
 );
 ```
@@ -74,6 +79,8 @@ $db = $factory->session(
 ### PostgreSQL
 
 ```php
+use SQLCraft\Enums\DatabaseDriver;
+
 $db = $factory->session(
     new ConnectionParameters(
         host: 'localhost',
@@ -81,7 +88,7 @@ $db = $factory->session(
         database: 'myapp',
         username: 'postgres',
         password: 'secret',
-        extras: ['driver' => 'pgsql']
+        driver: DatabaseDriver::PostgreSQL,
     )
 );
 ```
@@ -89,6 +96,8 @@ $db = $factory->session(
 ### SQL Server
 
 ```php
+use SQLCraft\Enums\DatabaseDriver;
+
 $db = $factory->session(
     new ConnectionParameters(
         host: 'localhost',
@@ -96,7 +105,7 @@ $db = $factory->session(
         database: 'myapp',
         username: 'sa',
         password: 'YourStrong@Password',
-        extras: ['driver' => 'sqlserver']
+        driver: DatabaseDriver::SqlServer,
     )
 );
 ```
@@ -327,13 +336,17 @@ declare(strict_types=1);
 
 require __DIR__ . '/vendor/autoload.php';
 
+use SQLCraft\Enums\DatabaseDriver;
 use SQLCraft\SQLCraftFactory;
 use SQLCraft\ValueObjects\{ConnectionParameters, DataType, Identifier, QualifiedName};
 use SQLCraft\Exceptions\UniqueConstraintException;
 
 // Connect
 $factory = new SQLCraftFactory();
-$db = $factory->session(new ConnectionParameters(database: ':memory:'));
+$db = $factory->session(new ConnectionParameters(
+    database: ':memory:',
+    driver: DatabaseDriver::SQLite,
+));
 
 // Create schema
 $db->ddl()->execute(

@@ -413,12 +413,14 @@ $db->privileges()->grant(
 ### 2. Use Application Users, Not Root
 
 ```php
+use SQLCraft\Enums\DatabaseDriver;
+
 // ✅ Good - dedicated application user
 $appDb = $factory->session(
     new ConnectionParameters(
         username: 'myapp_rw',
         password: $_ENV['APP_DB_PASSWORD'],
-        extras: ['driver' => 'mysql']
+        driver: DatabaseDriver::MySQL,
     )
 );
 
@@ -427,7 +429,7 @@ $db = $factory->session(
     new ConnectionParameters(
         username: 'root',
         password: 'root',
-        extras: ['driver' => 'mysql']
+        driver: DatabaseDriver::MySQL,
     )
 );
 ```
@@ -448,6 +450,8 @@ $writeDb->query('INSERT INTO orders ...');
 ### 4. Enable SSL for Remote Connections
 
 ```php
+use SQLCraft\Enums\DatabaseDriver;
+
 // ✅ Good - encrypted connection
 $params = new ConnectionParameters(
     host: 'remote.example.com',
@@ -456,7 +460,7 @@ $params = new ConnectionParameters(
         'verify_peer' => true,
         'verify_peer_name' => true,
     ],
-    extras: ['driver' => 'mysql']
+    driver: DatabaseDriver::MySQL,
 );
 ```
 

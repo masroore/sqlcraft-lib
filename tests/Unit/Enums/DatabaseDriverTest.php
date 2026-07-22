@@ -29,13 +29,18 @@ final class DatabaseDriverTest extends TestCase
 
     public function testTryFromReturnsNullForUnknownValue(): void
     {
-        self::assertNull(DatabaseDriver::tryFrom('oracle'));
-        self::assertNull(DatabaseDriver::tryFrom(''));
-        self::assertNull(DatabaseDriver::tryFrom('MySQL')); // case-sensitive
+        self::assertNull($this->tryFromValue('oracle'));
+        self::assertNull($this->tryFromValue(''));
+        self::assertNull($this->tryFromValue('MySQL')); // case-sensitive
     }
 
     public function testCasesMethodReturnsFiveEntries(): void
     {
         self::assertCount(5, DatabaseDriver::cases());
+    }
+
+    private function tryFromValue(string $value): ?DatabaseDriver
+    {
+        return DatabaseDriver::tryFrom($value);
     }
 }

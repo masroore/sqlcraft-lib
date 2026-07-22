@@ -94,6 +94,7 @@ open, network unreachable, driver extension not loaded.
 **Example:**
 
 ```php
+use SQLCraft\Enums\DatabaseDriver;
 use SQLCraft\Exceptions\ConnectionFailedException;
 use SQLCraft\SQLCraftFactory;
 use SQLCraft\ValueObjects\ConnectionParameters;
@@ -103,7 +104,7 @@ try {
         host: 'nonexistent.local',
         port: 5432,
         database: 'mydb',
-        extras: ['driver' => 'pgsql'],
+        driver: DatabaseDriver::PostgreSQL,
     ));
 } catch (ConnectionFailedException $e) {
     echo "Failed to connect to {$e->host} using driver {$e->driver}\n";
@@ -122,6 +123,7 @@ Thrown when credentials are rejected by the server.
 **Example:**
 
 ```php
+use SQLCraft\Enums\DatabaseDriver;
 use SQLCraft\Exceptions\AuthenticationException;
 
 try {
@@ -131,7 +133,7 @@ try {
         database: 'mydb',
         username: 'wronguser',
         password: 'wrongpass',
-        extras: ['driver' => 'pgsql'],
+        driver: DatabaseDriver::PostgreSQL,
     ));
 } catch (AuthenticationException $e) {
     echo "Authentication failed for driver {$e->driver} at {$e->host}\n";

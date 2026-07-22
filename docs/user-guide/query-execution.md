@@ -517,10 +517,12 @@ echo $row['id'];
 ### SQLite — In-Memory Testing
 
 ```php
+use SQLCraft\Enums\DatabaseDriver;
+
 $factory = new SQLCraftFactory();
 $db = $factory->session(new ConnectionParameters(
     database: ':memory:',
-    extras: ['driver' => 'sqlite'],
+    driver: DatabaseDriver::SQLite,
 ));
 
 $db->ddl()->execute($db->connection(), $createTableBuilder);

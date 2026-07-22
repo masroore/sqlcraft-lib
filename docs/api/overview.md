@@ -42,6 +42,7 @@ There are exactly two objects you construct directly.
 and call `session()` to open a `DatabaseSession`.
 
 ```php
+use SQLCraft\Enums\DatabaseDriver;
 use SQLCraft\SQLCraftFactory;
 use SQLCraft\ValueObjects\ConnectionParameters;
 
@@ -59,7 +60,7 @@ $session = $factory->session(
         database: 'mydb',
         username: 'user',
         password: 'pass',
-        extras: ['driver' => 'pgsql'],
+        driver: DatabaseDriver::PostgreSQL,
     )
 );
 ```
@@ -240,7 +241,7 @@ Immutable named types that prevent stringly-typed mistakes:
 
 | Class | Purpose |
 |---|---|
-| `ConnectionParameters` | Host, port, database, credentials, driver |
+| `ConnectionParameters` | Host, port, database, credentials, driver (`DatabaseDriver` enum) |
 | `Credential` | Username + password pair |
 | `Identifier` | A single SQL identifier (table name, column name) |
 | `QualifiedName` | Optionally schema- and catalog-qualified name |

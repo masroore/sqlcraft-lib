@@ -8,6 +8,7 @@ SQLCraft's schema introspection layer provides a uniform API for reading databas
 
 ```php
 use SQLCraft\SQLCraftFactory;
+use SQLCraft\Enums\DatabaseDriver;
 use SQLCraft\ValueObjects\ConnectionParameters;
 
 $factory = new SQLCraftFactory();
@@ -16,7 +17,7 @@ $db = $factory->session(new ConnectionParameters(
     database: 'myapp',
     username: 'root',
     password: 'secret',
-    extras: ['driver' => 'mysql'],
+    driver: DatabaseDriver::MySQL,
 ));
 
 $schema = $db->schema(); // SchemaManagerInterface

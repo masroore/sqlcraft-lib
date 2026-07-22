@@ -215,6 +215,7 @@ stops the container:
 // tests/Integration/PostgreSQL/SchemaManagerPostgresIntegrationTest.php
 use PHPUnit\Framework\TestCase;
 use Testcontainers\Container\PostgreSQLContainer;
+use SQLCraft\Enums\DatabaseDriver;
 use SQLCraft\SQLCraftFactory;
 use SQLCraft\ValueObjects\ConnectionParameters;
 
@@ -246,7 +247,7 @@ class SchemaManagerPostgresIntegrationTest extends TestCase
             database: 'testdb',
             username: 'test',
             password: 'test',
-            extras:   ['driver' => 'pgsql'],
+            driver:   DatabaseDriver::PostgreSQL,
         ));
     }
 }
@@ -259,6 +260,7 @@ Docker:
 
 ```php
 use PHPUnit\Framework\TestCase;
+use SQLCraft\Enums\DatabaseDriver;
 use SQLCraft\SQLCraftFactory;
 use SQLCraft\ValueObjects\ConnectionParameters;
 
@@ -271,7 +273,7 @@ class SchemaManagerSqliteIntegrationTest extends TestCase
         $factory = new SQLCraftFactory();
         $this->session = $factory->session(new ConnectionParameters(
             database: ':memory:',
-            extras:   ['driver' => 'sqlite'],
+            driver:   DatabaseDriver::SQLite,
         ));
 
         $this->session->connection()->execute(

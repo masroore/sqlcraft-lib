@@ -22,6 +22,7 @@ No container is required. Construct `SQLCraftFactory` directly and call `session
 <?php
 require 'vendor/autoload.php';
 
+use SQLCraft\Enums\DatabaseDriver;
 use SQLCraft\SQLCraftFactory;
 use SQLCraft\ValueObjects\ConnectionParameters;
 
@@ -33,7 +34,7 @@ $session = $factory->session(new ConnectionParameters(
     database: 'mydb',
     username: 'app',
     password: 'secret',
-    extras: ['driver' => 'pgsql'],
+    driver: DatabaseDriver::PostgreSQL,
 ));
 
 $tables = $session->schema()->listTables();
@@ -115,6 +116,7 @@ use SQLCraft\Driver\SqliteDriver;
 use SQLCraft\Driver\SqlServerDriver;
 use SQLCraft\Connection\PdoConnectionFactory;
 use SQLCraft\Connection\PdoExceptionTranslator;
+use SQLCraft\Enums\DatabaseDriver;
 use SQLCraft\Platform\MySQLPlatform;
 use SQLCraft\Platform\PostgreSQLPlatform;
 use SQLCraft\Platform\SqlitePlatform;
@@ -157,7 +159,7 @@ class SQLCraftServiceProvider extends ServiceProvider
                     database: $config['database'],
                     username: $config['username'],
                     password: $config['password'],
-                    extras:   ['driver' => $config['driver']],
+                    driver:   DatabaseDriver::from($config['driver']),
                 ),
             );
         });
@@ -407,6 +409,8 @@ One `SQLCraftFactory` instance can open sessions to multiple databases or tenant
 The factory is stateless aside from its driver registry and credential provider.
 
 ```php
+use SQLCraft\Enums\DatabaseDriver;
+
 final class TenantSessionPool
 {
     /** @var array<string, DatabaseSession> */
@@ -421,7 +425,7 @@ final class TenantSessionPool
                 host:     '10.0.0.' . $this->resolveHost($tenantId),
                 port:     5432,
                 database: 'tenant_' . $tenantId,
-                extras:   ['driver' => 'pgsql'],
+                driver:   DatabaseDriver::PostgreSQL,
             ),
             name: 'tenant_' . $tenantId,
             credentialKey: $tenantId,
