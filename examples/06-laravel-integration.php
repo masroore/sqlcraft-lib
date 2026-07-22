@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+// Shape only: bind SQLCraft connection like a Laravel container closure.
+
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 use SQLCraft\Connection\PdoConnectionFactory;
@@ -11,12 +13,13 @@ use SQLCraft\Driver\SqliteDriver;
 use SQLCraft\Platform\SqlitePlatform;
 use SQLCraft\ValueObjects\ConnectionParameters;
 
+// Mimics $this->app->singleton('sqlcraft.connection', fn () => …).
 $bindings = [];
 $bindings['sqlcraft.connection'] = static function (): ConnectionInterface {
-    $factory = new PdoConnectionFactory(new PdoExceptionTranslator);
-    $driver = new SqliteDriver($factory, new SqlitePlatform);
-
-    return $driver->connect(new ConnectionParameters(database: ':memory:'));
+    return (new SqliteDriver(
+        new PdoConnectionFactory(new PdoExceptionTranslator),
+        new SqlitePlatform,
+    ))->connect(new ConnectionParameters(database: ':memory:'));
 };
 
 $connection = $bindings['sqlcraft.connection']();

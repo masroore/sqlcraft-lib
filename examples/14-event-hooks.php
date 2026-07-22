@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+// Attach a PSR-14 listener; QueryExecutor dispatches AfterQueryExecuted.
+
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 use SQLCraft\Connection\PdoConnectionFactory;
@@ -14,6 +16,7 @@ use SQLCraft\Execution\QueryExecutor;
 use SQLCraft\Platform\SqlitePlatform;
 use SQLCraft\ValueObjects\ConnectionParameters;
 
+// Built-in dispatcher/provider — swap for your framework's PSR-14 stack.
 $listenerProvider = new SimpleListenerProvider;
 $listenerProvider->listen(
     AfterQueryExecuted::class,
@@ -22,13 +25,13 @@ $listenerProvider->listen(
     },
 );
 
-$dispatcher = new SimpleEventDispatcher($listenerProvider);
-$connectionFactory = new PdoConnectionFactory(new PdoExceptionTranslator);
-$platform = new SqlitePlatform;
-$driver = new SqliteDriver($connectionFactory, $platform);
-$connection = $driver->connect(new ConnectionParameters(database: ':memory:'));
+$connection = (new SqliteDriver(
+    new PdoConnectionFactory(new PdoExceptionTranslator),
+    new SqlitePlatform,
+))->connect(new ConnectionParameters(database: ':memory:'));
 
-$executor = new QueryExecutor(events: $dispatcher);
+// Pass the dispatcher into the executor (connection alone won't fire these).
+$executor = new QueryExecutor(events: new SimpleEventDispatcher($listenerProvider));
 
 $executor->execute($connection, 'CREATE TABLE test (id INTEGER)');
 $executor->execute($connection, 'INSERT INTO test VALUES (1)');

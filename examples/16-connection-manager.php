@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+// Register named connections and close them as a group.
+
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 use SQLCraft\Connection\ConnectionManager;
@@ -11,10 +13,12 @@ use SQLCraft\Driver\SqliteDriver;
 use SQLCraft\Platform\SqlitePlatform;
 use SQLCraft\ValueObjects\ConnectionParameters;
 
-$connectionFactory = new PdoConnectionFactory(new PdoExceptionTranslator);
-$platform = new SqlitePlatform;
-$driver = new SqliteDriver($connectionFactory, $platform);
+$driver = new SqliteDriver(
+    new PdoConnectionFactory(new PdoExceptionTranslator),
+    new SqlitePlatform,
+);
 
+// Two independent DBs under one registry (e.g. primary + cache).
 $manager = new ConnectionManager;
 $manager->add('main', $driver->connect(new ConnectionParameters(database: ':memory:')));
 $manager->add('cache', $driver->connect(new ConnectionParameters(database: ':memory:')));

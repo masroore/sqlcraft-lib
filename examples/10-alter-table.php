@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+// Compose multi-step ALTER TABLE (add column + rename), render, execute each statement.
+
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 use SQLCraft\Connection\PdoConnectionFactory;
@@ -16,15 +18,16 @@ use SQLCraft\ValueObjects\DefaultValue;
 use SQLCraft\ValueObjects\Identifier;
 use SQLCraft\ValueObjects\QualifiedName;
 
-$connectionFactory = new PdoConnectionFactory(new PdoExceptionTranslator);
 $platform = new SqlitePlatform;
-$driver = new SqliteDriver($connectionFactory, $platform);
-$connection = $driver->connect(new ConnectionParameters(database: ':memory:'));
+$connection = (new SqliteDriver(
+    new PdoConnectionFactory(new PdoExceptionTranslator),
+    $platform,
+))->connect(new ConnectionParameters(database: ':memory:'));
 
 $connection->execute('CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT)');
 
-$table = new QualifiedName(new Identifier('users'));
-$builder = (new AlterTableBuilder($table))
+// One builder can queue several changes; SQLite may expand them into recreation SQL.
+$builder = (new AlterTableBuilder(new QualifiedName(new Identifier('users'))))
     ->withColumn(new ColumnDefinition(
         name: 'email',
         dataType: new DataType('TEXT'),

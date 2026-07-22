@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+// CREATE INDEX then DROP INDEX via builders (typed IndexDefinition).
+
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 use SQLCraft\Connection\PdoConnectionFactory;
@@ -17,10 +19,11 @@ use SQLCraft\ValueObjects\Identifier;
 use SQLCraft\ValueObjects\IndexType;
 use SQLCraft\ValueObjects\QualifiedName;
 
-$connectionFactory = new PdoConnectionFactory(new PdoExceptionTranslator);
 $platform = new SqlitePlatform;
-$driver = new SqliteDriver($connectionFactory, $platform);
-$connection = $driver->connect(new ConnectionParameters(database: ':memory:'));
+$connection = (new SqliteDriver(
+    new PdoConnectionFactory(new PdoExceptionTranslator),
+    $platform,
+))->connect(new ConnectionParameters(database: ':memory:'));
 
 $connection->execute('CREATE TABLE users (id INTEGER PRIMARY KEY, email TEXT)');
 
@@ -35,13 +38,11 @@ $index = new IndexDefinition(
     filterExpression: null,
 );
 
-$createBuilder = new CreateIndexBuilder($table, $index);
-$sql = $createBuilder->toSql($platform)[0];
+$sql = (new CreateIndexBuilder($table, $index))->toSql($platform)[0];
 echo $sql, PHP_EOL;
 $connection->execute($sql);
 
-$dropBuilder = new DropIndexBuilder($table, new Identifier('idx_users_email'));
-$sql = $dropBuilder->toSql($platform)[0];
+$sql = (new DropIndexBuilder($table, new Identifier('idx_users_email')))->toSql($platform)[0];
 echo $sql, PHP_EOL;
 $connection->execute($sql);
 

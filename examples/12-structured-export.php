@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+// Official SQL export path: Exporter + SqlFormatWriter + in-memory sink.
+// Multi-format tour: examples/18-export-formats.php
+
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 use SQLCraft\Connection\PdoConnectionFactory;
@@ -17,27 +20,29 @@ use SQLCraft\Platform\SqlitePlatform;
 use SQLCraft\Schema\SchemaManagerFactory;
 use SQLCraft\ValueObjects\ConnectionParameters;
 
-$connectionFactory = new PdoConnectionFactory(new PdoExceptionTranslator);
-$platform = new SqlitePlatform;
-$driver = new SqliteDriver($connectionFactory, $platform);
-$connection = $driver->connect(new ConnectionParameters(database: ':memory:'));
+$connection = (new SqliteDriver(
+    new PdoConnectionFactory(new PdoExceptionTranslator),
+    new SqlitePlatform,
+))->connect(new ConnectionParameters(database: ':memory:'));
 
 $connection->execute('CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT)');
 $connection->execute('INSERT INTO users (name) VALUES (?)', ['Ada']);
 $connection->execute('INSERT INTO users (name) VALUES (?)', ['Grace']);
 
-$source = SchemaManagerFactory::exportSourceForConnection($connection);
-$executor = new QueryExecutor;
-$writer = new SqlFormatWriter($connection);
-$sink = new StringBufferSink;
-$exporter = new Exporter($source, $executor, $writer);
+// Source supplies table metadata; writer owns SQL rendering; sink receives bytes.
+$exporter = new Exporter(
+    SchemaManagerFactory::exportSourceForConnection($connection),
+    new QueryExecutor,
+    new SqlFormatWriter($connection),
+);
 
+$sink = new StringBufferSink;
 $exporter->export(
     $connection,
     $sink,
     new DumpOptions(
         format: 'sql',
-        scope: DumpScope::table('main', 'users'),
+        scope: DumpScope::table('main', 'users'), // SQLite default schema is "main"
     ),
 );
 

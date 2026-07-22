@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+// Hand-rolled dump/restore with quoteValue — contrast with Exporter in 12/18.
+
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 use SQLCraft\Connection\PdoConnectionFactory;
@@ -10,18 +12,18 @@ use SQLCraft\Driver\SqliteDriver;
 use SQLCraft\Platform\SqlitePlatform;
 use SQLCraft\ValueObjects\ConnectionParameters;
 
-$connectionFactory = new PdoConnectionFactory(new PdoExceptionTranslator);
-$platform = new SqlitePlatform;
-$driver = new SqliteDriver($connectionFactory, $platform);
-$connection = $driver->connect(new ConnectionParameters(database: ':memory:'));
+$connection = (new SqliteDriver(
+    new PdoConnectionFactory(new PdoExceptionTranslator),
+    new SqlitePlatform,
+))->connect(new ConnectionParameters(database: ':memory:'));
 
 $connection->execute('CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT NOT NULL)');
 $connection->execute('INSERT INTO users (name) VALUES (?)', ['Ada']);
 $connection->execute('INSERT INTO users (name) VALUES (?)', ['Grace']);
 
+// Build a portable SQL dump; quoteValue() is engine-aware string escaping.
 $dump = "CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT NOT NULL);\n";
-$rows = $connection->query('SELECT id, name FROM users');
-foreach ($rows as $row) {
+foreach ($connection->query('SELECT id, name FROM users') as $row) {
     $dump .= sprintf(
         "INSERT INTO users (id, name) VALUES (%d, %s);\n",
         $row['id'],
@@ -30,6 +32,8 @@ foreach ($rows as $row) {
 }
 
 echo $dump;
+
+// Drop and re-apply the dump as a crude import.
 $connection->execute('DROP TABLE users');
 foreach (array_filter(array_map('trim', explode(';', $dump))) as $statement) {
     $connection->execute($statement);

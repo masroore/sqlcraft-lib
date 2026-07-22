@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+// Feature-detect before using engine-specific APIs; require() throws if missing.
+
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 use SQLCraft\Capabilities\Capability;
@@ -13,11 +15,12 @@ use SQLCraft\Driver\SqliteDriver;
 use SQLCraft\Platform\SqlitePlatform;
 use SQLCraft\ValueObjects\ConnectionParameters;
 
-$connectionFactory = new PdoConnectionFactory(new PdoExceptionTranslator);
-$platform = new SqlitePlatform;
-$driver = new SqliteDriver($connectionFactory, $platform);
-$connection = $driver->connect(new ConnectionParameters(database: ':memory:'));
+$connection = (new SqliteDriver(
+    new PdoConnectionFactory(new PdoExceptionTranslator),
+    new SqlitePlatform,
+))->connect(new ConnectionParameters(database: ':memory:'));
 
+// In real code you'd take this from the platform; here we fix a set for clarity.
 $capabilities = new CapabilitySet([
     Capability::Table,
     Capability::View,
@@ -30,6 +33,7 @@ printf("Has Table: %s\n", $capabilities->has(Capability::Table) ? 'yes' : 'no');
 printf("Has Sequence: %s\n", $capabilities->has(Capability::Sequence) ? 'yes' : 'no');
 
 try {
+    // Prefer require() at API boundaries so missing features fail loudly.
     $capabilities->require(Capability::Sequence);
     echo "Sequence capability available\n";
 } catch (CapabilityNotSupportedException $e) {

@@ -2,14 +2,9 @@
 
 declare(strict_types=1);
 
-/**
- * Export the same two tables as JSON, XML, XLSX, and HTML.
- *
- * SQL baseline: examples/12-structured-export.php
- * Artifacts:    examples/out/users-orders.{json,xml,xlsx,html}
- *
- * Run: php examples/18-export-formats.php
- */
+// Same multi-table dump as JSON / XML / XLSX / HTML.
+// SQL-only baseline: examples/12-structured-export.php
+// Writes: examples/out/users-orders.{json,xml,xlsx,html}
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
@@ -35,8 +30,6 @@ use SQLCraft\Platform\SqlitePlatform;
 use SQLCraft\Schema\SchemaManagerFactory;
 use SQLCraft\ValueObjects\ConnectionParameters;
 
-// ── Connection + sample data ────────────────────────────────────────────────
-
 $connection = (new SqliteDriver(
     new PdoConnectionFactory(new PdoExceptionTranslator),
     new SqlitePlatform,
@@ -50,8 +43,7 @@ $connection->execute(
     [1, 120, 1, 45, 2, 90],
 );
 
-// ── One exporter, four format writers ───────────────────────────────────────
-
+// Registry maps format name → writer; one Exporter serves all of them.
 $exporter = new Exporter(
     SchemaManagerFactory::exportSourceForConnection($connection),
     new QueryExecutor,
@@ -63,19 +55,17 @@ $exporter = new Exporter(
     ]),
 );
 
-$outDir = __DIR__ . '/out';
-$stem = $outDir . '/users-orders';
-
+$stem = __DIR__ . '/out/users-orders';
 foreach (['json', 'xml', 'xlsx', 'html'] as $format) {
-    $path = $stem.'.' . $format;
+    $path = $stem . '.' . $format;
+    // dumpOptions() attaches format-specific knobs; ResourceSink streams to a file.
     $bytes = exportToFile($exporter, $connection, $path, dumpOptions($format));
     printf("%s: %s (%d bytes)\n", $format, relativePath($path), $bytes);
 }
 
 $connection->close();
 
-// ── Helpers ─────────────────────────────────────────────────────────────────
-
+/** One non-default option per format so the knobs are visible in the artifacts. */
 function dumpOptions(string $format): DumpOptions
 {
     $scope = DumpScope::tables('main', ['users', 'orders']);
@@ -84,7 +74,7 @@ function dumpOptions(string $format): DumpOptions
         'json' => new DumpOptions(
             format: 'json',
             scope: $scope,
-            jsonOptions: new JsonExportOptions(pretty: false),
+            jsonOptions: new JsonExportOptions(pretty: false), // compact on-disk JSON
         ),
         'xml' => new DumpOptions(
             format: 'xml',
@@ -94,7 +84,7 @@ function dumpOptions(string $format): DumpOptions
         'xlsx' => new DumpOptions(
             format: 'xlsx',
             scope: $scope,
-            xlsxOptions: new XlsxExportOptions(sheetPrefix: 'db_'),
+            xlsxOptions: new XlsxExportOptions(sheetPrefix: 'db_'), // sheets: db_users, db_orders
         ),
         'html' => new DumpOptions(
             format: 'html',
