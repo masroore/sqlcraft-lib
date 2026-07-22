@@ -75,3 +75,6 @@ Desktop.ini
 *.sqlite
 *.sqlite3
 .qwen/
+
+# ── Example demo artifacts ───────────────────────────────────────────────────
+/examples/out/

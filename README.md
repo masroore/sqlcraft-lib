@@ -76,6 +76,16 @@ default, so no engine container or external service is required:
 - `examples/06-laravel-integration.php` — thin service-provider binding shape
 - `examples/07-symfony-integration.php` — thin service-definition shape
 - `examples/08-multi-engine-comparison.php` — engine-independent operation shape
+- `examples/09-transactions.php` — commit and rollback on a balance transfer
+- `examples/10-alter-table.php` — render alter-table DDL
+- `examples/11-create-index.php` — render create/drop index DDL
+- `examples/12-structured-export.php` — SQL export via Exporter + SqlFormatWriter
+- `examples/13-csv-import.php` — CSV import into a table
+- `examples/14-event-hooks.php` — PSR-14 query listeners
+- `examples/15-credential-providers.php` — array and env credential providers
+- `examples/16-connection-manager.php` — named multi-connection registry
+- `examples/17-capability-detection.php` — platform capability checks
+- `examples/18-export-formats.php` — JSON/XML/XLSX/HTML export (writes `examples/out/`)
 
 ## Architecture
 
