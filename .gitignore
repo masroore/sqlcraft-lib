@@ -11,6 +11,7 @@
 
 # ── PHP tooling output ────────────────────────────────────────────────────────
 /.php-cs-fixer.cache
+/.php-cs-fixer.php            # dist version is .php-cs-fixer.dist.php
 /.phpunit.result.cache
 /.phpunit.cache/
 /phpunit.xml                  # dist version is phpunit.xml.dist; local overrides are ignored
@@ -20,6 +21,9 @@
 /phpstan.neon                 # dist version is phpstan.neon.dist
 /.deptrac.cache
 /.rector/
+/.phpcs-cache
+/phpcs.xml                    # dist version is phpcs.xml.dist
+*.phar
 
 # ── Infection / mutation testing ─────────────────────────────────────────────
 /infection.log
@@ -36,8 +40,22 @@
 /tools/composer.lock
 
 # ── OS / editor artifacts ─────────────────────────────────────────────────────
+# macOS
 .DS_Store
+._*
+.Spotlight-V100
+.Trashes
+.fseventsd
+.TemporaryItems
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+Icon?
+
+# Windows
 Thumbs.db
+Desktop.ini
+
+# Editors / IDEs
 /.idea/
 /.vscode/
 /.omc/
