@@ -30,7 +30,8 @@
     },
     "require": {
         "php": "^8.4",
-        "ext-pdo": "*"
+        "ext-pdo": "*",
+        "openspout/openspout": "^4.0"
     },
     "suggest": {
         "ext-pdo_mysql": "Required to connect to MySQL/MariaDB servers.",
@@ -41,7 +42,8 @@
         "ext-pdo_oci": "Required to connect to Oracle databases.",
         "psr/simple-cache-implementation": "Enables metadata caching (21-performance.md \u00a74). Any PSR-16 implementation.",
         "psr/event-dispatcher-implementation": "Enables domain event dispatch (QueryExecutedEvent, DdlExecutedEvent, etc; 05 \u00a79).",
-        "psr/log-implementation": "Enables query/deprecation logging. Any PSR-3 implementation."
+        "psr/log-implementation": "Enables query/deprecation logging. Any PSR-3 implementation.",
+        "twig/twig": "Enables Twig templating for HtmlFormatWriter (set HtmlExportOptions::$useTwig = true)."
     },
     "require-dev": {
         "deptrac/deptrac": "^4.7",
