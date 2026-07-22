@@ -62,20 +62,20 @@ foreach ($database->query('SELECT id, name FROM users', streaming: true) as $row
 Run the same script from the repository with:
 
 ```bash
-php examples/01-basic-connection/run.php
+php examples/01-basic-connection.php
 ```
 
 Every numbered example is runnable after `composer install` and uses SQLite by
 default, so no engine container or external service is required:
 
-- `examples/01-basic-connection` — connect, write, and stream rows
-- `examples/02-schema-introspection` — inspect tables and columns
-- `examples/03-ddl-create-table` — render and execute a DDL builder
-- `examples/04-query-and-paginate` — allowlisted filtering and pagination
-- `examples/05-import-export` — streaming row export and import
-- `examples/06-laravel-integration` — thin service-provider binding shape
-- `examples/07-symfony-integration` — thin service-definition shape
-- `examples/08-multi-engine-comparison` — engine-independent operation shape
+- `examples/01-basic-connection.php` — connect, write, and stream rows
+- `examples/02-schema-introspection.php` — inspect tables and columns
+- `examples/03-ddl-create-table.php` — render and execute a DDL builder
+- `examples/04-query-and-paginate.php` — allowlisted filtering and pagination
+- `examples/05-import-export.php` — streaming row export and import
+- `examples/06-laravel-integration.php` — thin service-provider binding shape
+- `examples/07-symfony-integration.php` — thin service-definition shape
+- `examples/08-multi-engine-comparison.php` — engine-independent operation shape
 
 ## Architecture
 
