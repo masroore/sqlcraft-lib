@@ -22,6 +22,10 @@ final readonly class DumpOptions
         public int $batchSize = 100,
         public ?string $csvSeparator = null,
         public string $nullRepresentation = '\\N',
+        public ?JsonExportOptions $jsonOptions = null,
+        public ?XmlExportOptions $xmlOptions = null,
+        public ?XlsxExportOptions $xlsxOptions = null,
+        public ?HtmlExportOptions $htmlOptions = null,
     ) {
         if (trim($format) === '') {
             throw new InvalidArgumentException('Export format cannot be empty.');

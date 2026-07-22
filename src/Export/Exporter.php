@@ -118,6 +118,10 @@ final class Exporter implements ExporterInterface
                 batchSize: $options->batchSize,
                 csvSeparator: $options->csvSeparator,
                 nullRepresentation: $options->nullRepresentation,
+                jsonOptions: $options->jsonOptions,
+                xmlOptions: $options->xmlOptions,
+                xlsxOptions: $options->xlsxOptions,
+                htmlOptions: $options->htmlOptions,
             );
             [$databaseTables, $databaseRows] = $this->exportDatabase($conn, $sink, $writer, $databaseOptions, $startedAt);
             $tables += $databaseTables;
