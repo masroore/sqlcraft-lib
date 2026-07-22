@@ -31,7 +31,8 @@
     "require": {
         "php": "^8.4",
         "ext-pdo": "*",
-        "openspout/openspout": "^4.0"
+        "openspout/openspout": "^4.0",
+        "psr/event-dispatcher": "^1.0"
     },
     "suggest": {
         "ext-pdo_mysql": "Required to connect to MySQL/MariaDB servers.",
@@ -40,8 +41,8 @@
         "ext-pdo_sqlsrv": "Required to connect to Microsoft SQL Server (Microsoft driver).",
         "ext-pdo_dblib": "Alternative FreeTDS-based driver for Microsoft SQL Server on non-Windows.",
         "ext-pdo_oci": "Required to connect to Oracle databases.",
-        "psr/simple-cache-implementation": "Enables metadata caching (21-performance.md \u00a74). Any PSR-16 implementation.",
-        "psr/event-dispatcher-implementation": "Enables domain event dispatch (QueryExecutedEvent, DdlExecutedEvent, etc; 05 \u00a79).",
+        "psr/simple-cache-implementation": "Enables metadata caching (21-performance.md §4). Any PSR-16 implementation.",
+        "psr/event-dispatcher-implementation": "Enables domain event dispatch (QueryExecutedEvent, DdlExecutedEvent, etc; 05 §9).",
         "psr/log-implementation": "Enables query/deprecation logging. Any PSR-3 implementation.",
         "twig/twig": "Enables Twig templating for HtmlFormatWriter (set HtmlExportOptions::$useTwig = true)."
     },
@@ -53,7 +54,6 @@
         "phpstan/phpstan": "^2.1",
         "phpstan/phpstan-strict-rules": "^2.0",
         "phpunit/phpunit": "^11.5",
-        "psr/event-dispatcher": "^1.0",
         "psr/log": "^3.0",
         "psr/simple-cache": "^3.0",
         "rector/rector": "^2.0",

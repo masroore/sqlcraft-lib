@@ -94,6 +94,8 @@ deptrac:
       - Export
       - Import
       - Query
+      - Execution
+      - Metadata
     ValueObjects:
       - Support
     DTO:
@@ -107,7 +109,8 @@ deptrac:
       - Contracts
       - ValueObjects
       - Capabilities
-    Support: ~
+    Support:
+      - Exceptions
     Capabilities:
       - Contracts
       - ValueObjects
@@ -120,6 +123,9 @@ deptrac:
       - Support
     Driver:
       - Contracts
+      - Events
+      - Metadata
+      - Support
       - Connection
       - Platform
       - Capabilities
@@ -181,6 +187,7 @@ deptrac:
       - Query
     Export:
       - Contracts
+      - Support
       - Execution
       - Metadata
       - DTO

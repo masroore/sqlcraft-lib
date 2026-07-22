@@ -8,5 +8,5 @@ use SQLCraft\ValueObjects\Credential;
 
 interface CredentialProviderInterface
 {
-    public function resolve(string $key): Credential;
+    public function resolve(string $key): ?Credential;
 }

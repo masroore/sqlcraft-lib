@@ -17,6 +17,8 @@ use SQLCraft\DTO\TableStatus;
 
 final class Exporter implements ExporterInterface
 {
+    private readonly ?FormatRegistry $formatRegistry;
+
     /** @var array<string, FormatWriterInterface> */
     private readonly array $writers;
 
@@ -27,12 +29,9 @@ final class Exporter implements ExporterInterface
         FormatWriterInterface ...$writers,
     ) {
         $events = $eventOrWriter instanceof ImportExportEventDispatcherInterface ? $eventOrWriter : null;
+        $this->formatRegistry = $eventOrWriter instanceof FormatRegistry ? $eventOrWriter : null;
         if ($eventOrWriter instanceof FormatRegistry) {
-            $writerMap = [];
-            foreach ($eventOrWriter->getSupportedWriteFormats() as $format) {
-                $writerMap[$format] = $eventOrWriter->getWriter($format);
-            }
-            $this->writers = $writerMap;
+            $this->writers = [];
         } else {
             if ($eventOrWriter instanceof FormatWriterInterface) {
                 $writers = [$eventOrWriter, ...$writers];

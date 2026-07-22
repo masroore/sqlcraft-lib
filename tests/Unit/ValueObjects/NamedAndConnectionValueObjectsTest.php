@@ -157,7 +157,7 @@ final class NamedAndConnectionValueObjectsTest extends TestCase
         self::assertSame('utf8mb4', $parameters->charset);
         self::assertSame(['verifyPeer' => true], $parameters->ssl);
         self::assertSame(['applicationName' => 'sqlcraft'], $parameters->extras);
-        self::assertSame(DatabaseDriver::MySQL, $parameters->driver);
+        self::assertSame('mysql', $parameters->driver);
     }
 
     public function test_connection_parameters_defaults_driver_to_null(): void

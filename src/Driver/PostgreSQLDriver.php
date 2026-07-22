@@ -30,9 +30,9 @@ final class PostgreSQLDriver implements DriverInterface
     }
 
     #[\Override]
-    public function connect(ConnectionParameters $params): ConnectionInterface
+    public function connect(ConnectionParameters $params, ?string $name = null): ConnectionInterface
     {
-        return $this->connectionFactory->connect($this->buildDsn($params), $params, $this->platform);
+        return $this->connectionFactory->connect($this->buildDsn($params), $params, $this->platform, $name);
     }
 
     #[\Override]

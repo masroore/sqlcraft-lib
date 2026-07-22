@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SQLCraft;
 
 use SQLCraft\Contracts\Connection\ConnectionInterface;
+use SQLCraft\Capabilities\Capability;
 use SQLCraft\Contracts\Connection\ResultInterface;
 use SQLCraft\Contracts\Execution\QueryExecutorInterface;
 use SQLCraft\Contracts\Schema\SchemaManagerInterface;
@@ -14,6 +15,11 @@ use SQLCraft\Contracts\Security\UserManagerInterface;
 use SQLCraft\DDL\DdlManager;
 use SQLCraft\DTO\ExecutionResult;
 use SQLCraft\Export\Exporter;
+use SQLCraft\Export\FormatRegistry;
+use SQLCraft\Import\CsvImporter;
+use SQLCraft\Contracts\Import\CsvImporterInterface;
+use SQLCraft\Contracts\Execution\ProcessManagerInterface;
+use SQLCraft\Schema\SchemaManager;
 use SQLCraft\Import\Importer;
 use SQLCraft\Query\DeleteQuery;
 use SQLCraft\Query\DeleteQueryRenderer;
@@ -26,7 +32,7 @@ final readonly class DatabaseSession
 {
     public function __construct(
         private ConnectionInterface $connection,
-        private SchemaManagerInterface $schema,
+        private SchemaManager $schema,
         private DdlManager $ddl,
         private QueryExecutorInterface $executor,
         private Exporter $exporter,
@@ -34,6 +40,9 @@ final readonly class DatabaseSession
         private SecurityGuardInterface $security,
         private UserManagerInterface $users,
         private PrivilegeManagerInterface $privileges,
+        private ?FormatRegistry $formats = null,
+        private ?CsvImporterInterface $csvImport = null,
+        private ?ProcessManagerInterface $processes = null,
     ) {}
 
     public function connection(): ConnectionInterface
@@ -58,7 +67,7 @@ final readonly class DatabaseSession
         return $this->executor->execute($this->connection, $rendered['sql'], $rendered['params']);
     }
 
-    public function schema(): SchemaManagerInterface
+    public function schema(): SchemaManager
     {
         return $this->schema;
     }
@@ -91,5 +100,20 @@ final readonly class DatabaseSession
     public function import(): Importer
     {
         return $this->importer;
+    }
+
+    public function formats(): FormatRegistry
+    {
+        return $this->formats ?? throw new \LogicException('Formats are not configured.');
+    }
+
+    public function csvImport(): CsvImporterInterface
+    {
+        return $this->csvImport ?? throw new \LogicException('CSV import is not configured.');
+    }
+
+    public function processes(): ProcessManagerInterface
+    {
+        return $this->processes ?? throw \SQLCraft\Capabilities\CapabilityNotSupportedException::for(Capability::Kill, $this->connection->getPlatformName());
     }
 }

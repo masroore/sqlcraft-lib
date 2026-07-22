@@ -8,9 +8,11 @@ use InvalidArgumentException;
 use SensitiveParameter;
 use SQLCraft\Enums\DatabaseDriver;
 use SQLCraft\Support\StringUtil;
+use SQLCraft\Support\ExtensionIdentifier;
 
 final readonly class ConnectionParameters
 {
+    public readonly ?string $driver;
     /**
      * @param  array<string, scalar|null>  $ssl
      * @param  array<string, scalar|null>  $extras
@@ -26,8 +28,9 @@ final readonly class ConnectionParameters
         public ?string $charset = null,
         public array $ssl = [],
         public array $extras = [],
-        public ?DatabaseDriver $driver = null,
+        string|DatabaseDriver|null $driver = null,
     ) {
+        $this->driver = $driver instanceof DatabaseDriver ? $driver->value : ($driver === null ? null : ExtensionIdentifier::normalize($driver, 'driver'));
         if ($host !== null && (StringUtil::isBlank($host) || StringUtil::containsNullByte($host))) {
             throw new InvalidArgumentException('Connection host must not be blank or contain null bytes.');
         }

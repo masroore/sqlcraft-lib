@@ -19,6 +19,7 @@ use SQLCraft\Events\BeforeQueryExecuted;
 use SQLCraft\Events\QueryFailedEvent;
 use SQLCraft\Events\SlowQueryDetectedEvent;
 use SQLCraft\Exceptions\OperationCancelledException;
+use SQLCraft\Enums\QueryKind;
 
 final readonly class QueryExecutor implements QueryExecutorInterface
 {
@@ -26,6 +27,7 @@ final readonly class QueryExecutor implements QueryExecutorInterface
         private ?QueryHistoryInterface $history = null,
         private ?EventDispatcherInterface $events = null,
         private int $slowQueryThresholdMs = 1000,
+        private ?QueryInterceptorPipeline $pipeline = null,
     ) {
         if ($slowQueryThresholdMs < 0) {
             throw new InvalidArgumentException('Slow query threshold must be zero or greater.');
@@ -36,7 +38,9 @@ final readonly class QueryExecutor implements QueryExecutorInterface
     #[\Override]
     public function execute(ConnectionInterface $connection, string $sql, array $params = []): ExecutionResult
     {
-        $before = new BeforeQueryExecuted($connection, $sql, $params, 'DML');
+        $request = $this->request($connection, $sql, $params, QueryKind::Dml);
+        $sql = $request->sql; $params = $request->params;
+        $before = new BeforeQueryExecuted($connection, $sql, $params, 'DML', QueryKind::Dml);
         $this->events?->dispatch($before);
         $this->assertNotCancelled($before->isCancelled(), $before->cancelReason);
         $sql = $before->getSql();
@@ -60,7 +64,9 @@ final readonly class QueryExecutor implements QueryExecutorInterface
     #[\Override]
     public function query(ConnectionInterface $connection, string $sql, array $params = [], bool $buffered = false): ResultInterface
     {
-        $before = new BeforeQueryExecuted($connection, $sql, $params, 'SELECT');
+        $request = $this->request($connection, $sql, $params, QueryKind::Select);
+        $sql = $request->sql; $params = $request->params;
+        $before = new BeforeQueryExecuted($connection, $sql, $params, 'SELECT', QueryKind::Select);
         $this->events?->dispatch($before);
         $this->assertNotCancelled($before->isCancelled(), $before->cancelReason);
         $sql = $before->getSql();
@@ -90,6 +96,8 @@ final readonly class QueryExecutor implements QueryExecutorInterface
     #[\Override]
     public function executeDdl(ConnectionInterface $connection, string $sql, array $params = [], string $objectName = ''): void
     {
+        $request = $this->request($connection, $sql, $params, QueryKind::Ddl);
+        $sql = $request->sql; $params = $request->params;
         $before = new BeforeDdlExecuted($connection, $sql, $objectName);
         $this->events?->dispatch($before);
         $this->assertNotCancelled($before->isCancelled(), $before->cancelReason);
@@ -113,6 +121,10 @@ final readonly class QueryExecutor implements QueryExecutorInterface
             throw $error;
         }
     }
+
+    /** @param array<string|int,mixed> $params */
+    public function executeAdministrative(ConnectionInterface $connection, string $sql, array $params=[]): ExecutionResult
+    { $request=$this->request($connection,$sql,$params,QueryKind::Administrative); $started=hrtime(true); try{$result=$connection->execute($request->sql,$request->params); $this->record($connection,$request->sql,$started,true); $this->dispatchQuerySuccess($connection,$request->sql,$request->params,$result,$started); return $result;}catch(\Throwable $e){$this->record($connection,$request->sql,$started,false,$e->getMessage()); throw $e;} }
 
     /** @param array<string|int, mixed> $params */
     #[\Override]
@@ -147,6 +159,10 @@ final readonly class QueryExecutor implements QueryExecutorInterface
             $this->events?->dispatch(new SlowQueryDetectedEvent($connection, $sql, $params, $elapsedMs, $this->slowQueryThresholdMs));
         }
     }
+
+    /** @param array<string|int,mixed> $params */
+    private function request(ConnectionInterface $connection, string $sql, array $params, QueryKind $kind): QueryRequest
+    { return $this->pipeline?->process($connection,$sql,$params,$kind) ?? new QueryRequest($connection,$sql,$sql,$params,$kind); }
 
     private function assertNotCancelled(bool $cancelled, string $reason): void
     {

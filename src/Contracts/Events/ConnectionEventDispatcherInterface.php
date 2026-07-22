@@ -11,7 +11,7 @@ interface ConnectionEventDispatcherInterface
 {
     public function beforeConnectionOpened(string $name, ConnectionParameters $parameters): ?string;
 
-    public function connectionOpened(string $name, string $driver, ?string $host, ?string $database, float $elapsedMs): void;
+    public function connectionOpened(string $name, string $driver, ?string $host, ?string $database, float $elapsedMs, ?ConnectionInterface $connection = null): void;
 
     public function connectionFailed(string $name, string $driver, \Throwable $error): void;
 

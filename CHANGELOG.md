@@ -15,7 +15,8 @@ and the public surface follows Semantic Versioning.
   explicitly when deferred scheduler-event or user-defined-type export options are selected.
 - Release verification remains blocked by the Infection mutation threshold; no v1.0.0 tag is claimed.
 
-## [1.0.0] - 2026-07-21
+## Pre-release history (not tagged)
+
 
 First complete release-candidate implementation of the SQLCraft SDK.
 
@@ -70,6 +71,3 @@ First complete release-candidate implementation of the SQLCraft SDK.
 - The planned convenience `SQLCraftFactory` / `DatabaseSession` aggregate and
   higher-level `SecurityGuardInterface` remain follow-up API work; the current
   release exposes the fully typed lower-level composition graph.
-
-[Unreleased]: https://github.com/vendor/sqlcraft/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/vendor/sqlcraft/releases/tag/v1.0.0

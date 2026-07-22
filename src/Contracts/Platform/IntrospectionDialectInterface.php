@@ -64,7 +64,7 @@ interface IntrospectionDialectInterface
 
     public function getProcesslistSql(): string;
 
-    public function getExplainSql(string $sql, bool $analyze = false): string;
 
+    public function getExplainSql(string $sql, bool $analyze = false): string;
     public function wrapWithTimeout(string $sql, int $milliseconds): ?string;
 }

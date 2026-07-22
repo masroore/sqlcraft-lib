@@ -10,5 +10,7 @@ interface ConnectionManagerInterface
 
     public function add(string $name, ConnectionInterface $connection): void;
 
+    public function has(string $name): bool;
+
     public function closeAll(): void;
 }

@@ -18,6 +18,11 @@ use SQLCraft\Contracts\DDL\IndexDefinitionInterface;
 use SQLCraft\Contracts\DDL\RoutineParameterDefinitionInterface;
 use SQLCraft\Contracts\Events\SchemaEventDispatcherInterface;
 use SQLCraft\Contracts\Platform\PlatformInterface;
+use SQLCraft\Contracts\Platform\DdlDialectInterface;
+use SQLCraft\Contracts\Platform\IntrospectionDialectInterface;
+use SQLCraft\Contracts\Platform\QueryDialectInterface;
+use SQLCraft\Contracts\Platform\QuotingInterface;
+use SQLCraft\Contracts\Platform\TypeMapperInterface;
 use SQLCraft\DTO\CheckConstraintMeta;
 use SQLCraft\DTO\ColumnMeta;
 use SQLCraft\DTO\ForeignKeyMeta;
@@ -30,9 +35,15 @@ use SQLCraft\ValueObjects\ServerVersion;
 use SQLCraft\ValueObjects\TriggerEvent;
 use SQLCraft\ValueObjects\TriggerTiming;
 
-abstract class AbstractPlatform implements PlatformInterface
+abstract class AbstractPlatform implements PlatformInterface, DdlDialectInterface, IntrospectionDialectInterface, QueryDialectInterface, QuotingInterface, TypeMapperInterface
 {
     public function __construct(private readonly ?SchemaEventDispatcherInterface $events = null) {}
+
+    public function ddl(): DdlDialectInterface { return $this; }
+    public function introspection(): IntrospectionDialectInterface { return $this; }
+    public function queryDialect(): QueryDialectInterface { return $this; }
+    public function quoting(): QuotingInterface { return $this; }
+    public function types(): TypeMapperInterface { return $this; }
 
     #[\Override]
     public function quoteIdentifier(Identifier $identifier): string

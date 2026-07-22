@@ -13,8 +13,8 @@ final readonly class ArrayCredentialProvider implements CredentialProviderInterf
     public function __construct(private array $credentials) {}
 
     #[\Override]
-    public function resolve(string $key): Credential
+    public function resolve(string $key): ?Credential
     {
-        return $this->credentials[$key] ?? throw new \InvalidArgumentException(sprintf('Credential not found: %s.', $key));
+        return $this->credentials[$key] ?? null;
     }
 }
