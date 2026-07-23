@@ -12,6 +12,7 @@ use SQLCraft\Contracts\Execution\QueryExecutorInterface;
 use SQLCraft\Contracts\Execution\QueryHistoryEntry;
 use SQLCraft\Contracts\Execution\QueryHistoryInterface;
 use SQLCraft\DTO\ExecutionResult;
+use SQLCraft\Enums\QueryKind;
 use SQLCraft\Events\AfterDdlExecuted;
 use SQLCraft\Events\AfterQueryExecuted;
 use SQLCraft\Events\BeforeDdlExecuted;
@@ -19,7 +20,6 @@ use SQLCraft\Events\BeforeQueryExecuted;
 use SQLCraft\Events\QueryFailedEvent;
 use SQLCraft\Events\SlowQueryDetectedEvent;
 use SQLCraft\Exceptions\OperationCancelledException;
-use SQLCraft\Enums\QueryKind;
 
 final readonly class QueryExecutor implements QueryExecutorInterface
 {
@@ -38,58 +38,14 @@ final readonly class QueryExecutor implements QueryExecutorInterface
     #[\Override]
     public function execute(ConnectionInterface $connection, string $sql, array $params = []): ExecutionResult
     {
-        $request = $this->request($connection, $sql, $params, QueryKind::Dml);
-        $sql = $request->sql; $params = $request->params;
-        $before = new BeforeQueryExecuted($connection, $sql, $params, 'DML', QueryKind::Dml);
-        $this->events?->dispatch($before);
-        $this->assertNotCancelled($before->isCancelled(), $before->cancelReason);
-        $sql = $before->getSql();
-        $params = $before->getParams();
-        $startedAt = hrtime(true);
-
-        try {
-            $result = $connection->execute($sql, $params);
-            $this->record($connection, $sql, $startedAt, true);
-            $this->dispatchQuerySuccess($connection, $sql, $params, $result, $startedAt);
-
-            return $result;
-        } catch (\Throwable $error) {
-            $this->record($connection, $sql, $startedAt, false, $error->getMessage());
-            $this->events?->dispatch(new QueryFailedEvent($connection, $sql, $params, $error, $this->elapsedMs($startedAt)));
-            throw $error;
-        }
+        return $this->executeRequest($connection, $this->request($connection, $sql, $params, QueryKind::Dml));
     }
 
     /** @param array<string|int, mixed> $params */
     #[\Override]
     public function query(ConnectionInterface $connection, string $sql, array $params = [], bool $buffered = false): ResultInterface
     {
-        $request = $this->request($connection, $sql, $params, QueryKind::Select);
-        $sql = $request->sql; $params = $request->params;
-        $before = new BeforeQueryExecuted($connection, $sql, $params, 'SELECT', QueryKind::Select);
-        $this->events?->dispatch($before);
-        $this->assertNotCancelled($before->isCancelled(), $before->cancelReason);
-        $sql = $before->getSql();
-        $params = $before->getParams();
-        $startedAt = hrtime(true);
-
-        try {
-            $result = $connection->query($sql, $params, streaming: ! $buffered);
-            $this->record($connection, $sql, $startedAt, true);
-            $execution = new ExecutionResult(
-                affectedRows: $connection->affectedRows(),
-                lastInsertId: (string) $connection->lastInsertId(),
-                elapsedMs: $this->elapsedMs($startedAt),
-                sql: $sql,
-            );
-            $this->dispatchQuerySuccess($connection, $sql, $params, $execution, $startedAt);
-
-            return $result;
-        } catch (\Throwable $error) {
-            $this->record($connection, $sql, $startedAt, false, $error->getMessage());
-            $this->events?->dispatch(new QueryFailedEvent($connection, $sql, $params, $error, $this->elapsedMs($startedAt)));
-            throw $error;
-        }
+        return $this->queryRequest($connection, $this->request($connection, $sql, $params, QueryKind::Select), $buffered);
     }
 
     /** @param array<string|int, mixed> $params */
@@ -97,77 +53,125 @@ final readonly class QueryExecutor implements QueryExecutorInterface
     public function executeDdl(ConnectionInterface $connection, string $sql, array $params = [], string $objectName = ''): void
     {
         $request = $this->request($connection, $sql, $params, QueryKind::Ddl);
-        $sql = $request->sql; $params = $request->params;
-        $before = new BeforeDdlExecuted($connection, $sql, $objectName);
+        $before = new BeforeDdlExecuted($connection, $request->sql, $objectName);
         $this->events?->dispatch($before);
         $this->assertNotCancelled($before->isCancelled(), $before->cancelReason);
         $startedAt = hrtime(true);
-
         try {
-            $connection->execute($sql, $params);
-            $this->record($connection, $sql, $startedAt, true);
+            $connection->execute($request->sql, $request->params);
+            $this->record($connection, $request->sql, $startedAt, true);
             $elapsedMs = $this->elapsedMs($startedAt);
-            $this->events?->dispatch(new AfterDdlExecuted($connection, $sql, $objectName, $elapsedMs));
-            $this->events?->dispatch(new AfterQueryExecuted(
-                $connection,
-                $sql,
-                $params,
-                new ExecutionResult($connection->affectedRows(), (string) $connection->lastInsertId(), $elapsedMs, $sql),
-                $elapsedMs,
-            ));
+            $this->events?->dispatch(new AfterDdlExecuted($connection, $request->sql, $objectName, $elapsedMs));
+            $this->dispatchQuerySuccess($connection, $request->sql, $request->params, new ExecutionResult($connection->affectedRows(), (string) $connection->lastInsertId(), $elapsedMs, $request->sql), $startedAt);
         } catch (\Throwable $error) {
-            $this->record($connection, $sql, $startedAt, false, $error->getMessage());
-            $this->events?->dispatch(new QueryFailedEvent($connection, $sql, $params, $error, $this->elapsedMs($startedAt)));
+            $this->record($connection, $request->sql, $startedAt, false, $error->getMessage());
+            $this->events?->dispatch(new QueryFailedEvent($connection, $request->sql, $request->params, $error, $this->elapsedMs($startedAt)));
             throw $error;
         }
     }
 
-    /** @param array<string|int,mixed> $params */
-    public function executeAdministrative(ConnectionInterface $connection, string $sql, array $params=[]): ExecutionResult
-    { $request=$this->request($connection,$sql,$params,QueryKind::Administrative); $started=hrtime(true); try{$result=$connection->execute($request->sql,$request->params); $this->record($connection,$request->sql,$started,true); $this->dispatchQuerySuccess($connection,$request->sql,$request->params,$result,$started); return $result;}catch(\Throwable $e){$this->record($connection,$request->sql,$started,false,$e->getMessage()); throw $e;} }
+    /** @param array<string|int, mixed> $params */
+    #[\Override]
+    public function executeAdministrative(ConnectionInterface $connection, string $sql, array $params = []): ExecutionResult
+    {
+        return $this->executeRequest($connection, $this->request($connection, $sql, $params, QueryKind::Administrative));
+    }
+
+    /** @param array<string|int, mixed> $params */
+    #[\Override]
+    public function executeWithTimeout(ConnectionInterface $connection, string $sql, array $params = [], int $timeoutMs = 0): ?ExecutionResult
+    {
+        $wrapped = $this->timeoutSql($connection, $sql, $timeoutMs);
+        if ($wrapped === null) {
+            return null;
+        }
+
+        return $this->executeRequest($connection, $this->request($connection, $wrapped, $params, QueryKind::Dml, $sql));
+    }
 
     /** @param array<string|int, mixed> $params */
     #[\Override]
     public function queryWithTimeout(ConnectionInterface $connection, string $sql, array $params = [], int $timeoutMs = 0): ?ResultInterface
     {
-        if ($timeoutMs < 0) {
-            throw new InvalidArgumentException('Query timeout must be zero or greater.');
-        }
-        if ($timeoutMs === 0) {
-            return $this->query($connection, $sql, $params);
-        }
-
-        $wrapped = $connection->getPlatform()->wrapWithTimeout($sql, $timeoutMs);
+        $wrapped = $this->timeoutSql($connection, $sql, $timeoutMs);
         if ($wrapped === null) {
             return null;
         }
 
-        return $this->query($connection, $wrapped, $params);
+        return $this->queryRequest($connection, $this->request($connection, $wrapped, $params, QueryKind::Select, $sql), false);
     }
 
-    /** @param array<string|int, mixed> $params */
-    private function dispatchQuerySuccess(
-        ConnectionInterface $connection,
-        string $sql,
-        array $params,
-        ExecutionResult $result,
-        int $startedAt,
-    ): void {
-        $elapsedMs = $this->elapsedMs($startedAt);
-        $this->events?->dispatch(new AfterQueryExecuted($connection, $sql, $params, $result, $elapsedMs));
-        if ($this->slowQueryThresholdMs > 0 && $elapsedMs >= $this->slowQueryThresholdMs) {
-            $this->events?->dispatch(new SlowQueryDetectedEvent($connection, $sql, $params, $elapsedMs, $this->slowQueryThresholdMs));
+    private function executeRequest(ConnectionInterface $connection, QueryRequest $request): ExecutionResult
+    {
+        $before = new BeforeQueryExecuted($connection, $request->sql, $request->params, $request->kind);
+        $this->events?->dispatch($before);
+        $this->assertNotCancelled($before->isCancelled(), $before->cancelReason);
+        $startedAt = hrtime(true);
+        try {
+            $result = $connection->execute($request->sql, $request->params);
+            $this->record($connection, $request->sql, $startedAt, true);
+            $this->dispatchQuerySuccess($connection, $request->sql, $request->params, $result, $startedAt);
+
+            return $result;
+        } catch (\Throwable $error) {
+            $this->record($connection, $request->sql, $startedAt, false, $error->getMessage());
+            $this->events?->dispatch(new QueryFailedEvent($connection, $request->sql, $request->params, $error, $this->elapsedMs($startedAt)));
+            throw $error;
         }
     }
 
-    /** @param array<string|int,mixed> $params */
-    private function request(ConnectionInterface $connection, string $sql, array $params, QueryKind $kind): QueryRequest
-    { return $this->pipeline?->process($connection,$sql,$params,$kind) ?? new QueryRequest($connection,$sql,$sql,$params,$kind); }
+    private function queryRequest(ConnectionInterface $connection, QueryRequest $request, bool $buffered): ResultInterface
+    {
+        $before = new BeforeQueryExecuted($connection, $request->sql, $request->params, $request->kind);
+        $this->events?->dispatch($before);
+        $this->assertNotCancelled($before->isCancelled(), $before->cancelReason);
+        $startedAt = hrtime(true);
+        try {
+            $result = $connection->query($request->sql, $request->params, streaming: ! $buffered);
+            $this->record($connection, $request->sql, $startedAt, true);
+            $execution = new ExecutionResult($connection->affectedRows(), (string) $connection->lastInsertId(), $this->elapsedMs($startedAt), $request->sql);
+            $this->dispatchQuerySuccess($connection, $request->sql, $request->params, $execution, $startedAt);
+
+            return $result;
+        } catch (\Throwable $error) {
+            $this->record($connection, $request->sql, $startedAt, false, $error->getMessage());
+            $this->events?->dispatch(new QueryFailedEvent($connection, $request->sql, $request->params, $error, $this->elapsedMs($startedAt)));
+            throw $error;
+        }
+    }
+
+    private function timeoutSql(ConnectionInterface $connection, string $sql, int $timeoutMs): ?string
+    {
+        if ($timeoutMs < 0) {
+            throw new InvalidArgumentException('Query timeout must be zero or greater.');
+        }
+        if ($timeoutMs === 0) {
+            return $sql;
+        }
+
+        return $connection->getPlatform()->queryDialect()->wrapWithTimeout($sql, $timeoutMs);
+    }
+
+    /** @param array<string|int, mixed> $params */
+    private function request(ConnectionInterface $connection, string $sql, array $params, QueryKind $kind, ?string $originalSql = null): QueryRequest
+    {
+        return $this->pipeline?->process($connection, $sql, $params, $kind, $originalSql) ?? new QueryRequest($connection, $originalSql ?? $sql, $sql, $params, $kind);
+    }
 
     private function assertNotCancelled(bool $cancelled, string $reason): void
     {
         if ($cancelled) {
             throw new OperationCancelledException($reason === '' ? 'Operation was cancelled.' : $reason);
+        }
+    }
+
+    /** @param array<string|int, mixed> $params */
+    private function dispatchQuerySuccess(ConnectionInterface $connection, string $sql, array $params, ExecutionResult $result, int $startedAt): void
+    {
+        $elapsedMs = $this->elapsedMs($startedAt);
+        $this->events?->dispatch(new AfterQueryExecuted($connection, $sql, $params, $result, $elapsedMs));
+        if ($this->slowQueryThresholdMs > 0 && $elapsedMs >= $this->slowQueryThresholdMs) {
+            $this->events?->dispatch(new SlowQueryDetectedEvent($connection, $sql, $params, $elapsedMs, $this->slowQueryThresholdMs));
         }
     }
 
@@ -181,14 +185,6 @@ final readonly class QueryExecutor implements QueryExecutorInterface
         if (! $this->history instanceof QueryHistoryInterface) {
             return;
         }
-
-        $this->history->record(new QueryHistoryEntry(
-            database: $connection->getDatabaseName() ?? '',
-            sql: $sql,
-            elapsedMs: (hrtime(true) - $startedAt) / 1_000_000,
-            executedAt: new \DateTimeImmutable,
-            success: $success,
-            errorMessage: $errorMessage,
-        ));
+        $this->history->record(new QueryHistoryEntry($connection->getDatabaseName() ?? '', $sql, $this->elapsedMs($startedAt), new \DateTimeImmutable, $success, $errorMessage));
     }
 }

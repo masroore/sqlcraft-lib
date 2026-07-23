@@ -1,8 +1,11 @@
 # Built-In Extensions Catalog
 
-> **Status:** PLAN ONLY  
-> **Phase:** 2 (Convenience — after foundation and default implementations)  
-> **Namespace:** `SQLCraft\Extension\`  
+> **Authoritative replacement:** `docs/other/plans/extensions-revised/04-implementation-handoff.md` and `03-verification.md`. This document is retained for history and is not an active implementation requirement.
+
+
+> **Status:** SUPERSEDED — historical reference only
+> **Phase:** 2 (Convenience — after foundation and default implementations)
+> **Namespace:** `SQLCraft\Extension\`
 > **Adminer plugin equivalents:** `sql-log.php`, `timeout.php`, `backward-keys.php`, `database-hide.php`, etc.
 
 ---
@@ -20,7 +23,7 @@ All built-in extensions use exclusively the three mechanisms from `17-plugin-sys
 
 ## 2. `QueryLogger` — PSR-3 Query Logging
 
-**Adminer equivalent:** `sql-log.php`  
+**Adminer equivalent:** `sql-log.php`
 **Mechanism:** PSR-14 event listener (Mechanism 1)
 
 ### File
@@ -113,7 +116,7 @@ final class LoggingExtension extends ExtensionBundle
 
 ## 3. `ReadOnlyGuard` — Veto All Write Operations
 
-**Adminer equivalent:** No direct equivalent; Adminer has no read-only mode at the plugin level.  
+**Adminer equivalent:** No direct equivalent; Adminer has no read-only mode at the plugin level.
 **Mechanism:** PSR-14 interception event (Mechanism 1) + `BeforeQueryExecuted`
 
 ### File
@@ -179,8 +182,8 @@ final class ReadOnlyExtension extends ExtensionBundle
 
 ## 4. `SlowQueryDetector` — Threshold-Based Slow Query Warning
 
-**Adminer equivalent:** `timeout.php` (limits query runtime)  
-**Mechanism:** PSR-14 event listener + `SlowQueryDetectedEvent` already exists  
+**Adminer equivalent:** `timeout.php` (limits query runtime)
+**Mechanism:** PSR-14 event listener + `SlowQueryDetectedEvent` already exists
 
 **Note:** The `SlowQueryDetectedEvent` is already fired by `QueryExecutor`. `SlowQueryDetector` is an event listener that **receives** those events and dispatches a user-defined callback. No new events needed.
 
@@ -234,7 +237,7 @@ final class SlowQueryDetector
 
 ## 5. `TenantScopingInterceptor` — Automatic Tenant Isolation
 
-**Adminer equivalent:** No equivalent (multi-tenancy is out of Adminer's scope).  
+**Adminer equivalent:** No equivalent (multi-tenancy is out of Adminer's scope).
 **Mechanism:** PSR-14 interception event (Mechanism 1), `BeforeQueryExecuted::replaceSql()`
 
 ### File

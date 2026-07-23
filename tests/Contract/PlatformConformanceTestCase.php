@@ -12,47 +12,51 @@ use SQLCraft\ValueObjects\Identifier;
 
 abstract class PlatformConformanceTestCase extends TestCase
 {
-    private ConnectionInterface $connection;
+    private ?ConnectionInterface $connection = null;
 
     #[\Override]
     protected function setUp(): void
     {
+        if ($this->requiresExternalEngine() && getenv('SQLCRAFT_RUN_ENGINE_INTEGRATION') !== '1') {
+            self::markTestSkipped('Set SQLCRAFT_RUN_ENGINE_INTEGRATION=1 with engine services running.');
+        }
+
         $this->connection = $this->createConnection();
-        $this->connection->execute('DROP TABLE IF EXISTS contract_fixture_rows');
-        $this->connection->execute('CREATE TABLE contract_fixture_rows (id INTEGER PRIMARY KEY, value TEXT NOT NULL)');
+        $this->connection()->execute('DROP TABLE IF EXISTS contract_fixture_rows');
+        $this->connection()->execute('CREATE TABLE contract_fixture_rows (id INTEGER PRIMARY KEY, value TEXT NOT NULL)');
         for ($id = 1; $id <= 10; $id++) {
-            $this->connection->execute('INSERT INTO contract_fixture_rows (id, value) VALUES (?, ?)', [$id, 'row-' . $id]);
+            $this->connection()->execute('INSERT INTO contract_fixture_rows (id, value) VALUES (?, ?)', [$id, 'row-' . $id]);
         }
     }
 
     #[\Override]
     protected function tearDown(): void
     {
-        $this->connection->close();
+        $this->connection?->close();
     }
 
     public function test_quoted_identifier_is_accepted_by_the_live_engine(): void
     {
         $identifier = new Identifier('weird`alias');
-        $row = $this->connection->query('SELECT 1 AS ' . $this->platform()->quoteIdentifier($identifier))->fetchAssoc();
+        $row = $this->connection()->query('SELECT 1 AS ' . $this->platform()->quoting()->quoteIdentifier($identifier))->fetchAssoc();
 
         self::assertSame(1, $row['weird`alias'] ?? null);
     }
 
     public function test_pagination_never_exceeds_the_requested_limit(): void
     {
-        $sql = $this->platform()->applyPagination(
+        $sql = $this->platform()->queryDialect()->applyPagination(
             'SELECT id FROM contract_fixture_rows ORDER BY id',
             limit: 5,
             offset: 0,
         );
 
-        self::assertCount(5, $this->connection->query($sql)->fetchAll());
+        self::assertCount(5, $this->connection()->query($sql)->fetchAll());
     }
 
     public function test_offset_pagination_starts_at_the_requested_row(): void
     {
-        $sql = $this->platform()->applyPagination(
+        $sql = $this->platform()->queryDialect()->applyPagination(
             'SELECT id FROM contract_fixture_rows ORDER BY id',
             limit: 3,
             offset: 4,
@@ -60,14 +64,14 @@ abstract class PlatformConformanceTestCase extends TestCase
 
         self::assertSame(
             [['id' => 5], ['id' => 6], ['id' => 7]],
-            $this->connection->query($sql)->fetchAll(),
+            $this->connection()->query($sql)->fetchAll(),
         );
     }
 
     public function test_quoted_string_is_accepted_as_a_value(): void
     {
-        $row = $this->connection->query(
-            'SELECT ' . $this->platform()->quoteValue("O'Reilly") . ' AS value',
+        $row = $this->connection()->query(
+            'SELECT ' . $this->platform()->quoting()->quoteValue("O'Reilly") . ' AS value',
         )->fetchAssoc();
 
         self::assertSame("O'Reilly", $row['value'] ?? null);
@@ -76,12 +80,22 @@ abstract class PlatformConformanceTestCase extends TestCase
     public function test_live_server_exposes_the_declared_platform_capabilities(): void
     {
         $platform = $this->platform();
-        $capabilities = $platform->getCapabilitySet($this->connection->getServerVersion());
+        $capabilities = $platform->getCapabilitySet($this->connection()->getServerVersion());
 
         self::assertTrue($capabilities->has(Capability::Table));
         self::assertTrue($capabilities->has(Capability::Columns));
         self::assertTrue($capabilities->has(Capability::Sql));
-        self::assertSame($platform->getName(), $this->connection->getPlatformName());
+        self::assertSame($platform->getName(), $this->connection()->getPlatformName());
+    }
+
+    private function connection(): ConnectionInterface
+    {
+        return $this->connection ?? throw new \LogicException('Connection is not initialized.');
+    }
+
+    protected function requiresExternalEngine(): bool
+    {
+        return true;
     }
 
     abstract protected function createConnection(): ConnectionInterface;

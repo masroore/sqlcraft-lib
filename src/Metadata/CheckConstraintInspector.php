@@ -20,7 +20,7 @@ final class CheckConstraintInspector implements CheckConstraintInspectorInterfac
     {
         $this->requireCapability($conn, Capability::CheckConstraints);
         /** @var list<array<string, bool|float|int|string|null>> $rows */
-        $rows = $conn->query($conn->getPlatform()->getCheckConstraintsSql($table))->fetchAll();
+        $rows = $conn->query($conn->getPlatform()->introspection()->getCheckConstraintsSql($table))->fetchAll();
         $constraints = [];
 
         foreach ($rows as $row) {

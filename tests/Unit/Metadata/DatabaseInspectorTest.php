@@ -9,6 +9,7 @@ use SQLCraft\Capabilities\Capability;
 use SQLCraft\Capabilities\CapabilityNotSupportedException;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Connection\ResultInterface;
+use SQLCraft\Contracts\Platform\IntrospectionDialectInterface;
 use SQLCraft\Contracts\Platform\PlatformInterface;
 use SQLCraft\Metadata\DatabaseInspector;
 use SQLCraft\Metadata\PostgreSQLMetadataFactory;
@@ -18,9 +19,11 @@ final class DatabaseInspectorTest extends TestCase
     public function test_it_hydrates_schemas_sequences_and_types(): void
     {
         $platform = self::createMock(PlatformInterface::class);
-        $platform->expects(self::once())->method('getSchemasSql')->willReturn('schemas');
-        $platform->expects(self::once())->method('getSequencesSql')->with('public')->willReturn('sequences');
-        $platform->expects(self::once())->method('getTypesSql')->with('public')->willReturn('types');
+        $introspection = self::createMock(IntrospectionDialectInterface::class);
+        $platform->method('introspection')->willReturn($introspection);
+        $introspection->expects(self::once())->method('getSchemasSql')->willReturn('schemas');
+        $introspection->expects(self::once())->method('getSequencesSql')->with('public')->willReturn('sequences');
+        $introspection->expects(self::once())->method('getTypesSql')->with('public')->willReturn('types');
 
         $schemaResult = self::createMock(ResultInterface::class);
         $schemaResult->method('fetchAll')->willReturn([[
@@ -67,7 +70,9 @@ final class DatabaseInspectorTest extends TestCase
     public function test_unsupported_types_remain_capability_errors(): void
     {
         $platform = self::createMock(PlatformInterface::class);
-        $platform->method('getTypesSql')->willThrowException(
+        $introspection = self::createMock(IntrospectionDialectInterface::class);
+        $platform->method('introspection')->willReturn($introspection);
+        $introspection->method('getTypesSql')->willThrowException(
             CapabilityNotSupportedException::for(Capability::Type, 'sqlite'),
         );
         $connection = self::createMock(ConnectionInterface::class);
@@ -81,7 +86,9 @@ final class DatabaseInspectorTest extends TestCase
     public function test_schema_listing_can_be_empty_when_platform_has_no_schema_concept(): void
     {
         $platform = self::createMock(PlatformInterface::class);
-        $platform->method('getSchemasSql')->willReturn('');
+        $introspection = self::createMock(IntrospectionDialectInterface::class);
+        $platform->method('introspection')->willReturn($introspection);
+        $introspection->method('getSchemasSql')->willReturn('');
         $connection = self::createMock(ConnectionInterface::class);
         $connection->method('getPlatform')->willReturn($platform);
 

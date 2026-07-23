@@ -1,7 +1,10 @@
 # Query Interception and `CredentialProviderChain`
 
-> **Status:** PLAN ONLY  
-> **Phase:** 0 (Foundation — blocking for built-in extensions)  
+> **Authoritative replacement:** `docs/other/plans/extensions-revised/04-implementation-handoff.md` and `03-verification.md`. This document is retained for history and is not an active implementation requirement.
+
+
+> **Status:** SUPERSEDED — historical reference only
+> **Phase:** 0 (Foundation — blocking for built-in extensions)
 > **Namespace:** `SQLCraft\Extension\`, `SQLCraft\Connection\`
 
 ---

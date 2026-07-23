@@ -154,13 +154,13 @@ final class PdoConnection implements ConnectionInterface
     #[\Override]
     public function quoteIdentifier(string $name): string
     {
-        return $this->platform->quoteIdentifier(new Identifier($name));
+        return $this->platform->quoting()->quoteIdentifier(new Identifier($name));
     }
 
     #[\Override]
     public function quoteValue(mixed $value): string
     {
-        return $this->platform->quoteValue($value);
+        return $this->platform->quoting()->quoteValue($value);
     }
 
     #[\Override]

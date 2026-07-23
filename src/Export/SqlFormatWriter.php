@@ -126,7 +126,7 @@ final class SqlFormatWriter implements FormatWriterInterface
                 throw new InvalidArgumentException('Binary column values must be strings.');
             }
 
-            return $this->connection->getPlatform()->quoteBinary($value);
+            return $this->connection->getPlatform()->quoting()->quoteBinary($value);
         }
 
         return $this->connection->quoteValue($value);

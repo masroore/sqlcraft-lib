@@ -1,7 +1,10 @@
 # API Stability Annotations and SemVer Policy
 
-> **Status:** PLAN ONLY  
-> **Phase:** 0 (Foundation — must land before v1.0)  
+> **Authoritative replacement:** `docs/other/plans/extensions-revised/04-implementation-handoff.md` and `03-verification.md`. This document is retained for history and is not an active implementation requirement.
+
+
+> **Status:** SUPERSEDED — historical reference only
+> **Phase:** 0 (Foundation — must land before v1.0)
 > **Scope:** PHPDoc `@api` / `@internal` tags, SemVer tier documentation, interface evolution policy
 
 ---

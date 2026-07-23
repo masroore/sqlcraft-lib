@@ -17,13 +17,13 @@ final class ForeignKeyInspector implements ForeignKeyInspectorInterface
     #[\Override]
     public function getForeignKeys(ConnectionInterface $conn, QualifiedName $table): ForeignKeyCollection
     {
-        return $this->collect($conn, $conn->getPlatform()->getForeignKeysSql($table));
+        return $this->collect($conn, $conn->getPlatform()->introspection()->getForeignKeysSql($table));
     }
 
     #[\Override]
     public function getReferencingKeys(ConnectionInterface $conn, QualifiedName $table): ForeignKeyCollection
     {
-        return $this->collect($conn, $conn->getPlatform()->getReferencingForeignKeysSql($table));
+        return $this->collect($conn, $conn->getPlatform()->introspection()->getReferencingForeignKeysSql($table));
     }
 
     private function collect(ConnectionInterface $conn, string $sql): ForeignKeyCollection

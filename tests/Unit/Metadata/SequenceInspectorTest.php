@@ -7,6 +7,7 @@ namespace SQLCraft\Tests\Unit\Metadata;
 use PHPUnit\Framework\TestCase;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Connection\ResultInterface;
+use SQLCraft\Contracts\Platform\IntrospectionDialectInterface;
 use SQLCraft\Contracts\Platform\PlatformInterface;
 use SQLCraft\Metadata\PostgreSQLMetadataFactory;
 use SQLCraft\Metadata\SequenceInspector;
@@ -16,7 +17,9 @@ final class SequenceInspectorTest extends TestCase
     public function test_it_hydrates_sequences_through_the_dialect(): void
     {
         $platform = self::createMock(PlatformInterface::class);
-        $platform->expects(self::once())->method('getSequencesSql')->with('public')->willReturn('sequences');
+        $introspection = self::createMock(IntrospectionDialectInterface::class);
+        $platform->method('introspection')->willReturn($introspection);
+        $introspection->expects(self::once())->method('getSequencesSql')->with('public')->willReturn('sequences');
         $result = self::createMock(ResultInterface::class);
         $result->method('fetchAll')->willReturn([[
             'sequence_name' => 'users_id_seq',

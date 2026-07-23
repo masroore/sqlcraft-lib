@@ -1,7 +1,11 @@
 <?php
+
 declare(strict_types=1);
+
 namespace SQLCraft\Support;
+
 use SQLCraft\Exceptions\ExtensionConfigurationException;
+
 /** @internal */
 final class ExtensionIdentifier
 {
@@ -11,6 +15,7 @@ final class ExtensionIdentifier
         if ($value === '' || preg_match('/[\x00-\x1F\x7F\s]/', $value) === 1) {
             throw new ExtensionConfigurationException(sprintf('Invalid %s identifier: %s.', $kind, $identifier));
         }
+
         return $value;
     }
 }

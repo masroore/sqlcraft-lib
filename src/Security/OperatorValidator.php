@@ -14,7 +14,7 @@ final readonly class OperatorValidator
     public function validate(string $operator): string
     {
         $operator = strtoupper(trim($operator));
-        if (! in_array($operator, $this->platform->getOperators(), true)) {
+        if (! in_array($operator, $this->platform->queryDialect()->getOperators(), true)) {
             throw new InvalidOperatorException(sprintf(
                 "Operator '%s' is not permitted for platform '%s'.",
                 $operator,

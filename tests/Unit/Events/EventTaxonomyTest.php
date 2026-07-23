@@ -6,6 +6,7 @@ namespace SQLCraft\Tests\Unit\Events;
 
 use PHPUnit\Framework\TestCase;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
+use SQLCraft\Enums\QueryKind;
 use SQLCraft\Events\BeforeQueryExecuted;
 use SQLCraft\Events\ObservabilityEvent;
 use SQLCraft\Events\SQLCraftEventInterface;
@@ -26,7 +27,7 @@ final class EventTaxonomyTest extends TestCase
             $this->createMock(ConnectionInterface::class),
             'SELECT 1',
             [],
-            'SELECT',
+            QueryKind::Select,
         );
         $event->cancel('maintenance window');
 
@@ -35,14 +36,13 @@ final class EventTaxonomyTest extends TestCase
         self::assertSame('maintenance window', $event->cancelReason);
     }
 
-    public function test_before_query_can_replace_sql_and_parameters(): void
+    public function test_before_query_exposes_final_sql_and_parameters_as_read_only(): void
     {
-        $connection = $this->createMock(ConnectionInterface::class);
-        $event = new BeforeQueryExecuted($connection, 'SELECT 1', [], 'SELECT');
-        $event->replaceSql('SELECT * FROM tenants WHERE tenant_id = ?', [42]);
+        $event = new BeforeQueryExecuted($this->createMock(ConnectionInterface::class), 'SELECT 1', [42], QueryKind::Select);
 
-        self::assertSame('SELECT * FROM tenants WHERE tenant_id = ?', $event->getSql());
+        self::assertSame('SELECT 1', $event->getSql());
         self::assertSame([42], $event->getParams());
+        self::assertFalse((new \ReflectionClass($event))->hasMethod('replaceSql'));
     }
 
     public function test_cancellation_exception_is_typed(): void

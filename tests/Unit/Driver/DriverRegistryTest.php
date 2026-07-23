@@ -11,6 +11,7 @@ use SQLCraft\Contracts\Platform\PlatformInterface;
 use SQLCraft\Driver\DriverRegistry;
 use SQLCraft\Enums\DatabaseDriver;
 use SQLCraft\Exceptions\DriverNotFoundException;
+use SQLCraft\Exceptions\DuplicateRegistrationException;
 use SQLCraft\ValueObjects\ConnectionParameters;
 
 final class DriverRegistryTest extends TestCase
@@ -25,7 +26,7 @@ final class DriverRegistryTest extends TestCase
             }
 
             #[\Override]
-            public function connect(ConnectionParameters $params): ConnectionInterface
+            public function connect(ConnectionParameters $params, ?string $name = null): ConnectionInterface
             {
                 throw new \LogicException;
             }
@@ -54,14 +55,13 @@ final class DriverRegistryTest extends TestCase
         self::assertSame(['fake'], $registry->getRegisteredNames());
     }
 
-    public function test_it_replaces_a_registered_driver_with_the_same_name(): void
+    public function test_it_rejects_a_duplicate_registered_driver(): void
     {
         $first = $this->fakeDriver();
         $second = $this->fakeDriver();
         $registry = new DriverRegistry([$first]);
+        $this->expectException(DuplicateRegistrationException::class);
         $registry->register($second);
-
-        self::assertSame($second, $registry->get('fake'));
         self::assertSame(['fake'], $registry->getRegisteredNames());
     }
 
@@ -75,9 +75,8 @@ final class DriverRegistryTest extends TestCase
     public function test_get_by_driver_delegates_to_get_using_backing_value(): void
     {
         $driver = $this->fakeDriver(); // getName() returns 'fake'
-        $registry = new DriverRegistry;
-        // Register the fake driver under the 'sqlite' key so we can look it up via the enum
-        $registry->registerAlias('sqlite', $driver);
+        $registry = new DriverRegistry([$driver]);
+        $registry->registerAlias('sqlite', 'fake');
 
         self::assertSame($driver, $registry->getByDriver(DatabaseDriver::SQLite));
     }
@@ -92,7 +91,7 @@ final class DriverRegistryTest extends TestCase
             }
 
             #[\Override]
-            public function connect(ConnectionParameters $params): ConnectionInterface
+            public function connect(ConnectionParameters $params, ?string $name = null): ConnectionInterface
             {
                 throw new \LogicException;
             }

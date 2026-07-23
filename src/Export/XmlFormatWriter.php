@@ -62,6 +62,7 @@ final class XmlFormatWriter implements FormatWriterInterface
         foreach ($rows as $row) {
             $w->startElement($opts->rowElement);
             foreach ($columns as $column) {
+                /** @psalm-suppress MixedAssignment */
                 $value = $row[$column->name] ?? null;
                 $elem = $this->sanitiseElementName($column->name);
                 if ($value === null) {

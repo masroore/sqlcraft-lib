@@ -19,13 +19,13 @@ final class ViewInspector implements ViewInspectorInterface
     #[\Override]
     public function getViews(ConnectionInterface $conn, ?string $schema = null): ViewCollection
     {
-        return $this->collect($conn, $conn->getPlatform()->getViewsSql($schema));
+        return $this->collect($conn, $conn->getPlatform()->introspection()->getViewsSql($schema));
     }
 
     #[\Override]
     public function getViewDefinition(ConnectionInterface $conn, QualifiedName $view): string
     {
-        $row = $conn->query($conn->getPlatform()->getViewDefinitionSql($view))->fetchAssoc();
+        $row = $conn->query($conn->getPlatform()->introspection()->getViewDefinitionSql($view))->fetchAssoc();
         if ($row === null) {
             throw new ObjectNotFoundException(
                 sprintf('View %s does not exist.', $view->object->name),
@@ -47,7 +47,7 @@ final class ViewInspector implements ViewInspectorInterface
     #[\Override]
     public function getMaterializedViews(ConnectionInterface $conn, ?string $schema = null): ViewCollection
     {
-        return $this->collect($conn, $conn->getPlatform()->getMaterializedViewsSql($schema));
+        return $this->collect($conn, $conn->getPlatform()->introspection()->getMaterializedViewsSql($schema));
     }
 
     private function collect(ConnectionInterface $conn, string $sql): ViewCollection

@@ -122,7 +122,7 @@ final class HtmlFormatWriter implements FormatWriterInterface
         ];
     }
 
-    private function prepareValue(mixed $value, ColumnMeta $column): mixed
+    private function prepareValue(mixed $value, ColumnMeta $column): float|int|string|null
     {
         if ($value === null) {
             return null;

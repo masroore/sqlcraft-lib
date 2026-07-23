@@ -20,6 +20,12 @@ final class SqlitePlatformConformanceTest extends PlatformConformanceTestCase
     private ?SqlitePlatform $sqlitePlatform = null;
 
     #[\Override]
+    protected function requiresExternalEngine(): bool
+    {
+        return false;
+    }
+
+    #[\Override]
     protected function createConnection(): ConnectionInterface
     {
         $this->sqlitePlatform = new SqlitePlatform;

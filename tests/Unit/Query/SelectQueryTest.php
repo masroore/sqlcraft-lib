@@ -6,6 +6,8 @@ namespace SQLCraft\Tests\Unit\Query;
 
 use PHPUnit\Framework\TestCase;
 use SQLCraft\Contracts\Platform\PlatformInterface;
+use SQLCraft\Contracts\Platform\QueryDialectInterface;
+use SQLCraft\Contracts\Platform\QuotingInterface;
 use SQLCraft\Platform\SqlitePlatform;
 use SQLCraft\Query\ColumnSelection;
 use SQLCraft\Query\OrderByClause;
@@ -76,9 +78,16 @@ final class SelectQueryTest extends TestCase
     public function test_aggregate_functions_come_from_the_platform_allowlist(): void
     {
         $platform = self::createMock(PlatformInterface::class);
-        $platform->method('getSupportedAggregateFunctions')->willReturn(['COUNT']);
-        $platform->method('quoteIdentifier')->willReturnCallback(static fn (Identifier $identifier): string => '"' . $identifier->name . '"');
-        $platform->method('getOperators')->willReturn(['=']);
+        $dialect = self::createMock(QueryDialectInterface::class);
+        $dialect->method('getSupportedAggregateFunctions')->willReturn(['COUNT']);
+        $platform->method('queryDialect')->willReturn($dialect);
+        $quoting = self::createMock(QuotingInterface::class);
+        $quoting->method('quoteIdentifier')->willReturnCallback(static fn (Identifier $identifier): string => '"' . $identifier->name . '"');
+        $platform->method('quoting')->willReturn($quoting);
+        $quoting = self::createMock(QuotingInterface::class);
+        $quoting->method('quoteIdentifier')->willReturnCallback(static fn (Identifier $identifier): string => '"' . $identifier->name . '"');
+        $platform->method('quoting')->willReturn($quoting);
+        $dialect->method('getOperators')->willReturn(['=']);
         $platform->method('getName')->willReturn('test');
         $query = new SelectQuery(new QualifiedName(new Identifier('users')), [new ColumnSelection(new Identifier('id'), 'SUM')]);
 

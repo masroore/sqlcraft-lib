@@ -22,7 +22,7 @@ final class ColumnInspector implements ColumnInspectorInterface
     public function getColumns(ConnectionInterface $conn, QualifiedName $table): ColumnCollection
     {
         /** @var list<array<string, bool|float|int|string|null>> $rows */
-        $rows = $conn->query($conn->getPlatform()->getColumnsSql($table))->fetchAll();
+        $rows = $conn->query($conn->getPlatform()->introspection()->getColumnsSql($table))->fetchAll();
         $columns = [];
 
         foreach ($rows as $row) {
@@ -40,7 +40,7 @@ final class ColumnInspector implements ColumnInspectorInterface
     public function getAllColumns(ConnectionInterface $conn, string $database, ?string $schema = null): array
     {
         /** @var list<array<string, bool|float|int|string|null>> $rows */
-        $rows = $conn->query($conn->getPlatform()->getAllColumnsSql($database, $schema))->fetchAll();
+        $rows = $conn->query($conn->getPlatform()->introspection()->getAllColumnsSql($database, $schema))->fetchAll();
         $columns = [];
 
         foreach ($rows as $row) {

@@ -51,7 +51,7 @@ final class TableInspector implements TableInspectorInterface
     #[\Override]
     public function getTableStatus(ConnectionInterface $conn, QualifiedName $table): TableStatus
     {
-        $row = $conn->query($conn->getPlatform()->getTableStatusSql($table))->fetchAssoc();
+        $row = $conn->query($conn->getPlatform()->introspection()->getTableStatusSql($table))->fetchAssoc();
         if ($row === null) {
             throw new ObjectNotFoundException(
                 sprintf('Table %s does not exist.', $table->object->name),
@@ -66,7 +66,7 @@ final class TableInspector implements TableInspectorInterface
     #[\Override]
     public function getParentTables(ConnectionInterface $conn, QualifiedName $table): QualifiedNameCollection
     {
-        $sql = $conn->getPlatform()->getParentTablesSql($table);
+        $sql = $conn->getPlatform()->introspection()->getParentTablesSql($table);
         if ($sql === '') {
             return new QualifiedNameCollection([]);
         }
@@ -86,7 +86,7 @@ final class TableInspector implements TableInspectorInterface
     #[\Override]
     public function getPartitions(ConnectionInterface $conn, QualifiedName $table): PartitionCollection
     {
-        $sql = $conn->getPlatform()->getPartitionsSql($table);
+        $sql = $conn->getPlatform()->introspection()->getPartitionsSql($table);
         /** @var list<array<string, bool|float|int|string|null>> $rows */
         $rows = $conn->query($sql)->fetchAll();
         $partitions = [];
@@ -106,7 +106,7 @@ final class TableInspector implements TableInspectorInterface
             throw new InvalidArgumentException('A database name is required to inspect tables.');
         }
 
-        return $conn->getPlatform()->getTablesSql($database, $schema);
+        return $conn->getPlatform()->introspection()->getTablesSql($database, $schema);
     }
 
     /** @param array<string, bool|float|int|string|null> $row */

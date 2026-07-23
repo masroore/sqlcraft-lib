@@ -9,6 +9,7 @@ use SQLCraft\Capabilities\Capability;
 use SQLCraft\Capabilities\CapabilityNotSupportedException;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Connection\ResultInterface;
+use SQLCraft\Contracts\Platform\IntrospectionDialectInterface;
 use SQLCraft\Contracts\Platform\PlatformInterface;
 use SQLCraft\Metadata\MySQLMetadataFactory;
 use SQLCraft\Metadata\ServerInspector;
@@ -19,16 +20,18 @@ final class ServerInspectorTest extends TestCase
     public function test_it_hydrates_server_collections_and_key_value_maps(): void
     {
         $platform = self::createMock(PlatformInterface::class);
+        $introspection = self::createMock(IntrospectionDialectInterface::class);
+        $platform->method('introspection')->willReturn($introspection);
         $platform->method('getName')->willReturn('mysql');
         $platform->method('getFlavor')->willReturn(null);
         $platform->method('getDefaultCharset')->willReturn('utf8mb4');
         $platform->method('getDefaultCollation')->willReturn('utf8mb4_general_ci');
-        $platform->method('getDatabasesSql')->willReturn('databases');
-        $platform->method('getVariablesSql')->willReturn('variables');
-        $platform->method('getStatusSql')->willReturn('status');
-        $platform->method('getProcesslistSql')->willReturn('processes');
-        $platform->method('getCharsetsSql')->willReturn('charsets');
-        $platform->method('getCollationsSql')->with('utf8mb4')->willReturn('collations');
+        $introspection->method('getDatabasesSql')->willReturn('databases');
+        $introspection->method('getVariablesSql')->willReturn('variables');
+        $introspection->method('getStatusSql')->willReturn('status');
+        $introspection->method('getProcesslistSql')->willReturn('processes');
+        $introspection->method('getCharsetsSql')->willReturn('charsets');
+        $introspection->method('getCollationsSql')->with('utf8mb4')->willReturn('collations');
 
         $results = [];
         foreach ([
@@ -74,7 +77,9 @@ final class ServerInspectorTest extends TestCase
     public function test_unsupported_charset_inspection_remains_capability_gated(): void
     {
         $platform = self::createMock(PlatformInterface::class);
-        $platform->method('getCharsetsSql')->willThrowException(
+        $introspection = self::createMock(IntrospectionDialectInterface::class);
+        $platform->method('introspection')->willReturn($introspection);
+        $introspection->method('getCharsetsSql')->willThrowException(
             CapabilityNotSupportedException::for(Capability::Charset, 'sqlite'),
         );
         $connection = self::createMock(ConnectionInterface::class);

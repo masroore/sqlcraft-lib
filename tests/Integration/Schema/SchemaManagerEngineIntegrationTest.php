@@ -11,6 +11,9 @@ use SQLCraft\Connection\PdoExceptionTranslator;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Driver\MySQLDriver;
 use SQLCraft\Driver\PostgreSQLDriver;
+use SQLCraft\Metadata\DefaultMetadataInspectorSetFactory;
+use SQLCraft\Metadata\MySQLMetadataFactory;
+use SQLCraft\Metadata\PostgreSQLMetadataFactory;
 use SQLCraft\Platform\MariaDbPlatform;
 use SQLCraft\Platform\MySQLPlatform;
 use SQLCraft\Platform\PostgreSQLPlatform;
@@ -50,7 +53,8 @@ final class SchemaManagerEngineIntegrationTest extends TestCase
         $connection->execute('CREATE TABLE ' . $orders . ' (id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL, CONSTRAINT orders_user_fk FOREIGN KEY (user_id) REFERENCES users(id))');
 
         try {
-            $manager = SchemaManagerFactory::forConnection($connection);
+            $metadataFactory = $platformName === 'pgsql' ? new PostgreSQLMetadataFactory : new MySQLMetadataFactory;
+            $manager = SchemaManagerFactory::schemaManager((new DefaultMetadataInspectorSetFactory($metadataFactory))->create($connection));
             $table = $platformName === 'pgsql'
                 ? new QualifiedName(new Identifier('orders'), new Identifier('public'))
                 : new QualifiedName(new Identifier('orders'), catalog: new Identifier('sqlcraft_test'));

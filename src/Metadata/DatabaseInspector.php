@@ -18,7 +18,7 @@ final class DatabaseInspector implements DatabaseInspectorInterface
     #[\Override]
     public function getSchemas(ConnectionInterface $conn): SchemaCollection
     {
-        $sql = $conn->getPlatform()->getSchemasSql();
+        $sql = $conn->getPlatform()->introspection()->getSchemasSql();
         if ($sql === '') {
             return new SchemaCollection([]);
         }
@@ -39,7 +39,7 @@ final class DatabaseInspector implements DatabaseInspectorInterface
     public function getSequences(ConnectionInterface $conn, ?string $schema = null): SequenceCollection
     {
         /** @var list<array<string, bool|float|int|string|null>> $rows */
-        $rows = $conn->query($conn->getPlatform()->getSequencesSql($schema))->fetchAll();
+        $rows = $conn->query($conn->getPlatform()->introspection()->getSequencesSql($schema))->fetchAll();
         $sequences = [];
 
         foreach ($rows as $row) {
@@ -54,7 +54,7 @@ final class DatabaseInspector implements DatabaseInspectorInterface
     public function getTypes(ConnectionInterface $conn, ?string $schema = null): TypeCollection
     {
         /** @var list<array<string, bool|float|int|string|null>> $rows */
-        $rows = $conn->query($conn->getPlatform()->getTypesSql($schema))->fetchAll();
+        $rows = $conn->query($conn->getPlatform()->introspection()->getTypesSql($schema))->fetchAll();
         $types = [];
 
         foreach ($rows as $row) {

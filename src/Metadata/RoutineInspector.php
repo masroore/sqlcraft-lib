@@ -33,7 +33,7 @@ final class RoutineInspector implements RoutineInspectorInterface
     public function getRoutineDetail(ConnectionInterface $conn, QualifiedName $routine): RoutineMeta
     {
         $this->requireCapability($conn, Capability::Routine);
-        $row = $conn->query($conn->getPlatform()->getRoutineDetailSql($routine))->fetchAssoc();
+        $row = $conn->query($conn->getPlatform()->introspection()->getRoutineDetailSql($routine))->fetchAssoc();
         if ($row === null) {
             throw new ObjectNotFoundException(
                 sprintf('Routine %s does not exist.', $routine->object->name),
@@ -49,7 +49,7 @@ final class RoutineInspector implements RoutineInspectorInterface
     {
         $this->requireCapability($conn, Capability::Routine);
         /** @var list<array<string, bool|float|int|string|null>> $rows */
-        $rows = $conn->query($conn->getPlatform()->getRoutinesSql($schema))->fetchAll();
+        $rows = $conn->query($conn->getPlatform()->introspection()->getRoutinesSql($schema))->fetchAll();
         $routines = [];
 
         foreach ($rows as $row) {

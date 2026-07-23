@@ -1,7 +1,10 @@
 # Format & Sink Registry — Current API and Extension Patterns
 
-> **Status:** PLAN ONLY  
-> **Phase:** 0 (the interfaces exist; this documents patterns and missing impls)  
+> **Authoritative replacement:** `docs/other/plans/extensions-revised/04-implementation-handoff.md` and `03-verification.md`. This document is retained for history and is not an active implementation requirement.
+
+
+> **Status:** SUPERSEDED — historical reference only
+> **Phase:** 0 (the interfaces exist; this documents patterns and missing impls)
 > **Namespace:** `SQLCraft\Export\`, `SQLCraft\Import\`
 
 ---

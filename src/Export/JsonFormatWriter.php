@@ -61,7 +61,9 @@ final class JsonFormatWriter implements FormatWriterInterface
             }
             $prefix = $this->firstRow ? "\n    " : ",\n    ";
             $this->firstRow = false;
-            $sink->write($prefix . json_encode($record, $flags));
+            $encoded = json_encode($record, $flags | JSON_THROW_ON_ERROR);
+            /** @psalm-suppress PossiblyFalseOperand */
+            $sink->write($prefix . $encoded);
         }
     }
 
@@ -88,7 +90,7 @@ final class JsonFormatWriter implements FormatWriterInterface
         return $flags;
     }
 
-    private function prepareValue(mixed $value, ColumnMeta $column): mixed
+    private function prepareValue(mixed $value, ColumnMeta $column): bool|float|int|string|null
     {
         if ($value === null) {
             return null;

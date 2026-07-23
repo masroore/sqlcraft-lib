@@ -9,6 +9,7 @@ use PHPUnit\Framework\TestCase;
 use SQLCraft\Connection\PdoConnection;
 use SQLCraft\Connection\PdoExceptionTranslator;
 use SQLCraft\Contracts\Platform\PlatformInterface;
+use SQLCraft\Contracts\Platform\QuotingInterface;
 use SQLCraft\Exceptions\QueryException;
 use SQLCraft\Exceptions\SyntaxErrorException;
 use SQLCraft\Exceptions\UniqueConstraintException;
@@ -93,10 +94,12 @@ final class PdoConnectionIntegrationTest extends TestCase
 
         $platform = $this->createMock(PlatformInterface::class);
         $platform->method('getName')->willReturn('sqlite');
-        $platform->method('quoteIdentifier')->willReturnCallback(
+        $quoting = $this->createMock(QuotingInterface::class);
+        $quoting->method('quoteIdentifier')->willReturnCallback(
             static fn (Identifier $identifier): string => '"' . $identifier->name . '"',
         );
-        $platform->method('quoteValue')->willReturn('quoted');
+        $quoting->method('quoteValue')->willReturn('quoted');
+        $platform->method('quoting')->willReturn($quoting);
 
         return new PdoConnection($pdo, $platform, new PdoExceptionTranslator);
     }

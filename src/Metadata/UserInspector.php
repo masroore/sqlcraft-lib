@@ -19,7 +19,7 @@ final class UserInspector implements UserInspectorInterface
     {
         $this->requireCapability($conn, Capability::Privileges);
         /** @var list<array<string, bool|float|int|string|null>> $rows */
-        $rows = $conn->query($conn->getPlatform()->getUsersSql())->fetchAll();
+        $rows = $conn->query($conn->getPlatform()->introspection()->getUsersSql())->fetchAll();
         $users = [];
 
         foreach ($rows as $row) {

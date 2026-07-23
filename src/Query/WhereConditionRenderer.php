@@ -14,7 +14,7 @@ final readonly class WhereConditionRenderer
     /** @return array{0: string, 1: list<mixed>} */
     public function render(WhereCondition $condition): array
     {
-        if (! in_array($condition->operator, $this->platform->getOperators(), true)) {
+        if (! in_array($condition->operator, $this->platform->queryDialect()->getOperators(), true)) {
             throw new InvalidArgumentException(sprintf(
                 'Operator %s is not supported by %s.',
                 $condition->operator,
@@ -22,7 +22,7 @@ final readonly class WhereConditionRenderer
             ));
         }
 
-        $column = $this->platform->quoteIdentifier($condition->column);
+        $column = $this->platform->quoting()->quoteIdentifier($condition->column);
         if (in_array($condition->operator, ['IS NULL', 'IS NOT NULL'], true)) {
             return [$column . ' ' . $condition->operator, []];
         }

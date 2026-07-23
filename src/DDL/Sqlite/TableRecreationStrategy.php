@@ -98,7 +98,7 @@ final readonly class TableRecreationStrategy
 
     private function executeBuilder(ConnectionInterface $connection, DdlBuilderInterface $builder): void
     {
-        foreach ($builder->toSql($connection->getPlatform()) as $sql) {
+        foreach ($builder->toSql($connection->getPlatform()->ddl()) as $sql) {
             $this->executeSql($connection, $sql, $this->objectName($builder));
         }
     }

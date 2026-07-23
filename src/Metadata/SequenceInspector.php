@@ -19,7 +19,7 @@ final class SequenceInspector implements SequenceInspectorInterface
     {
         $this->requireCapability($conn, Capability::Sequence);
         /** @var list<array<string, bool|float|int|string|null>> $rows */
-        $rows = $conn->query($conn->getPlatform()->getSequencesSql($schema))->fetchAll();
+        $rows = $conn->query($conn->getPlatform()->introspection()->getSequencesSql($schema))->fetchAll();
         $sequences = [];
 
         foreach ($rows as $row) {

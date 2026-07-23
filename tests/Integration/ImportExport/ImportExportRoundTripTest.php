@@ -169,7 +169,7 @@ final class ImportExportRoundTripTest extends TestCase
             $csv = $sink->contents();
             $connection->execute('DELETE FROM ' . $quoted);
 
-            $result = (new CsvImporter(new ColumnInspector(new SqliteMetadataFactory)))->importCsv(
+            $result = (new CsvImporter(new ColumnInspector(new SqliteMetadataFactory), new QueryExecutor))->importCsv(
                 $connection,
                 new QualifiedName(new Identifier($table)),
                 $this->sourceFromString($csv),

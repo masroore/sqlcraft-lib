@@ -20,7 +20,7 @@ final class TriggerInspector implements TriggerInspectorInterface
     {
         $this->requireCapability($conn, Capability::Trigger);
         /** @var list<array<string, bool|float|int|string|null>> $rows */
-        $rows = $conn->query($conn->getPlatform()->getTriggersSql($table))->fetchAll();
+        $rows = $conn->query($conn->getPlatform()->introspection()->getTriggersSql($table))->fetchAll();
         $triggers = [];
 
         foreach ($rows as $row) {

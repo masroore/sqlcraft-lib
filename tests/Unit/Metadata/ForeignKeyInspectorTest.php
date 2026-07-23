@@ -7,6 +7,7 @@ namespace SQLCraft\Tests\Unit\Metadata;
 use PHPUnit\Framework\TestCase;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Connection\ResultInterface;
+use SQLCraft\Contracts\Platform\IntrospectionDialectInterface;
 use SQLCraft\Contracts\Platform\PlatformInterface;
 use SQLCraft\Metadata\ForeignKeyInspector;
 use SQLCraft\Metadata\SqliteMetadataFactory;
@@ -22,8 +23,10 @@ final class ForeignKeyInspectorTest extends TestCase
         $outgoingSql = 'outgoing';
         $referencingSql = 'referencing';
         $platform = self::createMock(PlatformInterface::class);
-        $platform->expects(self::once())->method('getForeignKeysSql')->with($table)->willReturn($outgoingSql);
-        $platform->expects(self::once())->method('getReferencingForeignKeysSql')->with($table)->willReturn($referencingSql);
+        $introspection = self::createMock(IntrospectionDialectInterface::class);
+        $platform->method('introspection')->willReturn($introspection);
+        $introspection->expects(self::once())->method('getForeignKeysSql')->with($table)->willReturn($outgoingSql);
+        $introspection->expects(self::once())->method('getReferencingForeignKeysSql')->with($table)->willReturn($referencingSql);
         $outgoingResult = self::createMock(ResultInterface::class);
         $outgoingResult->expects(self::once())->method('fetchAll')->willReturn([[
             'constraint_name' => 'users_team_fk',

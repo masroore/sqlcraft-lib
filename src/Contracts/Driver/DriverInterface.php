@@ -12,7 +12,7 @@ interface DriverInterface
 {
     public function buildDsn(ConnectionParameters $params): string;
 
-    public function connect(ConnectionParameters $params): ConnectionInterface;
+    public function connect(ConnectionParameters $params, ?string $name = null): ConnectionInterface;
 
     public function getPlatform(ConnectionInterface $connection): PlatformInterface;
 

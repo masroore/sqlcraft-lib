@@ -206,6 +206,9 @@ final class Exporter implements ExporterInterface
 
     private function writer(string $format): FormatWriterInterface
     {
+        if ($this->formatRegistry instanceof FormatRegistry) {
+            return $this->formatRegistry->getWriter($format);
+        }
         if (! isset($this->writers[$format])) {
             throw new InvalidArgumentException(sprintf('Unsupported export format: %s', $format));
         }

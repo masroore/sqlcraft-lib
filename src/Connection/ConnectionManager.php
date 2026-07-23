@@ -21,7 +21,9 @@ final class ConnectionManager implements ConnectionManagerInterface
     #[\Override]
     public function add(string $name, ConnectionInterface $connection): void
     {
-        if ($this->has($name)) { throw new \InvalidArgumentException(sprintf('Connection already exists: %s.', $name)); }
+        if ($this->has($name)) {
+            throw new \InvalidArgumentException(sprintf('Connection already exists: %s.', $name));
+        }
         $this->connections[$name] = $connection;
     }
 

@@ -16,9 +16,9 @@ final readonly class DeleteQueryRenderer
     {
         $parts = [];
         if ($query->table->schema instanceof Identifier) {
-            $parts[] = $this->platform->quoteIdentifier($query->table->schema);
+            $parts[] = $this->platform->quoting()->quoteIdentifier($query->table->schema);
         }
-        $parts[] = $this->platform->quoteIdentifier($query->table->object);
+        $parts[] = $this->platform->quoting()->quoteIdentifier($query->table->object);
 
         $sql = 'DELETE FROM ' . implode('.', $parts);
         $params = [];

@@ -9,6 +9,7 @@ use SQLCraft\Capabilities\Capability;
 use SQLCraft\Capabilities\CapabilityNotSupportedException;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Connection\ResultInterface;
+use SQLCraft\Contracts\Platform\IntrospectionDialectInterface;
 use SQLCraft\Contracts\Platform\PlatformInterface;
 use SQLCraft\Metadata\MySQLMetadataFactory;
 use SQLCraft\Metadata\ViewInspector;
@@ -21,9 +22,11 @@ final class ViewInspectorTest extends TestCase
     {
         $view = new QualifiedName(new Identifier('active_users'));
         $platform = self::createMock(PlatformInterface::class);
-        $platform->method('getViewsSql')->with('app')->willReturn('views');
-        $platform->method('getViewDefinitionSql')->with($view)->willReturn('definition');
-        $platform->method('getMaterializedViewsSql')->with('app')->willReturn('materialized');
+        $introspection = self::createMock(IntrospectionDialectInterface::class);
+        $platform->method('introspection')->willReturn($introspection);
+        $introspection->method('getViewsSql')->with('app')->willReturn('views');
+        $introspection->method('getViewDefinitionSql')->with($view)->willReturn('definition');
+        $introspection->method('getMaterializedViewsSql')->with('app')->willReturn('materialized');
 
         $views = self::createMock(ResultInterface::class);
         $views->method('fetchAll')->willReturn([[
@@ -68,7 +71,9 @@ final class ViewInspectorTest extends TestCase
     public function test_materialized_view_capability_errors_are_not_hidden(): void
     {
         $platform = self::createMock(PlatformInterface::class);
-        $platform->method('getMaterializedViewsSql')->willThrowException(
+        $introspection = self::createMock(IntrospectionDialectInterface::class);
+        $platform->method('introspection')->willReturn($introspection);
+        $introspection->method('getMaterializedViewsSql')->willThrowException(
             CapabilityNotSupportedException::for(Capability::MaterializedView, 'mysql'),
         );
         $connection = self::createMock(ConnectionInterface::class);

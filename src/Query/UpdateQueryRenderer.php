@@ -18,7 +18,7 @@ final readonly class UpdateQueryRenderer
         $assignments = [];
         /** @psalm-suppress MixedAssignment */
         foreach ($query->assignments as $column => $value) {
-            $assignments[] = $this->platform->quoteIdentifier(new Identifier($column)) . ' = ?';
+            $assignments[] = $this->platform->quoting()->quoteIdentifier(new Identifier($column)) . ' = ?';
             /** @psalm-suppress MixedAssignment */
             $params[] = $value;
         }
@@ -46,9 +46,9 @@ final readonly class UpdateQueryRenderer
     {
         $parts = [];
         if ($query->table->schema instanceof Identifier) {
-            $parts[] = $this->platform->quoteIdentifier($query->table->schema);
+            $parts[] = $this->platform->quoting()->quoteIdentifier($query->table->schema);
         }
-        $parts[] = $this->platform->quoteIdentifier($query->table->object);
+        $parts[] = $this->platform->quoting()->quoteIdentifier($query->table->object);
 
         return implode('.', $parts);
     }

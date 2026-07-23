@@ -18,7 +18,7 @@ final readonly class ExplainService implements ExplainServiceInterface
         array $params = [],
         bool $analyze = false,
     ): ExplainResult {
-        $explainSql = $connection->getPlatform()->getExplainSql($sql, $analyze);
+        $explainSql = $connection->getPlatform()->queryDialect()->getExplainSql($sql, $analyze);
         $startedAt = hrtime(true);
         /** @var list<array<string, int|float|string|bool|null>> $rawRows */
         $rawRows = $connection->query($explainSql, $params, streaming: false)->fetchAll();

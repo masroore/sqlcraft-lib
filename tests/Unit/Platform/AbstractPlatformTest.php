@@ -57,6 +57,7 @@ final class AbstractPlatformTest extends TestCase
                 return false;
             }
 
+            /** @return list<string> */
             #[\Override]
             public function getKeywordList(): array
             {

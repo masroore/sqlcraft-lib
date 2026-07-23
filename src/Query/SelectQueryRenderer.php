@@ -35,13 +35,13 @@ final readonly class SelectQueryRenderer
         }
 
         if ($query->groupBy !== []) {
-            $sql .= ' GROUP BY ' . implode(', ', array_map(fn (string $column): string => $this->platform->quoteIdentifier(new Identifier($column)), $query->groupBy));
+            $sql .= ' GROUP BY ' . implode(', ', array_map(fn (string $column): string => $this->platform->quoting()->quoteIdentifier(new Identifier($column)), $query->groupBy));
         }
         if ($query->orderBy !== []) {
-            $sql .= ' ORDER BY ' . implode(', ', array_map(fn (OrderByClause $clause): string => $this->platform->quoteIdentifier($clause->column) . ($clause->descending ? ' DESC' : ' ASC'), $query->orderBy));
+            $sql .= ' ORDER BY ' . implode(', ', array_map(fn (OrderByClause $clause): string => $this->platform->quoting()->quoteIdentifier($clause->column) . ($clause->descending ? ' DESC' : ' ASC'), $query->orderBy));
         }
         if ($query->limit !== null) {
-            $sql = $this->platform->applyPagination($sql, $query->limit, $query->offset ?? 0);
+            $sql = $this->platform->queryDialect()->applyPagination($sql, $query->limit, $query->offset ?? 0);
         }
 
         return ['sql' => $sql, 'params' => $params];
@@ -53,10 +53,10 @@ final readonly class SelectQueryRenderer
         if ($columns === []) {
             return '*';
         }
-        $allowedAggregates = $this->platform->getSupportedAggregateFunctions();
+        $allowedAggregates = $this->platform->queryDialect()->getSupportedAggregateFunctions();
 
         return implode(', ', array_map(function (ColumnSelection $selection) use ($allowedAggregates): string {
-            $column = $this->platform->quoteIdentifier($selection->column);
+            $column = $this->platform->quoting()->quoteIdentifier($selection->column);
             if ($selection->aggregateFunction !== null) {
                 $aggregate = strtoupper($selection->aggregateFunction);
                 if (! in_array($aggregate, $allowedAggregates, true)) {
@@ -65,7 +65,7 @@ final readonly class SelectQueryRenderer
                 $column = $aggregate . '(' . $column . ')';
             }
             if ($selection->alias instanceof Identifier) {
-                $column .= ' AS ' . $this->platform->quoteIdentifier($selection->alias);
+                $column .= ' AS ' . $this->platform->quoting()->quoteIdentifier($selection->alias);
             }
 
             return $column;
@@ -76,12 +76,12 @@ final readonly class SelectQueryRenderer
     {
         $parts = [];
         if ($name->catalog instanceof Identifier) {
-            $parts[] = $this->platform->quoteIdentifier($name->catalog);
+            $parts[] = $this->platform->quoting()->quoteIdentifier($name->catalog);
         }
         if ($name->schema instanceof Identifier) {
-            $parts[] = $this->platform->quoteIdentifier($name->schema);
+            $parts[] = $this->platform->quoting()->quoteIdentifier($name->schema);
         }
-        $parts[] = $this->platform->quoteIdentifier($name->object);
+        $parts[] = $this->platform->quoting()->quoteIdentifier($name->object);
 
         return implode('.', $parts);
     }

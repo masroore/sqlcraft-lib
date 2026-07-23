@@ -7,12 +7,13 @@ namespace SQLCraft\ValueObjects;
 use InvalidArgumentException;
 use SensitiveParameter;
 use SQLCraft\Enums\DatabaseDriver;
-use SQLCraft\Support\StringUtil;
 use SQLCraft\Support\ExtensionIdentifier;
+use SQLCraft\Support\StringUtil;
 
 final readonly class ConnectionParameters
 {
-    public readonly ?string $driver;
+    public ?string $driver;
+
     /**
      * @param  array<string, scalar|null>  $ssl
      * @param  array<string, scalar|null>  $extras

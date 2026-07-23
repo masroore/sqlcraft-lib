@@ -18,7 +18,7 @@ final class IndexInspector implements IndexInspectorInterface
     public function getIndexes(ConnectionInterface $conn, QualifiedName $table): IndexCollection
     {
         /** @var list<array<string, bool|float|int|string|null>> $rows */
-        $rows = $conn->query($conn->getPlatform()->getIndexesSql($table))->fetchAll();
+        $rows = $conn->query($conn->getPlatform()->introspection()->getIndexesSql($table))->fetchAll();
         $indexes = [];
 
         foreach ($rows as $row) {

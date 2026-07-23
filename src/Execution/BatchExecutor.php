@@ -11,6 +11,7 @@ use SQLCraft\Contracts\Execution\BatchExecutorInterface;
 use SQLCraft\Contracts\Execution\BatchStatementResult;
 use SQLCraft\Contracts\Execution\QueryExecutorInterface;
 use SQLCraft\Contracts\Execution\StatementBatch;
+use SQLCraft\DTO\ExecutionResult;
 use SQLCraft\Exceptions\QueryTimeoutException;
 
 final readonly class BatchExecutor implements BatchExecutorInterface
@@ -39,11 +40,19 @@ final readonly class BatchExecutor implements BatchExecutorInterface
             $startedAt = hrtime(true);
             try {
                 if ($timeoutMs > 0) {
-                    $rows = $this->executor->queryWithTimeout($connection, $sql, timeoutMs: $timeoutMs);
-                    if (! $rows instanceof ResultInterface) {
-                        throw new QueryTimeoutException('Statement timeout is not supported by this platform.', $sql);
+                    if ($this->isQuery($sql)) {
+                        $rows = $this->executor->queryWithTimeout($connection, $sql, timeoutMs: $timeoutMs);
+                        if (! $rows instanceof ResultInterface) {
+                            throw new QueryTimeoutException('Statement timeout is not supported by this platform.', $sql);
+                        }
+                        yield new BatchStatementResult($index, $sql, null, $rows, $this->elapsedMs($startedAt), null);
+                    } else {
+                        $result = $this->executor->executeWithTimeout($connection, $sql, timeoutMs: $timeoutMs);
+                        if (! $result instanceof ExecutionResult) {
+                            throw new QueryTimeoutException('Statement timeout is not supported by this platform.', $sql);
+                        }
+                        yield new BatchStatementResult($index, $sql, $result, null, $this->elapsedMs($startedAt), null);
                     }
-                    yield new BatchStatementResult($index, $sql, null, $rows, $this->elapsedMs($startedAt), null);
 
                     continue;
                 }

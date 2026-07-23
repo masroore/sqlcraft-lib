@@ -64,7 +64,7 @@ final class SqlServerIntegrationTest extends TestCase
                 $connection->execute('INSERT INTO ' . $quoted . ' ([value]) VALUES (?)', ['row-' . $id]);
             }
 
-            $sql = $connection->getPlatform()->applyPagination('SELECT [id], [value] FROM ' . $quoted . ' ORDER BY [id]', 2, 2);
+            $sql = $connection->getPlatform()->queryDialect()->applyPagination('SELECT [id], [value] FROM ' . $quoted . ' ORDER BY [id]', 2, 2);
             self::assertSame(
                 [['id' => 3, 'value' => 'row-3'], ['id' => 4, 'value' => 'row-4']],
                 $connection->query($sql)->fetchAll(),

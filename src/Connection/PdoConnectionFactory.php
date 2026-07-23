@@ -34,7 +34,9 @@ final class PdoConnectionFactory implements PdoConnectionFactoryInterface
         $connectionName = $name ?? $platform->getName();
         $startedAt = hrtime(true);
         $cancelReason = $this->emitLifecycleEvents ? $this->events?->beforeConnectionOpened($connectionName, $parameters) : null;
-        if ($cancelReason !== null) throw new OperationCancelledException($cancelReason);
+        if ($cancelReason !== null) {
+            throw new OperationCancelledException($cancelReason);
+        }
         try {
             $options = [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -54,7 +56,9 @@ final class PdoConnectionFactory implements PdoConnectionFactoryInterface
                 $options,
             );
         } catch (PDOException $exception) {
-            if ($this->emitLifecycleEvents) $this->events?->connectionFailed($connectionName, $platform->getName(), $exception);
+            if ($this->emitLifecycleEvents) {
+                $this->events?->connectionFailed($connectionName, $platform->getName(), $exception);
+            }
             throw new ConnectionFailedException(
                 'Database connection failed.',
                 host: $parameters->host ?? '',
@@ -64,7 +68,10 @@ final class PdoConnectionFactory implements PdoConnectionFactoryInterface
         }
 
         $connection = new PdoConnection($pdo, $platform, $this->translator, $name, $parameters->database, $this->events);
-        if ($this->emitLifecycleEvents) $this->events?->connectionOpened($connectionName,$platform->getName(),$parameters->host,$parameters->database,(hrtime(true)-$startedAt)/1_000_000,$connection);
+        if ($this->emitLifecycleEvents) {
+            $this->events?->connectionOpened($connectionName, $platform->getName(), $parameters->host, $parameters->database, (hrtime(true) - $startedAt) / 1_000_000, $connection);
+        }
+
         return $connection;
     }
 }

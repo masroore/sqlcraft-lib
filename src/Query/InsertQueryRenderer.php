@@ -15,7 +15,7 @@ final readonly class InsertQueryRenderer
     /** @return array{sql: string, params: list<mixed>} */
     public function render(InsertQuery $query): array
     {
-        $columns = implode(', ', array_map(fn (string $name): string => $this->platform->quoteIdentifier(new Identifier($name)), $query->columns));
+        $columns = implode(', ', array_map(fn (string $name): string => $this->platform->quoting()->quoteIdentifier(new Identifier($name)), $query->columns));
         if ($query->selectSql !== null) {
             return ['sql' => 'INSERT INTO ' . $this->quoteTable($query) . ' (' . $columns . ') ' . $query->selectSql, 'params' => []];
         }
@@ -25,7 +25,7 @@ final readonly class InsertQueryRenderer
             $values = [...$values, ...$valuesRow];
         }
         /** @var list<mixed> $values */
-        $quotedColumns = array_map(fn (string $name): string => $this->platform->quoteIdentifier(new Identifier($name)), $query->columns);
+        $quotedColumns = array_map(fn (string $name): string => $this->platform->quoting()->quoteIdentifier(new Identifier($name)), $query->columns);
         $clauses = UpsertSqlRenderer::clauses($this->platform, $query->upsertMode, $quotedColumns);
         if ($this->platform->getName() === 'sqlserver' && $query->upsertMode !== UpsertMode::Insert) {
             $sourceColumns = implode(', ', $quotedColumns);
@@ -51,8 +51,8 @@ final readonly class InsertQueryRenderer
     {
         $parts = [];
         if ($query->table->schema instanceof Identifier) {
-            $parts[] = $this->platform->quoteIdentifier($query->table->schema);
-        } $parts[] = $this->platform->quoteIdentifier($query->table->object);
+            $parts[] = $this->platform->quoting()->quoteIdentifier($query->table->schema);
+        } $parts[] = $this->platform->quoting()->quoteIdentifier($query->table->object);
 
         return implode('.', $parts);
     }

@@ -7,6 +7,7 @@ namespace SQLCraft\Tests\Unit\Execution;
 use PHPUnit\Framework\TestCase;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Connection\ResultInterface;
+use SQLCraft\Contracts\Execution\QueryInterceptorInterface;
 use SQLCraft\DTO\ExecutionResult;
 use SQLCraft\Events\AfterQueryExecuted;
 use SQLCraft\Events\BeforeQueryExecuted;
@@ -15,6 +16,8 @@ use SQLCraft\Events\SimpleEventDispatcher;
 use SQLCraft\Events\SimpleListenerProvider;
 use SQLCraft\Exceptions\OperationCancelledException;
 use SQLCraft\Execution\QueryExecutor;
+use SQLCraft\Execution\QueryInterceptorPipeline;
+use SQLCraft\Execution\QueryRequest;
 use SQLCraft\Platform\SqlitePlatform;
 
 final class QueryExecutorTest extends TestCase
@@ -63,13 +66,12 @@ final class QueryExecutorTest extends TestCase
         $connection = self::createMock(ConnectionInterface::class);
         $expected = new ExecutionResult(1, '', 0.0, 'SELECT * FROM users WHERE tenant_id = ?');
         $connection->expects(self::once())->method('execute')->with($expected->sql, [7])->willReturn($expected);
-        $provider = new SimpleListenerProvider;
-        $provider->listen(BeforeQueryExecuted::class, static function (BeforeQueryExecuted $event): void {
-            $event->replaceSql('SELECT * FROM users WHERE tenant_id = ?', [7]);
-        });
-        $events = new SimpleEventDispatcher($provider);
+        $interceptor = self::createMock(QueryInterceptorInterface::class);
+        $interceptor->expects(self::once())->method('intercept')->willReturnCallback(
+            static fn (QueryRequest $request): QueryRequest => $request->withSqlAndParams('SELECT * FROM users WHERE tenant_id = ?', [7]),
+        );
 
-        self::assertSame($expected, (new QueryExecutor(events: $events, slowQueryThresholdMs: 0))->execute($connection, 'UPDATE users SET active = ?', [true]));
+        self::assertSame($expected, (new QueryExecutor(slowQueryThresholdMs: 0, pipeline: new QueryInterceptorPipeline([$interceptor])))->execute($connection, 'UPDATE users SET active = ?', [true]));
     }
 
     public function test_cancelled_query_is_not_executed(): void

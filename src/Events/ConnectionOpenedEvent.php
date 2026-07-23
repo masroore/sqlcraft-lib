@@ -18,5 +18,8 @@ final readonly class ConnectionOpenedEvent extends ObservabilityEvent
     ) {}
 
     /** @return array<string,mixed> */
-    public function __serialize(): array { return ['name'=>$this->name,'driver'=>$this->driver,'host'=>$this->host,'database'=>$this->database,'elapsedMs'=>$this->elapsedMs]; }
+    public function __serialize(): array
+    {
+        return ['name' => $this->name, 'driver' => $this->driver, 'host' => $this->host, 'database' => $this->database, 'elapsedMs' => $this->elapsedMs];
+    }
 }

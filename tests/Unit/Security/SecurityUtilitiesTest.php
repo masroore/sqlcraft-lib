@@ -6,6 +6,7 @@ namespace SQLCraft\Tests\Unit\Security;
 
 use PHPUnit\Framework\TestCase;
 use SQLCraft\Contracts\Platform\PlatformInterface;
+use SQLCraft\Contracts\Platform\QueryDialectInterface;
 use SQLCraft\Exceptions\InvalidOperatorException;
 use SQLCraft\Platform\MySQLPlatform;
 use SQLCraft\Security\IdentifierQuoter;
@@ -36,7 +37,9 @@ final class SecurityUtilitiesTest extends TestCase
     {
         $platform = self::createMock(PlatformInterface::class);
         $platform->method('getName')->willReturn('test');
-        $platform->method('getOperators')->willReturn(['=', 'LIKE']);
+        $dialect = self::createMock(QueryDialectInterface::class);
+        $dialect->method('getOperators')->willReturn(['=', 'LIKE']);
+        $platform->method('queryDialect')->willReturn($dialect);
         $validator = new OperatorValidator($platform);
 
         $this->expectException(InvalidOperatorException::class);

@@ -155,7 +155,7 @@ final class JsonFormatWriterTest extends TestCase
         $writer->writeTableFooter($sink, $table);
         $writer->writeFooter($sink, $options);
 
-        $rowJson = trim(explode("\n", $sink->contents())[1] ?? '');
+        trim(explode("\n", $sink->contents())[1] ?? '');
         // With pretty:false, json_encode of the row has no whitespace; document still uses structural newlines.
         self::assertStringNotContainsString("\n  ", json_encode(['id' => 1], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE));
         self::assertStringContainsString('{"id":1}', $sink->contents());

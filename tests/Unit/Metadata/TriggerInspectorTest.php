@@ -7,6 +7,7 @@ namespace SQLCraft\Tests\Unit\Metadata;
 use PHPUnit\Framework\TestCase;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Connection\ResultInterface;
+use SQLCraft\Contracts\Platform\IntrospectionDialectInterface;
 use SQLCraft\Contracts\Platform\PlatformInterface;
 use SQLCraft\Metadata\SqliteMetadataFactory;
 use SQLCraft\Metadata\TriggerInspector;
@@ -21,7 +22,9 @@ final class TriggerInspectorTest extends TestCase
         $table = new QualifiedName(new Identifier('users'));
         $sql = "SELECT name, sql FROM sqlite_master WHERE type = 'trigger' ORDER BY name";
         $platform = self::createMock(PlatformInterface::class);
-        $platform->expects(self::once())->method('getTriggersSql')->with($table)->willReturn($sql);
+        $introspection = self::createMock(IntrospectionDialectInterface::class);
+        $platform->method('introspection')->willReturn($introspection);
+        $introspection->expects(self::once())->method('getTriggersSql')->with($table)->willReturn($sql);
         $result = self::createMock(ResultInterface::class);
         $result->expects(self::once())->method('fetchAll')->willReturn([[
             'name' => 'users_inserted',

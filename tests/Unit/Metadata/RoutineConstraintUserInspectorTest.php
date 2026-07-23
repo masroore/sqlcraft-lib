@@ -9,6 +9,7 @@ use SQLCraft\Capabilities\Capability;
 use SQLCraft\Capabilities\CapabilityNotSupportedException;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Connection\ResultInterface;
+use SQLCraft\Contracts\Platform\IntrospectionDialectInterface;
 use SQLCraft\Contracts\Platform\PlatformInterface;
 use SQLCraft\Metadata\CheckConstraintInspector;
 use SQLCraft\Metadata\MySQLMetadataFactory;
@@ -23,10 +24,12 @@ final class RoutineConstraintUserInspectorTest extends TestCase
     {
         $routine = new QualifiedName(new Identifier('refresh_users'));
         $platform = self::createMock(PlatformInterface::class);
-        $platform->method('getRoutinesSql')->with('app')->willReturn('routines');
-        $platform->method('getRoutineDetailSql')->with($routine)->willReturn('routine');
-        $platform->method('getCheckConstraintsSql')->with($routine)->willReturn('checks');
-        $platform->method('getUsersSql')->willReturn('users');
+        $introspection = self::createMock(IntrospectionDialectInterface::class);
+        $platform->method('introspection')->willReturn($introspection);
+        $introspection->method('getRoutinesSql')->with('app')->willReturn('routines');
+        $introspection->method('getRoutineDetailSql')->with($routine)->willReturn('routine');
+        $introspection->method('getCheckConstraintsSql')->with($routine)->willReturn('checks');
+        $introspection->method('getUsersSql')->willReturn('users');
 
         $results = [];
         foreach ([
@@ -72,7 +75,9 @@ final class RoutineConstraintUserInspectorTest extends TestCase
     public function test_unsupported_user_inspection_remains_capability_gated(): void
     {
         $platform = self::createMock(PlatformInterface::class);
-        $platform->method('getUsersSql')->willThrowException(
+        $introspection = self::createMock(IntrospectionDialectInterface::class);
+        $platform->method('introspection')->willReturn($introspection);
+        $introspection->method('getUsersSql')->willThrowException(
             CapabilityNotSupportedException::for(Capability::Privileges, 'sqlite'),
         );
         $connection = self::createMock(ConnectionInterface::class);

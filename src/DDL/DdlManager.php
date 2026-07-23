@@ -23,7 +23,7 @@ final readonly class DdlManager
     /** @return list<string> */
     public function preview(ConnectionInterface $connection, DdlBuilderInterface $builder): array
     {
-        return $builder->toSql($connection->getPlatform());
+        return $builder->toSql($connection->getPlatform()->ddl());
     }
 
     public function execute(ConnectionInterface $connection, DdlBuilderInterface $builder): void
@@ -37,16 +37,11 @@ final readonly class DdlManager
         $objectName = $this->objectName($builder);
         foreach ($this->preview($connection, $builder) as $sql) {
             $cancelReason = $this->events?->beforeSchemaChange($connection, 'DDL', $objectName, 'ALTER', $sql);
-            if ($cancelReason === null) {
-                $cancelReason = $this->events?->beforeDdlExecuted($connection, $sql, $objectName);
-            }
             if ($cancelReason !== null) {
                 throw new OperationCancelledException($cancelReason);
             }
 
-            $startedAt = hrtime(true);
             $this->executor->executeDdl($connection, $sql, objectName: $objectName);
-            $this->events?->afterDdlExecuted($connection, $sql, $objectName, (hrtime(true) - $startedAt) / 1_000_000);
             $this->events?->schemaChanged($connection, 'DDL', $objectName, 'ALTER');
         }
     }

@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace SQLCraft;
 
-use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Capabilities\Capability;
+use SQLCraft\Capabilities\CapabilityNotSupportedException;
+use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Connection\ResultInterface;
+use SQLCraft\Contracts\Execution\ProcessManagerInterface;
 use SQLCraft\Contracts\Execution\QueryExecutorInterface;
-use SQLCraft\Contracts\Schema\SchemaManagerInterface;
+use SQLCraft\Contracts\Import\CsvImporterInterface;
 use SQLCraft\Contracts\Security\PrivilegeManagerInterface;
 use SQLCraft\Contracts\Security\SecurityGuardInterface;
 use SQLCraft\Contracts\Security\UserManagerInterface;
@@ -16,10 +18,6 @@ use SQLCraft\DDL\DdlManager;
 use SQLCraft\DTO\ExecutionResult;
 use SQLCraft\Export\Exporter;
 use SQLCraft\Export\FormatRegistry;
-use SQLCraft\Import\CsvImporter;
-use SQLCraft\Contracts\Import\CsvImporterInterface;
-use SQLCraft\Contracts\Execution\ProcessManagerInterface;
-use SQLCraft\Schema\SchemaManager;
 use SQLCraft\Import\Importer;
 use SQLCraft\Query\DeleteQuery;
 use SQLCraft\Query\DeleteQueryRenderer;
@@ -27,6 +25,7 @@ use SQLCraft\Query\InsertQuery;
 use SQLCraft\Query\InsertQueryRenderer;
 use SQLCraft\Query\UpdateQuery;
 use SQLCraft\Query\UpdateQueryRenderer;
+use SQLCraft\Schema\SchemaManager;
 
 final readonly class DatabaseSession
 {
@@ -114,6 +113,11 @@ final readonly class DatabaseSession
 
     public function processes(): ProcessManagerInterface
     {
-        return $this->processes ?? throw \SQLCraft\Capabilities\CapabilityNotSupportedException::for(Capability::Kill, $this->connection->getPlatformName());
+        $capabilities = $this->connection->getPlatform()->getCapabilitySet($this->connection->getServerVersion());
+        if (! $capabilities->has(Capability::Kill) || ! $this->processes instanceof ProcessManagerInterface) {
+            throw CapabilityNotSupportedException::for(Capability::Kill, $this->connection->getPlatformName());
+        }
+
+        return $this->processes;
     }
 }

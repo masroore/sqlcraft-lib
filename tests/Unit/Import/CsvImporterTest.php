@@ -7,7 +7,7 @@ namespace SQLCraft\Tests\Unit\Import;
 use PHPUnit\Framework\TestCase;
 use SQLCraft\Collections\ColumnCollection;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
-use SQLCraft\Contracts\Connection\PreparedStatementInterface;
+use SQLCraft\Contracts\Execution\QueryExecutorInterface;
 use SQLCraft\Contracts\Import\ImportSourceInterface;
 use SQLCraft\Contracts\Metadata\ColumnInspectorInterface;
 use SQLCraft\DTO\ColumnMeta;
@@ -27,18 +27,12 @@ final class CsvImporterTest extends TestCase
         $connection = self::createMock(ConnectionInterface::class);
         $connection->method('quoteIdentifier')->willReturnCallback(static fn (string $name): string => '"' . $name . '"');
         $connection->method('getPlatformName')->willReturn('sqlite');
-        $statement = self::createMock(PreparedStatementInterface::class);
-        $statement->expects(self::once())->method('execute')->with([
-            '1',
-            'hello,world',
-            "\x01\x02",
-            '2',
-            null,
-            null,
-        ])->willReturn(new ExecutionResult(2, '', 0.0, 'INSERT'));
-        $connection->expects(self::once())->method('prepare')->with(
+        $executor = self::createMock(QueryExecutorInterface::class);
+        $executor->expects(self::once())->method('execute')->with(
+            $connection,
             'INSERT INTO "shop"."orders" ("id", "name", "payload") VALUES (?, ?, ?), (?, ?, ?)',
-        )->willReturn($statement);
+            ['1', 'hello,world', "\x01\x02", '2', null, null],
+        )->willReturn(new ExecutionResult(2, '', 0.0, 'INSERT'));
         $columns = self::createMock(ColumnInspectorInterface::class);
         $columns->expects(self::once())->method('getColumns')->with(
             $connection,
@@ -51,7 +45,7 @@ final class CsvImporterTest extends TestCase
         $source = self::createMock(ImportSourceInterface::class);
         $source->method('openStream')->willReturn($this->stream("id,name,payload,unknown\n1,\"hello,world\",AQI=,ignored\n2,\\N,\\N,ignored\n"));
 
-        $result = (new CsvImporter($columns))->importCsv(
+        $result = (new CsvImporter($columns, $executor))->importCsv(
             $connection,
             new QualifiedName(new Identifier('orders'), new Identifier('shop')),
             $source,
@@ -67,15 +61,18 @@ final class CsvImporterTest extends TestCase
         $connection = self::createMock(ConnectionInterface::class);
         $connection->method('quoteIdentifier')->willReturnCallback(static fn (string $name): string => '"' . $name . '"');
         $connection->method('getPlatformName')->willReturn('sqlite');
-        $statement = self::createMock(PreparedStatementInterface::class);
-        $statement->method('execute')->willReturn(new ExecutionResult(1, '', 0.0, 'INSERT'));
-        $connection->expects(self::once())->method('prepare')->with('INSERT OR REPLACE INTO "orders" ("id") VALUES (?)')->willReturn($statement);
+        $executor = self::createMock(QueryExecutorInterface::class);
+        $executor->expects(self::once())->method('execute')->with(
+            $connection,
+            'INSERT OR REPLACE INTO "orders" ("id") VALUES (?)',
+            ['1'],
+        )->willReturn(new ExecutionResult(1, '', 0.0, 'INSERT'));
         $columns = self::createMock(ColumnInspectorInterface::class);
         $columns->method('getColumns')->willReturn(new ColumnCollection([$this->column('id', 'INTEGER')]));
         $source = self::createMock(ImportSourceInterface::class);
         $source->method('openStream')->willReturn($this->stream("id\n1\n"));
 
-        (new CsvImporter($columns))->importCsv(
+        (new CsvImporter($columns, $executor))->importCsv(
             $connection,
             new QualifiedName(new Identifier('orders')),
             $source,

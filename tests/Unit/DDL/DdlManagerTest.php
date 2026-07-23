@@ -59,8 +59,6 @@ final class DdlManagerTest extends TestCase
         $executor->expects(self::once())->method('executeDdl');
         $events = self::createMock(SchemaEventDispatcherInterface::class);
         $events->expects(self::once())->method('beforeSchemaChange')->willReturn(null);
-        $events->expects(self::once())->method('beforeDdlExecuted')->willReturn(null);
-        $events->expects(self::once())->method('afterDdlExecuted');
         $events->expects(self::once())->method('schemaChanged');
 
         (new DdlManager($executor, events: $events))->execute(

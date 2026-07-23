@@ -29,6 +29,10 @@ final class HtmlFormatWriterTest extends TestCase
             ],
         ]);
 
+        if ($html === '') {
+            throw new RuntimeException('HTML export was empty.');
+        }
+
         $dom = new DOMDocument;
         $previous = libxml_use_internal_errors(true);
         $loaded = $dom->loadHTML($html);

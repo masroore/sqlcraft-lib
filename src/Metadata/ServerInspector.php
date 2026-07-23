@@ -39,7 +39,7 @@ final class ServerInspector implements ServerInspectorInterface
     public function getDatabases(ConnectionInterface $conn): DatabaseCollection
     {
         /** @var list<array<string, bool|float|int|string|null>> $rows */
-        $rows = $conn->query($conn->getPlatform()->getDatabasesSql())->fetchAll();
+        $rows = $conn->query($conn->getPlatform()->introspection()->getDatabasesSql())->fetchAll();
         $databases = [];
 
         foreach ($rows as $row) {
@@ -54,14 +54,14 @@ final class ServerInspector implements ServerInspectorInterface
     #[\Override]
     public function getVariables(ConnectionInterface $conn): array
     {
-        return $this->keyValueRows($conn->getPlatform()->getVariablesSql(), $conn);
+        return $this->keyValueRows($conn->getPlatform()->introspection()->getVariablesSql(), $conn);
     }
 
     /** @return array<string, string> */
     #[\Override]
     public function getStatus(ConnectionInterface $conn): array
     {
-        $sql = $conn->getPlatform()->getStatusSql();
+        $sql = $conn->getPlatform()->introspection()->getStatusSql();
         if ($sql === '') {
             return [];
         }
@@ -73,7 +73,7 @@ final class ServerInspector implements ServerInspectorInterface
     public function getProcessList(ConnectionInterface $conn): ProcessCollection
     {
         /** @var list<array<string, bool|float|int|string|null>> $rows */
-        $rows = $conn->query($conn->getPlatform()->getProcesslistSql())->fetchAll();
+        $rows = $conn->query($conn->getPlatform()->introspection()->getProcesslistSql())->fetchAll();
         $processes = [];
 
         foreach ($rows as $row) {
@@ -88,7 +88,7 @@ final class ServerInspector implements ServerInspectorInterface
     public function getCharsets(ConnectionInterface $conn): CharsetCollection
     {
         /** @var list<array<string, bool|float|int|string|null>> $rows */
-        $rows = $conn->query($conn->getPlatform()->getCharsetsSql())->fetchAll();
+        $rows = $conn->query($conn->getPlatform()->introspection()->getCharsetsSql())->fetchAll();
         $charsets = [];
 
         foreach ($rows as $row) {
@@ -105,7 +105,7 @@ final class ServerInspector implements ServerInspectorInterface
     public function getCollations(ConnectionInterface $conn, ?string $charset = null): CollationCollection
     {
         /** @var list<array<string, bool|float|int|string|null>> $rows */
-        $rows = $conn->query($conn->getPlatform()->getCollationsSql($charset))->fetchAll();
+        $rows = $conn->query($conn->getPlatform()->introspection()->getCollationsSql($charset))->fetchAll();
         $collations = [];
 
         foreach ($rows as $row) {

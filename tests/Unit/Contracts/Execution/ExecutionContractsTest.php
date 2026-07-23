@@ -13,7 +13,7 @@ final class ExecutionContractsTest extends TestCase
     public function test_query_executor_port_exposes_execution_modes(): void
     {
         self::assertSame(
-            ['execute', 'query', 'executeDdl', 'queryWithTimeout'],
+            ['execute', 'query', 'executeDdl', 'executeAdministrative', 'executeWithTimeout', 'queryWithTimeout'],
             $this->methodNames(QueryExecutorInterface::class),
         );
     }

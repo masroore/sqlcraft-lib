@@ -119,7 +119,7 @@ final class XlsxFormatWriter implements FormatWriterInterface
         $writer = $this->writer;
 
         try {
-            if ($writer === null || $path === null) {
+            if (! $writer instanceof Writer || $path === null) {
                 throw new LogicException('XlsxFormatWriter: writeHeader() not called.');
             }
 
@@ -147,8 +147,8 @@ final class XlsxFormatWriter implements FormatWriterInterface
 
     private function sheetName(TableStatus $table, DumpOptions $options): string
     {
-        $prefix = ($options->xlsxOptions ?? new XlsxExportOptions)->sheetPrefix ?? '';
-        $name = $prefix . $table->name;
+        $prefix = ($options->xlsxOptions ?? new XlsxExportOptions)->sheetPrefix;
+        $name = ($prefix ?? '') . $table->name;
         $name = preg_replace('/[\\\\\/\?\*\[\]]/', '_', $name) ?? $name;
 
         return mb_substr($name, 0, 31);

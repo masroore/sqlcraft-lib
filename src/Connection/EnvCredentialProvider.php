@@ -18,7 +18,10 @@ final readonly class EnvCredentialProvider implements CredentialProviderInterfac
         $username = getenv($this->prefix . $name . '_USERNAME');
         $password = getenv($this->prefix . $name . '_PASSWORD');
 
-        if ($username === false && $password === false) { return null; }
+        if ($username === false && $password === false) {
+            return null;
+        }
+
         return new Credential($username === false ? null : $username, $password === false ? null : $password);
     }
 }

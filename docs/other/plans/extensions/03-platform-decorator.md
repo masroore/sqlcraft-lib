@@ -1,8 +1,11 @@
 # `AbstractPlatformDecorator` — Platform Decoration Helper
 
-> **Status:** PLAN ONLY  
-> **Phase:** 0 (Foundation — blocking)  
-> **Namespace:** `SQLCraft\Extension\`  
+> **Authoritative replacement:** `docs/other/plans/extensions-revised/04-implementation-handoff.md` and `03-verification.md`. This document is retained for history and is not an active implementation requirement.
+
+
+> **Status:** SUPERSEDED — historical reference only
+> **Phase:** 0 (Foundation — blocking)
+> **Namespace:** `SQLCraft\Extension\`
 > **Adminer equivalent:** Engine-flavor plugins (`mysql.inc.php` variations, MariaDB-specific tweaks)
 
 ---

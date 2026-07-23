@@ -1,15 +1,18 @@
 # Implementation Order and Phase Breakdown
 
-> **Status:** PLAN ONLY  
-> **Purpose:** Detailed, dependency-ordered implementation schedule for the extension system  
+> **Authoritative replacement:** `docs/other/plans/extensions-revised/04-implementation-handoff.md` and `03-verification.md`. This document is retained for history and is not an active implementation requirement.
+
+
+> **Status:** SUPERSEDED — historical reference only
+> **Purpose:** Detailed, dependency-ordered implementation schedule for the extension system
 > **Est. Total Effort:** 18-23 days (4 developer-weeks)
 
 ---
 
 ## Phase 0: Foundation (P0 — Blocking)
 
-**Duration:** 5-7 days  
-**Blocks:** All other phases  
+**Duration:** 5-7 days
+**Blocks:** All other phases
 **Goal:** Core infrastructure that other extensions depend on
 
 ### 0.1 Extension Interfaces (Day 1-2)
@@ -138,8 +141,8 @@
 
 ## Phase 1: Default Implementations (P1 — Usability)
 
-**Duration:** 3-4 days  
-**Depends on:** Phase 0  
+**Duration:** 3-4 days
+**Depends on:** Phase 0
 **Goal:** Sensible default implementations for common use cases
 
 ### 1.1 Format Implementations (Day 8-9)
@@ -220,8 +223,8 @@
 
 ## Phase 2: Built-In Extensions (P2 — Convenience)
 
-**Duration:** 5-7 days  
-**Depends on:** Phase 0, Phase 1  
+**Duration:** 5-7 days
+**Depends on:** Phase 0, Phase 1
 **Goal:** SQLCraft-native extension implementations demonstrating all three mechanisms
 
 ### 2.1 Query & Connection Observers (Day 12-13)
@@ -279,8 +282,8 @@
 
 ## Phase 3: Documentation (P0 — Critical for Adoption)
 
-**Duration:** 4-5 days  
-**Can run in parallel with Phase 2**  
+**Duration:** 4-5 days
+**Can run in parallel with Phase 2**
 **Goal:** Complete extension author documentation
 
 ### 3.1 Extension Author Guide (Day 16-18)
@@ -347,8 +350,8 @@
 
 ## Phase 4: Integration & Polish (P1 — Quality Gate)
 
-**Duration:** 1-2 days  
-**Depends on:** All prior phases  
+**Duration:** 1-2 days
+**Depends on:** All prior phases
 **Goal:** End-to-end integration, final polish
 
 ### 4.1 Full-Stack Integration Tests (Day 21)

@@ -6,13 +6,13 @@ namespace SQLCraft\Import;
 
 use InvalidArgumentException;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
-use SQLCraft\Contracts\Connection\ResultInterface;
 use SQLCraft\Contracts\Events\ImportExportEventDispatcherInterface;
 use SQLCraft\Contracts\Execution\QueryExecutorInterface;
 use SQLCraft\Contracts\Import\CsvImporterInterface;
 use SQLCraft\Contracts\Import\ImportSourceInterface;
 use SQLCraft\Contracts\Metadata\ColumnInspectorInterface;
 use SQLCraft\DTO\ColumnMeta;
+use SQLCraft\DTO\ExecutionResult;
 use SQLCraft\Exceptions\QueryTimeoutException;
 use SQLCraft\Query\UpsertSqlRenderer;
 use SQLCraft\ValueObjects\Identifier;
@@ -22,8 +22,8 @@ final readonly class CsvImporter implements CsvImporterInterface
 {
     public function __construct(
         private ColumnInspectorInterface $columns,
+        private QueryExecutorInterface $executor,
         private ?ImportExportEventDispatcherInterface $events = null,
-        private ?QueryExecutorInterface $executor = null,
     ) {}
 
     #[\Override]
@@ -170,17 +170,13 @@ final readonly class CsvImporter implements CsvImporterInterface
         $sql = $clauses['prefix'] . ' INTO ' . $tableSql . ' (' . implode(', ', $quotedColumns) . ') VALUES '
             . implode(', ', array_fill(0, count($rows), $row)) . $clauses['suffix'];
         if ($options->statementTimeoutMs > 0) {
-            if (! $this->executor instanceof QueryExecutorInterface) {
-                throw new InvalidArgumentException('A QueryExecutor is required for CSV statement timeouts.');
-            }
-            if (! $this->executor->queryWithTimeout($conn, $sql, $values, $options->statementTimeoutMs) instanceof ResultInterface) {
+            if (! $this->executor->executeWithTimeout($conn, $sql, $values, $options->statementTimeoutMs) instanceof ExecutionResult) {
                 throw new QueryTimeoutException('Statement timeout is not supported by this platform.', $sql);
             }
 
             return;
         }
-        $statement = $conn->prepare($sql);
-        $statement->execute($values);
+        $this->executor->execute($conn, $sql, $values);
     }
 
     private function quoteTable(ConnectionInterface $conn, QualifiedName $table): string

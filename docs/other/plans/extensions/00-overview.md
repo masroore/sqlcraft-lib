@@ -1,15 +1,18 @@
 # SQLCraft Extension System — Implementation Plan
 
-> **Created:** 2026-07-22  
-> **Status:** PLAN ONLY — not yet implemented  
-> **Purpose:** Gap analysis and implementation roadmap for SQLCraft's extension/plugin system  
+> **Authoritative replacement:** `docs/other/plans/extensions-revised/04-implementation-handoff.md` and `03-verification.md`. This document is retained for history and is not an active implementation requirement.
+
+
+> **Created:** 2026-07-22
+> **Status:** SUPERSEDED — historical reference only — not yet implemented
+> **Purpose:** Gap analysis and implementation roadmap for SQLCraft's extension/plugin system
 > **Related:** `docs/other/plans/17-plugin-system.md` (design specification)
 
 ---
 
 ## 1. Executive Summary
 
-Adminer's extension system provides ~60 hook methods allowing plugins to customize authentication, data formatting, export/import behavior, UI rendering, and database introspection. SQLCraft aims to provide similar extensibility **for logic/data operations only** (no UI/rendering hooks), using a three-mechanism model:
+The superseded draft described Adminer's hook inventory as approximate allowing plugins to customize authentication, data formatting, export/import behavior, UI rendering, and database introspection. SQLCraft aims to provide similar extensibility **for logic/data operations only** (no UI/rendering hooks), using a three-mechanism model:
 
 1. **PSR-14 events** — for cross-cutting observation and interception
 2. **Swappable service implementations via DI** — for wholesale behavior replacement
@@ -19,31 +22,31 @@ Adminer's extension system provides ~60 hook methods allowing plugins to customi
 
 **What EXISTS (implemented in SQLCraft):**
 
-✅ PSR-14 event system with 30+ event classes  
-✅ `FormatRegistry` with `registerWriter()` / `registerReader()`  
-✅ `DriverRegistry` with `register()` / `registerAlias()`  
-✅ `CredentialProviderInterface`, `MetadataCacheInterface`, `QueryHistoryInterface`  
-✅ `FormatWriterInterface`, `FormatReaderInterface`, `SinkInterface`, `ImportSourceInterface`  
-✅ `BeforeQueryExecuted::replaceSql()` for query interception  
-✅ All `Contracts\Metadata\*InspectorInterface` as swappable services  
+✅ PSR-14 event system with 30+ event classes
+✅ `FormatRegistry` with `registerWriter()` / `registerReader()`
+✅ `DriverRegistry` with `register()` / `registerAlias()`
+✅ `CredentialProviderInterface`, `MetadataCacheInterface`, `QueryHistoryInterface`
+✅ `FormatWriterInterface`, `FormatReaderInterface`, `SinkInterface`, `ImportSourceInterface`
+✅ `BeforeQueryExecuted::replaceSql()` for query interception
+✅ All `Contracts\Metadata\*InspectorInterface` as swappable services
 ✅ `DriverInterface`, `PlatformInterface` for third-party database engines
 
 **What is MISSING (needs implementation):**
 
-❌ `SQLCraft\Extension\` namespace — no extension helper classes  
-❌ `AbstractPlatformDecorator` — no typed helper for platform decoration pattern  
-❌ `CredentialProviderChain` — no composite credential provider  
-❌ `QueryHistory` / `MetadataCache` default implementations  
-❌ `ExtensionBundle` pattern — no grouping mechanism for multi-extension registration  
-❌ Built-in extension implementations — no SQLCraft equivalents of Adminer plugins  
-❌ `@api` / `@internal` stability annotations — not systematically applied  
+❌ `SQLCraft\Extension\` namespace — no extension helper classes
+❌ `AbstractPlatformDecorator` — no typed helper for platform decoration pattern
+❌ `CredentialProviderChain` — no composite credential provider
+❌ `QueryHistory` / `MetadataCache` default implementations
+❌ `ExtensionBundle` pattern — no grouping mechanism for multi-extension registration
+❌ Built-in extension implementations — no SQLCraft equivalents of Adminer plugins
+❌ `@api` / `@internal` stability annotations — not systematically applied
 ❌ Extension author guide documentation
 
 ---
 
 ## 2. Adminer Hook → SQLCraft Mechanism Mapping Summary
 
-Of Adminer's ~60 plugin hooks:
+The superseded draft's hook grouping (replaced by the 79-hook matrix):
 
 - **~20 hooks** map to SQLCraft logic mechanisms (events, swappable interfaces, extension interfaces)
 - **~6 hooks** map to constructor parameters / value objects (not extension points)
@@ -237,13 +240,13 @@ Each phase must include:
 
 The extension system implementation is **COMPLETE** when:
 
-✅ All P0 (Phase 0) components are implemented and tested  
-✅ All P1 (Phase 1) default implementations exist  
-✅ Extension Author Guide is published  
-✅ At least 3 built-in extensions demonstrate the three extension mechanisms  
-✅ All public extension interfaces are tagged `@api`  
-✅ All internal classes are tagged `@internal`  
-✅ Migration guide from Adminer plugins exists  
+✅ All P0 (Phase 0) components are implemented and tested
+✅ All P1 (Phase 1) default implementations exist
+✅ Extension Author Guide is published
+✅ At least 3 built-in extensions demonstrate the three extension mechanisms
+✅ All public extension interfaces are tagged `@api`
+✅ All internal classes are tagged `@internal`
+✅ Migration guide from Adminer plugins exists
 ✅ Third-party developers can write and register extensions without reading SQLCraft internals
 
 ---
@@ -266,11 +269,11 @@ The extension system implementation is **COMPLETE** when:
 
 The following are explicitly **NOT** part of this implementation:
 
-❌ **UI/rendering hooks** — SQLCraft has no HTML/HTTP layer  
-❌ **Auto-discovery plugin directories** — explicit DI registration only  
-❌ **Magic `__call` dispatch** — all extension points are typed interfaces  
-❌ **Runtime reflection for capability detection** — use `instanceof` and type system  
-❌ **Single monolithic `Plugin` base class** — use mechanism-specific interfaces  
+❌ **UI/rendering hooks** — SQLCraft has no HTML/HTTP layer
+❌ **Auto-discovery plugin directories** — explicit DI registration only
+❌ **Magic `__call` dispatch** — all extension points are typed interfaces
+❌ **Runtime reflection for capability detection** — use `instanceof` and type system
+❌ **Single monolithic `Plugin` base class** — use mechanism-specific interfaces
 ❌ **Web-application concerns** — sessions, cookies, brute-force protection, form processing
 
 These are Adminer-specific patterns that SQLCraft deliberately avoids (see plan17 §1, §9).

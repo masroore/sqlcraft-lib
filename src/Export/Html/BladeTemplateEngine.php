@@ -26,16 +26,19 @@ final class BladeTemplateEngine implements TemplateEngineInterface
         file_put_contents($tmp, $compiled);
 
         try {
+            /** @psalm-suppress InvalidFalsableReturnType */
             return (static function (string $__path, array $__data): string {
                 extract($__data, EXTR_SKIP);
                 ob_start();
                 try {
+                    /** @psalm-suppress UnresolvableInclude */
                     include $__path;
                 } catch (Throwable $e) {
                     ob_end_clean();
                     throw $e;
                 }
 
+                /** @psalm-suppress FalsableReturnStatement */
                 return ob_get_clean();
             })($tmp, $data);
         } finally {
@@ -59,9 +62,8 @@ final class BladeTemplateEngine implements TemplateEngineInterface
         $template = $this->replaceDirective($template, '@elseif', '<?php elseif (%s): ?>');
         $template = $this->replaceDirective($template, '@if', '<?php if (%s): ?>');
         $template = str_replace('@else', '<?php else: ?>', $template);
-        $template = str_replace('@endif', '<?php endif; ?>', $template);
 
-        return $template;
+        return str_replace('@endif', '<?php endif; ?>', $template);
     }
 
     /**

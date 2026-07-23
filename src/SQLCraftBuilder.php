@@ -1,39 +1,331 @@
 <?php
+
 declare(strict_types=1);
+
 namespace SQLCraft;
+
 use Closure;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use SQLCraft\Connection\EnvCredentialProvider;
+use SQLCraft\Connection\PdoConnectionFactory;
+use SQLCraft\Connection\PdoExceptionTranslator;
 use SQLCraft\Contracts\Connection\ConnectionInitializerInterface;
+use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Connection\CredentialProviderInterface;
+use SQLCraft\Contracts\Events\ConnectionEventDispatcherInterface;
 use SQLCraft\Contracts\Execution\QueryHistoryInterface;
 use SQLCraft\Contracts\Execution\QueryInterceptorInterface;
 use SQLCraft\Contracts\Export\FormatWriterInterface;
 use SQLCraft\Contracts\Import\FormatReaderInterface;
 use SQLCraft\Contracts\Metadata\MetadataCacheInterface;
 use SQLCraft\Driver\DriverDefinition;
-use SQLCraft\Driver\MySQLDriver; use SQLCraft\Driver\PostgreSQLDriver; use SQLCraft\Driver\SqliteDriver; use SQLCraft\Driver\SqlServerDriver;
-use SQLCraft\Metadata\DefaultMetadataInspectorSetFactory;
-use SQLCraft\Execution\{MySQLProcessManagerFactory,PostgreSQLProcessManagerFactory,SqlServerProcessManagerFactory}; use SQLCraft\Metadata\MySQLMetadataFactory; use SQLCraft\Metadata\PostgreSQLMetadataFactory; use SQLCraft\Metadata\SqliteMetadataFactory; use SQLCraft\Metadata\SqlServerMetadataFactory;
-use SQLCraft\Export\{CsvFormatWriter,CsvSemicolonFormatWriter,FormatRegistry,HtmlFormatWriter,JsonFormatWriter,SqlFormatWriter,TsvFormatWriter,XlsxFormatWriter,XmlFormatWriter};
+use SQLCraft\Driver\DriverRegistry;
+use SQLCraft\Driver\MySQLDriver;
+use SQLCraft\Driver\PostgreSQLDriver;
+use SQLCraft\Driver\SqliteDriver;
+use SQLCraft\Driver\SqlServerDriver;
+use SQLCraft\Events\AfterDdlExecuted;
+use SQLCraft\Events\CompositeEventDispatcher;
+use SQLCraft\Events\ConnectionEventDispatcher;
+use SQLCraft\Events\SchemaChangedEvent;
+use SQLCraft\Events\SimpleEventDispatcher;
+use SQLCraft\Events\SimpleListenerProvider;
+use SQLCraft\Exceptions\DuplicateRegistrationException;
+use SQLCraft\Exceptions\ExtensionConfigurationException;
+use SQLCraft\Exceptions\RegistrationNotFoundException;
+use SQLCraft\Execution\MySQLProcessManagerFactory;
+use SQLCraft\Execution\PostgreSQLProcessManagerFactory;
+use SQLCraft\Execution\SqlServerProcessManagerFactory;
+use SQLCraft\Export\CsvFormatWriter;
+use SQLCraft\Export\CsvSemicolonFormatWriter;
+use SQLCraft\Export\HtmlFormatWriter;
+use SQLCraft\Export\JsonFormatWriter;
+use SQLCraft\Export\SqlFormatWriter;
+use SQLCraft\Export\TsvFormatWriter;
+use SQLCraft\Export\XlsxFormatWriter;
+use SQLCraft\Export\XmlFormatWriter;
 use SQLCraft\Import\CsvFormatReader;
-use SQLCraft\Events\{CompositeEventDispatcher,ConnectionEventDispatcher,SimpleEventDispatcher,SimpleListenerProvider};
-use SQLCraft\Exceptions\{DuplicateRegistrationException,ExtensionConfigurationException,RegistrationNotFoundException};
+use SQLCraft\Metadata\DefaultMetadataInspectorSetFactory;
+use SQLCraft\Metadata\MySQLMetadataFactory;
+use SQLCraft\Metadata\PostgreSQLMetadataFactory;
+use SQLCraft\Metadata\SqliteMetadataFactory;
+use SQLCraft\Metadata\SqlServerMetadataFactory;
+use SQLCraft\Platform\MySQLPlatform;
+use SQLCraft\Platform\PostgreSQLPlatform;
+use SQLCraft\Platform\SqlitePlatform;
+use SQLCraft\Platform\SqlServerPlatform;
+use SQLCraft\Schema\CacheInvalidationListener;
+use SQLCraft\Schema\NullMetadataCache;
 use SQLCraft\Support\ExtensionIdentifier;
-use SQLCraft\Schema\{NullMetadataCache,SchemaManagerFactory};
+
 final class SQLCraftBuilder
 {
-    private array $drivers=[]; private array $aliases=[]; private array $writers=[]; private array $readers=[]; private ?CredentialProviderInterface $credentials=null; private ?QueryHistoryInterface $history=null; private ?MetadataCacheInterface $cache=null; private array $initializers=[]; private array $interceptors=[]; private array $decorators=[]; private array $listeners=[]; private ?EventDispatcherInterface $external=null;
-    public static function defaults(): self { $b=new self; $pdoFactory=fn($events)=>new \SQLCraft\Connection\PdoConnectionFactory(new \SQLCraft\Connection\PdoExceptionTranslator,$events,false); $b->registerDriver(new DriverDefinition('mysql',fn($events)=>new MySQLDriver($pdoFactory($events),new \SQLCraft\Platform\MySQLPlatform),new DefaultMetadataInspectorSetFactory(new MySQLMetadataFactory),new MySQLProcessManagerFactory)); $b->registerDriver(new DriverDefinition('pgsql',fn($events)=>new PostgreSQLDriver($pdoFactory($events),new \SQLCraft\Platform\PostgreSQLPlatform),new DefaultMetadataInspectorSetFactory(new PostgreSQLMetadataFactory),new PostgreSQLProcessManagerFactory)); $b->registerDriver(new DriverDefinition('sqlite',fn($events)=>new SqliteDriver($pdoFactory($events),new \SQLCraft\Platform\SqlitePlatform),new DefaultMetadataInspectorSetFactory(new SqliteMetadataFactory))); $b->registerDriver(new DriverDefinition('sqlserver',fn($events)=>new SqlServerDriver($pdoFactory($events),new \SQLCraft\Platform\SqlServerPlatform),new DefaultMetadataInspectorSetFactory(new SqlServerMetadataFactory),new SqlServerProcessManagerFactory)); $b->registerDriverAlias('mariadb','mysql'); $b->registerWriter('sql',fn($c)=>new SqlFormatWriter($c)); foreach(['csv'=>CsvFormatWriter::class,'tsv'=>TsvFormatWriter::class,'csv-semicolon'=>CsvSemicolonFormatWriter::class,'json'=>JsonFormatWriter::class,'xml'=>XmlFormatWriter::class,'xlsx'=>XlsxFormatWriter::class,'html'=>HtmlFormatWriter::class] as $n=>$class) $b->registerWriter($n,fn($c) => new $class); $b->registerReader('csv',fn()=>new CsvFormatReader); $b->credentials(new EnvCredentialProvider); $b->metadataCache(null); return $b; }
-    public function registerDriver(DriverDefinition $d): self { $n=ExtensionIdentifier::normalize($d->name,'driver'); if(isset($this->drivers[$n])||isset($this->aliases[$n])) throw new DuplicateRegistrationException("Driver already registered: $n."); $this->drivers[$n]=$d; return $this; }
-    public function replaceDriver(DriverDefinition $d): self { $n=ExtensionIdentifier::normalize($d->name,'driver'); if(!isset($this->drivers[$n])) throw new RegistrationNotFoundException("Driver is not registered: $n."); $this->drivers[$n]=$d; return $this; }
-    public function registerDriverAlias(string $a,string $t): self { $a=ExtensionIdentifier::normalize($a,'driver alias'); $t=ExtensionIdentifier::normalize($t,'driver'); if(isset($this->aliases[$a])||isset($this->drivers[$a])) throw new DuplicateRegistrationException("Driver alias already registered: $a."); $this->aliases[$a]=$t; return $this; }
-    public function replaceDriverAlias(string $a,string $t): self { $a=ExtensionIdentifier::normalize($a,'driver alias'); if(!isset($this->aliases[$a])) throw new RegistrationNotFoundException("Driver alias is not registered: $a."); $this->aliases[$a]=ExtensionIdentifier::normalize($t,'driver'); return $this; }
-    public function registerWriter(string $n,Closure $f): self { $n=ExtensionIdentifier::normalize($n,'writer'); if(isset($this->writers[$n])) throw new DuplicateRegistrationException("Writer already registered: $n."); $this->writers[$n]=$f; return $this; }
-    public function replaceWriter(string $n,Closure $f): self { $n=ExtensionIdentifier::normalize($n,'writer'); if(!isset($this->writers[$n])) throw new RegistrationNotFoundException("Writer is not registered: $n."); $this->writers[$n]=$f; return $this; }
-    public function registerReader(string $n,Closure $f): self { $n=ExtensionIdentifier::normalize($n,'reader'); if(isset($this->readers[$n])) throw new DuplicateRegistrationException("Reader already registered: $n."); $this->readers[$n]=$f; return $this; }
-    public function replaceReader(string $n,Closure $f): self { $n=ExtensionIdentifier::normalize($n,'reader'); if(!isset($this->readers[$n])) throw new RegistrationNotFoundException("Reader is not registered: $n."); $this->readers[$n]=$f; return $this; }
-    public function credentials(CredentialProviderInterface $p): self {$this->credentials=$p;return $this;} public function queryHistory(?QueryHistoryInterface $h): self {$this->history=$h;return $this;} public function metadataCache(?MetadataCacheInterface $c): self {$this->cache=$c;return $this;} public function initializeConnection(ConnectionInitializerInterface $i): self {$this->initializers[]=$i;return $this;} public function interceptQueries(QueryInterceptorInterface $i): self {$this->interceptors[]=$i;return $this;} public function decorateMetadataInspectors(Closure $d): self {$this->decorators[]=$d;return $this;}
-    public function listen(string $eventClass,callable $listener,int $priority=0): self { if($this->external) throw new ExtensionConfigurationException('SQLCraft-owned listeners and external dispatcher are mutually exclusive.'); $this->listeners[]=[$eventClass,$listener,$priority]; return $this;} public function eventDispatcher(EventDispatcherInterface $d): self { if($this->listeners!==[]) throw new ExtensionConfigurationException('SQLCraft-owned listeners and external dispatcher are mutually exclusive.'); $this->external=$d; return $this;}
-    public function build(): SQLCraftFactory { if($this->drivers===[]) throw new ExtensionConfigurationException('At least one driver must be registered.'); foreach($this->aliases as $a=>$t){if(!isset($this->drivers[$t])) throw new ExtensionConfigurationException("Driver alias target is not registered: $t.");} $coreProvider=new SimpleListenerProvider; $core=new SimpleEventDispatcher($coreProvider); $user=null; if($this->listeners!==[]){$provider=new SimpleListenerProvider; foreach($this->listeners as [$e,$l,$p]) $provider->listen($e,$l,$p); $user=new SimpleEventDispatcher($provider);} $events=$user instanceof EventDispatcherInterface?new CompositeEventDispatcher($core,$user):new CompositeEventDispatcher($core,$this->external); $connectionEvents=new ConnectionEventDispatcher($events); $registry=new \SQLCraft\Driver\DriverRegistry; foreach($this->drivers as $d) $registry->registerDefinition($d,$connectionEvents); foreach($this->aliases as $a=>$t)$registry->registerAlias($a,$t); return new SQLCraftFactory($registry,$this->credentials??new EnvCredentialProvider,$events,$connectionEvents,$this->history,$this->cache??new NullMetadataCache,$this->initializers,$this->interceptors,$this->decorators,$this->writers,$this->readers); }
+    /** @var array<string, DriverDefinition> */
+    private array $drivers = [];
+
+    /** @var array<string, string> */
+    private array $aliases = [];
+
+    /** @var array<string, Closure(ConnectionInterface): FormatWriterInterface> */
+    private array $writers = [];
+
+    /** @var array<string, Closure(): FormatReaderInterface> */
+    private array $readers = [];
+
+    /** @var list<ConnectionInitializerInterface> */
+    private array $initializers = [];
+
+    /** @var list<QueryInterceptorInterface> */
+    private array $interceptors = [];
+
+    /** @var list<Closure> */
+    private array $decorators = [];
+
+    /** @var list<array{0: string, 1: callable, 2: int}> */
+    private array $listeners = [];
+
+    private ?CredentialProviderInterface $credentials = null;
+
+    private ?QueryHistoryInterface $history = null;
+
+    private ?MetadataCacheInterface $cache = null;
+
+    private ?EventDispatcherInterface $external = null;
+
+    public static function defaults(): self
+    {
+        $builder = new self;
+        $pdoFactory = static fn (ConnectionEventDispatcherInterface $events): PdoConnectionFactory => new PdoConnectionFactory(new PdoExceptionTranslator, $events, false);
+
+        $builder
+            ->registerDriver(new DriverDefinition('mysql', static fn ($events): MySQLDriver => new MySQLDriver($pdoFactory($events), new MySQLPlatform), new DefaultMetadataInspectorSetFactory(new MySQLMetadataFactory), new MySQLProcessManagerFactory))
+            ->registerDriver(new DriverDefinition('pgsql', static fn ($events): PostgreSQLDriver => new PostgreSQLDriver($pdoFactory($events), new PostgreSQLPlatform), new DefaultMetadataInspectorSetFactory(new PostgreSQLMetadataFactory), new PostgreSQLProcessManagerFactory))
+            ->registerDriver(new DriverDefinition('sqlite', static fn ($events): SqliteDriver => new SqliteDriver($pdoFactory($events), new SqlitePlatform), new DefaultMetadataInspectorSetFactory(new SqliteMetadataFactory)))
+            ->registerDriver(new DriverDefinition('sqlserver', static fn ($events): SqlServerDriver => new SqlServerDriver($pdoFactory($events), new SqlServerPlatform), new DefaultMetadataInspectorSetFactory(new SqlServerMetadataFactory), new SqlServerProcessManagerFactory))
+            ->registerDriverAlias('mariadb', 'mysql')
+            ->registerWriter('sql', static fn (ConnectionInterface $connection): FormatWriterInterface => new SqlFormatWriter($connection))
+            ->registerWriter('csv', static fn (ConnectionInterface $connection): FormatWriterInterface => new CsvFormatWriter)
+            ->registerWriter('tsv', static fn (ConnectionInterface $connection): FormatWriterInterface => new TsvFormatWriter)
+            ->registerWriter('csv-semicolon', static fn (ConnectionInterface $connection): FormatWriterInterface => new CsvSemicolonFormatWriter)
+            ->registerWriter('json', static fn (ConnectionInterface $connection): FormatWriterInterface => new JsonFormatWriter)
+            ->registerWriter('xml', static fn (ConnectionInterface $connection): FormatWriterInterface => new XmlFormatWriter)
+            ->registerWriter('xlsx', static fn (ConnectionInterface $connection): FormatWriterInterface => new XlsxFormatWriter)
+            ->registerWriter('html', static fn (ConnectionInterface $connection): FormatWriterInterface => new HtmlFormatWriter)
+            ->registerReader('csv', static fn (): FormatReaderInterface => new CsvFormatReader)
+            ->credentials(new EnvCredentialProvider)
+            ->metadataCache(null);
+
+        return $builder;
+    }
+
+    public function registerDriver(DriverDefinition $definition): self
+    {
+        $name = ExtensionIdentifier::normalize($definition->name, 'driver');
+        if (isset($this->drivers[$name]) || isset($this->aliases[$name])) {
+            throw new DuplicateRegistrationException("Driver already registered: $name.");
+        }
+        $this->drivers[$name] = $definition;
+
+        return $this;
+    }
+
+    public function replaceDriver(DriverDefinition $definition): self
+    {
+        $name = ExtensionIdentifier::normalize($definition->name, 'driver');
+        if (! isset($this->drivers[$name])) {
+            throw new RegistrationNotFoundException("Driver is not registered: $name.");
+        }
+        $this->drivers[$name] = $definition;
+
+        return $this;
+    }
+
+    public function registerDriverAlias(string $alias, string $target): self
+    {
+        $alias = ExtensionIdentifier::normalize($alias, 'driver alias');
+        $target = ExtensionIdentifier::normalize($target, 'driver');
+        if (isset($this->aliases[$alias]) || isset($this->drivers[$alias])) {
+            throw new DuplicateRegistrationException("Driver alias already registered: $alias.");
+        }
+        $this->aliases[$alias] = $target;
+
+        return $this;
+    }
+
+    public function replaceDriverAlias(string $alias, string $target): self
+    {
+        $alias = ExtensionIdentifier::normalize($alias, 'driver alias');
+        if (! isset($this->aliases[$alias])) {
+            throw new RegistrationNotFoundException("Driver alias is not registered: $alias.");
+        }
+        $this->aliases[$alias] = ExtensionIdentifier::normalize($target, 'driver');
+
+        return $this;
+    }
+
+    /** @param Closure(ConnectionInterface): FormatWriterInterface $factory */
+    public function registerWriter(string $format, Closure $factory): self
+    {
+        $format = ExtensionIdentifier::normalize($format, 'writer');
+        if (isset($this->writers[$format])) {
+            throw new DuplicateRegistrationException("Writer already registered: $format.");
+        }
+        $this->writers[$format] = $factory;
+
+        return $this;
+    }
+
+    /** @param Closure(ConnectionInterface): FormatWriterInterface $factory */
+    public function replaceWriter(string $format, Closure $factory): self
+    {
+        $format = ExtensionIdentifier::normalize($format, 'writer');
+        if (! isset($this->writers[$format])) {
+            throw new RegistrationNotFoundException("Writer is not registered: $format.");
+        }
+        $this->writers[$format] = $factory;
+
+        return $this;
+    }
+
+    /** @param Closure(): FormatReaderInterface $factory */
+    public function registerReader(string $format, Closure $factory): self
+    {
+        $format = ExtensionIdentifier::normalize($format, 'reader');
+        if (isset($this->readers[$format])) {
+            throw new DuplicateRegistrationException("Reader already registered: $format.");
+        }
+        $this->readers[$format] = $factory;
+
+        return $this;
+    }
+
+    /** @param Closure(): FormatReaderInterface $factory */
+    public function replaceReader(string $format, Closure $factory): self
+    {
+        $format = ExtensionIdentifier::normalize($format, 'reader');
+        if (! isset($this->readers[$format])) {
+            throw new RegistrationNotFoundException("Reader is not registered: $format.");
+        }
+        $this->readers[$format] = $factory;
+
+        return $this;
+    }
+
+    public function credentials(CredentialProviderInterface $provider): self
+    {
+        $this->credentials = $provider;
+
+        return $this;
+    }
+
+    public function queryHistory(?QueryHistoryInterface $history): self
+    {
+        $this->history = $history;
+
+        return $this;
+    }
+
+    public function metadataCache(?MetadataCacheInterface $cache): self
+    {
+        $this->cache = $cache;
+
+        return $this;
+    }
+
+    public function initializeConnection(ConnectionInitializerInterface $initializer): self
+    {
+        $this->initializers[] = $initializer;
+
+        return $this;
+    }
+
+    public function interceptQueries(QueryInterceptorInterface $interceptor): self
+    {
+        $this->interceptors[] = $interceptor;
+
+        return $this;
+    }
+
+    public function decorateMetadataInspectors(Closure $decorator): self
+    {
+        $this->decorators[] = $decorator;
+
+        return $this;
+    }
+
+    public function listen(string $eventClass, callable $listener, int $priority = 0): self
+    {
+        if ($this->external instanceof EventDispatcherInterface) {
+            throw new ExtensionConfigurationException('SQLCraft-owned listeners and external dispatcher are mutually exclusive.');
+        }
+        if (! class_exists($eventClass) && ! interface_exists($eventClass)) {
+            throw new ExtensionConfigurationException("Event class is not loadable: $eventClass.");
+        }
+        /** @var class-string $eventClass */
+        $this->listeners[] = [$eventClass, $listener, $priority];
+
+        return $this;
+    }
+
+    public function eventDispatcher(EventDispatcherInterface $dispatcher): self
+    {
+        if ($this->external instanceof EventDispatcherInterface || $this->listeners !== []) {
+            throw new ExtensionConfigurationException('SQLCraft-owned listeners and external dispatcher are mutually exclusive.');
+        }
+        $this->external = $dispatcher;
+
+        return $this;
+    }
+
+    public function build(): SQLCraftFactory
+    {
+        if ($this->drivers === []) {
+            throw new ExtensionConfigurationException('At least one driver must be registered.');
+        }
+        foreach ($this->aliases as $target) {
+            if (! isset($this->drivers[$target])) {
+                throw new ExtensionConfigurationException("Driver alias target is not registered: $target.");
+            }
+        }
+
+        $coreProvider = new SimpleListenerProvider;
+        $cache = $this->cache ?? new NullMetadataCache;
+        $cacheListener = new CacheInvalidationListener($cache);
+        $coreProvider->listen(AfterDdlExecuted::class, $cacheListener(...));
+        $coreProvider->listen(SchemaChangedEvent::class, $cacheListener(...));
+        $core = new SimpleEventDispatcher($coreProvider);
+        $user = null;
+        if ($this->listeners !== []) {
+            $provider = new SimpleListenerProvider;
+            foreach ($this->listeners as [$eventClass, $listener, $priority]) {
+                /** @var class-string $listenerClass */
+                $listenerClass = $eventClass;
+                $provider->listen($listenerClass, $listener, $priority);
+            }
+            $user = new SimpleEventDispatcher($provider);
+        }
+        $events = new CompositeEventDispatcher($core, $user ?? $this->external);
+        $connectionEvents = new ConnectionEventDispatcher($events);
+        $registry = new DriverRegistry;
+        foreach ($this->drivers as $definition) {
+            $registry->registerDefinition($definition, $connectionEvents);
+        }
+        foreach ($this->aliases as $alias => $target) {
+            $registry->registerAlias($alias, $target);
+        }
+
+        return new SQLCraftFactory(
+            $registry,
+            $this->credentials ?? new EnvCredentialProvider,
+            $events,
+            $connectionEvents,
+            $this->history,
+            $cache,
+            $this->initializers,
+            $this->interceptors,
+            $this->decorators,
+            $this->writers,
+            $this->readers,
+        );
+    }
 }

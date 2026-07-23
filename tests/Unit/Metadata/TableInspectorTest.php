@@ -10,6 +10,7 @@ use SQLCraft\Capabilities\Capability;
 use SQLCraft\Capabilities\CapabilityNotSupportedException;
 use SQLCraft\Contracts\Connection\ConnectionInterface;
 use SQLCraft\Contracts\Connection\ResultInterface;
+use SQLCraft\Contracts\Platform\IntrospectionDialectInterface;
 use SQLCraft\Contracts\Platform\PlatformInterface;
 use SQLCraft\Metadata\SqliteMetadataFactory;
 use SQLCraft\Metadata\TableInspector;
@@ -21,7 +22,9 @@ final class TableInspectorTest extends TestCase
     public function test_it_hydrates_buffered_and_streaming_table_statuses(): void
     {
         $platform = self::createMock(PlatformInterface::class);
-        $platform->expects(self::exactly(2))->method('getTablesSql')->with('app', 'public')->willReturn('tables');
+        $introspection = self::createMock(IntrospectionDialectInterface::class);
+        $platform->method('introspection')->willReturn($introspection);
+        $introspection->expects(self::exactly(2))->method('getTablesSql')->with('app', 'public')->willReturn('tables');
 
         $buffered = self::createMock(ResultInterface::class);
         $buffered->expects(self::once())->method('fetchAll')->willReturn([
@@ -60,9 +63,11 @@ final class TableInspectorTest extends TestCase
     {
         $table = new QualifiedName(new Identifier('child'), new Identifier('public'), new Identifier('app'));
         $platform = self::createMock(PlatformInterface::class);
-        $platform->expects(self::once())->method('getTableStatusSql')->with($table)->willReturn('status');
-        $platform->expects(self::once())->method('getParentTablesSql')->with($table)->willReturn('parents');
-        $platform->expects(self::once())->method('getPartitionsSql')->with($table)->willReturn('partitions');
+        $introspection = self::createMock(IntrospectionDialectInterface::class);
+        $platform->method('introspection')->willReturn($introspection);
+        $introspection->expects(self::once())->method('getTableStatusSql')->with($table)->willReturn('status');
+        $introspection->expects(self::once())->method('getParentTablesSql')->with($table)->willReturn('parents');
+        $introspection->expects(self::once())->method('getPartitionsSql')->with($table)->willReturn('partitions');
 
         $statusResult = self::createMock(ResultInterface::class);
         $statusResult->method('fetchAssoc')->willReturn(['table_name' => 'child', 'rows' => 4]);
@@ -104,7 +109,9 @@ final class TableInspectorTest extends TestCase
     public function test_it_returns_empty_parent_collection_when_dialect_has_no_inheritance(): void
     {
         $platform = self::createMock(PlatformInterface::class);
-        $platform->method('getParentTablesSql')->willReturn('');
+        $introspection = self::createMock(IntrospectionDialectInterface::class);
+        $platform->method('introspection')->willReturn($introspection);
+        $introspection->method('getParentTablesSql')->willReturn('');
         $connection = self::createMock(ConnectionInterface::class);
         $connection->method('getPlatform')->willReturn($platform);
 
@@ -119,6 +126,8 @@ final class TableInspectorTest extends TestCase
     public function test_it_rejects_table_listing_without_configured_database(): void
     {
         $platform = self::createMock(PlatformInterface::class);
+        $introspection = self::createMock(IntrospectionDialectInterface::class);
+        $platform->method('introspection')->willReturn($introspection);
         $connection = self::createMock(ConnectionInterface::class);
         $connection->method('getDatabaseName')->willReturn(null);
         $connection->method('getPlatform')->willReturn($platform);
@@ -132,7 +141,9 @@ final class TableInspectorTest extends TestCase
     public function test_unsupported_partition_dialect_exception_remains_visible(): void
     {
         $platform = self::createMock(PlatformInterface::class);
-        $platform->method('getPartitionsSql')->willThrowException(
+        $introspection = self::createMock(IntrospectionDialectInterface::class);
+        $platform->method('introspection')->willReturn($introspection);
+        $introspection->method('getPartitionsSql')->willThrowException(
             CapabilityNotSupportedException::for(Capability::Partitions, 'sqlite'),
         );
         $connection = self::createMock(ConnectionInterface::class);

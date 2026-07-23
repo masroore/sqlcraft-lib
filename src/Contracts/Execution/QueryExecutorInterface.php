@@ -34,6 +34,21 @@ interface QueryExecutorInterface
     ): void;
 
     /** @param array<string|int, mixed> $params */
+    public function executeAdministrative(
+        ConnectionInterface $connection,
+        string $sql,
+        array $params = [],
+    ): ExecutionResult;
+
+    /** @param array<string|int, mixed> $params */
+    public function executeWithTimeout(
+        ConnectionInterface $connection,
+        string $sql,
+        array $params = [],
+        int $timeoutMs = 0,
+    ): ?ExecutionResult;
+
+    /** @param array<string|int, mixed> $params */
     public function queryWithTimeout(
         ConnectionInterface $connection,
         string $sql,
