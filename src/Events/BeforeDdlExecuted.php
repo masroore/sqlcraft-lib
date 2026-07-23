@@ -12,6 +12,7 @@ final class BeforeDdlExecuted extends InterceptionEvent
         public readonly ConnectionInterface $connection,
         public readonly string $sql,
         public readonly string $objectName,
-    ) {}
+    ) {
+    }
 
 }

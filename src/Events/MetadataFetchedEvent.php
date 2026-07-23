@@ -13,5 +13,6 @@ final readonly class MetadataFetchedEvent extends ObservabilityEvent
         public string $objectType,
         public string $objectName,
         public float $elapsedMs,
-    ) {}
+    ) {
+    }
 }

@@ -12,7 +12,9 @@ use SQLCraft\ValueObjects\QualifiedName;
 
 final readonly class BlobStreamService
 {
-    public function __construct(private QueryExecutorInterface $executor) {}
+    public function __construct(private QueryExecutorInterface $executor)
+    {
+    }
 
     /**
      * @param  array<string, scalar|null>  $where

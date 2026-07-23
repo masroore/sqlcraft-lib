@@ -12,7 +12,9 @@ use SQLCraft\Contracts\Metadata\SequenceInspectorInterface;
 /** @internal */
 final class SequenceInspector implements SequenceInspectorInterface
 {
-    public function __construct(private readonly MetadataFactoryInterface $factory) {}
+    public function __construct(private readonly MetadataFactoryInterface $factory)
+    {
+    }
 
     #[\Override]
     public function getSequences(ConnectionInterface $conn, ?string $schema = null): SequenceCollection

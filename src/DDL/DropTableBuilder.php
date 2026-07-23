@@ -17,7 +17,8 @@ final readonly class DropTableBuilder implements DdlBuilderInterface, ObjectName
         public QualifiedName $table,
         public bool $ifExists = false,
         public bool $cascade = false,
-    ) {}
+    ) {
+    }
 
     #[\Override]
     public function toSql(DdlDialectInterface $dialect): array

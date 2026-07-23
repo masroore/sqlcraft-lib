@@ -25,7 +25,8 @@ final readonly class CreateRoutineBuilder implements DdlBuilderInterface, Object
         public ?string $language = null,
         public bool $deterministic = false,
         public bool $orReplace = false,
-    ) {}
+    ) {
+    }
 
     /** @return list<string> */
     #[\Override]

@@ -16,7 +16,9 @@ final readonly class AlterRoutineBuilder implements DdlBuilderInterface, ObjectN
     use LegacyDdlExecution;
 
     /** @param list<RoutineParameterDefinitionInterface> $parameters */
-    public function __construct(public QualifiedName $name, public string $type, public array $parameters = [], public ?DataType $returnType = null, public string $body = '', public ?string $language = null, public bool $deterministic = false) {}
+    public function __construct(public QualifiedName $name, public string $type, public array $parameters = [], public ?DataType $returnType = null, public string $body = '', public ?string $language = null, public bool $deterministic = false)
+    {
+    }
 
     /** @return list<string> */
     #[\Override]

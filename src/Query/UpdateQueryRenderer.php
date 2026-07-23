@@ -9,7 +9,9 @@ use SQLCraft\ValueObjects\Identifier;
 
 final readonly class UpdateQueryRenderer
 {
-    public function __construct(private PlatformInterface $platform) {}
+    public function __construct(private PlatformInterface $platform)
+    {
+    }
 
     /** @return array{sql: string, params: list<mixed>} */
     public function render(UpdateQuery $query): array

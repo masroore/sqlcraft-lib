@@ -24,7 +24,7 @@ final class FormatWriterTest extends TestCase
 {
     public function test_sql_writer_renders_table_ddl_and_quoted_insert_batches(): void
     {
-        $sink = new StringBufferSink;
+        $sink = new StringBufferSink();
         $table = new TableStatus('orders', schema: 'shop');
         $columns = $this->columns();
         $options = new DumpOptions('sql', DumpScope::table('shop', 'orders'), tableStyle: TableSectionStyle::DropCreate);
@@ -34,9 +34,9 @@ final class FormatWriterTest extends TestCase
             $value === null => 'NULL',
             is_int($value), is_float($value) => (string) $value,
             is_string($value) => "'" . str_replace("'", "''", $value) . "'",
-            default => throw new \InvalidArgumentException,
+            default => throw new \InvalidArgumentException(),
         });
-        $connection->method('getPlatform')->willReturn(new SqlitePlatform);
+        $connection->method('getPlatform')->willReturn(new SqlitePlatform());
         $writer = new SqlFormatWriter($connection);
 
         $writer->writeHeader($sink, $options);
@@ -63,10 +63,10 @@ final class FormatWriterTest extends TestCase
 
     public function test_csv_writer_uses_rfc4180_escaping_and_null_token(): void
     {
-        $sink = new StringBufferSink;
+        $sink = new StringBufferSink();
         $table = new TableStatus('orders');
         $options = new DumpOptions('csv', DumpScope::table('shop', 'orders'));
-        $writer = new CsvFormatWriter;
+        $writer = new CsvFormatWriter();
         $columns = $this->columns();
 
         $writer->writeTableHeader($sink, $table, $options);
@@ -91,13 +91,13 @@ final class FormatWriterTest extends TestCase
         $columns = [$this->column('value', 'TEXT')];
         $options = new DumpOptions('csv-semicolon', DumpScope::table('shop', 'items'));
 
-        $semicolonSink = new StringBufferSink;
-        $semicolonWriter = new CsvSemicolonFormatWriter;
+        $semicolonSink = new StringBufferSink();
+        $semicolonWriter = new CsvSemicolonFormatWriter();
         $semicolonWriter->writeTableHeader($semicolonSink, $table, $options);
         $semicolonWriter->writeRows($semicolonSink, $table, [['value' => 'a;b']], $columns, $options);
 
-        $tsvSink = new StringBufferSink;
-        $tsvWriter = new TsvFormatWriter;
+        $tsvSink = new StringBufferSink();
+        $tsvWriter = new TsvFormatWriter();
         $tsvWriter->writeTableHeader($tsvSink, $table, $options);
         $tsvWriter->writeRows($tsvSink, $table, [['value' => "a\tb"]], $columns, $options);
 

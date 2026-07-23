@@ -4,4 +4,6 @@ declare(strict_types=1);
 
 namespace SQLCraft\Exceptions;
 
-abstract class MetadataException extends SQLCraftException {}
+abstract class MetadataException extends SQLCraftException
+{
+}

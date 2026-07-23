@@ -27,7 +27,7 @@ final class SchemaManagerSqliteIntegrationTest extends TestCase
         $connection->execute('CREATE INDEX orders_user_id_idx ON orders(user_id)');
         $connection->execute('CREATE TRIGGER users_insert AFTER INSERT ON users BEGIN SELECT NEW.id; END');
 
-        $manager = SchemaManagerFactory::schemaManager((new DefaultMetadataInspectorSetFactory(new SqliteMetadataFactory))->create($connection));
+        $manager = SchemaManagerFactory::schemaManager((new DefaultMetadataInspectorSetFactory(new SqliteMetadataFactory()))->create($connection));
         $table = new QualifiedName(new Identifier('orders'));
         $structure = $manager->describeTable($connection, $table);
 
@@ -44,7 +44,7 @@ final class SchemaManagerSqliteIntegrationTest extends TestCase
         $connection->execute('CREATE TABLE users (id INTEGER PRIMARY KEY, email TEXT NOT NULL)');
         $connection->execute('CREATE TABLE orders (id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL)');
 
-        $columns = SchemaManagerFactory::schemaManager((new DefaultMetadataInspectorSetFactory(new SqliteMetadataFactory))->create($connection))->getAllColumns($connection, 'main');
+        $columns = SchemaManagerFactory::schemaManager((new DefaultMetadataInspectorSetFactory(new SqliteMetadataFactory()))->create($connection))->getAllColumns($connection, 'main');
 
         self::assertSame(['id', 'email'], array_keys(iterator_to_array($columns['users'])));
         self::assertSame(['id', 'user_id'], array_keys(iterator_to_array($columns['orders'])));
@@ -55,7 +55,7 @@ final class SchemaManagerSqliteIntegrationTest extends TestCase
         $connection = $this->connection();
 
         $this->expectException(CapabilityNotSupportedException::class);
-        SchemaManagerFactory::schemaManager((new DefaultMetadataInspectorSetFactory(new SqliteMetadataFactory))->create($connection))->getSequences($connection);
+        SchemaManagerFactory::schemaManager((new DefaultMetadataInspectorSetFactory(new SqliteMetadataFactory()))->create($connection))->getSequences($connection);
     }
 
     private function connection(): PdoConnection
@@ -65,8 +65,8 @@ final class SchemaManagerSqliteIntegrationTest extends TestCase
 
         return new PdoConnection(
             pdo: $pdo,
-            platform: new SqlitePlatform,
-            translator: new PdoExceptionTranslator,
+            platform: new SqlitePlatform(),
+            translator: new PdoExceptionTranslator(),
             databaseName: 'main',
         );
     }

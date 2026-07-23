@@ -17,7 +17,8 @@ final readonly class DropViewBuilder implements DdlBuilderInterface, ObjectNameA
         public QualifiedName $name,
         public bool $ifExists = false,
         public bool $cascade = false,
-    ) {}
+    ) {
+    }
 
     /** @return list<string> */
     #[\Override]

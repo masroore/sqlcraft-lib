@@ -13,5 +13,6 @@ final readonly class ImportProgressEvent extends ObservabilityEvent
         public int $bytesProcessed,
         public int $statementsExecuted,
         public float $elapsedMs,
-    ) {}
+    ) {
+    }
 }

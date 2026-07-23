@@ -35,7 +35,8 @@ final class CallbackQueryHistory implements QueryHistoryInterface
                 return $entries;
             };
         $this->clearer = $clearer === null
-            ? static function (string $database): void {}
+            ? static function (string $database): void {
+            }
         : static function (string $database) use ($clearer): void {
             $clearer($database);
         };

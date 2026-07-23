@@ -68,7 +68,7 @@ final class SQLCraftFactory
         private readonly array $writerFactories,
         private readonly array $readerFactories,
     ) {
-        $this->connections = new ConnectionManager;
+        $this->connections = new ConnectionManager();
     }
 
     public function session(ConnectionParameters $parameters, ?string $name = null, ?string $credentialKey = null): DatabaseSession
@@ -163,7 +163,7 @@ final class SQLCraftFactory
         }
         $exporter = new Exporter($source, $executor, $formats);
         $csv = new CsvImporter($inspectors->column(), $executor);
-        $importer = new Importer(new StatementSplitter, new BatchExecutor($executor));
+        $importer = new Importer(new StatementSplitter(), new BatchExecutor($executor));
         $process = $runtime->processes?->create($connection, $inspectors->server(), $executor);
 
         return new DatabaseSession(
@@ -173,7 +173,7 @@ final class SQLCraftFactory
             $executor,
             $exporter,
             $importer,
-            $inspectors->privileges() instanceof PrivilegeInspectorInterface ? new PrivilegeGuard($connection, $inspectors->privileges()) : new DenySecurityGuard,
+            $inspectors->privileges() instanceof PrivilegeInspectorInterface ? new PrivilegeGuard($connection, $inspectors->privileges()) : new DenySecurityGuard(),
             new UserManager($connection, $executor),
             new PrivilegeManager($connection, $executor),
             $formats,

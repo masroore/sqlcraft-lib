@@ -47,6 +47,6 @@ final class EventTaxonomyTest extends TestCase
 
     public function test_cancellation_exception_is_typed(): void
     {
-        self::assertInstanceOf(\RuntimeException::class, new OperationCancelledException);
+        self::assertInstanceOf(\RuntimeException::class, new OperationCancelledException());
     }
 }

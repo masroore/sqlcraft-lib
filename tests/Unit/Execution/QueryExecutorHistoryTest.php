@@ -17,7 +17,7 @@ final class QueryExecutorHistoryTest extends TestCase
         $connection = self::createMock(ConnectionInterface::class);
         $connection->method('getDatabaseName')->willReturn('app');
         $connection->expects(self::once())->method('execute')->with('UPDATE users SET active = ?', [true])->willReturn(new ExecutionResult(1, '', 1.0, 'UPDATE users SET active = ?'));
-        $history = new InMemoryQueryHistory;
+        $history = new InMemoryQueryHistory();
 
         (new QueryExecutor($history))->execute($connection, 'UPDATE users SET active = ?', [true]);
         $entry = $history->getRecent('app')[0];
@@ -32,7 +32,7 @@ final class QueryExecutorHistoryTest extends TestCase
         $connection = self::createMock(ConnectionInterface::class);
         $connection->method('getDatabaseName')->willReturn('app');
         $connection->expects(self::once())->method('execute')->willThrowException(new \RuntimeException('boom'));
-        $history = new InMemoryQueryHistory;
+        $history = new InMemoryQueryHistory();
 
         try {
             (new QueryExecutor($history))->execute($connection, 'DELETE FROM users');

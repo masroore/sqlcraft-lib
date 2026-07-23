@@ -53,7 +53,7 @@ final class SchemaManagerEngineIntegrationTest extends TestCase
         $connection->execute('CREATE TABLE ' . $orders . ' (id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL, CONSTRAINT orders_user_fk FOREIGN KEY (user_id) REFERENCES users(id))');
 
         try {
-            $metadataFactory = $platformName === 'pgsql' ? new PostgreSQLMetadataFactory : new MySQLMetadataFactory;
+            $metadataFactory = $platformName === 'pgsql' ? new PostgreSQLMetadataFactory() : new MySQLMetadataFactory();
             $manager = SchemaManagerFactory::schemaManager((new DefaultMetadataInspectorSetFactory($metadataFactory))->create($connection));
             $table = $platformName === 'pgsql'
                 ? new QualifiedName(new Identifier('orders'), new Identifier('public'))
@@ -71,13 +71,13 @@ final class SchemaManagerEngineIntegrationTest extends TestCase
 
     private function connect(string $platformName, string $host, string $database, string $username, string $password): ConnectionInterface
     {
-        $factory = new PdoConnectionFactory(new PdoExceptionTranslator);
+        $factory = new PdoConnectionFactory(new PdoExceptionTranslator());
         $parameters = new ConnectionParameters(host: $host, port: $platformName === 'pgsql' ? 5432 : 3306, database: $database, username: $username, password: $password);
 
         return match ($platformName) {
-            'mysql' => (new MySQLDriver($factory, new MySQLPlatform))->connect($parameters),
-            'mariadb' => (new MySQLDriver($factory, new MariaDbPlatform))->connect($parameters),
-            'pgsql' => (new PostgreSQLDriver($factory, new PostgreSQLPlatform))->connect($parameters),
+            'mysql' => (new MySQLDriver($factory, new MySQLPlatform()))->connect($parameters),
+            'mariadb' => (new MySQLDriver($factory, new MariaDbPlatform()))->connect($parameters),
+            'pgsql' => (new PostgreSQLDriver($factory, new PostgreSQLPlatform()))->connect($parameters),
             default => throw new \InvalidArgumentException('Unknown engine: ' . $platformName),
         };
     }

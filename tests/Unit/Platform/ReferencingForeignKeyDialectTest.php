@@ -19,14 +19,14 @@ final class ReferencingForeignKeyDialectTest extends TestCase
     {
         $table = new QualifiedName(new Identifier('teams'));
 
-        self::assertStringContainsString('REFERENCED_TABLE_NAME', (new MySQLPlatform)->getReferencingForeignKeysSql($table));
-        self::assertStringContainsString('ccu.table_name', (new PostgreSQLPlatform)->getReferencingForeignKeysSql($table));
+        self::assertStringContainsString('REFERENCED_TABLE_NAME', (new MySQLPlatform())->getReferencingForeignKeysSql($table));
+        self::assertStringContainsString('ccu.table_name', (new PostgreSQLPlatform())->getReferencingForeignKeysSql($table));
     }
 
     public function test_sqlite_rejects_reverse_foreign_key_inspection_explicitly(): void
     {
         try {
-            (new SqlitePlatform)->getReferencingForeignKeysSql(new QualifiedName(new Identifier('teams')));
+            (new SqlitePlatform())->getReferencingForeignKeysSql(new QualifiedName(new Identifier('teams')));
             self::fail('Expected reverse foreign-key capability exception.');
         } catch (CapabilityNotSupportedException $exception) {
             self::assertSame(Capability::ForeignKeys, $exception->capability);

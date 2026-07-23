@@ -12,5 +12,6 @@ final readonly class TransactionRolledBackEvent extends ObservabilityEvent
         public ConnectionInterface $connection,
         public ?string $savepoint,
         public string $reason,
-    ) {}
+    ) {
+    }
 }

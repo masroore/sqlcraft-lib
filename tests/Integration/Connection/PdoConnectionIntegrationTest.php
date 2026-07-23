@@ -101,6 +101,6 @@ final class PdoConnectionIntegrationTest extends TestCase
         $quoting->method('quoteValue')->willReturn('quoted');
         $platform->method('quoting')->willReturn($quoting);
 
-        return new PdoConnection($pdo, $platform, new PdoExceptionTranslator);
+        return new PdoConnection($pdo, $platform, new PdoExceptionTranslator());
     }
 }

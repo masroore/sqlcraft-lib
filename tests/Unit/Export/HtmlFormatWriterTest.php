@@ -33,7 +33,7 @@ final class HtmlFormatWriterTest extends TestCase
             throw new RuntimeException('HTML export was empty.');
         }
 
-        $dom = new DOMDocument;
+        $dom = new DOMDocument();
         $previous = libxml_use_internal_errors(true);
         $loaded = $dom->loadHTML($html);
         $errors = array_values(array_filter(
@@ -158,8 +158,8 @@ final class HtmlFormatWriterTest extends TestCase
      */
     private function export(array $tables, ?HtmlExportOptions $htmlOptions = null): string
     {
-        $sink = new StringBufferSink;
-        $writer = new HtmlFormatWriter;
+        $sink = new StringBufferSink();
+        $writer = new HtmlFormatWriter();
         $options = new DumpOptions(
             format: 'html',
             scope: DumpScope::database('shop'),

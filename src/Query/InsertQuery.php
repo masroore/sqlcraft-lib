@@ -19,7 +19,8 @@ final readonly class InsertQuery implements QueryBuilderInterface
         public array $rows = [],
         public ?string $selectSql = null,
         public UpsertMode $upsertMode = UpsertMode::Insert,
-    ) {}
+    ) {
+    }
 
     /** @param array<string, mixed> $row */
     public static function fromRow(QualifiedName $table, array $row, UpsertMode $mode = UpsertMode::Insert): self

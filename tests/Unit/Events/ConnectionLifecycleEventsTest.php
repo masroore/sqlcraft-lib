@@ -25,7 +25,7 @@ final class ConnectionLifecycleEventsTest extends TestCase
 {
     public function test_factory_dispatches_opened_and_close_events_without_credentials(): void
     {
-        $provider = new SimpleListenerProvider;
+        $provider = new SimpleListenerProvider();
         $events = [];
         $provider->listen(ConnectionOpenedEvent::class, static function (ConnectionOpenedEvent $event) use (&$events): void {
             $events[] = $event;
@@ -33,10 +33,10 @@ final class ConnectionLifecycleEventsTest extends TestCase
         $provider->listen(ConnectionClosedEvent::class, static function (ConnectionClosedEvent $event) use (&$events): void {
             $events[] = $event;
         });
-        $connection = (new PdoConnectionFactory(new PdoExceptionTranslator, new ConnectionEventDispatcher(new SimpleEventDispatcher($provider))))->connect(
+        $connection = (new PdoConnectionFactory(new PdoExceptionTranslator(), new ConnectionEventDispatcher(new SimpleEventDispatcher($provider))))->connect(
             'sqlite::memory:',
             new ConnectionParameters(database: 'app', username: 'alice', password: 'secret'),
-            new SqlitePlatform,
+            new SqlitePlatform(),
             'app',
         );
 
@@ -51,15 +51,15 @@ final class ConnectionLifecycleEventsTest extends TestCase
 
     public function test_factory_dispatches_failure_event(): void
     {
-        $provider = new SimpleListenerProvider;
+        $provider = new SimpleListenerProvider();
         $failed = null;
         $provider->listen(ConnectionFailedEvent::class, static function (ConnectionFailedEvent $event) use (&$failed): void {
             $failed = $event;
         });
-        $factory = new PdoConnectionFactory(new PdoExceptionTranslator, new ConnectionEventDispatcher(new SimpleEventDispatcher($provider)));
+        $factory = new PdoConnectionFactory(new PdoExceptionTranslator(), new ConnectionEventDispatcher(new SimpleEventDispatcher($provider)));
 
         try {
-            $factory->connect('sqlite:/path/that/does/not/exist/db.sqlite', new ConnectionParameters, new SqlitePlatform);
+            $factory->connect('sqlite:/path/that/does/not/exist/db.sqlite', new ConnectionParameters(), new SqlitePlatform());
         } catch (\Throwable) {
         }
 
@@ -68,29 +68,29 @@ final class ConnectionLifecycleEventsTest extends TestCase
 
     public function test_connection_opening_can_be_cancelled_before_pdo_creation(): void
     {
-        $provider = new SimpleListenerProvider;
+        $provider = new SimpleListenerProvider();
         $provider->listen(BeforeConnectionOpened::class, static function (BeforeConnectionOpened $event): void {
             $event->cancel('disabled');
         });
-        $factory = new PdoConnectionFactory(new PdoExceptionTranslator, new ConnectionEventDispatcher(new SimpleEventDispatcher($provider)));
+        $factory = new PdoConnectionFactory(new PdoExceptionTranslator(), new ConnectionEventDispatcher(new SimpleEventDispatcher($provider)));
 
         $this->expectException(OperationCancelledException::class);
-        $factory->connect('sqlite::memory:', new ConnectionParameters, new SqlitePlatform);
+        $factory->connect('sqlite::memory:', new ConnectionParameters(), new SqlitePlatform());
     }
 
     public function test_transaction_lifecycle_events_include_savepoint_data(): void
     {
-        $provider = new SimpleListenerProvider;
+        $provider = new SimpleListenerProvider();
         $received = [];
         foreach ([TransactionBeganEvent::class, TransactionCommittedEvent::class, TransactionRolledBackEvent::class] as $eventClass) {
             $provider->listen($eventClass, static function (object $event) use (&$received): void {
                 $received[] = $event;
             });
         }
-        $connection = (new PdoConnectionFactory(new PdoExceptionTranslator, new ConnectionEventDispatcher(new SimpleEventDispatcher($provider))))->connect(
+        $connection = (new PdoConnectionFactory(new PdoExceptionTranslator(), new ConnectionEventDispatcher(new SimpleEventDispatcher($provider))))->connect(
             'sqlite::memory:',
-            new ConnectionParameters,
-            new SqlitePlatform,
+            new ConnectionParameters(),
+            new SqlitePlatform(),
         );
         $outer = $connection->beginTransaction('SERIALIZABLE');
         $inner = $connection->beginTransaction();

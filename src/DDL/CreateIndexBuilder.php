@@ -18,7 +18,8 @@ final readonly class CreateIndexBuilder implements DdlBuilderInterface, ObjectNa
         public QualifiedName $table,
         public IndexDefinitionInterface $index,
         public bool $ifNotExists = false,
-    ) {}
+    ) {
+    }
 
     #[\Override]
     public function toSql(DdlDialectInterface $dialect): array

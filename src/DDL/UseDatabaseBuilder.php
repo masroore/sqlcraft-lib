@@ -13,7 +13,9 @@ final readonly class UseDatabaseBuilder implements DdlBuilderInterface, ObjectNa
 {
     use LegacyDdlExecution;
 
-    public function __construct(public Identifier $database) {}
+    public function __construct(public Identifier $database)
+    {
+    }
 
     /** @return list<string> */
     #[\Override]

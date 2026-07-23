@@ -58,7 +58,7 @@ final class RoutineConstraintUserInspectorTest extends TestCase
             },
         );
 
-        $factory = new MySQLMetadataFactory;
+        $factory = new MySQLMetadataFactory();
         $routines = (new RoutineInspector($factory))->getFunctions($connection, 'app');
         $procedures = (new RoutineInspector($factory))->getProcedures($connection, 'app');
         $detail = (new RoutineInspector($factory))->getRoutineDetail($connection, $routine);
@@ -85,6 +85,6 @@ final class RoutineConstraintUserInspectorTest extends TestCase
 
         $this->expectException(CapabilityNotSupportedException::class);
 
-        (new UserInspector(new MySQLMetadataFactory))->getUsers($connection);
+        (new UserInspector(new MySQLMetadataFactory()))->getUsers($connection);
     }
 }

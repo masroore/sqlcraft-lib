@@ -9,7 +9,9 @@ use SQLCraft\Contracts\Metadata\MetadataCacheInterface;
 
 final readonly class Psr16MetadataCache implements MetadataCacheInterface
 {
-    public function __construct(private CacheInterface $cache, private string $prefix = 'sqlcraft:') {}
+    public function __construct(private CacheInterface $cache, private string $prefix = 'sqlcraft:')
+    {
+    }
 
     #[\Override]
     public function remember(string $key, callable $loader, int $ttl = 0): mixed

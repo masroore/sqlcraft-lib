@@ -16,7 +16,9 @@ use SQLCraft\ValueObjects\QualifiedName;
 /** @internal */
 final class ColumnInspector implements ColumnInspectorInterface
 {
-    public function __construct(private readonly MetadataFactoryInterface $factory) {}
+    public function __construct(private readonly MetadataFactoryInterface $factory)
+    {
+    }
 
     #[\Override]
     public function getColumns(ConnectionInterface $conn, QualifiedName $table): ColumnCollection

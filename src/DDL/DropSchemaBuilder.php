@@ -13,7 +13,9 @@ final readonly class DropSchemaBuilder implements DdlBuilderInterface, ObjectNam
 {
     use LegacyDdlExecution;
 
-    public function __construct(public Identifier $name, public bool $ifExists = false, public bool $cascade = false) {}
+    public function __construct(public Identifier $name, public bool $ifExists = false, public bool $cascade = false)
+    {
+    }
 
     /** @return list<string> */
     #[\Override]

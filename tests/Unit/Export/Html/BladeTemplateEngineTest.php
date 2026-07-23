@@ -11,7 +11,7 @@ final class BladeTemplateEngineTest extends TestCase
 {
     public function test_escaped_output(): void
     {
-        $engine = new BladeTemplateEngine;
+        $engine = new BladeTemplateEngine();
         $out = $engine->render('{{ $var }}', ['var' => '<script>']);
 
         self::assertSame('&lt;script&gt;', $out);
@@ -19,7 +19,7 @@ final class BladeTemplateEngineTest extends TestCase
 
     public function test_raw_output(): void
     {
-        $engine = new BladeTemplateEngine;
+        $engine = new BladeTemplateEngine();
         $out = $engine->render('{!! $var !!}', ['var' => '<b>ok</b>']);
 
         self::assertSame('<b>ok</b>', $out);
@@ -27,7 +27,7 @@ final class BladeTemplateEngineTest extends TestCase
 
     public function test_foreach(): void
     {
-        $engine = new BladeTemplateEngine;
+        $engine = new BladeTemplateEngine();
         $out = $engine->render(
             '@foreach($items as $item)[{{ $item }}]@endforeach',
             ['items' => ['a', 'b', 'c']],
@@ -38,7 +38,7 @@ final class BladeTemplateEngineTest extends TestCase
 
     public function test_if_else_endif(): void
     {
-        $engine = new BladeTemplateEngine;
+        $engine = new BladeTemplateEngine();
         $template = '@if($flag)yes@else no@endif';
 
         self::assertSame('yes', $engine->render($template, ['flag' => true]));
@@ -47,7 +47,7 @@ final class BladeTemplateEngineTest extends TestCase
 
     public function test_nested_foreach_if(): void
     {
-        $engine = new BladeTemplateEngine;
+        $engine = new BladeTemplateEngine();
         $template = <<<'BLADE'
 @foreach($tables as $table)
 #{{ $table['name'] }}
@@ -74,7 +74,7 @@ BLADE;
     public function test_temp_file_cleaned_up_on_success(): void
     {
         $before = $this->tempHtmlFiles();
-        (new BladeTemplateEngine)->render('ok {{ $x }}', ['x' => 1]);
+        (new BladeTemplateEngine())->render('ok {{ $x }}', ['x' => 1]);
         self::assertSame($before, $this->tempHtmlFiles());
     }
 
@@ -83,7 +83,7 @@ BLADE;
         $before = $this->tempHtmlFiles();
 
         try {
-            (new BladeTemplateEngine)->render('{!! throw new \\RuntimeException(\'boom\') !!}', []);
+            (new BladeTemplateEngine())->render('{!! throw new \\RuntimeException(\'boom\') !!}', []);
             self::fail('Expected exception was not thrown.');
         } catch (\Throwable) {
             // expected — template evaluation throws

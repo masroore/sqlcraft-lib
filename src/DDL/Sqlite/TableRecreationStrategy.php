@@ -33,7 +33,8 @@ final readonly class TableRecreationStrategy
         private TransactionManagerInterface $transactions,
         private TableRecreationMetadataProviderInterface $metadata,
         private ?QueryExecutorInterface $executor = null,
-    ) {}
+    ) {
+    }
 
     public function execute(ConnectionInterface $connection, AlterTableBuilder $builder): void
     {

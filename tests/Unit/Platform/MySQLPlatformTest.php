@@ -29,7 +29,7 @@ final class MySQLPlatformTest extends TestCase
 {
     public function test_it_describes_my_sql_defaults_and_capabilities(): void
     {
-        $platform = new MySQLPlatform;
+        $platform = new MySQLPlatform();
 
         self::assertSame('mysql', $platform->getName());
         self::assertNull($platform->getFlavor());
@@ -44,7 +44,7 @@ final class MySQLPlatformTest extends TestCase
 
     public function test_maria_db_specializes_flavor_and_version_gates(): void
     {
-        $platform = new MariaDbPlatform;
+        $platform = new MariaDbPlatform();
 
         self::assertSame('mariadb', $platform->getName());
         self::assertSame('maria', $platform->getFlavor());
@@ -63,12 +63,12 @@ final class MySQLPlatformTest extends TestCase
         $connection = self::createMock(ConnectionInterface::class);
         $connection->expects(self::once())->method('query')->with('SELECT VERSION()')->willReturn($result);
 
-        self::assertSame('8.0.36', (string) (new MySQLPlatform)->getServerVersion($connection));
+        self::assertSame('8.0.36', (string) (new MySQLPlatform())->getServerVersion($connection));
     }
 
     public function test_it_quotes_values_identifiers_and_paginates(): void
     {
-        $platform = new MySQLPlatform;
+        $platform = new MySQLPlatform();
 
         self::assertSame('`a``b`', $platform->quoteIdentifier(new Identifier('a`b')));
         self::assertSame("'a\\\\b''c'", $platform->quoteValue("a\\b'c"));
@@ -82,7 +82,7 @@ final class MySQLPlatformTest extends TestCase
 
     public function test_it_renders_my_sql_ddl(): void
     {
-        $platform = new MySQLPlatform;
+        $platform = new MySQLPlatform();
         $table = new QualifiedName(new Identifier('users'), catalog: new Identifier('app'));
         $column = new ColumnMeta(
             name: 'id',
@@ -137,7 +137,7 @@ final class MySQLPlatformTest extends TestCase
 
     public function test_it_returns_my_sql_introspection_sql_and_rejects_sequences(): void
     {
-        $platform = new MySQLPlatform;
+        $platform = new MySQLPlatform();
         $table = new QualifiedName(new Identifier('users'), catalog: new Identifier('app'));
 
         self::assertSame('SHOW DATABASES', $platform->getDatabasesSql());

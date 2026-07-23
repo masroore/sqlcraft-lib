@@ -14,7 +14,7 @@ final class QueryHistoryTest extends TestCase
 {
     public function test_in_memory_history_returns_newest_entries_first_and_clears_database(): void
     {
-        $history = new InMemoryQueryHistory;
+        $history = new InMemoryQueryHistory();
         $first = $this->entry('SELECT 1');
         $second = $this->entry('SELECT 2');
         $history->record($first);
@@ -27,7 +27,7 @@ final class QueryHistoryTest extends TestCase
 
     public function test_null_history_is_no_op(): void
     {
-        $history = new NullQueryHistory;
+        $history = new NullQueryHistory();
         $history->record($this->entry('SELECT 1'));
 
         self::assertSame([], $history->getRecent('app'));

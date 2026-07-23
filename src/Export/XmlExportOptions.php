@@ -9,5 +9,6 @@ final readonly class XmlExportOptions
     public function __construct(
         public string $rootElement = 'export',
         public string $rowElement = 'row',
-    ) {}
+    ) {
+    }
 }

@@ -27,7 +27,7 @@ final class SelectQueryTest extends TestCase
             ->withOrderBy(new OrderByClause(new Identifier('id'), descending: true));
         $query = new SelectQuery($query->table, $query->columns, $query->where, $query->orderBy, limit: 10, offset: 20);
 
-        $rendered = (new SelectQueryRenderer(new SqlitePlatform))->render($query);
+        $rendered = (new SelectQueryRenderer(new SqlitePlatform()))->render($query);
 
         self::assertSame('SELECT * FROM "users" WHERE "email" = ? ORDER BY "id" DESC LIMIT 10 OFFSET 20', $rendered['sql']);
         self::assertSame(['ada@example.test'], $rendered['params']);
@@ -43,7 +43,7 @@ final class SelectQueryTest extends TestCase
             groupBy: ['id'],
         );
 
-        $rendered = (new SelectQueryRenderer(new SqlitePlatform))->render($query);
+        $rendered = (new SelectQueryRenderer(new SqlitePlatform()))->render($query);
 
         self::assertSame('SELECT COUNT("id") AS "total" FROM "public"."users" WHERE "id" IN (?, ?, ?) GROUP BY "id"', $rendered['sql']);
         self::assertSame([1, 2, 3], $rendered['params']);
@@ -56,7 +56,7 @@ final class SelectQueryTest extends TestCase
             new WhereCondition(new Identifier('age'), 'BETWEEN', [18, 65]),
         ]);
 
-        $rendered = (new SelectQueryRenderer(new SqlitePlatform))->render($query);
+        $rendered = (new SelectQueryRenderer(new SqlitePlatform()))->render($query);
 
         self::assertSame('SELECT * FROM "users" WHERE "deleted_at" IS NULL AND "age" BETWEEN ? AND ?', $rendered['sql']);
         self::assertSame([18, 65], $rendered['params']);

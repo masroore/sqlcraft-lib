@@ -28,8 +28,8 @@ final class SqlitePlatformConformanceTest extends PlatformConformanceTestCase
     #[\Override]
     protected function createConnection(): ConnectionInterface
     {
-        $this->sqlitePlatform = new SqlitePlatform;
-        $driver = new SqliteDriver(new PdoConnectionFactory(new PdoExceptionTranslator), $this->sqlitePlatform);
+        $this->sqlitePlatform = new SqlitePlatform();
+        $driver = new SqliteDriver(new PdoConnectionFactory(new PdoExceptionTranslator()), $this->sqlitePlatform);
 
         return $driver->connect(new ConnectionParameters(database: ':memory:'));
     }

@@ -14,7 +14,7 @@ final class PostgreSQLMetadataFactoryTest extends TestCase
 {
     public function test_hydrates_postgre_sql_column_and_sequence_default(): void
     {
-        $column = (new PostgreSQLMetadataFactory)->createColumnMeta([
+        $column = (new PostgreSQLMetadataFactory())->createColumnMeta([
             'column_name' => 'id',
             'udt_name' => 'int4',
             'is_nullable' => 'NO',
@@ -30,7 +30,7 @@ final class PostgreSQLMetadataFactoryTest extends TestCase
 
     public function test_hydrates_postgre_sql_index_and_foreign_key(): void
     {
-        $factory = new PostgreSQLMetadataFactory;
+        $factory = new PostgreSQLMetadataFactory();
         $index = $factory->createIndexMeta([
             'index_name' => 'users_search',
             'index_type' => 'GIN',
@@ -55,7 +55,7 @@ final class PostgreSQLMetadataFactoryTest extends TestCase
 
     public function test_hydrates_postgre_sql_routine_and_table_status(): void
     {
-        $factory = new PostgreSQLMetadataFactory;
+        $factory = new PostgreSQLMetadataFactory();
         $routine = $factory->createRoutineMeta([
             'routine_name' => 'refresh_users',
             'routine_type' => 'PROCEDURE',

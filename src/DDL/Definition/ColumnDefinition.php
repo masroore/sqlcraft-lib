@@ -26,7 +26,8 @@ final readonly class ColumnDefinition implements ColumnDefinitionInterface
         private array $privileges,
         private ?string $originalName,
         private ?string $defaultConstraintName,
-    ) {}
+    ) {
+    }
 
     #[\Override]
     public function getName(): string

@@ -27,5 +27,6 @@ final readonly class ColumnMeta
         public array $privileges,
         public ?string $origName,
         public ?string $defaultConstraintName,
-    ) {}
+    ) {
+    }
 }

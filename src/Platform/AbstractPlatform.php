@@ -37,7 +37,9 @@ use SQLCraft\ValueObjects\TriggerTiming;
 
 abstract class AbstractPlatform implements DdlDialectInterface, IntrospectionDialectInterface, PlatformInterface, QueryDialectInterface, QuotingInterface, TypeMapperInterface
 {
-    public function __construct(private readonly ?SchemaEventDispatcherInterface $events = null) {}
+    public function __construct(private readonly ?SchemaEventDispatcherInterface $events = null)
+    {
+    }
 
     #[\Override]
     public function ddl(): DdlDialectInterface

@@ -16,5 +16,6 @@ final readonly class ServerInfo
         public ?string $timezone,
         public ?string $charset,
         public ?string $collation,
-    ) {}
+    ) {
+    }
 }

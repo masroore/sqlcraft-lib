@@ -12,7 +12,9 @@ use SQLCraft\Contracts\Platform\TypeMapperInterface;
 
 final readonly class PlatformRoles
 {
-    public function __construct(public DdlDialectInterface $ddl, public IntrospectionDialectInterface $introspection, public QueryDialectInterface $queryDialect, public QuotingInterface $quoting, public TypeMapperInterface $types) {}
+    public function __construct(public DdlDialectInterface $ddl, public IntrospectionDialectInterface $introspection, public QueryDialectInterface $queryDialect, public QuotingInterface $quoting, public TypeMapperInterface $types)
+    {
+    }
 
     public function withDdl(DdlDialectInterface $role): self
     {

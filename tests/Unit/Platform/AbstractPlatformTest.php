@@ -20,7 +20,7 @@ final class AbstractPlatformTest extends TestCase
 {
     public function test_it_provides_standard_identifier_and_single_row_rendering(): void
     {
-        $platform = new class extends AbstractPlatform {
+        $platform = new class () extends AbstractPlatform {
             #[\Override]
             public function getName(): string
             {

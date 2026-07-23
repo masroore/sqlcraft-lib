@@ -11,7 +11,9 @@ use SQLCraft\Contracts\Security\UserManagerInterface;
 
 final readonly class UserManager implements UserManagerInterface
 {
-    public function __construct(private ConnectionInterface $connection, private QueryExecutorInterface $executor) {}
+    public function __construct(private ConnectionInterface $connection, private QueryExecutorInterface $executor)
+    {
+    }
 
     #[\Override]
     public function createUser(string $username, #[\SensitiveParameter] string $password): void

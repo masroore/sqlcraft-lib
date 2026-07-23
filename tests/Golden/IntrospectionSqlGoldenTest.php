@@ -21,11 +21,11 @@ final class IntrospectionSqlGoldenTest extends TestCase
     /** @return iterable<string, array{IntrospectionDialectInterface, string, string, ?string}> */
     public static function platformProvider(): iterable
     {
-        yield 'mysql' => [new MySQLPlatform, 'app', 'public', 'mysql'];
-        yield 'mariadb' => [new MariaDbPlatform, 'app', 'public', 'mariadb'];
-        yield 'pgsql' => [new PostgreSQLPlatform, 'app', 'public', 'pgsql'];
-        yield 'sqlite' => [new SqlitePlatform, 'main', 'main', 'sqlite'];
-        yield 'sqlserver' => [new SqlServerPlatform, 'app', 'public', 'sqlserver'];
+        yield 'mysql' => [new MySQLPlatform(), 'app', 'public', 'mysql'];
+        yield 'mariadb' => [new MariaDbPlatform(), 'app', 'public', 'mariadb'];
+        yield 'pgsql' => [new PostgreSQLPlatform(), 'app', 'public', 'pgsql'];
+        yield 'sqlite' => [new SqlitePlatform(), 'main', 'main', 'sqlite'];
+        yield 'sqlserver' => [new SqlServerPlatform(), 'app', 'public', 'sqlserver'];
     }
 
     #[DataProvider('platformProvider')]

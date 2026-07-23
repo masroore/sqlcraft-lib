@@ -32,14 +32,14 @@ final class TableViewBuilderTest extends TestCase
     {
         $table = new QualifiedName(new Identifier('users'));
 
-        self::assertSame(['DELETE FROM "users"'], (new TruncateBuilder($table))->toSql(new SqlitePlatform));
+        self::assertSame(['DELETE FROM "users"'], (new TruncateBuilder($table))->toSql(new SqlitePlatform()));
         self::assertSame(['CREATE VIEW "active_users" AS SELECT 1'], (new CreateViewBuilder(
             new QualifiedName(new Identifier('active_users')),
             'SELECT 1',
-        ))->toSql(new SqlitePlatform));
+        ))->toSql(new SqlitePlatform()));
         self::assertSame(['DROP VIEW IF EXISTS "active_users"'], (new DropViewBuilder(
             new QualifiedName(new Identifier('active_users')),
             true,
-        ))->toSql(new SqlitePlatform));
+        ))->toSql(new SqlitePlatform()));
     }
 }

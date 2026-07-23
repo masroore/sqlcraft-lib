@@ -21,8 +21,8 @@ final class ImportExportEventDispatcherTest extends TestCase
     public function test_dispatches_typed_import_and_export_events(): void
     {
         $connection = self::createMock(ConnectionInterface::class);
-        $source = new \stdClass;
-        $target = new \stdClass;
+        $source = new \stdClass();
+        $target = new \stdClass();
         $events = [];
         $dispatcher = self::createMock(EventDispatcherInterface::class);
         $dispatcher->expects(self::exactly(7))->method('dispatch')->willReturnCallback(

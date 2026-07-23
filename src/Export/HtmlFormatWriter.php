@@ -59,7 +59,9 @@ final class HtmlFormatWriter implements FormatWriterInterface
 
     /** @param list<string> $ddlStatements */
     #[\Override]
-    public function writeTableDdl(SinkInterface $sink, TableStatus $table, array $ddlStatements): void {}
+    public function writeTableDdl(SinkInterface $sink, TableStatus $table, array $ddlStatements): void
+    {
+    }
 
     /**
      * @param  list<array<string, mixed>>  $rows
@@ -102,7 +104,7 @@ final class HtmlFormatWriter implements FormatWriterInterface
     #[\Override]
     public function writeFooter(SinkInterface $sink, DumpOptions $options): void
     {
-        $htmlOptions = $options->htmlOptions ?? new HtmlExportOptions;
+        $htmlOptions = $options->htmlOptions ?? new HtmlExportOptions();
         $engine = TemplateEngineFactory::create($htmlOptions);
         $template = TemplateEngineFactory::resolveTemplate($htmlOptions);
         $sink->write($engine->render($template, $this->buildData($options, $htmlOptions)));
@@ -117,7 +119,7 @@ final class HtmlFormatWriter implements FormatWriterInterface
         return [
             'title' => $htmlOptions->title,
             'databaseName' => $options->scope->database ?? '',
-            'exportedAt' => new DateTimeImmutable,
+            'exportedAt' => new DateTimeImmutable(),
             'tables' => $this->tables,
         ];
     }

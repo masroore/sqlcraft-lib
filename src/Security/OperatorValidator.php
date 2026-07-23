@@ -9,7 +9,9 @@ use SQLCraft\Exceptions\InvalidOperatorException;
 
 final readonly class OperatorValidator
 {
-    public function __construct(private PlatformInterface $platform) {}
+    public function __construct(private PlatformInterface $platform)
+    {
+    }
 
     public function validate(string $operator): string
     {

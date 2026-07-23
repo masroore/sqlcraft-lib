@@ -51,7 +51,7 @@ final class XlsxFormatWriter implements FormatWriterInterface
 
         $this->tmpPath = $path;
         $this->sheetCount = 0;
-        $this->writer = new Writer(new Options);
+        $this->writer = new Writer(new Options());
         $this->writer->openToFile($path);
     }
 
@@ -68,15 +68,17 @@ final class XlsxFormatWriter implements FormatWriterInterface
         $sheet = $writer->getCurrentSheet();
         $sheet->setName($this->sheetName($table, $options));
 
-        $xlsxOptions = $options->xlsxOptions ?? new XlsxExportOptions;
+        $xlsxOptions = $options->xlsxOptions ?? new XlsxExportOptions();
         if ($xlsxOptions->freezeHeaderRow) {
-            $sheet->setSheetView((new SheetView)->setFreezeRow(2));
+            $sheet->setSheetView((new SheetView())->setFreezeRow(2));
         }
     }
 
     /** @param list<string> $ddlStatements */
     #[\Override]
-    public function writeTableDdl(SinkInterface $sink, TableStatus $table, array $ddlStatements): void {}
+    public function writeTableDdl(SinkInterface $sink, TableStatus $table, array $ddlStatements): void
+    {
+    }
 
     /**
      * @param  list<array<string, mixed>>  $rows
@@ -110,7 +112,9 @@ final class XlsxFormatWriter implements FormatWriterInterface
     }
 
     #[\Override]
-    public function writeTableFooter(SinkInterface $sink, TableStatus $table): void {}
+    public function writeTableFooter(SinkInterface $sink, TableStatus $table): void
+    {
+    }
 
     #[\Override]
     public function writeFooter(SinkInterface $sink, DumpOptions $options): void
@@ -147,7 +151,7 @@ final class XlsxFormatWriter implements FormatWriterInterface
 
     private function sheetName(TableStatus $table, DumpOptions $options): string
     {
-        $prefix = ($options->xlsxOptions ?? new XlsxExportOptions)->sheetPrefix;
+        $prefix = ($options->xlsxOptions ?? new XlsxExportOptions())->sheetPrefix;
         $name = ($prefix ?? '') . $table->name;
         $name = preg_replace('/[\\\\\/\?\*\[\]]/', '_', $name) ?? $name;
 

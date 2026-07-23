@@ -21,5 +21,6 @@ final readonly class TableStatus
         public ?string $createOptions = null,
         public bool $partitioned = false,
         public ?string $schema = null,
-    ) {}
+    ) {
+    }
 }

@@ -10,7 +10,9 @@ use SQLCraft\Contracts\Events\SchemaEventDispatcherInterface;
 
 final readonly class SchemaEventDispatcher implements SchemaEventDispatcherInterface
 {
-    public function __construct(private EventDispatcherInterface $dispatcher) {}
+    public function __construct(private EventDispatcherInterface $dispatcher)
+    {
+    }
 
     #[\Override]
     public function beforeDdlExecuted(ConnectionInterface $connection, string $sql, string $objectName): ?string

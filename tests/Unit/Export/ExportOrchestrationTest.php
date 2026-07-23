@@ -45,9 +45,9 @@ final class ExportOrchestrationTest extends TestCase
             ['id' => 3],
         ]));
 
-        $sink = new StringBufferSink;
+        $sink = new StringBufferSink();
         $options = new DumpOptions('csv', DumpScope::table('shop', 'orders'), batchSize: 2);
-        $rows = (new TableDumper($source, $executor))->dump($connection, $table, new CsvFormatWriter, $sink, $options);
+        $rows = (new TableDumper($source, $executor))->dump($connection, $table, new CsvFormatWriter(), $sink, $options);
 
         self::assertSame(3, $rows);
         self::assertSame("id\r\n1\r\n2\r\n3\r\n", $sink->contents());
@@ -71,9 +71,9 @@ final class ExportOrchestrationTest extends TestCase
             $this->resultSet([['id' => 2]]),
         );
 
-        $sink = new StringBufferSink;
+        $sink = new StringBufferSink();
         $options = new DumpOptions('csv', DumpScope::tables('shop', ['first', 'second']));
-        (new Exporter($source, $executor, new CsvFormatWriter))->export($connection, $sink, $options);
+        (new Exporter($source, $executor, new CsvFormatWriter()))->export($connection, $sink, $options);
 
         self::assertSame("id\r\n1\r\nid\r\n2\r\n", $sink->contents());
     }
@@ -88,13 +88,13 @@ final class ExportOrchestrationTest extends TestCase
         $executor = self::createMock(QueryExecutorInterface::class);
         $executor->expects(self::once())->method('query')->with($connection, 'SELECT id FROM "orders" WHERE id > 1', [], false)->willReturn($this->resultSet([['id' => 2]]));
 
-        $sink = new StringBufferSink;
+        $sink = new StringBufferSink();
         $options = new DumpOptions(
             'csv',
             DumpScope::filteredResult('shop', 'orders', 'SELECT id FROM "orders" WHERE id > 1'),
             dataStyle: DataStyle::Insert,
         );
-        (new Exporter($source, $executor, new CsvFormatWriter))->export($connection, $sink, $options);
+        (new Exporter($source, $executor, new CsvFormatWriter()))->export($connection, $sink, $options);
 
         self::assertSame("id\r\n2\r\n", $sink->contents());
     }
@@ -103,23 +103,23 @@ final class ExportOrchestrationTest extends TestCase
     {
         $source = self::createMock(ExportSourceInterface::class);
         $executor = self::createMock(QueryExecutorInterface::class);
-        $sink = new StringBufferSink;
+        $sink = new StringBufferSink();
         $options = new DumpOptions('yaml', DumpScope::database('shop'));
 
         $this->expectException(\InvalidArgumentException::class);
-        (new Exporter($source, $executor, new CsvFormatWriter))->export($this->connection(), $sink, $options);
+        (new Exporter($source, $executor, new CsvFormatWriter()))->export($this->connection(), $sink, $options);
         self::assertSame('', $sink->contents());
     }
 
     public function test_table_dumper_emits_mysql_auto_increment_state_when_requested(): void
     {
-        $connection = $this->connection('mysql', new MySQLPlatform);
+        $connection = $this->connection('mysql', new MySQLPlatform());
         $table = new TableStatus('orders', autoIncrement: 42);
         $source = self::createMock(ExportSourceInterface::class);
         $source->expects(self::once())->method('getTableDdl')->willReturn([]);
         $executor = self::createMock(QueryExecutorInterface::class);
 
-        $sink = new StringBufferSink;
+        $sink = new StringBufferSink();
         $rows = (new TableDumper($source, $executor))->dump(
             $connection,
             $table,
@@ -135,14 +135,14 @@ final class ExportOrchestrationTest extends TestCase
 
     public function test_table_dumper_emits_requested_trigger_and_routine_ddl(): void
     {
-        $connection = $this->connection('mysql', new MySQLPlatform);
+        $connection = $this->connection('mysql', new MySQLPlatform());
         $table = new TableStatus('orders');
         $source = self::createMock(ExportSourceInterface::class);
         $source->expects(self::once())->method('getTableDdl')->willReturn(['CREATE TABLE "orders" ("id" INT)']);
         $source->expects(self::once())->method('getTriggerDdl')->with($connection, 'orders', null)->willReturn(['CREATE TRIGGER audit', 'CREATE TRIGGER audit_2']);
         $source->expects(self::once())->method('getRoutineDdl')->with($connection, null)->willReturn(['CREATE FUNCTION total', 'CREATE FUNCTION count']);
 
-        $sink = new StringBufferSink;
+        $sink = new StringBufferSink();
         (new TableDumper($source, self::createMock(QueryExecutorInterface::class)))->dump(
             $connection,
             $table,
@@ -165,13 +165,13 @@ final class ExportOrchestrationTest extends TestCase
 
     public function test_table_dumper_does_not_emit_optional_ddl_when_flags_are_false(): void
     {
-        $connection = $this->connection('mysql', new MySQLPlatform);
+        $connection = $this->connection('mysql', new MySQLPlatform());
         $source = self::createMock(ExportSourceInterface::class);
         $source->expects(self::once())->method('getTableDdl')->willReturn([]);
         $source->expects(self::never())->method('getTriggerDdl');
         $source->expects(self::never())->method('getRoutineDdl');
 
-        $sink = new StringBufferSink;
+        $sink = new StringBufferSink();
         (new TableDumper($source, self::createMock(QueryExecutorInterface::class)))->dump(
             $connection,
             new TableStatus('orders'),
@@ -186,7 +186,7 @@ final class ExportOrchestrationTest extends TestCase
 
     public function test_table_dumper_preserves_batch_boundaries_in_sql_output(): void
     {
-        $connection = $this->connection('mysql', new MySQLPlatform);
+        $connection = $this->connection('mysql', new MySQLPlatform());
         $source = self::createMock(ExportSourceInterface::class);
         $source->method('getColumns')->willReturn($this->columns());
         $source->method('getTableDdl')->willReturn([]);
@@ -197,7 +197,7 @@ final class ExportOrchestrationTest extends TestCase
             ['id' => 3],
         ]));
 
-        $sink = new StringBufferSink;
+        $sink = new StringBufferSink();
         (new TableDumper($source, $executor))->dump(
             $connection,
             new TableStatus('orders'),
@@ -225,7 +225,7 @@ final class ExportOrchestrationTest extends TestCase
             $connection,
             new TableStatus('orders'),
             new SqlFormatWriter($connection),
-            new StringBufferSink,
+            new StringBufferSink(),
             new DumpOptions(
                 'sql',
                 DumpScope::table('shop', 'orders'),
@@ -241,7 +241,7 @@ final class ExportOrchestrationTest extends TestCase
         $connection->method('quoteIdentifier')->willReturnCallback(static fn (string $name): string => '"' . $name . '"');
         $connection->method('getDatabaseName')->willReturn('shop');
         $connection->method('getPlatformName')->willReturn($platformName);
-        $connection->method('getPlatform')->willReturn($platform ?? new SqlitePlatform);
+        $connection->method('getPlatform')->willReturn($platform ?? new SqlitePlatform());
         $connection->method('getServerVersion')->willReturn(new ServerVersion('8.0.36'));
 
         return $connection;

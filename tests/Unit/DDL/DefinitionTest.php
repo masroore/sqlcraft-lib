@@ -63,7 +63,7 @@ final class DefinitionTest extends TestCase
 
     public function test_platform_adapts_projection_to_existing_dialect_rendering(): void
     {
-        $platform = new SqlitePlatform;
+        $platform = new SqlitePlatform();
         $column = new ColumnDefinition(
             'id',
             new DataType('INTEGER'),

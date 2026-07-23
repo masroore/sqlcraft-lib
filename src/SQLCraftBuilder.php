@@ -94,25 +94,25 @@ final class SQLCraftBuilder
 
     public static function defaults(): self
     {
-        $builder = new self;
-        $pdoFactory = static fn (ConnectionEventDispatcherInterface $events): PdoConnectionFactory => new PdoConnectionFactory(new PdoExceptionTranslator, $events, false);
+        $builder = new self();
+        $pdoFactory = static fn (ConnectionEventDispatcherInterface $events): PdoConnectionFactory => new PdoConnectionFactory(new PdoExceptionTranslator(), $events, false);
 
         $builder
-            ->registerDriver(new DriverDefinition('mysql', static fn ($events): MySQLDriver => new MySQLDriver($pdoFactory($events), new MySQLPlatform), new DefaultMetadataInspectorSetFactory(new MySQLMetadataFactory), new MySQLProcessManagerFactory))
-            ->registerDriver(new DriverDefinition('pgsql', static fn ($events): PostgreSQLDriver => new PostgreSQLDriver($pdoFactory($events), new PostgreSQLPlatform), new DefaultMetadataInspectorSetFactory(new PostgreSQLMetadataFactory), new PostgreSQLProcessManagerFactory))
-            ->registerDriver(new DriverDefinition('sqlite', static fn ($events): SqliteDriver => new SqliteDriver($pdoFactory($events), new SqlitePlatform), new DefaultMetadataInspectorSetFactory(new SqliteMetadataFactory)))
-            ->registerDriver(new DriverDefinition('sqlserver', static fn ($events): SqlServerDriver => new SqlServerDriver($pdoFactory($events), new SqlServerPlatform), new DefaultMetadataInspectorSetFactory(new SqlServerMetadataFactory), new SqlServerProcessManagerFactory))
+            ->registerDriver(new DriverDefinition('mysql', static fn ($events): MySQLDriver => new MySQLDriver($pdoFactory($events), new MySQLPlatform()), new DefaultMetadataInspectorSetFactory(new MySQLMetadataFactory()), new MySQLProcessManagerFactory()))
+            ->registerDriver(new DriverDefinition('pgsql', static fn ($events): PostgreSQLDriver => new PostgreSQLDriver($pdoFactory($events), new PostgreSQLPlatform()), new DefaultMetadataInspectorSetFactory(new PostgreSQLMetadataFactory()), new PostgreSQLProcessManagerFactory()))
+            ->registerDriver(new DriverDefinition('sqlite', static fn ($events): SqliteDriver => new SqliteDriver($pdoFactory($events), new SqlitePlatform()), new DefaultMetadataInspectorSetFactory(new SqliteMetadataFactory())))
+            ->registerDriver(new DriverDefinition('sqlserver', static fn ($events): SqlServerDriver => new SqlServerDriver($pdoFactory($events), new SqlServerPlatform()), new DefaultMetadataInspectorSetFactory(new SqlServerMetadataFactory()), new SqlServerProcessManagerFactory()))
             ->registerDriverAlias('mariadb', 'mysql')
             ->registerWriter('sql', static fn (ConnectionInterface $connection): FormatWriterInterface => new SqlFormatWriter($connection))
-            ->registerWriter('csv', static fn (ConnectionInterface $connection): FormatWriterInterface => new CsvFormatWriter)
-            ->registerWriter('tsv', static fn (ConnectionInterface $connection): FormatWriterInterface => new TsvFormatWriter)
-            ->registerWriter('csv-semicolon', static fn (ConnectionInterface $connection): FormatWriterInterface => new CsvSemicolonFormatWriter)
-            ->registerWriter('json', static fn (ConnectionInterface $connection): FormatWriterInterface => new JsonFormatWriter)
-            ->registerWriter('xml', static fn (ConnectionInterface $connection): FormatWriterInterface => new XmlFormatWriter)
-            ->registerWriter('xlsx', static fn (ConnectionInterface $connection): FormatWriterInterface => new XlsxFormatWriter)
-            ->registerWriter('html', static fn (ConnectionInterface $connection): FormatWriterInterface => new HtmlFormatWriter)
-            ->registerReader('csv', static fn (): FormatReaderInterface => new CsvFormatReader)
-            ->credentials(new EnvCredentialProvider)
+            ->registerWriter('csv', static fn (ConnectionInterface $connection): FormatWriterInterface => new CsvFormatWriter())
+            ->registerWriter('tsv', static fn (ConnectionInterface $connection): FormatWriterInterface => new TsvFormatWriter())
+            ->registerWriter('csv-semicolon', static fn (ConnectionInterface $connection): FormatWriterInterface => new CsvSemicolonFormatWriter())
+            ->registerWriter('json', static fn (ConnectionInterface $connection): FormatWriterInterface => new JsonFormatWriter())
+            ->registerWriter('xml', static fn (ConnectionInterface $connection): FormatWriterInterface => new XmlFormatWriter())
+            ->registerWriter('xlsx', static fn (ConnectionInterface $connection): FormatWriterInterface => new XlsxFormatWriter())
+            ->registerWriter('html', static fn (ConnectionInterface $connection): FormatWriterInterface => new HtmlFormatWriter())
+            ->registerReader('csv', static fn (): FormatReaderInterface => new CsvFormatReader())
+            ->credentials(new EnvCredentialProvider())
             ->metadataCache(null);
 
         return $builder;
@@ -288,15 +288,15 @@ final class SQLCraftBuilder
             }
         }
 
-        $coreProvider = new SimpleListenerProvider;
-        $cache = $this->cache ?? new NullMetadataCache;
+        $coreProvider = new SimpleListenerProvider();
+        $cache = $this->cache ?? new NullMetadataCache();
         $cacheListener = new CacheInvalidationListener($cache);
         $coreProvider->listen(AfterDdlExecuted::class, $cacheListener(...));
         $coreProvider->listen(SchemaChangedEvent::class, $cacheListener(...));
         $core = new SimpleEventDispatcher($coreProvider);
         $user = null;
         if ($this->listeners !== []) {
-            $provider = new SimpleListenerProvider;
+            $provider = new SimpleListenerProvider();
             foreach ($this->listeners as [$eventClass, $listener, $priority]) {
                 /** @var class-string $listenerClass */
                 $listenerClass = $eventClass;
@@ -306,7 +306,7 @@ final class SQLCraftBuilder
         }
         $events = new CompositeEventDispatcher($core, $user ?? $this->external);
         $connectionEvents = new ConnectionEventDispatcher($events);
-        $registry = new DriverRegistry;
+        $registry = new DriverRegistry();
         foreach ($this->drivers as $definition) {
             $registry->registerDefinition($definition, $connectionEvents);
         }
@@ -316,7 +316,7 @@ final class SQLCraftBuilder
 
         return new SQLCraftFactory(
             $registry,
-            $this->credentials ?? new EnvCredentialProvider,
+            $this->credentials ?? new EnvCredentialProvider(),
             $events,
             $connectionEvents,
             $this->history,

@@ -19,8 +19,8 @@ final class JsonFormatWriterTest extends TestCase
 {
     public function test_empty_export(): void
     {
-        $sink = new StringBufferSink;
-        $writer = new JsonFormatWriter;
+        $sink = new StringBufferSink();
+        $writer = new JsonFormatWriter();
         $options = $this->options();
 
         $writer->writeHeader($sink, $options);
@@ -31,8 +31,8 @@ final class JsonFormatWriterTest extends TestCase
 
     public function test_single_table_no_rows(): void
     {
-        $sink = new StringBufferSink;
-        $writer = new JsonFormatWriter;
+        $sink = new StringBufferSink();
+        $writer = new JsonFormatWriter();
         $options = $this->options();
         $table = new TableStatus('users');
 
@@ -47,8 +47,8 @@ final class JsonFormatWriterTest extends TestCase
 
     public function test_single_table_with_rows(): void
     {
-        $sink = new StringBufferSink;
-        $writer = new JsonFormatWriter;
+        $sink = new StringBufferSink();
+        $writer = new JsonFormatWriter();
         $options = $this->options();
         $table = new TableStatus('users');
         $columns = [$this->column('id', 'INTEGER'), $this->column('name', 'TEXT')];
@@ -76,8 +76,8 @@ final class JsonFormatWriterTest extends TestCase
 
     public function test_multiple_tables_order_preserved(): void
     {
-        $sink = new StringBufferSink;
-        $writer = new JsonFormatWriter;
+        $sink = new StringBufferSink();
+        $writer = new JsonFormatWriter();
         $options = $this->options();
         $columns = [$this->column('id', 'INTEGER')];
 
@@ -97,8 +97,8 @@ final class JsonFormatWriterTest extends TestCase
 
     public function test_null_becomes_json_null(): void
     {
-        $sink = new StringBufferSink;
-        $writer = new JsonFormatWriter;
+        $sink = new StringBufferSink();
+        $writer = new JsonFormatWriter();
         $options = $this->options();
         $table = new TableStatus('users');
         $columns = [$this->column('name', 'TEXT')];
@@ -120,8 +120,8 @@ final class JsonFormatWriterTest extends TestCase
 
     public function test_binary_column_is_base64_encoded(): void
     {
-        $sink = new StringBufferSink;
-        $writer = new JsonFormatWriter;
+        $sink = new StringBufferSink();
+        $writer = new JsonFormatWriter();
         $options = $this->options();
         $table = new TableStatus('files');
         $columns = [$this->column('payload', 'BLOB')];
@@ -143,8 +143,8 @@ final class JsonFormatWriterTest extends TestCase
 
     public function test_compact_json(): void
     {
-        $sink = new StringBufferSink;
-        $writer = new JsonFormatWriter;
+        $sink = new StringBufferSink();
+        $writer = new JsonFormatWriter();
         $options = $this->options(new JsonExportOptions(pretty: false));
         $table = new TableStatus('users');
         $columns = [$this->column('id', 'INTEGER')];
@@ -164,8 +164,8 @@ final class JsonFormatWriterTest extends TestCase
 
     public function test_pretty_json_default(): void
     {
-        $sink = new StringBufferSink;
-        $writer = new JsonFormatWriter;
+        $sink = new StringBufferSink();
+        $writer = new JsonFormatWriter();
         $options = $this->options();
         $table = new TableStatus('users');
         $columns = [$this->column('id', 'INTEGER'), $this->column('name', 'TEXT')];

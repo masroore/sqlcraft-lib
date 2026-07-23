@@ -21,7 +21,8 @@ final readonly class CreateViewBuilder implements DdlBuilderInterface, ObjectNam
         public bool $orReplace = false,
         public array $columns = [],
         public ?string $checkOption = null,
-    ) {}
+    ) {
+    }
 
     /** @return list<string> */
     #[\Override]

@@ -26,7 +26,8 @@ final readonly class TableRecreationDefinition implements TableRecreationDefinit
         private array $foreignKeys = [],
         private array $checkConstraints = [],
         private array $triggers = [],
-    ) {}
+    ) {
+    }
 
     /** @return list<ColumnDefinitionInterface> */
     #[\Override]

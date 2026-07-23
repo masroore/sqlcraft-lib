@@ -15,5 +15,6 @@ final readonly class SlowQueryDetectedEvent extends ObservabilityEvent
         public array $params,
         public float $elapsedMs,
         public int $thresholdMs,
-    ) {}
+    ) {
+    }
 }

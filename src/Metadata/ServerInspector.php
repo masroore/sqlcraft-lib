@@ -17,7 +17,9 @@ use SQLCraft\ValueObjects\Collation;
 /** @internal */
 final class ServerInspector implements ServerInspectorInterface
 {
-    public function __construct(private readonly MetadataFactoryInterface $factory) {}
+    public function __construct(private readonly MetadataFactoryInterface $factory)
+    {
+    }
 
     #[\Override]
     public function getServerInfo(ConnectionInterface $conn): ServerInfo

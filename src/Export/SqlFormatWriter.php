@@ -13,7 +13,9 @@ use SQLCraft\DTO\TableStatus;
 
 final class SqlFormatWriter implements FormatWriterInterface
 {
-    public function __construct(private readonly ConnectionInterface $connection) {}
+    public function __construct(private readonly ConnectionInterface $connection)
+    {
+    }
 
     #[\Override]
     public function getFormatName(): string

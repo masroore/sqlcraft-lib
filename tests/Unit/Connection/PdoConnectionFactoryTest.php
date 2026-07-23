@@ -17,7 +17,7 @@ final class PdoConnectionFactoryTest extends TestCase
     {
         $platform = $this->createMock(PlatformInterface::class);
         $platform->method('getName')->willReturn('sqlite');
-        $factory = new PdoConnectionFactory(new PdoExceptionTranslator);
+        $factory = new PdoConnectionFactory(new PdoExceptionTranslator());
         $connection = $factory->connect('sqlite::memory:', new ConnectionParameters(database: 'app'), $platform, 'memory');
 
         self::assertSame('memory', $connection->getName());
@@ -29,9 +29,9 @@ final class PdoConnectionFactoryTest extends TestCase
     public function test_it_translates_connection_failures(): void
     {
         $platform = $this->createMock(PlatformInterface::class);
-        $factory = new PdoConnectionFactory(new PdoExceptionTranslator);
+        $factory = new PdoConnectionFactory(new PdoExceptionTranslator());
 
         $this->expectException(ConnectionFailedException::class);
-        $factory->connect('sqlite:/path/that/does/not/exist/db.sqlite', new ConnectionParameters, $platform);
+        $factory->connect('sqlite:/path/that/does/not/exist/db.sqlite', new ConnectionParameters(), $platform);
     }
 }

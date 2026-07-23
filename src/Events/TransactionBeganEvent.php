@@ -12,5 +12,6 @@ final readonly class TransactionBeganEvent extends ObservabilityEvent
         public ConnectionInterface $connection,
         public string $isolationLevel,
         public ?string $savepoint,
-    ) {}
+    ) {
+    }
 }

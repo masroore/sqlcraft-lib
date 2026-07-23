@@ -34,7 +34,8 @@ final readonly class MetadataInspectorSet
         private CheckConstraintInspectorInterface $checkConstraint,
         private UserInspectorInterface $user,
         private ?PrivilegeInspectorInterface $privileges = null
-    ) {}
+    ) {
+    }
 
     public function server(): ServerInspectorInterface
     {

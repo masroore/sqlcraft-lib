@@ -35,7 +35,7 @@ final class ImporterTest extends TestCase
             new BatchStatementResult(1, 'INSERT INTO orders VALUES (1)', null, null, 0.1, null),
         ]));
 
-        $result = (new Importer(new StatementSplitter, $batchExecutor))->import($connection, $source, new ImportOptions);
+        $result = (new Importer(new StatementSplitter(), $batchExecutor))->import($connection, $source, new ImportOptions());
 
         self::assertSame(2, $result->statementsExecuted);
         self::assertSame(0, $result->statementsSkipped);
@@ -53,7 +53,7 @@ final class ImporterTest extends TestCase
             new BatchStatementResult(1, 'good', null, null, 0.1, null),
         ]));
 
-        $result = (new Importer(new StatementSplitter, $batchExecutor))->import(
+        $result = (new Importer(new StatementSplitter(), $batchExecutor))->import(
             $connection,
             $source,
             new ImportOptions(stopOnError: false),
@@ -80,7 +80,7 @@ final class ImporterTest extends TestCase
             new BatchStatementResult(1, 'two', null, null, 0.1, null),
         ]));
 
-        $result = (new Importer(new StatementSplitter, $batchExecutor))->import(
+        $result = (new Importer(new StatementSplitter(), $batchExecutor))->import(
             $connection,
             $source,
             new ImportOptions(maxStatements: 2),
@@ -108,7 +108,7 @@ final class ImporterTest extends TestCase
             },
         );
 
-        $result = (new Importer(new StatementSplitter, $batchExecutor))->import($connection, $source, new ImportOptions);
+        $result = (new Importer(new StatementSplitter(), $batchExecutor))->import($connection, $source, new ImportOptions());
 
         self::assertSame(5000, $result->statementsExecuted);
         self::assertGreaterThan(1, $batchCalls);
@@ -131,7 +131,7 @@ final class ImporterTest extends TestCase
             },
         );
 
-        $result = (new Importer(new StatementSplitter, $batchExecutor, $events))->import(
+        $result = (new Importer(new StatementSplitter(), $batchExecutor, $events))->import(
             $connection,
             $source,
             new ImportOptions(progressInterval: 2),

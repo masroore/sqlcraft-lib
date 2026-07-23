@@ -13,7 +13,9 @@ final readonly class AlterDatabaseBuilder implements DdlBuilderInterface, Object
 {
     use LegacyDdlExecution;
 
-    public function __construct(public Identifier $name, public ?string $charset = null, public ?string $collation = null) {}
+    public function __construct(public Identifier $name, public ?string $charset = null, public ?string $collation = null)
+    {
+    }
 
     /** @return list<string> */
     #[\Override]

@@ -18,7 +18,8 @@ final readonly class DdlManager
         private QueryExecutorInterface $executor,
         private ?TableRecreationStrategy $sqliteRecreation = null,
         private ?SchemaEventDispatcherInterface $events = null,
-    ) {}
+    ) {
+    }
 
     /** @return list<string> */
     public function preview(ConnectionInterface $connection, DdlBuilderInterface $builder): array

@@ -37,7 +37,7 @@ final class TriggerInspectorTest extends TestCase
         $connection->method('getPlatform')->willReturn($platform);
         $connection->expects(self::once())->method('query')->with($sql)->willReturn($result);
 
-        $triggers = (new TriggerInspector(new SqliteMetadataFactory))->getTriggers($connection, $table);
+        $triggers = (new TriggerInspector(new SqliteMetadataFactory()))->getTriggers($connection, $table);
 
         self::assertSame(TriggerEvent::INSERT, $triggers->get('users_inserted')->event);
         self::assertSame('users', $triggers->get('users_inserted')->table);

@@ -8,5 +8,6 @@ final readonly class JsonExportOptions
 {
     public function __construct(
         public bool $pretty = true,
-    ) {}
+    ) {
+    }
 }

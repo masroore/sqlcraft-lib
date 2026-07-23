@@ -33,10 +33,10 @@ final class ThirdPartyDriverConformanceTest extends TestCase
 {
     public function test_fake_engine_uses_public_composition_seams_end_to_end(): void
     {
-        $metadata = new FakeMetadataInspectorSetFactory;
-        $initializer = new RecordingInitializer;
+        $metadata = new FakeMetadataInspectorSetFactory();
+        $initializer = new RecordingInitializer();
         $opened = false;
-        $history = new RecordingHistory;
+        $history = new RecordingHistory();
         $builder = SQLCraftBuilder::defaults()
             ->registerDriver(new DriverDefinition(
                 'fixturedb',
@@ -45,7 +45,7 @@ final class ThirdPartyDriverConformanceTest extends TestCase
             ))
             ->registerDriverAlias('fixture', 'fixturedb')
             ->initializeConnection($initializer)
-            ->interceptQueries(new class implements QueryInterceptorInterface {
+            ->interceptQueries(new class () implements QueryInterceptorInterface {
                 #[\Override]
                 public function intercept(QueryRequest $request): QueryRequest
                 {
@@ -53,7 +53,7 @@ final class ThirdPartyDriverConformanceTest extends TestCase
                 }
             })
             ->queryHistory($history)
-            ->registerWriter('fixture', static fn (ConnectionInterface $connection): FormatWriterInterface => new FixtureWriter)
+            ->registerWriter('fixture', static fn (ConnectionInterface $connection): FormatWriterInterface => new FixtureWriter())
             ->listen(ConnectionOpenedEvent::class, static function () use (&$opened): void {
                 $opened = true;
             });
@@ -75,7 +75,7 @@ final class ThirdPartyDriverConformanceTest extends TestCase
         self::assertInstanceOf(QueryHistoryEntry::class, $last);
         self::assertStringContainsString('/* fixture */', $last->sql);
         self::assertFalse($driver->connection()->getPlatform()->getCapabilitySet($driver->connection()->getServerVersion())->has(Capability::Kill));
-        $sink = new StringBufferSink;
+        $sink = new StringBufferSink();
         $driver->export()->export($driver->connection(), $sink, new DumpOptions('fixture', DumpScope::table('main', 'items')));
         self::assertSame('', $sink->contents());
     }
@@ -126,22 +126,34 @@ final class FixtureWriter implements FormatWriterInterface
     }
 
     #[\Override]
-    public function writeHeader(SinkInterface $sink, DumpOptions $options): void {}
+    public function writeHeader(SinkInterface $sink, DumpOptions $options): void
+    {
+    }
 
     #[\Override]
-    public function writeTableHeader(SinkInterface $sink, TableStatus $table, DumpOptions $options): void {}
+    public function writeTableHeader(SinkInterface $sink, TableStatus $table, DumpOptions $options): void
+    {
+    }
 
     /** @param list<string> $ddlStatements */
     #[\Override]
-    public function writeTableDdl(SinkInterface $sink, TableStatus $table, array $ddlStatements): void {}
+    public function writeTableDdl(SinkInterface $sink, TableStatus $table, array $ddlStatements): void
+    {
+    }
 
     /** @param list<array<string, mixed>> $rows @param list<ColumnMeta> $columns */
     #[\Override]
-    public function writeRows(SinkInterface $sink, TableStatus $table, array $rows, array $columns, DumpOptions $options): void {}
+    public function writeRows(SinkInterface $sink, TableStatus $table, array $rows, array $columns, DumpOptions $options): void
+    {
+    }
 
     #[\Override]
-    public function writeTableFooter(SinkInterface $sink, TableStatus $table): void {}
+    public function writeTableFooter(SinkInterface $sink, TableStatus $table): void
+    {
+    }
 
     #[\Override]
-    public function writeFooter(SinkInterface $sink, DumpOptions $options): void {}
+    public function writeFooter(SinkInterface $sink, DumpOptions $options): void
+    {
+    }
 }

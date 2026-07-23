@@ -9,7 +9,9 @@ use SQLCraft\ValueObjects\Credential;
 
 final readonly class EnvCredentialProvider implements CredentialProviderInterface
 {
-    public function __construct(private string $prefix = 'SQLCRAFT_') {}
+    public function __construct(private string $prefix = 'SQLCRAFT_')
+    {
+    }
 
     #[\Override]
     public function resolve(string $key): ?Credential

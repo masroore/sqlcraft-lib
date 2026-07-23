@@ -9,7 +9,9 @@ use SQLCraft\Contracts\Platform\PlatformInterface;
 
 final readonly class WhereConditionRenderer
 {
-    public function __construct(private PlatformInterface $platform) {}
+    public function __construct(private PlatformInterface $platform)
+    {
+    }
 
     /** @return array{0: string, 1: list<mixed>} */
     public function render(WhereCondition $condition): array

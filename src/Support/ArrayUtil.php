@@ -6,7 +6,9 @@ namespace SQLCraft\Support;
 
 final class ArrayUtil
 {
-    private function __construct() {}
+    private function __construct()
+    {
+    }
 
     /**
      * @param  array<array-key, scalar|null>  $values

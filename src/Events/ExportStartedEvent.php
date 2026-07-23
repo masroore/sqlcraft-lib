@@ -14,5 +14,6 @@ final readonly class ExportStartedEvent extends ObservabilityEvent
         public object $target,
         public string $format,
         public array $tables,
-    ) {}
+    ) {
+    }
 }

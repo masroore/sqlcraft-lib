@@ -21,7 +21,8 @@ final readonly class CreateSequenceBuilder implements DdlBuilderInterface, Objec
         public ?int $max = null,
         public bool $cycle = false,
         public ?int $cache = null,
-    ) {}
+    ) {
+    }
 
     /** @return list<string> */
     #[\Override]

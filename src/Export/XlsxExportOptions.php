@@ -9,5 +9,6 @@ final readonly class XlsxExportOptions
     public function __construct(
         public ?string $sheetPrefix = null,
         public bool $freezeHeaderRow = true,
-    ) {}
+    ) {
+    }
 }

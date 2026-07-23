@@ -16,11 +16,17 @@ final class NullMetadataCache implements MetadataCacheInterface
     }
 
     #[\Override]
-    public function invalidateTable(string $database, string $table): void {}
+    public function invalidateTable(string $database, string $table): void
+    {
+    }
 
     #[\Override]
-    public function invalidateDatabase(string $database): void {}
+    public function invalidateDatabase(string $database): void
+    {
+    }
 
     #[\Override]
-    public function clear(): void {}
+    public function clear(): void
+    {
+    }
 }

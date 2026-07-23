@@ -42,7 +42,8 @@ final readonly class AlterTableBuilder implements AlterTableDefinitionInterface,
         private array $addCheckConstraints = [],
         private array $dropCheckConstraints = [],
         private ?Identifier $rename = null,
-    ) {}
+    ) {
+    }
 
     public function withColumn(ColumnDefinitionInterface $column, ?Identifier $after = null): self
     {

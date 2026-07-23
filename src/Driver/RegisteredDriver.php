@@ -11,5 +11,7 @@ use SQLCraft\Contracts\Metadata\MetadataInspectorSetFactoryInterface;
 /** @internal */
 final readonly class RegisteredDriver
 {
-    public function __construct(public DriverInterface $driver, public MetadataInspectorSetFactoryInterface $metadata, public ?ProcessManagerFactoryInterface $processes = null) {}
+    public function __construct(public DriverInterface $driver, public MetadataInspectorSetFactoryInterface $metadata, public ?ProcessManagerFactoryInterface $processes = null)
+    {
+    }
 }

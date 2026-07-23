@@ -18,7 +18,7 @@ final class DriverRegistryTest extends TestCase
 {
     public function test_it_registers_and_retrieves_drivers_by_name(): void
     {
-        $driver = new class implements DriverInterface {
+        $driver = new class () implements DriverInterface {
             #[\Override]
             public function buildDsn(ConnectionParameters $params): string
             {
@@ -28,13 +28,13 @@ final class DriverRegistryTest extends TestCase
             #[\Override]
             public function connect(ConnectionParameters $params, ?string $name = null): ConnectionInterface
             {
-                throw new \LogicException;
+                throw new \LogicException();
             }
 
             #[\Override]
             public function getPlatform(ConnectionInterface $connection): PlatformInterface
             {
-                throw new \LogicException;
+                throw new \LogicException();
             }
 
             #[\Override]
@@ -69,7 +69,7 @@ final class DriverRegistryTest extends TestCase
     {
         $this->expectException(DriverNotFoundException::class);
         $this->expectExceptionMessage('Driver not found: missing.');
-        (new DriverRegistry)->get('missing');
+        (new DriverRegistry())->get('missing');
     }
 
     public function test_get_by_driver_delegates_to_get_using_backing_value(): void
@@ -83,7 +83,7 @@ final class DriverRegistryTest extends TestCase
 
     private function fakeDriver(): DriverInterface
     {
-        return new class implements DriverInterface {
+        return new class () implements DriverInterface {
             #[\Override]
             public function buildDsn(ConnectionParameters $params): string
             {
@@ -93,13 +93,13 @@ final class DriverRegistryTest extends TestCase
             #[\Override]
             public function connect(ConnectionParameters $params, ?string $name = null): ConnectionInterface
             {
-                throw new \LogicException;
+                throw new \LogicException();
             }
 
             #[\Override]
             public function getPlatform(ConnectionInterface $connection): PlatformInterface
             {
-                throw new \LogicException;
+                throw new \LogicException();
             }
 
             #[\Override]

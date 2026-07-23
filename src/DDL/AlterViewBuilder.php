@@ -15,7 +15,9 @@ final readonly class AlterViewBuilder implements DdlBuilderInterface, ObjectName
     use LegacyDdlExecution;
 
     /** @param list<Identifier> $columns */
-    public function __construct(public QualifiedName $name, public string $selectSql, public array $columns = [], public ?string $checkOption = null) {}
+    public function __construct(public QualifiedName $name, public string $selectSql, public array $columns = [], public ?string $checkOption = null)
+    {
+    }
 
     /** @return list<string> */
     #[\Override]

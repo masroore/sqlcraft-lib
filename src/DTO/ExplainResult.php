@@ -16,5 +16,6 @@ final readonly class ExplainResult
         public ?string $tree = null,
         public ?array $json = null,
         public float $elapsedMs = 0.0,
-    ) {}
+    ) {
+    }
 }

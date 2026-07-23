@@ -18,5 +18,6 @@ final readonly class TableStructure
         public IndexCollection $indexes,
         public ForeignKeyCollection $foreignKeys,
         public TriggerCollection $triggers,
-    ) {}
+    ) {
+    }
 }

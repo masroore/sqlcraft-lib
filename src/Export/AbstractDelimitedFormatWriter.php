@@ -15,7 +15,9 @@ abstract class AbstractDelimitedFormatWriter implements FormatWriterInterface
     private bool $headerWritten = false;
 
     #[\Override]
-    public function writeHeader(SinkInterface $sink, DumpOptions $options): void {}
+    public function writeHeader(SinkInterface $sink, DumpOptions $options): void
+    {
+    }
 
     #[\Override]
     public function writeTableHeader(SinkInterface $sink, TableStatus $table, DumpOptions $options): void
@@ -25,7 +27,9 @@ abstract class AbstractDelimitedFormatWriter implements FormatWriterInterface
 
     /** @param list<string> $ddlStatements */
     #[\Override]
-    public function writeTableDdl(SinkInterface $sink, TableStatus $table, array $ddlStatements): void {}
+    public function writeTableDdl(SinkInterface $sink, TableStatus $table, array $ddlStatements): void
+    {
+    }
 
     /**
      * @param  list<array<string, mixed>>  $rows
@@ -66,10 +70,14 @@ abstract class AbstractDelimitedFormatWriter implements FormatWriterInterface
     }
 
     #[\Override]
-    public function writeTableFooter(SinkInterface $sink, TableStatus $table): void {}
+    public function writeTableFooter(SinkInterface $sink, TableStatus $table): void
+    {
+    }
 
     #[\Override]
-    public function writeFooter(SinkInterface $sink, DumpOptions $options): void {}
+    public function writeFooter(SinkInterface $sink, DumpOptions $options): void
+    {
+    }
 
     abstract protected function defaultSeparator(): string;
 

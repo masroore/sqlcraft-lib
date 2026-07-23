@@ -13,7 +13,9 @@ final readonly class CreateSchemaBuilder implements DdlBuilderInterface, ObjectN
 {
     use LegacyDdlExecution;
 
-    public function __construct(public Identifier $name, public ?string $authorization = null, public bool $ifNotExists = false) {}
+    public function __construct(public Identifier $name, public ?string $authorization = null, public bool $ifNotExists = false)
+    {
+    }
 
     /** @return list<string> */
     #[\Override]

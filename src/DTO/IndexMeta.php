@@ -19,5 +19,6 @@ final readonly class IndexMeta
         public ?string $comment,
         public ?string $algorithm,
         public ?string $filterExpression,
-    ) {}
+    ) {
+    }
 }

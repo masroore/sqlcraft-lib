@@ -12,7 +12,8 @@ final readonly class QualifiedName
         public Identifier $object,
         public ?Identifier $schema = null,
         public ?Identifier $catalog = null,
-    ) {}
+    ) {
+    }
 
     public function qualify(int $depth = 3): self
     {

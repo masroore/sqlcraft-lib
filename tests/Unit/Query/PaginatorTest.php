@@ -30,7 +30,7 @@ final class PaginatorTest extends TestCase
         $status = self::createMock(TableStatusProviderInterface::class);
         $status->expects(self::once())->method('getApproximateRowCount')->willReturn(10);
 
-        $page = (new Paginator($executor, new SelectQueryRenderer(new SqlitePlatform), $status))
+        $page = (new Paginator($executor, new SelectQueryRenderer(new SqlitePlatform()), $status))
             ->paginate($connection, new SelectQuery(new QualifiedName(new Identifier('users'))), new PaginationParams(1, 2));
 
         self::assertSame(10, $page->totalRows);
@@ -63,7 +63,7 @@ final class PaginatorTest extends TestCase
         $query = new SelectQuery(new QualifiedName(new Identifier('users')), where: [
             new WhereCondition(new Identifier('name'), '=', 'Ada'),
         ]);
-        $page = (new Paginator($executor, new SelectQueryRenderer(new SqlitePlatform)))
+        $page = (new Paginator($executor, new SelectQueryRenderer(new SqlitePlatform())))
             ->paginate($connection, $query, new PaginationParams(2, 2));
 
         self::assertSame(5, $page->totalRows);
@@ -75,7 +75,7 @@ final class PaginatorTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
 
-        (new Paginator(self::createMock(QueryExecutorInterface::class), new SelectQueryRenderer(new SqlitePlatform), maximumLimit: 10))
+        (new Paginator(self::createMock(QueryExecutorInterface::class), new SelectQueryRenderer(new SqlitePlatform()), maximumLimit: 10))
             ->paginate(self::createMock(ConnectionInterface::class), new SelectQuery(new QualifiedName(new Identifier('users'))), new PaginationParams(1, 11));
     }
 }

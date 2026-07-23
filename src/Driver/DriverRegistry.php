@@ -42,7 +42,7 @@ final class DriverRegistry
     ): void {
         if ($definition instanceof DriverDefinition) {
             $name = ExtensionIdentifier::normalize($definition->name, 'driver');
-            $driver = ($definition->driverFactory)(new ConnectionEventDispatcher(new SimpleEventDispatcher(new SimpleListenerProvider)));
+            $driver = ($definition->driverFactory)(new ConnectionEventDispatcher(new SimpleEventDispatcher(new SimpleListenerProvider())));
             if ($driver->getName() !== $name) {
                 throw new DriverMisconfiguredException(
                     sprintf('Driver factory returned %s for definition %s.', $driver->getName(), $name),
@@ -53,7 +53,7 @@ final class DriverRegistry
         } elseif ($definition instanceof DriverInterface) {
             $definition = new RegisteredDriver(
                 $definition,
-                $metadata ?? new UnavailableMetadataInspectorSetFactory,
+                $metadata ?? new UnavailableMetadataInspectorSetFactory(),
                 $processes,
             );
         }

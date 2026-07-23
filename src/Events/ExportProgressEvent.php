@@ -13,5 +13,6 @@ final readonly class ExportProgressEvent extends ObservabilityEvent
         public int $tablesExported,
         public int $rowsExported,
         public float $elapsedMs,
-    ) {}
+    ) {
+    }
 }

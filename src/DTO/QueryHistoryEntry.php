@@ -13,5 +13,6 @@ final readonly class QueryHistoryEntry
         public \DateTimeImmutable $executedAt,
         public bool $success,
         public ?string $errorMessage,
-    ) {}
+    ) {
+    }
 }

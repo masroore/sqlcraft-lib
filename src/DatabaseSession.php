@@ -42,7 +42,8 @@ final readonly class DatabaseSession
         private ?FormatRegistry $formats = null,
         private ?CsvImporterInterface $csvImport = null,
         private ?ProcessManagerInterface $processes = null,
-    ) {}
+    ) {
+    }
 
     public function connection(): ConnectionInterface
     {

@@ -23,5 +23,6 @@ final readonly class ForeignKeyMeta
         public ForeignKeyAction $onUpdate,
         public ?string $definition,
         public bool $deferrable = false,
-    ) {}
+    ) {
+    }
 }

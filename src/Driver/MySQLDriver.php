@@ -15,7 +15,8 @@ final class MySQLDriver implements DriverInterface
     public function __construct(
         private readonly PdoConnectionFactoryInterface $connectionFactory,
         private readonly MySQLPlatform $platform,
-    ) {}
+    ) {
+    }
 
     #[\Override]
     public function buildDsn(ConnectionParameters $params): string

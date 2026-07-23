@@ -20,7 +20,8 @@ final readonly class QueryManager
         private QueryExecutorInterface $executor,
         private ?StatementSplitterInterface $splitter = null,
         private ?BatchExecutorInterface $batchExecutor = null,
-    ) {}
+    ) {
+    }
 
     /** @param array<string|int, mixed> $params */
     public function execute(ConnectionInterface $connection, string $sql, array $params = []): ExecutionResult

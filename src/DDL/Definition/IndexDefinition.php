@@ -19,7 +19,8 @@ final readonly class IndexDefinition implements IndexDefinitionInterface
         private ?string $comment,
         private ?string $algorithm,
         private ?string $filterExpression,
-    ) {}
+    ) {
+    }
 
     #[\Override]
     public function getName(): string

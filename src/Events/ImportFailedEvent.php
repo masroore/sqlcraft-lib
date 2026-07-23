@@ -13,5 +13,6 @@ final readonly class ImportFailedEvent extends ObservabilityEvent
         public \Throwable $exception,
         public ?string $lastSql,
         public float $elapsedMs,
-    ) {}
+    ) {
+    }
 }

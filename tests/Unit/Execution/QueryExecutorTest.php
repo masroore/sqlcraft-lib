@@ -28,7 +28,7 @@ final class QueryExecutorTest extends TestCase
         $expected = new ExecutionResult(2, '', 1.5, 'UPDATE users SET active = ?');
         $connection->expects(self::once())->method('execute')->with($expected->sql, [true])->willReturn($expected);
 
-        self::assertSame($expected, (new QueryExecutor)->execute($connection, $expected->sql, [true]));
+        self::assertSame($expected, (new QueryExecutor())->execute($connection, $expected->sql, [true]));
     }
 
     public function test_query_streams_by_default_and_buffers_when_requested(): void
@@ -43,7 +43,7 @@ final class QueryExecutorTest extends TestCase
                 return $result;
             },
         );
-        $executor = new QueryExecutor;
+        $executor = new QueryExecutor();
 
         self::assertSame($result, $executor->query($connection, 'SELECT * FROM users'));
         self::assertSame($result, $executor->query($connection, 'SELECT * FROM users', buffered: true));
@@ -58,7 +58,7 @@ final class QueryExecutorTest extends TestCase
         $connection = self::createMock(ConnectionInterface::class);
         $connection->expects(self::once())->method('execute')->with('CREATE TABLE users (id INTEGER)', [])->willReturn(new ExecutionResult(0, '', 1.0, 'CREATE TABLE users (id INTEGER)'));
 
-        (new QueryExecutor)->executeDdl($connection, 'CREATE TABLE users (id INTEGER)');
+        (new QueryExecutor())->executeDdl($connection, 'CREATE TABLE users (id INTEGER)');
     }
 
     public function test_before_query_can_replace_sql_and_parameters(): void
@@ -78,7 +78,7 @@ final class QueryExecutorTest extends TestCase
     {
         $connection = self::createMock(ConnectionInterface::class);
         $connection->expects(self::never())->method('execute');
-        $provider = new SimpleListenerProvider;
+        $provider = new SimpleListenerProvider();
         $provider->listen(BeforeQueryExecuted::class, static function (BeforeQueryExecuted $event): void {
             $event->cancel('tenant is inactive');
         });
@@ -95,7 +95,7 @@ final class QueryExecutorTest extends TestCase
             self::throwException(new \RuntimeException('failed')),
         );
         $received = [];
-        $provider = new SimpleListenerProvider;
+        $provider = new SimpleListenerProvider();
         $provider->listen(AfterQueryExecuted::class, static function (AfterQueryExecuted $event) use (&$received): void {
             $received[] = $event::class;
         });
@@ -118,22 +118,22 @@ final class QueryExecutorTest extends TestCase
         $result = self::createMock(ResultInterface::class);
         $connection->expects(self::once())->method('query')->with('SELECT 1', [], true)->willReturn($result);
 
-        self::assertSame($result, (new QueryExecutor)->queryWithTimeout($connection, 'SELECT 1'));
+        self::assertSame($result, (new QueryExecutor())->queryWithTimeout($connection, 'SELECT 1'));
     }
 
     public function test_unsupported_timeout_returns_null(): void
     {
         $connection = self::createMock(ConnectionInterface::class);
-        $connection->expects(self::once())->method('getPlatform')->willReturn(new SqlitePlatform);
+        $connection->expects(self::once())->method('getPlatform')->willReturn(new SqlitePlatform());
         $connection->expects(self::never())->method('query');
 
-        self::assertNull((new QueryExecutor)->queryWithTimeout($connection, 'SELECT 1', timeoutMs: 100));
+        self::assertNull((new QueryExecutor())->queryWithTimeout($connection, 'SELECT 1', timeoutMs: 100));
     }
 
     public function test_negative_timeout_is_rejected(): void
     {
         $this->expectException(\InvalidArgumentException::class);
 
-        (new QueryExecutor)->queryWithTimeout(self::createMock(ConnectionInterface::class), 'SELECT 1', timeoutMs: -1);
+        (new QueryExecutor())->queryWithTimeout(self::createMock(ConnectionInterface::class), 'SELECT 1', timeoutMs: -1);
     }
 }

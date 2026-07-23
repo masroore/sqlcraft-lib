@@ -38,7 +38,8 @@ final readonly class CreateTableBuilder implements DdlBuilderInterface, ObjectNa
         public bool $temporary = false,
         public bool $includeAutoIncrementValue = false,
         public ?int $autoIncrementValue = null,
-    ) {}
+    ) {
+    }
 
     public function withColumn(ColumnDefinitionInterface $column): self
     {

@@ -15,7 +15,8 @@ final class BeforeQueryExecuted extends InterceptionEvent
         public readonly string $sql,
         public readonly array $params,
         public readonly QueryKind $kind,
-    ) {}
+    ) {
+    }
 
     /** @return array<string|int, mixed> */
     public function getParams(): array

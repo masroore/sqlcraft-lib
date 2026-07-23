@@ -23,7 +23,8 @@ final readonly class CreateTriggerBuilder implements DdlBuilderInterface, Object
         public string $body,
         public ?string $definer = null,
         public string $forEach = 'ROW',
-    ) {}
+    ) {
+    }
 
     /** @return list<string> */
     #[\Override]

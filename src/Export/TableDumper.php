@@ -18,7 +18,8 @@ final readonly class TableDumper
     public function __construct(
         private ExportSourceInterface $source,
         private QueryExecutorInterface $executor,
-    ) {}
+    ) {
+    }
 
     public function dump(
         ConnectionInterface $connection,

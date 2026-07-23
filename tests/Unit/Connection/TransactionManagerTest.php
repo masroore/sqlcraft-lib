@@ -21,7 +21,7 @@ final class TransactionManagerTest extends TestCase
             ->with('SERIALIZABLE')
             ->willReturn(new Transaction($connection, 'SERIALIZABLE'));
 
-        $transaction = (new TransactionManager)->begin($connection, 'SERIALIZABLE');
+        $transaction = (new TransactionManager())->begin($connection, 'SERIALIZABLE');
 
         self::assertTrue($transaction->isActive());
     }
@@ -35,7 +35,7 @@ final class TransactionManagerTest extends TestCase
             ->with(self::matchesRegularExpression('/^SAVEPOINT sp_[a-f0-9]{12}$/'))
             ->willReturn(new ExecutionResult(0, '', 0.0, 'SAVEPOINT'));
 
-        $transaction = (new TransactionManager)->begin($connection);
+        $transaction = (new TransactionManager())->begin($connection);
 
         self::assertNotNull($transaction->savepointName);
         self::assertStringStartsWith('sp_', $transaction->savepointName);
@@ -48,7 +48,7 @@ final class TransactionManagerTest extends TestCase
         $connection->expects(self::once())->method('beginTransaction')->willReturn(new Transaction($connection));
         $connection->expects(self::once())->method('execute')->with('COMMIT')->willReturn(new ExecutionResult(0, '', 0.0, 'COMMIT'));
 
-        $result = (new TransactionManager)->transactional(
+        $result = (new TransactionManager())->transactional(
             $connection,
             static fn (ConnectionInterface $received): string => $received === $connection ? 'done' : 'wrong',
         );
@@ -64,7 +64,7 @@ final class TransactionManagerTest extends TestCase
         $connection->expects(self::once())->method('execute')->with('ROLLBACK')->willReturn(new ExecutionResult(0, '', 0.0, 'ROLLBACK'));
 
         $this->expectExceptionObject(new \RuntimeException('failed'));
-        (new TransactionManager)->transactional(
+        (new TransactionManager())->transactional(
             $connection,
             static function (): never {
                 throw new \RuntimeException('failed');

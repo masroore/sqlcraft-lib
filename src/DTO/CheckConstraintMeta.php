@@ -10,5 +10,6 @@ final readonly class CheckConstraintMeta
         public string $name,
         public string $expression,
         public bool $enforced,
-    ) {}
+    ) {
+    }
 }

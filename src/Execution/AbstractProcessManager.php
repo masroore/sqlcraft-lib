@@ -13,7 +13,9 @@ use SQLCraft\Exceptions\ExtensionConfigurationException;
 
 abstract class AbstractProcessManager implements ProcessManagerInterface
 {
-    public function __construct(protected ConnectionInterface $connection, protected ServerInspectorInterface $server, protected QueryExecutorInterface $executor) {}
+    public function __construct(protected ConnectionInterface $connection, protected ServerInspectorInterface $server, protected QueryExecutorInterface $executor)
+    {
+    }
 
     #[\Override]
     public function list(): ProcessCollection

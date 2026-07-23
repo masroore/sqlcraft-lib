@@ -14,7 +14,8 @@ final readonly class RoutineParameterDefinition implements RoutineParameterDefin
         private string $name,
         private DataType $dataType,
         private RoutineDirection $direction,
-    ) {}
+    ) {
+    }
 
     #[\Override]
     public function getName(): string

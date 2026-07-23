@@ -22,5 +22,6 @@ final readonly class RoutineMeta
         public string $definer,
         public bool $deterministic,
         public string $sqlDataAccess,
-    ) {}
+    ) {
+    }
 }

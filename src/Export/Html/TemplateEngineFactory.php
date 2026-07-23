@@ -19,10 +19,10 @@ final class TemplateEngineFactory
                 );
             }
 
-            return new TwigTemplateEngine;
+            return new TwigTemplateEngine();
         }
 
-        return new BladeTemplateEngine;
+        return new BladeTemplateEngine();
     }
 
     /**

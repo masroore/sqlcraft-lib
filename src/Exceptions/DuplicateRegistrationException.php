@@ -4,4 +4,6 @@ declare(strict_types=1);
 
 namespace SQLCraft\Exceptions;
 
-final class DuplicateRegistrationException extends ExtensionConfigurationException {}
+final class DuplicateRegistrationException extends ExtensionConfigurationException
+{
+}

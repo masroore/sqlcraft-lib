@@ -10,7 +10,9 @@ use SQLCraft\Contracts\Execution\QueryHistoryInterface;
 final class NullQueryHistory implements QueryHistoryInterface
 {
     #[\Override]
-    public function record(QueryHistoryEntry $entry): void {}
+    public function record(QueryHistoryEntry $entry): void
+    {
+    }
 
     /** @return list<QueryHistoryEntry> */
     #[\Override]
@@ -20,5 +22,7 @@ final class NullQueryHistory implements QueryHistoryInterface
     }
 
     #[\Override]
-    public function clearDatabase(string $database): void {}
+    public function clearDatabase(string $database): void
+    {
+    }
 }

@@ -66,7 +66,8 @@ final class SchemaManager implements SchemaManagerInterface
         private readonly ?MetadataCacheInterface $cache = null,
         private readonly ?SchemaEventDispatcherInterface $events = null,
         private readonly ?PrivilegeInspectorInterface $privilegeInspector = null,
-    ) {}
+    ) {
+    }
 
     /** @return array<string, mixed> */
     #[\Override]

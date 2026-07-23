@@ -24,7 +24,7 @@ final class DdlManagerTest extends TestCase
     public function test_preview_does_not_execute(): void
     {
         $connection = self::createMock(ConnectionInterface::class);
-        $connection->method('getPlatform')->willReturn(new SqlitePlatform);
+        $connection->method('getPlatform')->willReturn(new SqlitePlatform());
         $executor = self::createMock(QueryExecutorInterface::class);
         $executor->expects(self::never())->method('executeDdl');
         $builder = new CreateViewBuilder(new QualifiedName(new Identifier('active_users')), 'SELECT 1');
@@ -54,7 +54,7 @@ final class DdlManagerTest extends TestCase
     public function test_execute_dispatches_schema_lifecycle_events(): void
     {
         $connection = self::createMock(ConnectionInterface::class);
-        $connection->method('getPlatform')->willReturn(new SqlitePlatform);
+        $connection->method('getPlatform')->willReturn(new SqlitePlatform());
         $executor = self::createMock(QueryExecutorInterface::class);
         $executor->expects(self::once())->method('executeDdl');
         $events = self::createMock(SchemaEventDispatcherInterface::class);
@@ -70,7 +70,7 @@ final class DdlManagerTest extends TestCase
     public function test_ddl_can_be_cancelled_before_execution(): void
     {
         $connection = self::createMock(ConnectionInterface::class);
-        $connection->method('getPlatform')->willReturn(new SqlitePlatform);
+        $connection->method('getPlatform')->willReturn(new SqlitePlatform());
         $executor = self::createMock(QueryExecutorInterface::class);
         $executor->expects(self::never())->method('executeDdl');
         $events = self::createMock(SchemaEventDispatcherInterface::class);
@@ -87,7 +87,7 @@ final class DdlManagerTest extends TestCase
     public function test_execute_routes_every_statement_through_query_executor(): void
     {
         $connection = self::createMock(ConnectionInterface::class);
-        $connection->method('getPlatform')->willReturn(new SqlitePlatform);
+        $connection->method('getPlatform')->willReturn(new SqlitePlatform());
         $executor = self::createMock(QueryExecutorInterface::class);
         $executor->expects(self::once())->method('executeDdl')->with($connection, 'CREATE VIEW "active_users" AS SELECT 1');
         $builder = new CreateViewBuilder(new QualifiedName(new Identifier('active_users')), 'SELECT 1');

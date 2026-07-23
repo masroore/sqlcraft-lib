@@ -42,7 +42,7 @@ final class AlterTableBuilderTest extends TestCase
 
     public function test_abstract_dialect_renders_common_alter_operations(): void
     {
-        $platform = new SqlitePlatform;
+        $platform = new SqlitePlatform();
         $table = new QualifiedName(new Identifier('users'));
         $builder = (new AlterTableBuilder($table))
             ->withColumn($this->column('email', new DataType('TEXT')))
@@ -60,7 +60,7 @@ final class AlterTableBuilderTest extends TestCase
     {
         $this->expectException(CapabilityNotSupportedException::class);
 
-        (new SqlitePlatform)->renderDdlAlterTable(
+        (new SqlitePlatform())->renderDdlAlterTable(
             (new AlterTableBuilder(new QualifiedName(new Identifier('users'))))
                 ->withColumn($this->column('email', new DataType('TEXT')), new Identifier('id')),
         );

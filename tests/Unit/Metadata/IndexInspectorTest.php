@@ -36,7 +36,7 @@ final class IndexInspectorTest extends TestCase
         $connection->method('getPlatform')->willReturn($platform);
         $connection->expects(self::once())->method('query')->with($sql)->willReturn($result);
 
-        $indexes = (new IndexInspector(new SqliteMetadataFactory))->getIndexes($connection, $table);
+        $indexes = (new IndexInspector(new SqliteMetadataFactory()))->getIndexes($connection, $table);
 
         self::assertSame(IndexType::UNIQUE, $indexes->get('users_email')->type);
         self::assertSame('email', $indexes->get('users_email')->columns[0]->columnName);

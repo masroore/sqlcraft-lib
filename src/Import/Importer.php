@@ -22,7 +22,8 @@ final readonly class Importer implements ImporterInterface
         private StatementSplitterInterface $splitter,
         private BatchExecutorInterface $batchExecutor,
         private ?ImportExportEventDispatcherInterface $events = null,
-    ) {}
+    ) {
+    }
 
     #[\Override]
     public function import(

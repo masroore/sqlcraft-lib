@@ -11,5 +11,6 @@ final readonly class ExecutionResult
         public string|int $lastInsertId,
         public float $elapsedMs,
         public string $sql,
-    ) {}
+    ) {
+    }
 }

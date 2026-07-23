@@ -15,7 +15,8 @@ final class SqlServerDriver implements DriverInterface
     public function __construct(
         private readonly PdoConnectionFactoryInterface $connectionFactory,
         private readonly SqlServerPlatform $platform,
-    ) {}
+    ) {
+    }
 
     #[\Override]
     public function buildDsn(ConnectionParameters $params): string

@@ -25,7 +25,7 @@ final class PostgreSQLPlatformTest extends TestCase
 {
     public function test_it_describes_postgre_sql_defaults_and_capabilities(): void
     {
-        $platform = new PostgreSQLPlatform;
+        $platform = new PostgreSQLPlatform();
 
         self::assertSame('pgsql', $platform->getName());
         self::assertNull($platform->getFlavor());
@@ -44,12 +44,12 @@ final class PostgreSQLPlatformTest extends TestCase
         $connection = self::createMock(ConnectionInterface::class);
         $connection->expects(self::once())->method('query')->with('SHOW server_version')->willReturn($result);
 
-        self::assertSame('16.4', (string) (new PostgreSQLPlatform)->getServerVersion($connection));
+        self::assertSame('16.4', (string) (new PostgreSQLPlatform())->getServerVersion($connection));
     }
 
     public function test_it_quotes_values_and_paginates(): void
     {
-        $platform = new PostgreSQLPlatform;
+        $platform = new PostgreSQLPlatform();
 
         self::assertSame('"a""b"', $platform->quoteIdentifier(new Identifier('a"b')));
         self::assertSame('TRUE', $platform->quoteValue(true));
@@ -63,7 +63,7 @@ final class PostgreSQLPlatformTest extends TestCase
 
     public function test_it_renders_schema_aware_ddl(): void
     {
-        $platform = new PostgreSQLPlatform;
+        $platform = new PostgreSQLPlatform();
         $table = new QualifiedName(new Identifier('users'), new Identifier('public'));
         $column = new ColumnMeta(
             name: 'id',
@@ -107,7 +107,7 @@ final class PostgreSQLPlatformTest extends TestCase
 
     public function test_it_returns_introspection_sql_and_rejects_variables(): void
     {
-        $platform = new PostgreSQLPlatform;
+        $platform = new PostgreSQLPlatform();
         $table = new QualifiedName(new Identifier('users'), new Identifier('public'));
 
         self::assertStringContainsString('pg_database', $platform->getDatabasesSql());

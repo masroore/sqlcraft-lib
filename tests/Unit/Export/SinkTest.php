@@ -12,7 +12,7 @@ final class SinkTest extends TestCase
 {
     public function test_string_buffer_accumulates_chunks(): void
     {
-        $sink = new StringBufferSink;
+        $sink = new StringBufferSink();
         $sink->write('one');
         $sink->write('two');
         $sink->flush();

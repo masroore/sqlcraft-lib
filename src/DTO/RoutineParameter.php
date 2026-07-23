@@ -13,5 +13,6 @@ final readonly class RoutineParameter
         public string $name,
         public DataType $dataType,
         public RoutineDirection $direction,
-    ) {}
+    ) {
+    }
 }

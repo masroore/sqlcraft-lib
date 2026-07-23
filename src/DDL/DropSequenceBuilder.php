@@ -13,7 +13,9 @@ final readonly class DropSequenceBuilder implements DdlBuilderInterface, ObjectN
 {
     use LegacyDdlExecution;
 
-    public function __construct(public Identifier $name, public bool $ifExists = false) {}
+    public function __construct(public Identifier $name, public bool $ifExists = false)
+    {
+    }
 
     /** @return list<string> */
     #[\Override]

@@ -4,4 +4,6 @@ declare(strict_types=1);
 
 namespace SQLCraft\Exceptions;
 
-abstract class DriverException extends SQLCraftException {}
+abstract class DriverException extends SQLCraftException
+{
+}

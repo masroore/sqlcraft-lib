@@ -31,7 +31,8 @@ final readonly class ExportSource implements ExportSourceInterface, ForeignKeyEx
         private ?RoutineInspectorInterface $routines = null,
         private ?ServerInspectorInterface $server = null,
         private ?ForeignKeyInspectorInterface $foreignKeys = null,
-    ) {}
+    ) {
+    }
 
     #[\Override]
     public function getTables(ConnectionInterface $connection, ?string $schema = null): TableCollection

@@ -45,7 +45,7 @@ final class SequenceSchemaBuilderTest extends TestCase
 
     public function test_sqlite_renders_portable_database_and_schema_operations(): void
     {
-        $sqlite = new SqlitePlatform;
+        $sqlite = new SqlitePlatform();
         self::assertSame(['CREATE SEQUENCE "user_ids" START WITH 1 INCREMENT BY 1'], (new CreateSequenceBuilder(new Identifier('user_ids')))->toSql($sqlite));
         self::assertSame(['DROP SEQUENCE IF EXISTS "user_ids"'], (new DropSequenceBuilder(new Identifier('user_ids'), true))->toSql($sqlite));
         self::assertSame(['CREATE DATABASE IF NOT EXISTS "analytics"'], (new CreateDatabaseBuilder(new Identifier('analytics'), null, null, true))->toSql($sqlite));
@@ -58,19 +58,19 @@ final class SequenceSchemaBuilderTest extends TestCase
     public function test_sqlite_rejects_schema_creation_at_preview_time(): void
     {
         $this->expectException(CapabilityNotSupportedException::class);
-        (new CreateSchemaBuilder(new Identifier('reporting')))->toSql(new SqlitePlatform);
+        (new CreateSchemaBuilder(new Identifier('reporting')))->toSql(new SqlitePlatform());
     }
 
     public function test_sqlite_rejects_schema_drop_at_preview_time(): void
     {
         $this->expectException(CapabilityNotSupportedException::class);
-        (new DropSchemaBuilder(new Identifier('reporting')))->toSql(new SqlitePlatform);
+        (new DropSchemaBuilder(new Identifier('reporting')))->toSql(new SqlitePlatform());
     }
 
     public function test_mysql_rejects_native_sequences(): void
     {
         $this->expectException(CapabilityNotSupportedException::class);
 
-        (new CreateSequenceBuilder(new Identifier('user_ids')))->toSql(new MySQLPlatform);
+        (new CreateSequenceBuilder(new Identifier('user_ids')))->toSql(new MySQLPlatform());
     }
 }

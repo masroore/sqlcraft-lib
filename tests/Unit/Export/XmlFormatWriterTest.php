@@ -118,8 +118,8 @@ final class XmlFormatWriterTest extends TestCase
         ?XmlExportOptions $xmlOptions = null,
         string $table = 'users',
     ): string {
-        $sink = new StringBufferSink;
-        $writer = new XmlFormatWriter;
+        $sink = new StringBufferSink();
+        $writer = new XmlFormatWriter();
         $options = new DumpOptions(
             format: 'xml',
             scope: DumpScope::table('shop', $table),

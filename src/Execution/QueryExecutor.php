@@ -185,6 +185,6 @@ final readonly class QueryExecutor implements QueryExecutorInterface
         if (! $this->history instanceof QueryHistoryInterface) {
             return;
         }
-        $this->history->record(new QueryHistoryEntry($connection->getDatabaseName() ?? '', $sql, $this->elapsedMs($startedAt), new \DateTimeImmutable, $success, $errorMessage));
+        $this->history->record(new QueryHistoryEntry($connection->getDatabaseName() ?? '', $sql, $this->elapsedMs($startedAt), new \DateTimeImmutable(), $success, $errorMessage));
     }
 }

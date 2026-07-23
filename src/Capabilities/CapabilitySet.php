@@ -23,7 +23,8 @@ final readonly class CapabilitySet implements Countable, IteratorAggregate
         private ?SchemaEventDispatcherInterface $events = null,
         private string $platform = '',
         private string $version = '',
-    ) {}
+    ) {
+    }
 
     public function has(Capability|ExtendedCapability $capability): bool
     {

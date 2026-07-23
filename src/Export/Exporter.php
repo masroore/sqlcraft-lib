@@ -196,7 +196,7 @@ final class Exporter implements ExporterInterface
                 yield $foreignKey->targetTable;
             }
         };
-        $sort = (new TopologicalTableSorter)->sort($tables, $dependencies);
+        $sort = (new TopologicalTableSorter())->sort($tables, $dependencies);
         if ($sort['cycle']) {
             $this->events?->exportWarning($connection, 'Foreign-key cycle detected; preserving declaration order.', array_map(static fn (TableStatus $table): string => $table->name, $sort['tables']));
         }

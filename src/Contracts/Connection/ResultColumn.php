@@ -12,5 +12,6 @@ final readonly class ResultColumn
         public ?string $table,
         public ?int $length,
         public bool $nullable,
-    ) {}
+    ) {
+    }
 }

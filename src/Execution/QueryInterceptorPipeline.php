@@ -12,7 +12,9 @@ use SQLCraft\Exceptions\ExtensionConfigurationException;
 final readonly class QueryInterceptorPipeline
 {
     /** @param list<QueryInterceptorInterface> $interceptors */
-    public function __construct(private array $interceptors = []) {}
+    public function __construct(private array $interceptors = [])
+    {
+    }
 
     /** @param array<string|int, mixed> $params */
     public function process(

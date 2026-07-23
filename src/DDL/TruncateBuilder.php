@@ -17,7 +17,8 @@ final readonly class TruncateBuilder implements DdlBuilderInterface, ObjectNameA
         public QualifiedName $table,
         public bool $cascade = false,
         public bool $restartIdentity = false,
-    ) {}
+    ) {
+    }
 
     /** @return list<string> */
     #[\Override]

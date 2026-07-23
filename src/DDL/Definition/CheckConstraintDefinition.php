@@ -12,7 +12,8 @@ final readonly class CheckConstraintDefinition implements CheckConstraintDefinit
         private string $name,
         private string $expression,
         private bool $enforced,
-    ) {}
+    ) {
+    }
 
     #[\Override]
     public function getName(): string

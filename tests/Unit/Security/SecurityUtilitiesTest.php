@@ -18,7 +18,7 @@ final class SecurityUtilitiesTest extends TestCase
 {
     public function test_identifier_quoter_delegates_single_and_qualified_names(): void
     {
-        $quoter = new IdentifierQuoter(new MySQLPlatform);
+        $quoter = new IdentifierQuoter(new MySQLPlatform());
         $name = new QualifiedName(new Identifier('table'), new Identifier('schema'), new Identifier('database'));
 
         self::assertSame('`column`', $quoter->quote(new Identifier('column')));
@@ -28,7 +28,7 @@ final class SecurityUtilitiesTest extends TestCase
 
     public function test_operator_validator_normalizes_allowed_operators(): void
     {
-        $validator = new OperatorValidator(new MySQLPlatform);
+        $validator = new OperatorValidator(new MySQLPlatform());
 
         self::assertSame('NOT LIKE', $validator->validate(' not like '));
     }

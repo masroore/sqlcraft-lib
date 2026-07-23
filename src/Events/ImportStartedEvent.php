@@ -13,5 +13,6 @@ final readonly class ImportStartedEvent extends ObservabilityEvent
         public object $source,
         public ?int $estimatedBytes,
         public string $format = 'sql',
-    ) {}
+    ) {
+    }
 }

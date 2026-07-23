@@ -57,7 +57,7 @@ final class DatabaseInspectorTest extends TestCase
             },
         );
 
-        $inspector = new DatabaseInspector(new PostgreSQLMetadataFactory);
+        $inspector = new DatabaseInspector(new PostgreSQLMetadataFactory());
         $schemas = $inspector->getSchemas($connection);
         $sequences = $inspector->getSequences($connection, 'public');
         $types = $inspector->getTypes($connection, 'public');
@@ -80,7 +80,7 @@ final class DatabaseInspectorTest extends TestCase
 
         $this->expectException(CapabilityNotSupportedException::class);
 
-        (new DatabaseInspector(new PostgreSQLMetadataFactory))->getTypes($connection);
+        (new DatabaseInspector(new PostgreSQLMetadataFactory()))->getTypes($connection);
     }
 
     public function test_schema_listing_can_be_empty_when_platform_has_no_schema_concept(): void
@@ -92,7 +92,7 @@ final class DatabaseInspectorTest extends TestCase
         $connection = self::createMock(ConnectionInterface::class);
         $connection->method('getPlatform')->willReturn($platform);
 
-        $schemas = (new DatabaseInspector(new PostgreSQLMetadataFactory))->getSchemas($connection);
+        $schemas = (new DatabaseInspector(new PostgreSQLMetadataFactory()))->getSchemas($connection);
 
         self::assertCount(0, $schemas);
     }

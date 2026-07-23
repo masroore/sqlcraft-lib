@@ -16,5 +16,6 @@ final readonly class BatchStatementResult
         public ?ResultInterface $rows,
         public float $elapsedMs,
         public ?\Throwable $error,
-    ) {}
+    ) {
+    }
 }

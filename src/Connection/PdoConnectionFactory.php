@@ -22,7 +22,8 @@ final class PdoConnectionFactory implements PdoConnectionFactoryInterface
         private readonly PdoExceptionTranslator $translator,
         private readonly ?ConnectionEventDispatcherInterface $events = null,
         private readonly bool $emitLifecycleEvents = true,
-    ) {}
+    ) {
+    }
 
     #[\Override]
     public function connect(

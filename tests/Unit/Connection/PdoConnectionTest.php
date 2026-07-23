@@ -37,7 +37,7 @@ final class PdoConnectionTest extends TestCase
         $this->connection = new PdoConnection(
             $pdo,
             $platform,
-            new PdoExceptionTranslator,
+            new PdoExceptionTranslator(),
             'test',
             'app',
         );

@@ -50,7 +50,7 @@ final class TableInspectorTest extends TestCase
             },
         );
 
-        $inspector = new TableInspector(new SqliteMetadataFactory);
+        $inspector = new TableInspector(new SqliteMetadataFactory());
         $tables = $inspector->getTables($connection, 'public');
         $streamed = iterator_to_array($inspector->streamTables($connection, 'public'));
 
@@ -96,7 +96,7 @@ final class TableInspectorTest extends TestCase
             },
         );
 
-        $inspector = new TableInspector(new SqliteMetadataFactory);
+        $inspector = new TableInspector(new SqliteMetadataFactory());
         $status = $inspector->getTableStatus($connection, $table);
         $parents = $inspector->getParentTables($connection, $table);
         $partitions = $inspector->getPartitions($connection, $table);
@@ -115,7 +115,7 @@ final class TableInspectorTest extends TestCase
         $connection = self::createMock(ConnectionInterface::class);
         $connection->method('getPlatform')->willReturn($platform);
 
-        $parents = (new TableInspector(new SqliteMetadataFactory))->getParentTables(
+        $parents = (new TableInspector(new SqliteMetadataFactory()))->getParentTables(
             $connection,
             new QualifiedName(new Identifier('users')),
         );
@@ -135,7 +135,7 @@ final class TableInspectorTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('database name is required');
 
-        (new TableInspector(new SqliteMetadataFactory))->getTables($connection);
+        (new TableInspector(new SqliteMetadataFactory()))->getTables($connection);
     }
 
     public function test_unsupported_partition_dialect_exception_remains_visible(): void
@@ -151,7 +151,7 @@ final class TableInspectorTest extends TestCase
 
         $this->expectException(CapabilityNotSupportedException::class);
 
-        (new TableInspector(new SqliteMetadataFactory))->getPartitions(
+        (new TableInspector(new SqliteMetadataFactory()))->getPartitions(
             $connection,
             new QualifiedName(new Identifier('users')),
         );

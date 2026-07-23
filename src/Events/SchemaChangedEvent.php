@@ -13,5 +13,6 @@ final readonly class SchemaChangedEvent extends ObservabilityEvent
         public string $objectType,
         public string $objectName,
         public string $operation,
-    ) {}
+    ) {
+    }
 }

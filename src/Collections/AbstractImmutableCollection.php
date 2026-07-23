@@ -24,7 +24,9 @@ abstract class AbstractImmutableCollection implements ArrayAccess, Countable, It
     /**
      * @param  array<int|string, T>  $items
      */
-    final public function __construct(protected readonly array $items) {}
+    final public function __construct(protected readonly array $items)
+    {
+    }
 
     /**
      * @return T

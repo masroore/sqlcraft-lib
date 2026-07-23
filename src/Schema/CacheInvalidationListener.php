@@ -11,7 +11,9 @@ use SQLCraft\Events\SchemaChangedEvent;
 /** Invalidates metadata affected by schema mutations. */
 final readonly class CacheInvalidationListener
 {
-    public function __construct(private MetadataCacheInterface $cache) {}
+    public function __construct(private MetadataCacheInterface $cache)
+    {
+    }
 
     public function __invoke(object $event): void
     {

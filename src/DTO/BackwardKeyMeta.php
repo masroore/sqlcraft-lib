@@ -15,5 +15,6 @@ final readonly class BackwardKeyMeta
         public string $sourceTable,
         public array $sourceColumns,
         public array $targetColumns,
-    ) {}
+    ) {
+    }
 }

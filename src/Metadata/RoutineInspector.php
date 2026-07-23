@@ -15,7 +15,9 @@ use SQLCraft\ValueObjects\QualifiedName;
 /** @internal */
 final class RoutineInspector implements RoutineInspectorInterface
 {
-    public function __construct(private readonly MetadataFactoryInterface $factory) {}
+    public function __construct(private readonly MetadataFactoryInterface $factory)
+    {
+    }
 
     #[\Override]
     public function getFunctions(ConnectionInterface $conn, ?string $schema = null): RoutineCollection

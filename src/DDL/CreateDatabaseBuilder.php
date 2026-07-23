@@ -13,7 +13,9 @@ final readonly class CreateDatabaseBuilder implements DdlBuilderInterface, Objec
 {
     use LegacyDdlExecution;
 
-    public function __construct(public Identifier $name, public ?string $charset = null, public ?string $collation = null, public bool $ifNotExists = false) {}
+    public function __construct(public Identifier $name, public ?string $charset = null, public ?string $collation = null, public bool $ifNotExists = false)
+    {
+    }
 
     /** @return list<string> */
     #[\Override]

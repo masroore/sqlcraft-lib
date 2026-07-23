@@ -17,7 +17,8 @@ final readonly class DropTriggerBuilder implements DdlBuilderInterface, ObjectNa
         public QualifiedName $name,
         public ?QualifiedName $table = null,
         public bool $ifExists = false,
-    ) {}
+    ) {
+    }
 
     /** @return list<string> */
     #[\Override]

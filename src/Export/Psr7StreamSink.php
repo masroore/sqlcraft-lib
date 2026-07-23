@@ -44,5 +44,7 @@ final class Psr7StreamSink implements SinkInterface
     }
 
     #[\Override]
-    public function close(): void {}
+    public function close(): void
+    {
+    }
 }

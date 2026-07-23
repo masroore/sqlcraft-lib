@@ -30,7 +30,7 @@ final class FakePlatformRoles
 {
     public static function create(): ComposedPlatform
     {
-        $sqlite = new SqlitePlatform;
+        $sqlite = new SqlitePlatform();
 
         return new ComposedPlatform(
             name: 'fixturedb',
@@ -56,7 +56,7 @@ final class FakeMetadataInspectorSetFactory implements MetadataInspectorSetFacto
 
     public function __construct()
     {
-        $this->delegate = new DefaultMetadataInspectorSetFactory(new SqliteMetadataFactory);
+        $this->delegate = new DefaultMetadataInspectorSetFactory(new SqliteMetadataFactory());
     }
 
     #[\Override]
@@ -77,8 +77,8 @@ final class FakeDriver implements DriverInterface
     public function __construct(public readonly ConnectionEventDispatcherInterface $events)
     {
         $this->sqlite = new SqliteDriver(
-            new PdoConnectionFactory(new PdoExceptionTranslator, emitLifecycleEvents: false),
-            new SqlitePlatform,
+            new PdoConnectionFactory(new PdoExceptionTranslator(), emitLifecycleEvents: false),
+            new SqlitePlatform(),
         );
         $this->platform = FakePlatformRoles::create();
     }
@@ -121,7 +121,8 @@ final class FakeConnection implements ConnectionInterface
     public function __construct(
         private readonly ConnectionInterface $delegate,
         private readonly PlatformInterface $platform,
-    ) {}
+    ) {
+    }
 
     #[\Override]
     public function getPlatformName(): string

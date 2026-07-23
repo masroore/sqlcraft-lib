@@ -44,6 +44,6 @@ final class TriggerRoutineBuilderTest extends TestCase
     {
         $this->expectException(CapabilityNotSupportedException::class);
 
-        (new CreateRoutineBuilder(new QualifiedName(new Identifier('refresh_users')), 'FUNCTION'))->toSql(new SqlitePlatform);
+        (new CreateRoutineBuilder(new QualifiedName(new Identifier('refresh_users')), 'FUNCTION'))->toSql(new SqlitePlatform());
     }
 }

@@ -17,7 +17,8 @@ final class PdoPreparedStatement implements PreparedStatementInterface
     public function __construct(
         private readonly PdoConnection $connection,
         private readonly string $sql,
-    ) {}
+    ) {
+    }
 
     /** @param array<string|int, mixed> $params */
     #[\Override]

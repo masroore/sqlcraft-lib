@@ -44,7 +44,7 @@ final class QueryEngineAcceptanceIntegrationTest extends TestCase
 
         gc_collect_cycles();
         $before = memory_get_usage(true);
-        $result = (new QueryExecutor)->query($connection, 'SELECT id, value FROM rows ORDER BY id');
+        $result = (new QueryExecutor())->query($connection, 'SELECT id, value FROM rows ORDER BY id');
         $rows = 0;
         while ($result->fetchAssoc() !== null) {
             $rows++;
@@ -58,10 +58,10 @@ final class QueryEngineAcceptanceIntegrationTest extends TestCase
     {
         $connection = $this->sqliteConnection();
         $connection->execute('CREATE TABLE ledger (value TEXT NOT NULL)');
-        $executor = new QueryExecutor;
+        $executor = new QueryExecutor();
 
         try {
-            (new TransactionManager)->transactional($connection, function (ConnectionInterface $connection) use ($executor): never {
+            (new TransactionManager())->transactional($connection, function (ConnectionInterface $connection) use ($executor): never {
                 $executor->execute($connection, 'INSERT INTO ledger (value) VALUES (?)', ['transient']);
                 throw new \RuntimeException('deliberate rollback');
             });
@@ -79,7 +79,7 @@ final class QueryEngineAcceptanceIntegrationTest extends TestCase
         $connection->execute('INSERT INTO users (name) VALUES (?)', ['Ada']);
         $connection->execute('INSERT INTO users (name) VALUES (?)', ['Grace']);
 
-        $status = new class implements TableStatusProviderInterface {
+        $status = new class () implements TableStatusProviderInterface {
             #[\Override]
             public function getApproximateRowCount(ConnectionInterface $connection, QualifiedName $table): int
             {
@@ -87,7 +87,7 @@ final class QueryEngineAcceptanceIntegrationTest extends TestCase
             }
         };
         $table = new QualifiedName(new Identifier('users'));
-        $page = (new Paginator(new QueryExecutor, new SelectQueryRenderer(new SqlitePlatform), $status))
+        $page = (new Paginator(new QueryExecutor(), new SelectQueryRenderer(new SqlitePlatform()), $status))
             ->paginate($connection, new SelectQuery($table), new PaginationParams(1, 1));
 
         self::assertSame(2500000, $page->totalRows);
@@ -102,8 +102,8 @@ final class QueryEngineAcceptanceIntegrationTest extends TestCase
         }
 
         $connection = (new MySQLDriver(
-            new PdoConnectionFactory(new PdoExceptionTranslator),
-            new MySQLPlatform,
+            new PdoConnectionFactory(new PdoExceptionTranslator()),
+            new MySQLPlatform(),
         ))->connect(new ConnectionParameters(
             host: $this->environment('SQLCRAFT_MYSQL_HOST', 'mysql'),
             port: (int) $this->environment('SQLCRAFT_MYSQL_PORT', '3306'),
@@ -114,7 +114,7 @@ final class QueryEngineAcceptanceIntegrationTest extends TestCase
         $connection->execute('DROP PROCEDURE IF EXISTS sqlcraft_acceptance_routine');
 
         try {
-            $batch = (new StatementSplitter)->split(<<<'SQL'
+            $batch = (new StatementSplitter())->split(<<<'SQL'
                 DELIMITER $$
                 CREATE PROCEDURE sqlcraft_acceptance_routine()
                 BEGIN
@@ -123,7 +123,7 @@ final class QueryEngineAcceptanceIntegrationTest extends TestCase
                 END$$
                 DELIMITER ;
                 SQL);
-            $results = iterator_to_array((new BatchExecutor(new QueryExecutor))->executeBatch($connection, $batch));
+            $results = iterator_to_array((new BatchExecutor(new QueryExecutor()))->executeBatch($connection, $batch));
 
             self::assertCount(1, $results);
             self::assertNull($results[0]->error);
@@ -148,6 +148,6 @@ final class QueryEngineAcceptanceIntegrationTest extends TestCase
         $pdo = new PDO('sqlite::memory:');
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-        return new PdoConnection($pdo, new SqlitePlatform, new PdoExceptionTranslator, databaseName: 'main');
+        return new PdoConnection($pdo, new SqlitePlatform(), new PdoExceptionTranslator(), databaseName: 'main');
     }
 }

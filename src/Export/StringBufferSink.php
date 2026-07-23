@@ -17,10 +17,14 @@ final class StringBufferSink implements SinkInterface
     }
 
     #[\Override]
-    public function flush(): void {}
+    public function flush(): void
+    {
+    }
 
     #[\Override]
-    public function close(): void {}
+    public function close(): void
+    {
+    }
 
     public function contents(): string
     {

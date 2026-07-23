@@ -39,7 +39,9 @@ final class JsonFormatWriter implements FormatWriterInterface
 
     /** @param list<string> $ddlStatements */
     #[\Override]
-    public function writeTableDdl(SinkInterface $sink, TableStatus $table, array $ddlStatements): void {}
+    public function writeTableDdl(SinkInterface $sink, TableStatus $table, array $ddlStatements): void
+    {
+    }
 
     /**
      * @param  list<array<string, mixed>>  $rows
@@ -82,7 +84,7 @@ final class JsonFormatWriter implements FormatWriterInterface
     private function jsonFlags(DumpOptions $options): int
     {
         $flags = JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE;
-        $opts = $options->jsonOptions ?? new JsonExportOptions;
+        $opts = $options->jsonOptions ?? new JsonExportOptions();
         if ($opts->pretty) {
             $flags |= JSON_PRETTY_PRINT;
         }

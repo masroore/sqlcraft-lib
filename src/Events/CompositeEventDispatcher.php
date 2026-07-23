@@ -9,7 +9,9 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 /** @internal */
 final readonly class CompositeEventDispatcher implements EventDispatcherInterface
 {
-    public function __construct(private EventDispatcherInterface $core, private ?EventDispatcherInterface $external = null) {}
+    public function __construct(private EventDispatcherInterface $core, private ?EventDispatcherInterface $external = null)
+    {
+    }
 
     #[\Override]
     public function dispatch(object $event): object

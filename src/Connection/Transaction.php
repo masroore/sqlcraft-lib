@@ -18,7 +18,8 @@ final class Transaction
         public readonly string $isolationLevel = '',
         public readonly ?string $savepointName = null,
         private readonly ?ConnectionEventDispatcherInterface $events = null,
-    ) {}
+    ) {
+    }
 
     public function commit(): void
     {

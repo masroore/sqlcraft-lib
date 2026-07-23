@@ -11,7 +11,7 @@ final class ImportOptionsTest extends TestCase
 {
     public function test_defaults_match_the_planned_safe_import_policy(): void
     {
-        $options = new ImportOptions;
+        $options = new ImportOptions();
 
         self::assertTrue($options->stopOnError);
         self::assertFalse($options->wrapInTransaction);

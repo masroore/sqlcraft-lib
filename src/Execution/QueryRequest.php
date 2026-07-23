@@ -10,7 +10,9 @@ use SQLCraft\Enums\QueryKind;
 final readonly class QueryRequest
 {
     /** @param array<string|int, mixed> $params */
-    public function __construct(public ConnectionInterface $connection, public string $originalSql, public string $sql, public array $params, public QueryKind $kind) {}
+    public function __construct(public ConnectionInterface $connection, public string $originalSql, public string $sql, public array $params, public QueryKind $kind)
+    {
+    }
 
     /** @param array<string|int, mixed> $params */
     public function withSqlAndParams(string $sql, array $params): self

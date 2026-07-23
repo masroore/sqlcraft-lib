@@ -12,6 +12,6 @@ trait LegacyDdlExecution
 {
     public function execute(ConnectionInterface $connection): void
     {
-        (new DdlManager(new QueryExecutor))->execute($connection, $this);
+        (new DdlManager(new QueryExecutor()))->execute($connection, $this);
     }
 }

@@ -15,7 +15,8 @@ final readonly class ConnectionOpenedEvent extends ObservabilityEvent
         public ?string $database,
         public float $elapsedMs,
         public ?ConnectionInterface $connection = null,
-    ) {}
+    ) {
+    }
 
     /** @return array<string,mixed> */
     public function __serialize(): array

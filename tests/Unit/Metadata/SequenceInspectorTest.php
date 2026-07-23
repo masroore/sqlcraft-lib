@@ -34,7 +34,7 @@ final class SequenceInspectorTest extends TestCase
         $connection->method('getPlatform')->willReturn($platform);
         $connection->expects(self::once())->method('query')->with('sequences')->willReturn($result);
 
-        $sequences = (new SequenceInspector(new PostgreSQLMetadataFactory))->getSequences($connection, 'public');
+        $sequences = (new SequenceInspector(new PostgreSQLMetadataFactory()))->getSequences($connection, 'public');
 
         self::assertTrue($sequences->get('users_id_seq')->cycle);
     }

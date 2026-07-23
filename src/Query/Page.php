@@ -13,7 +13,8 @@ final readonly class Page
         public ?int $totalRows,
         public bool $totalApprox,
         public bool $hasMore,
-    ) {}
+    ) {
+    }
 
     public function totalPages(): ?int
     {

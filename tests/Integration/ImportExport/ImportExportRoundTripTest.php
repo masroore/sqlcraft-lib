@@ -70,17 +70,17 @@ final class ImportExportRoundTripTest extends TestCase
 
         try {
             $source = $this->source($connection);
-            $sink = new StringBufferSink;
+            $sink = new StringBufferSink();
             $options = new DumpOptions('sql', DumpScope::table($connection->getDatabaseName() ?? 'main', $table));
-            (new Exporter($source, new QueryExecutor, new SqlFormatWriter($connection)))->export($connection, $sink, $options);
+            (new Exporter($source, new QueryExecutor(), new SqlFormatWriter($connection)))->export($connection, $sink, $options);
             $dump = $sink->contents();
 
             $connection->execute('DROP TABLE ' . $quoted);
             $importSource = $this->sourceFromString($dump);
-            $result = (new Importer(new StatementSplitter, new BatchExecutor(new QueryExecutor)))->import(
+            $result = (new Importer(new StatementSplitter(), new BatchExecutor(new QueryExecutor())))->import(
                 $connection,
                 $importSource,
-                new ImportOptions,
+                new ImportOptions(),
             );
 
             self::assertSame(3, $result->statementsExecuted);
@@ -108,8 +108,10 @@ final class ImportExportRoundTripTest extends TestCase
         fclose($handle);
 
         try {
-            $source = new class($path) implements ImportSourceInterface {
-                public function __construct(private readonly string $path) {}
+            $source = new class ($path) implements ImportSourceInterface {
+                public function __construct(private readonly string $path)
+                {
+                }
 
                 #[\Override]
                 public function openStream(): mixed
@@ -132,10 +134,10 @@ final class ImportExportRoundTripTest extends TestCase
             };
             memory_reset_peak_usage();
             $before = memory_get_usage(true);
-            $result = (new Importer(new StatementSplitter, new BatchExecutor(new QueryExecutor)))->import(
+            $result = (new Importer(new StatementSplitter(), new BatchExecutor(new QueryExecutor())))->import(
                 $connection,
                 $source,
-                new ImportOptions,
+                new ImportOptions(),
             );
             $peakDelta = memory_get_peak_usage(true) - $before;
 
@@ -160,8 +162,8 @@ final class ImportExportRoundTripTest extends TestCase
 
         try {
             $source = $this->source($connection);
-            $sink = new StringBufferSink;
-            (new Exporter($source, new QueryExecutor, new CsvFormatWriter))->export(
+            $sink = new StringBufferSink();
+            (new Exporter($source, new QueryExecutor(), new CsvFormatWriter()))->export(
                 $connection,
                 $sink,
                 new DumpOptions('csv', DumpScope::table('main', $table), tableStyle: TableSectionStyle::None),
@@ -169,7 +171,7 @@ final class ImportExportRoundTripTest extends TestCase
             $csv = $sink->contents();
             $connection->execute('DELETE FROM ' . $quoted);
 
-            $result = (new CsvImporter(new ColumnInspector(new SqliteMetadataFactory), new QueryExecutor))->importCsv(
+            $result = (new CsvImporter(new ColumnInspector(new SqliteMetadataFactory()), new QueryExecutor()))->importCsv(
                 $connection,
                 new QualifiedName(new Identifier($table)),
                 $this->sourceFromString($csv),
@@ -192,15 +194,15 @@ final class ImportExportRoundTripTest extends TestCase
             $pdo = new PDO('sqlite::memory:');
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-            return new PdoConnection($pdo, new SqlitePlatform, new PdoExceptionTranslator, databaseName: 'main');
+            return new PdoConnection($pdo, new SqlitePlatform(), new PdoExceptionTranslator(), databaseName: 'main');
         }
 
-        $factory = new PdoConnectionFactory(new PdoExceptionTranslator);
+        $factory = new PdoConnectionFactory(new PdoExceptionTranslator());
 
         return match ($engine) {
-            'mysql' => (new MySQLDriver($factory, new MySQLPlatform))->connect(new ConnectionParameters(host: 'mysql', port: 3306, database: 'sqlcraft_test', username: 'sqlcraft', password: 'secret')),
-            'mariadb' => (new MySQLDriver($factory, new MariaDbPlatform))->connect(new ConnectionParameters(host: 'mariadb', port: 3306, database: 'sqlcraft_test', username: 'sqlcraft', password: 'secret')),
-            'pgsql' => (new PostgreSQLDriver($factory, new PostgreSQLPlatform))->connect(new ConnectionParameters(host: 'postgres', port: 5432, database: 'sqlcraft_test', username: 'sqlcraft', password: 'secret')),
+            'mysql' => (new MySQLDriver($factory, new MySQLPlatform()))->connect(new ConnectionParameters(host: 'mysql', port: 3306, database: 'sqlcraft_test', username: 'sqlcraft', password: 'secret')),
+            'mariadb' => (new MySQLDriver($factory, new MariaDbPlatform()))->connect(new ConnectionParameters(host: 'mariadb', port: 3306, database: 'sqlcraft_test', username: 'sqlcraft', password: 'secret')),
+            'pgsql' => (new PostgreSQLDriver($factory, new PostgreSQLPlatform()))->connect(new ConnectionParameters(host: 'postgres', port: 5432, database: 'sqlcraft_test', username: 'sqlcraft', password: 'secret')),
             default => throw new \InvalidArgumentException('Unknown engine: ' . $engine),
         };
     }
@@ -208,9 +210,9 @@ final class ImportExportRoundTripTest extends TestCase
     private function source(ConnectionInterface $connection): ExportSource
     {
         $factory = match ($connection->getPlatformName()) {
-            'mysql', 'mariadb' => new MySQLMetadataFactory,
-            'pgsql' => new PostgreSQLMetadataFactory,
-            'sqlite' => new SqliteMetadataFactory,
+            'mysql', 'mariadb' => new MySQLMetadataFactory(),
+            'pgsql' => new PostgreSQLMetadataFactory(),
+            'sqlite' => new SqliteMetadataFactory(),
             default => throw new \InvalidArgumentException('Unknown platform.'),
         };
 
@@ -219,8 +221,10 @@ final class ImportExportRoundTripTest extends TestCase
 
     private function sourceFromString(string $contents): ImportSourceInterface
     {
-        return new class($contents) implements ImportSourceInterface {
-            public function __construct(private readonly string $contents) {}
+        return new class ($contents) implements ImportSourceInterface {
+            public function __construct(private readonly string $contents)
+            {
+            }
 
             #[\Override]
             public function openStream(): mixed

@@ -55,7 +55,7 @@ final class ForeignKeyInspectorTest extends TestCase
             },
         );
 
-        $inspector = new ForeignKeyInspector(new SqliteMetadataFactory);
+        $inspector = new ForeignKeyInspector(new SqliteMetadataFactory());
         $outgoing = $inspector->getForeignKeys($connection, $table);
         $referencing = $inspector->getReferencingKeys($connection, $table);
 

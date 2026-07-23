@@ -18,7 +18,8 @@ final readonly class DropIndexBuilder implements DdlBuilderInterface, ObjectName
         public QualifiedName $table,
         public Identifier $indexName,
         public bool $ifExists = false,
-    ) {}
+    ) {
+    }
 
     #[\Override]
     public function toSql(DdlDialectInterface $dialect): array

@@ -56,7 +56,7 @@ final class ServerInspectorTest extends TestCase
             },
         );
 
-        $inspector = new ServerInspector(new MySQLMetadataFactory);
+        $inspector = new ServerInspector(new MySQLMetadataFactory());
         $info = $inspector->getServerInfo($connection);
         $databases = $inspector->getDatabases($connection);
         $variables = $inspector->getVariables($connection);
@@ -87,6 +87,6 @@ final class ServerInspectorTest extends TestCase
 
         $this->expectException(CapabilityNotSupportedException::class);
 
-        (new ServerInspector(new MySQLMetadataFactory))->getCharsets($connection);
+        (new ServerInspector(new MySQLMetadataFactory()))->getCharsets($connection);
     }
 }

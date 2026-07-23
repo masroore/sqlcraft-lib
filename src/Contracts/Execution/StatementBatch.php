@@ -7,5 +7,7 @@ namespace SQLCraft\Contracts\Execution;
 final readonly class StatementBatch
 {
     /** @param list<string> $statements */
-    public function __construct(public array $statements) {}
+    public function __construct(public array $statements)
+    {
+    }
 }

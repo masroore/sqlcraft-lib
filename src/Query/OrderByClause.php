@@ -8,5 +8,7 @@ use SQLCraft\ValueObjects\Identifier;
 
 final readonly class OrderByClause
 {
-    public function __construct(public Identifier $column, public bool $descending = false) {}
+    public function __construct(public Identifier $column, public bool $descending = false)
+    {
+    }
 }

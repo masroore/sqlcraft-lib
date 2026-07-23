@@ -11,7 +11,9 @@ use SQLCraft\ValueObjects\QualifiedName;
 final readonly class UpdateQuery implements QueryBuilderInterface
 {
     /** @param array<string, mixed> $assignments @param list<WhereCondition> $where */
-    public function __construct(public QualifiedName $table, public array $assignments, /** @var list<WhereCondition> */ public array $where = [], public ?int $limit = null) {}
+    public function __construct(public QualifiedName $table, public array $assignments, /** @var list<WhereCondition> */ public array $where = [], public ?int $limit = null)
+    {
+    }
 
     public function set(string $column, mixed $value): self
     {

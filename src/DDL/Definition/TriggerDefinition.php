@@ -19,7 +19,8 @@ final readonly class TriggerDefinition implements TriggerDefinitionInterface
         private string $body,
         private ?string $definer,
         private string $forEach = 'ROW',
-    ) {}
+    ) {
+    }
 
     #[\Override]
     public function getName(): QualifiedName

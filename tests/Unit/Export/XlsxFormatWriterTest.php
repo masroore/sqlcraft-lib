@@ -123,8 +123,8 @@ final class XlsxFormatWriterTest extends TestCase
      */
     private function export(array $tables, ?XlsxExportOptions $xlsxOptions = null): string
     {
-        $sink = new StringBufferSink;
-        $writer = new XlsxFormatWriter;
+        $sink = new StringBufferSink();
+        $writer = new XlsxFormatWriter();
         $options = new DumpOptions(
             format: 'xlsx',
             scope: DumpScope::database('shop'),
@@ -155,7 +155,7 @@ final class XlsxFormatWriterTest extends TestCase
         file_put_contents($xlsx, $binary);
 
         try {
-            $reader = new Reader;
+            $reader = new Reader();
             $reader->open($xlsx);
             $sheets = [];
             foreach ($reader->getSheetIterator() as $sheet) {

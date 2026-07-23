@@ -11,5 +11,6 @@ final class BeforeTransactionBegan extends InterceptionEvent
     public function __construct(
         public readonly ConnectionInterface $connection,
         public readonly string $isolationLevel,
-    ) {}
+    ) {
+    }
 }

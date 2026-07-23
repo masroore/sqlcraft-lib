@@ -14,7 +14,9 @@ use SQLCraft\ValueObjects\QualifiedName;
 
 final readonly class PrivilegeManager implements PrivilegeManagerInterface
 {
-    public function __construct(private ConnectionInterface $connection, private QueryExecutorInterface $executor) {}
+    public function __construct(private ConnectionInterface $connection, private QueryExecutorInterface $executor)
+    {
+    }
 
     #[\Override]
     public function grant(Privilege $privilege, QualifiedName $object, string $grantee): void

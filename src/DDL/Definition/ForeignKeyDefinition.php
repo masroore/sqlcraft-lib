@@ -24,7 +24,8 @@ final readonly class ForeignKeyDefinition implements ForeignKeyDefinitionInterfa
         private ForeignKeyAction $onUpdate,
         private ?string $definition,
         private bool $deferrable = false,
-    ) {}
+    ) {
+    }
 
     #[\Override]
     public function getConstraintName(): string

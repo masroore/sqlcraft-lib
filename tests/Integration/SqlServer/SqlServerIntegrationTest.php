@@ -25,7 +25,7 @@ final class SqlServerIntegrationTest extends TestCase
             self::markTestSkipped('Set SQLCRAFT_RUN_ENGINE_INTEGRATION=1 with the SQL Server service running.');
         }
 
-        $factory = new PdoConnectionFactory(new PdoExceptionTranslator);
+        $factory = new PdoConnectionFactory(new PdoExceptionTranslator());
         $parameters = new ConnectionParameters(
             host: $this->environment('SQLCRAFT_MSSQL_HOST', 'mssql'),
             port: (int) $this->environment('SQLCRAFT_MSSQL_PORT', '1433'),
@@ -33,7 +33,7 @@ final class SqlServerIntegrationTest extends TestCase
             username: $this->environment('SQLCRAFT_MSSQL_USER', 'sa'),
             password: $this->environment('SQLCRAFT_MSSQL_PASS', 'SQLcraft_Test1!'),
         );
-        $this->connection = (new SqlServerDriver($factory, new SqlServerPlatform))->connect($parameters);
+        $this->connection = (new SqlServerDriver($factory, new SqlServerPlatform()))->connect($parameters);
     }
 
     #[\Override]

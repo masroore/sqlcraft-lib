@@ -16,7 +16,8 @@ final readonly class PrivilegeGuard implements SecurityGuardInterface
         private ConnectionInterface $connection,
         private PrivilegeInspectorInterface $inspector,
         private ?string $user = null,
-    ) {}
+    ) {
+    }
 
     #[\Override]
     public function can(string $action, QualifiedName $object): bool

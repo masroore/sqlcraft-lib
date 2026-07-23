@@ -25,8 +25,8 @@ final class XmlFormatWriter implements FormatWriterInterface
     #[\Override]
     public function writeHeader(SinkInterface $sink, DumpOptions $options): void
     {
-        $opts = $options->xmlOptions ?? new XmlExportOptions;
-        $this->writer = new XMLWriter;
+        $opts = $options->xmlOptions ?? new XmlExportOptions();
+        $this->writer = new XMLWriter();
         $this->writer->openMemory();
         $this->writer->setIndent(true);
         $this->writer->setIndentString('  ');
@@ -43,7 +43,9 @@ final class XmlFormatWriter implements FormatWriterInterface
 
     /** @param list<string> $ddlStatements */
     #[\Override]
-    public function writeTableDdl(SinkInterface $sink, TableStatus $table, array $ddlStatements): void {}
+    public function writeTableDdl(SinkInterface $sink, TableStatus $table, array $ddlStatements): void
+    {
+    }
 
     /**
      * @param  list<array<string, mixed>>  $rows
@@ -57,7 +59,7 @@ final class XmlFormatWriter implements FormatWriterInterface
         array $columns,
         DumpOptions $options,
     ): void {
-        $opts = $options->xmlOptions ?? new XmlExportOptions;
+        $opts = $options->xmlOptions ?? new XmlExportOptions();
         $w = $this->writer();
         foreach ($rows as $row) {
             $w->startElement($opts->rowElement);

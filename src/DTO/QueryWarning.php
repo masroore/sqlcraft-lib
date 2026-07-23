@@ -10,5 +10,6 @@ final readonly class QueryWarning
         public string $level,
         public int $code,
         public string $message,
-    ) {}
+    ) {
+    }
 }

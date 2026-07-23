@@ -15,7 +15,8 @@ final class SqliteDriver implements DriverInterface
     public function __construct(
         private readonly PdoConnectionFactoryInterface $connectionFactory,
         private readonly SqlitePlatform $platform,
-    ) {}
+    ) {
+    }
 
     #[\Override]
     public function buildDsn(ConnectionParameters $params): string

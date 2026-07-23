@@ -23,7 +23,7 @@ final class WarningsProviderTest extends TestCase
         $connection->expects(self::once())->method('getPlatformName')->willReturn('mysql');
         $connection->expects(self::once())->method('query')->with('SHOW WARNINGS', [], false)->willReturn($result);
 
-        $warnings = (new WarningsProvider)->getWarnings($connection);
+        $warnings = (new WarningsProvider())->getWarnings($connection);
 
         self::assertInstanceOf(WarningCollection::class, $warnings);
         self::assertCount(2, $warnings);
@@ -37,6 +37,6 @@ final class WarningsProviderTest extends TestCase
         $connection->expects(self::once())->method('getPlatformName')->willReturn('sqlite');
         $connection->expects(self::never())->method('query');
 
-        self::assertCount(0, (new WarningsProvider)->getWarnings($connection));
+        self::assertCount(0, (new WarningsProvider())->getWarnings($connection));
     }
 }

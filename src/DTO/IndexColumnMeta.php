@@ -11,5 +11,6 @@ final readonly class IndexColumnMeta
         public bool $descending,
         public ?int $length,
         public ?string $expression,
-    ) {}
+    ) {
+    }
 }

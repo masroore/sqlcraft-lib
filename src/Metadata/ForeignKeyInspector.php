@@ -12,7 +12,9 @@ use SQLCraft\ValueObjects\QualifiedName;
 /** @internal */
 final class ForeignKeyInspector implements ForeignKeyInspectorInterface
 {
-    public function __construct(private readonly MetadataFactoryInterface $factory) {}
+    public function __construct(private readonly MetadataFactoryInterface $factory)
+    {
+    }
 
     #[\Override]
     public function getForeignKeys(ConnectionInterface $conn, QualifiedName $table): ForeignKeyCollection

@@ -58,7 +58,7 @@ final class ViewInspectorTest extends TestCase
             },
         );
 
-        $inspector = new ViewInspector(new MySQLMetadataFactory);
+        $inspector = new ViewInspector(new MySQLMetadataFactory());
         $viewCollection = $inspector->getViews($connection, 'app');
         $definitionSql = $inspector->getViewDefinition($connection, $view);
         $materializedCollection = $inspector->getMaterializedViews($connection, 'app');
@@ -81,6 +81,6 @@ final class ViewInspectorTest extends TestCase
 
         $this->expectException(CapabilityNotSupportedException::class);
 
-        (new ViewInspector(new MySQLMetadataFactory))->getMaterializedViews($connection);
+        (new ViewInspector(new MySQLMetadataFactory()))->getMaterializedViews($connection);
     }
 }

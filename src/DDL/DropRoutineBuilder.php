@@ -17,7 +17,8 @@ final readonly class DropRoutineBuilder implements DdlBuilderInterface, ObjectNa
         public QualifiedName $name,
         public string $type,
         public bool $ifExists = false,
-    ) {}
+    ) {
+    }
 
     /** @return list<string> */
     #[\Override]

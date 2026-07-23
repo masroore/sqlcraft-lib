@@ -6,7 +6,9 @@ namespace SQLCraft\Support;
 
 final class StringUtil
 {
-    private function __construct() {}
+    private function __construct()
+    {
+    }
 
     public static function isBlank(?string $value): bool
     {

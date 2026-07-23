@@ -36,7 +36,8 @@ final class PdoConnection implements ConnectionInterface
         private readonly ?string $name = null,
         private readonly ?string $databaseName = null,
         private readonly ?ConnectionEventDispatcherInterface $events = null,
-    ) {}
+    ) {
+    }
 
     #[\Override]
     public function getPlatformName(): string

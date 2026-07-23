@@ -20,7 +20,7 @@ final class PdoExceptionTranslatorTest extends TestCase
 {
     public function test_it_translates_authentication_and_connection_failures(): void
     {
-        $translator = new PdoExceptionTranslator;
+        $translator = new PdoExceptionTranslator();
 
         $authentication = $translator->translate($this->pdoException('28000', 1045), '');
         $connection = $translator->translate($this->pdoException('08006', 7), 'SELECT 1');
@@ -33,7 +33,7 @@ final class PdoExceptionTranslatorTest extends TestCase
 
     public function test_it_translates_query_and_constraint_failures(): void
     {
-        $translator = new PdoExceptionTranslator;
+        $translator = new PdoExceptionTranslator();
         $previous = $this->pdoException('23000', 1062, 'sensitive native message');
         $sql = 'INSERT INTO users (email) VALUES (?)';
 
@@ -55,7 +55,7 @@ final class PdoExceptionTranslatorTest extends TestCase
 
     public function test_it_uses_a_concrete_generic_query_exception_for_unknown_failures(): void
     {
-        $translator = new PdoExceptionTranslator;
+        $translator = new PdoExceptionTranslator();
         $previous = $this->pdoException('HY000', 999, 'sensitive native message');
 
         $exception = $translator->translate($previous, 'SELECT * FROM users');

@@ -13,7 +13,8 @@ final readonly class IndexColumnDefinition implements IndexColumnDefinitionInter
         private bool $descending,
         private ?int $length,
         private ?string $expression,
-    ) {}
+    ) {
+    }
 
     #[\Override]
     public function getColumnName(): string

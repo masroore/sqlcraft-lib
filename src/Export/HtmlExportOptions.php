@@ -11,5 +11,6 @@ final readonly class HtmlExportOptions
         public ?string $templateString = null,
         public string $title = 'Database Export',
         public bool $useTwig = false,
-    ) {}
+    ) {
+    }
 }

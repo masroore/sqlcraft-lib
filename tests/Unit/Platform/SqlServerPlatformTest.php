@@ -25,7 +25,7 @@ final class SqlServerPlatformTest extends TestCase
 {
     public function test_it_describes_sql_server_defaults_and_capabilities(): void
     {
-        $platform = new SqlServerPlatform;
+        $platform = new SqlServerPlatform();
 
         self::assertSame('sqlserver', $platform->getName());
         self::assertNull($platform->getFlavor());
@@ -47,12 +47,12 @@ final class SqlServerPlatformTest extends TestCase
             ->with("SELECT CONVERT(varchar(128), SERVERPROPERTY('ProductVersion'))")
             ->willReturn($result);
 
-        self::assertSame('16.0.4125', (string) (new SqlServerPlatform)->getServerVersion($connection));
+        self::assertSame('16.0.4125', (string) (new SqlServerPlatform())->getServerVersion($connection));
     }
 
     public function test_it_quotes_sql_server_values_and_paginates(): void
     {
-        $platform = new SqlServerPlatform;
+        $platform = new SqlServerPlatform();
 
         self::assertSame('[a]]b]', $platform->quoteIdentifier(new Identifier('a]b')));
         self::assertSame("'a\\\\b''c'", $platform->quoteValue("a\\b'c"));
@@ -67,7 +67,7 @@ final class SqlServerPlatformTest extends TestCase
 
     public function test_it_renders_sql_server_ddl(): void
     {
-        $platform = new SqlServerPlatform;
+        $platform = new SqlServerPlatform();
         $table = new QualifiedName(new Identifier('users'), new Identifier('dbo'), new Identifier('app'));
         $column = new ColumnMeta(
             name: 'id',
@@ -103,7 +103,7 @@ final class SqlServerPlatformTest extends TestCase
 
     public function test_it_returns_native_catalog_sql(): void
     {
-        $platform = new SqlServerPlatform;
+        $platform = new SqlServerPlatform();
         $table = new QualifiedName(new Identifier('users'), new Identifier('dbo'), new Identifier('app'));
 
         self::assertStringContainsString('sys.databases', $platform->getDatabasesSql());

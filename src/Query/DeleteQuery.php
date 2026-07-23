@@ -11,7 +11,9 @@ use SQLCraft\ValueObjects\QualifiedName;
 final readonly class DeleteQuery implements QueryBuilderInterface
 {
     /** @param list<WhereCondition> $where */
-    public function __construct(public QualifiedName $table, /** @var list<WhereCondition> */ public array $where = [], public ?int $limit = null) {}
+    public function __construct(public QualifiedName $table, /** @var list<WhereCondition> */ public array $where = [], public ?int $limit = null)
+    {
+    }
 
     public function withWhere(WhereCondition ...$where): self
     {

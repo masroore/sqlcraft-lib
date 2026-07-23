@@ -13,7 +13,9 @@ final readonly class CopyTableBuilder implements DdlBuilderInterface, ObjectName
 {
     use LegacyDdlExecution;
 
-    public function __construct(public QualifiedName $source, public QualifiedName $target, public bool $includeData = true) {}
+    public function __construct(public QualifiedName $source, public QualifiedName $target, public bool $includeData = true)
+    {
+    }
 
     /** @return list<string> */
     #[\Override]

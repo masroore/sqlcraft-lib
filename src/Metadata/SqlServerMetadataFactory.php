@@ -5,4 +5,6 @@ declare(strict_types=1);
 namespace SQLCraft\Metadata;
 
 /** @internal */
-final class SqlServerMetadataFactory extends AbstractMetadataFactory {}
+final class SqlServerMetadataFactory extends AbstractMetadataFactory
+{
+}

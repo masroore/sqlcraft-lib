@@ -24,7 +24,8 @@ final readonly class CsvImporter implements CsvImporterInterface
         private ColumnInspectorInterface $columns,
         private QueryExecutorInterface $executor,
         private ?ImportExportEventDispatcherInterface $events = null,
-    ) {}
+    ) {
+    }
 
     #[\Override]
     public function importCsv(

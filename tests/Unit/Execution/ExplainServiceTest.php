@@ -26,7 +26,7 @@ final class ExplainServiceTest extends TestCase
         $connection->expects(self::once())->method('getPlatformName')->willReturn('sqlite');
         $connection->expects(self::once())->method('query')->with('EXPLAIN ANALYZE SELECT * FROM users WHERE id = ?', [7], false)->willReturn($result);
 
-        $explain = (new ExplainService)->explain($connection, 'SELECT * FROM users WHERE id = ?', [7], true);
+        $explain = (new ExplainService())->explain($connection, 'SELECT * FROM users WHERE id = ?', [7], true);
 
         self::assertSame('sqlite', $explain->engine);
         self::assertSame([['plan' => 'scan']], $explain->rows);
