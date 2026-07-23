@@ -7,6 +7,9 @@ and the public surface follows Semantic Versioning.
 
 ## [Unreleased]
 
+- Implemented the revised typed extension composition root: immutable builder/factory snapshots, atomic third-party driver definitions, composed platform roles, per-connection metadata inspector sets, credential chains, connection initializers, ordered query interception, factory-backed formats, process-control liveness, and core-first PSR-14 event dispatch.
+- Added third-party driver conformance coverage, a stable API manifest, extension-author documentation, and the Adminer 5.5.0 migration guide.
+
 - Gap-analysis phase 8 reconciled architecture, capability, driver, Oracle-deferral,
   import/export, roadmap, and dependency-boundary documentation.
 - Added seam-liveness architectural tests for metadata-cache invalidation,

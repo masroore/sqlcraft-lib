@@ -28,7 +28,8 @@ Welcome to the SQLCraft documentation. SQLCraft is a framework-independent PHP 8
 ### Advanced Topics
 - [Capabilities System](advanced/capabilities.md) - Understanding database capabilities
 - [Streaming and Performance](advanced/streaming.md) - Memory-efficient data processing
-- [Custom Drivers](advanced/custom-drivers.md) - Creating custom database drivers
+- [Extension Author Guide](advanced/extensions.md) - Composing drivers, metadata, queries, formats, and events
+- [Adminer Migration](advanced/adminer-migration.md) - Map Adminer capabilities without API compatibility claims
 - [Framework Integration](advanced/framework-integration.md) - Laravel, Symfony, and more
 
 ### API Reference
